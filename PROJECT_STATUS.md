@@ -1,7 +1,25 @@
 # PROJECT STATUS — Dictator Sandbox
 
-> Read this file first. It is the handover document between sessions.
-> Last updated: after the first playtest round.
+> Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
+> Last updated: after playtest round 2.
+
+> ## ⏸ WHERE WE STOPPED
+>
+> **V1 is complete, playable and tested. The owner has playtested twice.**
+> Round 1 feedback was fixed in full (see table below). Round 2 passed
+> functionally, but the owner raised a **design direction** concern:
+> too many things to track, wants a simpler and more visually distinctive
+> game, and wants to evolve toward roguelike runs, shops and unlocks.
+>
+> **The project is paused on that decision.** The diagnosis (with measured
+> evidence), the proposed V2 target and the execution order are in
+> **`docs/DESIGN_V2.md`**. That document is marked PROPOSED and is not
+> approved. **Do not start the V2 refactor until the owner has chosen a
+> direction and it has been recorded at the top of that file.**
+>
+> If you are a new session and the owner has already answered: update
+> `docs/DESIGN_V2.md` with the decision, then follow its section 6
+> execution order. Otherwise, ask.
 
 ---
 
@@ -33,10 +51,25 @@ Playwright scripts for real-browser playthroughs.
 ## 2. Current milestone
 
 **MILESTONE 1 — PLAYABLE CORE: ✅ COMPLETE.**
-**PLAYTEST ROUND 1 FIXES: ✅ COMPLETE. Awaiting playtest round 2.**
+**PLAYTEST ROUND 1 FIXES: ✅ COMPLETE.**
+**PLAYTEST ROUND 2: ✅ PASSED functionally. Design direction question raised.**
 
-Development is **paused here by request**. Do not start Milestone 2 until the
-project owner has playtested again and given feedback.
+Development is **paused on a design decision**, not on a bug. See
+`docs/DESIGN_V2.md`.
+
+### Playtest round 2 — what was reported
+
+> "Second play test checks out. I am not sure I love the design direction
+> though. There seems to be too many things to be keeping track of. I want it
+> to be a bit more simplistic with a more creative and fitting design. I want
+> to eventually evolve this with rogue like elements like unique runs, shops,
+> etc."
+
+Measured cause, not a matter of taste: **five of the ten headline stats are
+near-duplicates of a faction bar** (ELITE/Business and SECURITY/Security move
+together 100% of the time; MILITARY/Army 96%; STABILITY/Unions 89%;
+PUBLIC/Public 76%). **55 trackable numbers** can be on screen at once. Full
+analysis and proposal in `docs/DESIGN_V2.md`.
 
 ### Playtest round 1 — what was reported and what was done
 
