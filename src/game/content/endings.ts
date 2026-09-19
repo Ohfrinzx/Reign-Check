@@ -2,6 +2,7 @@ import type { GameState, EndingDef, EndingResult } from '../types';
 import { REGIME_KEYS } from '../types';
 import { money } from '../stats';
 import { FACTIONS, FACTION_ORDER } from './country';
+import { DISPLAY_FACTIONS } from '../display';
 
 /**
  * Failure states are never a dice roll. Each one is the terminus of a pressure
@@ -177,9 +178,13 @@ function verdict(s: GameState): string {
   // faction colour
   const loved = FACTION_ORDER.filter((f) => s.factions[f].loyalty > 74);
   const hated = FACTION_ORDER.filter((f) => s.factions[f].loyalty < 16);
-  const fname = (id: (typeof FACTION_ORDER)[number]) => FACTIONS[id].name.replace(/^The /, 'the ');
-  if (loved.length) bits.push(`was genuinely popular with ${fname(loved[0])}`);
-  if (hated.length) bits.push(`was loathed by ${fname(hated[0])}`);
+  // Use the same short labels the rest of the UI shows (Army, Security, Money,
+  // Workers, Street), not the internal faction record names, so the epitaph
+  // never names a group the player has not seen called that anywhere else.
+  const fname = (id: (typeof FACTION_ORDER)[number]) =>
+    DISPLAY_FACTIONS.find((d) => d.id === id)?.label ?? FACTIONS[id].name.replace(/^The /, 'the ');
+  if (loved.length) bits.push(`was genuinely popular with the ${fname(loved[0])}`);
+  if (hated.length) bits.push(`was loathed by the ${fname(hated[0])}`);
 
   if (s.flags.pigeonPatron) bits.push('left you Honorary Patron of the reunified Pigeon Federation');
   else if (s.flags.pigeonFriend) bits.push('is still spoken of warmly in pigeon-racing circles');

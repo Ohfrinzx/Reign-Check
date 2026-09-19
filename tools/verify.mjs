@@ -3,27 +3,43 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const errs = [];
 const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
 page.on('pageerror', e => errs.push(String(e)));
-page.on('console', m => { if (m.type()==='error' && !/CERT_AUTHORITY|favicon/.test(m.text())) errs.push('CONSOLE: '+m.text()); });
+page.on('console', m => { if (m.type()==='error' && !/favicon/.test(m.text())) errs.push('CONSOLE: '+m.text()); });
 
 const notes = [];
 await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 await page.evaluate(() => localStorage.clear());
 await page.reload({ waitUntil: 'networkidle' });
+await page.screenshot({ path: '/tmp/claude-0/shots/P-title.png' });
 
-// honorific picker
 await page.fill('.name-field input', 'Adrin Vo');
 await page.click('.seg-btn:has-text("Sir")');
 await page.click('button:has-text("Take the job")');
 await page.waitForSelector('.intro');
+await page.waitForTimeout(500);
+await page.screenshot({ path: '/tmp/claude-0/shots/P-intro.png' });
 notes.push('intro shown on new game: yes');
-await page.click('.intro-foot .btn-primary');
-await page.waitForSelector('.dossier');
 
-let cards = 0, alerts = 0, days = 0, minMoneyMentions = 0;
-for (let i = 0; i < 260; i++) {
+// scroll check on intro at short viewport
+const introScroll = await page.evaluate(() => {
+  const el = document.querySelector('.intro-scroll');
+  const before = el.scrollTop; el.scrollTop = 99999; const after = el.scrollTop;
+  return { canScroll: after - before, sh: el.scrollHeight, ch: el.clientHeight };
+});
+notes.push('intro scroll: ' + JSON.stringify(introScroll));
+
+await page.click('.intro-foot .btn-primary');
+await page.waitForSelector('.frontpage');
+await page.waitForTimeout(400);
+await page.screenshot({ path: '/tmp/claude-0/shots/P-briefing.png', fullPage: false });
+
+let cards = 0, alerts = 0, days = 0, priced = 0;
+for (let i = 0; i < 220; i++) {
   if (await page.locator('.ending-title').count()) break;
   if (await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count()) {
-    alerts++; await page.locator('.alert-scrim .alert-card .opt:not([disabled])').nth(i % 2).click();
+    alerts++;
+    if (alerts === 1) { await page.waitForTimeout(600); await page.screenshot({ path: '/tmp/claude-0/shots/P-alert.png' }); }
+    const aCount = await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count();
+    await page.locator('.alert-scrim .alert-card .opt:not([disabled])').nth(i % Math.max(1, aCount)).click();
   } else if (await page.locator('.alert-scrim .outcome').count()) {
     await page.locator('.alert-scrim .outcome .btn-primary').click();
   } else if (await page.locator('.action-bar .btn-primary').count()) {
@@ -31,32 +47,47 @@ for (let i = 0; i < 260; i++) {
     if (/Begin the day/.test(t)) days++;
     await page.locator('.action-bar .btn-primary').click();
   } else if (await page.locator('.stage-col .outcome').count()) {
+    if (cards === 1) await page.screenshot({ path: '/tmp/claude-0/shots/P-outcome.png' });
     await page.locator('.stage-col .outcome .btn-primary').click();
-  } else if (await page.locator('.stage-col .card .opt:not([disabled])').count()) {
+  } else if (await page.locator('.stage-col .doc .opt:not([disabled])').count()) {
     cards++;
-    const hints = await page.locator('.stage-col .card .opt-hint').allInnerTexts();
-    if (hints.some(h => /\$\d/.test(h))) minMoneyMentions++;
-    await page.locator('.stage-col .card .opt:not([disabled])').nth(i % 3).click();
+    if (cards === 2) await page.screenshot({ path: '/tmp/claude-0/shots/P-card.png' });
+    const hints = await page.locator('.stage-col .doc .opt .hint').allInnerTexts();
+    if (hints.some(h => /\$\d/.test(h))) priced++;
+    // hover a glossary term if present, to confirm it renders
+    if (cards === 3) {
+      const term = page.locator('.stage-col abbr.term').first();
+      if (await term.count()) {
+        const title = await term.getAttribute('title');
+        notes.push('glossary term found on card 3: "' + (await term.innerText()) + '" -> ' + (title||'').slice(0,60));
+      }
+    }
+    const optCount = await page.locator('.stage-col .doc .opt:not([disabled])').count();
+    await page.locator('.stage-col .doc .opt:not([disabled])').nth(i % Math.max(1, optCount)).click();
   } else break;
-  await page.waitForTimeout(55);
+  await page.waitForTimeout(45);
 }
-notes.push(`days=${days} cards=${cards} alerts=${alerts} cards-with-price-hints=${minMoneyMentions}`);
+notes.push(`days=${days} cards=${cards} alerts=${alerts} priced=${priced}`);
 
 if (await page.locator('.ending-title').count()) {
   notes.push('ENDING: ' + await page.locator('.ending-title').innerText());
-  notes.push('VERDICT: ' + await page.locator('.ending-verdict').innerText());
-  await page.screenshot({ path: '/tmp/claude-0/shots/V-ending.png', fullPage: true });
+  await page.screenshot({ path: '/tmp/claude-0/shots/P-ending.png', fullPage: true });
+} else {
+  await page.screenshot({ path: '/tmp/claude-0/shots/P-night.png' });
 }
 
-// no archaic leftovers anywhere on screen
-const body = await page.evaluate(() => document.body.innerText);
-const banned = ['First Citizen', 'velk', '₩', 'Convocation Square', 'Sable Office’s'];
-notes.push('banned terms present: ' + banned.filter(b => body.includes(b)).join(', ') || 'banned terms present: none');
+// scroll test on a busy stage-col
+const scroll = await page.evaluate(() => {
+  const col = document.querySelector('.stage-col');
+  if (!col) return null;
+  const before = col.scrollTop; col.scrollTop = 99999; const after = col.scrollTop; col.scrollTop = before;
+  return { canScroll: after - before, sh: col.scrollHeight, ch: col.clientHeight };
+});
+notes.push('stage-col scroll: ' + JSON.stringify(scroll));
 
-// save/reload
 const save = await page.evaluate(() => localStorage.getItem('dictator-sandbox:save:v1'));
 notes.push('save bytes: ' + (save ? save.length : 'NONE'));
 
 console.log(notes.join('\n'));
-console.log('ERRORS:', errs.length, errs.slice(0,5).join(' | '));
+console.log('ERRORS:', errs.length, errs.slice(0,6).join(' | '));
 await browser.close();

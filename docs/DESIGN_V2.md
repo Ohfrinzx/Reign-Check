@@ -1,8 +1,22 @@
 # Design V2 — simplification and the roguelike turn
 
-**Status: PROPOSED. Not approved. Do not build this yet.**
-When the owner picks a direction, record it at the top of this file with the
-date, then build.
+**Status: Layout and simplification IMPLEMENTED (this pass). Roguelike layer
+(acts, shop, mandates, run deck) is STILL PROPOSED, not built.**
+
+Decisions made by the owner, in order:
+1. Visual direction: the flat top-down **desk**, then **Poster** skin
+   (section 5), then the **Broadsheet** layout (section 5b) — "Go with 1."
+2. Mechanical scope: implemented as a **presentation-layer aggregation**
+   (section 2b) rather than a deep engine rewrite — this was an engineering
+   call made without an explicit owner sign-off on that specific tradeoff;
+   flag it back to them if it doesn't feel like enough of a cut in play.
+3. Wording: card prose needed to be more accessible to players without
+   political/financial literacy — addressed with a glossary system plus a
+   rewrite of the specific example given (section 8).
+
+**What is NOT built yet**: the roguelike layer in section 4 (acts, the Back
+Room shop, mandates, a run deck, meta-progression). That is still exactly as
+proposed below and needs its own go-ahead.
 
 ---
 
@@ -52,9 +66,35 @@ Every number on screen must be something the player makes a decision about.
 If a number is only ever an echo of another number, it is not a resource, it
 is noise — delete it or derive it.
 
-## 3. Proposed target
+## 3. Proposed target — and how it was actually built
 
-### 3.1 Resources: 10 → 3 (+1 derived)
+**Engineering decision, made without an explicit owner sign-off on this
+specific point:** this was implemented as a **presentation layer**
+(`src/game/display.ts`), not a rewrite of `GameState`. The engine underneath
+still tracks the full 10 stats and 7 factions, with every existing card
+effect, every test, and the balance probe completely unchanged — verified by
+running the full suite before and after with identical results. Only what
+the player is SHOWN changed.
+
+Why: a real data-model cut (new `StatKey`/`FactionId` unions, migrating all
+42 cards' `effects` objects, re-balancing, a save-version bump with no
+migration path) is a much bigger, much riskier change than the "too much to
+track" complaint actually required. The complaint was about what's on
+screen. A display-layer cut gets the full cognitive-load win (55 → ~10
+trackables, see 3.5) at a fraction of the risk, and is fully reversible if a
+deeper cut is wanted later — nothing here forecloses that.
+
+**If this turns out not to be enough** (the underlying depth "leaks" back
+into the player's decisions in a way that still feels like too much), the
+next step is the real data-model cut this section originally proposed. That
+is a substantially larger job: touching `types.ts`, `effects.ts`, every
+card's `effects` block, `endings.ts`'s check functions, and re-running the
+balance probe from scratch.
+
+### 3.1 Resources: 10 → 3 (+1 derived) — IMPLEMENTED as a display aggregate
+
+Built in `src/game/display.ts::computeResources()`. Not a straight 1:1 of the
+original proposal — `military` and `elite` needed a home too:
 
 | Resource | What it means | Absorbs |
 |---|---|---|
@@ -67,49 +107,62 @@ Lose conditions become legible: **GRIP 0** = you are a figurehead and get
 replaced. **LEGITIMACY 0** = the street removes you. **MONEY deeply negative**
 = the state stops functioning.
 
-### 3.2 Factions: 7 → 5, one number each
+### 3.2 Factions: 7 → 5, one number each — IMPLEMENTED
 
-**Army · Security · Money · Workers · Street.**
-One value per faction, −100 hostile to +100 devoted, shown as a mood not a
-stack of bars. That removes 14 numbers on its own.
+Built in `src/game/display.ts::DISPLAY_FACTIONS` + `factionMood()`. **Army ·
+Security · Money · Workers · Street.** One faction record (`staff`, `sable`,
+`concord`, `combine`, `chorus`) each. Shown as the existing 0–100 `loyalty`
+value mapped to a five-tier mood word per faction (e.g. Army: devoted /
+backing you / uneasy / hostile / ready to move) — not a new −100..+100 scale;
+that would have required touching `effects.ts`. `power`, `influence` and
+`patience` are still tracked per faction but not displayed — they remain
+readable in code and drive behaviour, they are just not on screen.
 
-`power`, `influence` and `patience` stop being displayed and become hidden
-modifiers the player infers from behaviour. The **Civil Service** and the
-**Provinces** stop being tracked factions and survive as characters and card
-sources — Grebs and Kostyn still matter, they just do not own a meter.
+The **Civil Service** (`grey`) and the **Provinces** (`provinces`) are not in
+`DISPLAY_FACTIONS` and get no bar. They are fully live underneath — Grebs and
+Kostyn's cards still move their faction's loyalty/patience exactly as before
+— they surface to the player only through those two characters and through
+their own threat-card headlines (which fall back to the faction's full name
+since there is no short label to match against, e.g. "The Provincial Bloc:
+out of patience").
 
-### 3.3 Hidden pressure → visible threat cards
+### 3.3 Hidden pressure → visible threat cards — IMPLEMENTED
 
-Ten hidden variables currently surface only as prose warnings. Replace with a
-small **threat tray**: when a faction or pressure crosses a line, a physical
-card appears with an escalating stage and a countdown.
+Built as `buildThreats()` in `src/game/briefing.ts`, rendered by the "On your
+desk" panel in `Rail.tsx`. Reuses `buildBriefing()`'s own severity-ranked
+warnings and demands — one source of truth, not a parallel system — so a
+warning that appears in the (still-present) Dossier-style briefing front page
+is the same object that becomes a threat card. Shown as headline + body +
+"STAGE N OF 3" with filled pips + source, capped at 3 live at once.
 
-```
-┌──────────────────────────────┐
-│ ⚠ THE ARMY IS TALKING        │
-│ stage 2 of 3 · 2 days        │
-└──────────────────────────────┘
-```
+Every `WARNINGS` entry in `briefing.ts` gained a short `head` field for this
+(e.g. `head: 'The army is talking'` for the coup-pressure entry at threshold
+52) — that was a real content pass, not just plumbing: 21 warning entries and
+every inline demand/opportunity push needed an active-voice headline written
+for it.
 
-This keeps the warning-sequence design the game already has, but makes it an
-object you can point at instead of a paragraph you have to read carefully.
-At most two or three exist at a time.
+### 3.4 Economy: ledger → one line — PARTIALLY IMPLEMENTED
 
-### 3.4 Economy: ledger → one line
+The masthead ledger shows exactly `$42.0B` and `+$0.34B/day` for MONEY — the
+full itemised budget breakdown from `economy.ts` (`computeBudget()`) is no
+longer shown by default anywhere. What *did* ship, matching the "keep a short
+list of commitments" half of the proposal: the Rail's **Standing costs**
+panel appears only when `s.commitments.length > 0` and lists just the active
+recurring costs, nothing else. The 11-line itemised view (revenue/spending
+broken out by source) still exists in `economy.ts` and is computed for the
+ledger's rate, but has no UI surface right now — if a "show me everything"
+detail view is wanted later, the data is already there.
 
-Drop the 11-line budget panel. Show `$42B` and `+$3/day`. Keep a short list of
-**commitments** only when the player has made some, because those are
-decisions. The full ledger was accurate and nobody needs it every turn.
+### 3.5 Net effect — measured as built
 
-### 3.5 Net effect
-
-| Surface | Now | V2 |
+| Surface | Before | After |
 |---|---|---|
-| Resources | 10 | 3 |
-| Faction numbers | 21 | 5 |
-| Characters (as numbers) | 13 | 0 — they appear on cards instead |
-| Budget lines | 11 | 1 + commitments |
-| **Total** | **55** | **~9** |
+| Resources (masthead) | 10 | 3 |
+| Faction numbers | 21 (7 × 3 bars) | 5 (1 each) |
+| Characters (as standing numbers) | 13 | 0 — appear on cards via the existing "who is this" line instead |
+| Budget lines (default view) | 11 | 1, +1 line per active commitment |
+| Threats/warnings | unlimited prose list | ≤3 threat cards |
+| **Typical total on screen** | **~55** | **~9–12** |
 
 ## 4. The roguelike layer
 
@@ -163,7 +216,13 @@ run".
 Completed runs unlock mandates, advisors and cards for future runs. Small,
 persistent, stored in `localStorage` next to the save.
 
-## 5. Visual direction — the desk
+## 5. Visual direction — the desk (superseded by 5a/5b below)
+
+**This section is the FIRST visual direction pass and is now superseded.**
+The desk concept (everything has a permanent home, no tabs) survived; the
+specific dark rendering of it did not — the owner rejected it as "way too
+similar to the last" (i.e. still read as the same dark dashboard look). Kept
+here for the reasoning, which is still why the layout is shaped this way.
 
 **Direction: a flat, top-down desk layout. Mockup: `docs/mockups/desk.html`.**
 
@@ -234,6 +293,65 @@ roughly 700×500px — it *is* the screen, and the desk would only survive as a
 picture frame around it. It would also need illustration assets that cannot be
 produced to a good standard here, and it fights the shop and deck screens.
 
+## 5a. Visual skin — Poster (CHOSEN)
+
+Three light-mode skins were mocked up (`docs/mockups/skin-{poster,manila,
+bureau}.html`, all sharing the desk layout above): **Poster** (cream
+newsprint, huge condensed black headlines, one red, flat blocks — a state
+printing-office look), **Manila** (buff paperwork, folders, typewriter
+labels, rubber stamps), and **Bureau** (warm off-white, soft-shadow cards,
+1960s institutional-report look).
+
+**The owner chose Poster.** Palette and type extracted into
+`docs/mockups/poster.css` for the mockups, and into `src/styles/index.css`
+for the real app — see the header comment there for the full token list
+(`--paper`, `--ink`, `--red`, `--teal`, `--mustard`; `Anton` for the huge
+headline, `Archivo Black` for kickers/labels, `Libre Franklin` for UI chrome,
+`Lora` for card prose, `Courier Prime` for numbers/monospace). Fonts are
+self-hosted under `public/fonts/` (Google Fonts is blocked in the sandbox
+this was built in — every earlier screenshot before this was taken in
+fallback system fonts, not the intended type; self-hosting also removes a
+runtime network dependency the game had no real need for).
+
+## 5b. Layout — Broadsheet (CHOSEN)
+
+Four Poster-skinned layout variants were mocked up
+(`docs/mockups/layout-{1-broadsheet,2-focus,3-bands,4-table}.html`):
+**Broadsheet** (the interface as a newspaper front page — masthead, lead
+story in two columns, decision boxed at the foot, standings in a right
+rail), **Focus** (one card, everything else collapsed to a bottom strip),
+**Bands** (a flat horizontal stack), and **The Table** (three situations
+face-up, time for two — a genuine mechanic, not just an arrangement, flagged
+at the time as the most roguelike-compatible option).
+
+**The owner chose Broadsheet ("Go with 1").** The Table's triage mechanic
+was NOT adopted — it remains a good candidate for the Act structure in
+section 4 (a natural home for "pick which situation gets your attention"),
+but was not part of what got built here.
+
+### As built
+
+`App.tsx` + `src/ui/screens/Screens.tsx`'s `BriefingScreen` implement a
+simplified single-column-vs-rail version of the broadsheet mockup (the
+mockup's masthead-with-skew-red-band became the app's persistent
+`.masthead`; the mockup's own day/act strap became the app's persistent
+`.strap`, which ALSO carries the primary "next" action button — see the
+callout below). The card-as-lead-story treatment (kicker, byline, headline,
+prose, boxed decision list) is `CardView.tsx`'s `.doc`.
+
+**One layout change made during implementation, not in either mockup:** the
+mockups' "Begin the day" button lived in a bottom action bar. Built with
+`position:sticky`, that bar visibly overlapped tail content before the
+first scroll — the same class of bug as the V1 scroll issue, caught in
+testing at 1366×700 and documented in the `.action-bar` CSS comment. Fixed
+by *also* putting the primary action in the `.strap` at the top of the
+page (`.strap-action` in `App.tsx`), which needs no scrolling to reach at
+all, and dropping `position:sticky` from the bottom bar entirely — it is
+now a plain, non-sticky convenience duplicate at the natural end of the
+content. Any future layout work should keep this: **the primary action for
+a screen must be reachable without scrolling**, full stop, not just "reachable
+after a fix to how sticky behaves".
+
 ## 6. How to execute it
 
 **Refactor, do not rewrite.** The engine is the good part and is content- and
@@ -243,24 +361,90 @@ alert weighting and the save system all survive unchanged. What changes is the
 
 Suggested order, each step shippable and playtestable on its own:
 
-1. **Collapse the model.** 10 stats → 3, 7 factions → 5, one bar each. Migrate
-   every existing card's effects with a mapping table. Bump `SAVE_VERSION`.
-   Keep all 42 cards — only their numbers get remapped.
-2. **Threat cards.** Replace prose-only warnings with the threat tray.
-3. **Rebuild the screen as the desk**, from `docs/mockups/desk.html`. This
-   replaces the briefing screen too: the morning briefing becomes the desk at
-   the start of a day, with the in-tray full and the diary showing.
-4. **Acts and the shop.** 3 × 6 days, Back Room between acts.
-5. **Mandates.** Run-start rules.
-6. **Run deck + meta-progression.**
+1. ✅ **DONE, as a display-layer cut, not a data-model migration** (see the
+   "how it was actually built" note under section 3). 10 stats → 3 shown,
+   7 factions → 5 shown, one bar each. All 42 cards' `effects` are completely
+   untouched — nothing was remapped because nothing needed to be.
+   `SAVE_VERSION` did NOT bump for this (no state shape changed). If a deeper
+   cut is ever wanted, `SAVE_VERSION` bumps then, not before.
+2. ✅ **DONE.** Threat cards (`buildThreats()` + the Rail's "On your desk"
+   panel) replaced the prose-only warning list as the default view. The full
+   prose briefing (now styled as the front page) still exists and still
+   shows the same warnings in more depth — it was not deleted, just no
+   longer the ONLY place they show up.
+3. ✅ **DONE, as Poster + Broadsheet, not the original dark desk mockup.**
+   See 5a/5b. The morning briefing is now the front-page treatment described
+   there; it was not merged into a single persistent "desk" screen the way
+   the original desk.html mockup showed (cards still get their own doc view
+   once the day starts, per Broadsheet).
+4. ⬜ **NOT STARTED.** Acts and the shop.
+5. ⬜ **NOT STARTED.** Mandates.
+6. ⬜ **NOT STARTED.** Run deck + meta-progression.
 
-Steps 1–3 answer "too much to track" and "more creative and fitting".
-Steps 4–6 are the roguelike turn.
+Steps 1–3 (done) answer "too much to track" and "more creative and fitting".
+Steps 4–6 (not started) are the roguelike turn and need their own go-ahead
+before anyone builds them — see `CLAUDE.md`.
 
-## 7. Open questions for the owner
+## 7. Open questions — updated
 
-1. How radical should the mechanical cut be — the full 3-resource collapse
-   (10 → 3 stats, 7 → 5 factions), or something more moderate?
-2. Simplify first and add the roguelike layer after, or do both as one V2?
+Resolved by the owner during this pass:
+- ~~Visual direction~~ → Poster skin, Broadsheet layout (5a/5b).
+- ~~Wording accessibility~~ → glossary system + targeted rewrites (section 8
+  below); the owner should re-judge this in play, since "fix wording some
+  more" is inherently a matter of degree and this was one pass, not
+  presumed-finished.
 
-Visual direction is settled: the flat top-down desk, per section 5.
+Still genuinely open, for whoever picks this up next:
+1. **Was the display-layer cut (not a data-model rewrite) the right call?**
+   The owner did not explicitly choose between these two approaches — it was
+   an engineering judgment made to ship a testable result quickly and
+   reversibly. If playtesting this build still feels like too much to track,
+   that is the signal the deeper cut (section 3's original proposal) is
+   actually needed, not just a display tweak.
+2. **Roguelike layer next, or another polish/playtest round on the current
+   build first?** Nothing in sections 4 has been started.
+
+
+## 8. Wording — making the language accessible
+
+**Owner's exact note:** *"the text needs to be more clear for users who may
+not understand this sort of political language. Example being most people
+don't know what clearing the payroll means and how their decision will
+affect it."*
+
+### What shipped
+
+1. **A glossary system**, `src/game/glossary.ts` + `Prose.tsx`. 18 recurring
+   institutional/financial terms (payroll, the currency peg, capital
+   controls, deficit, subsidy, a commitment, runway, the gazette,
+   procurement, a levy, a concession, a tranche, legitimacy, the confirmation
+   vote, and a few more) each get a one-sentence plain definition. The FIRST
+   occurrence of a term in any block of rendered prose is wrapped in a native
+   `<abbr title="…">` — a dotted underline, hover or tap for the definition,
+   no extra UI state needed, works everywhere card text renders (card body,
+   outcome text, threat cards, diary). Later occurrences in the same text are
+   left plain so prose does not get visually noisy.
+2. **The specific example rewritten directly**, not just glossed: the
+   `payroll-crunch` card (`src/game/content/cards.ts`) now spells out what
+   payroll IS in the body text itself ("the wages the government owes every
+   soldier, teacher, and clerk on its books"), and every option's hint states
+   the plain consequence rather than the institutional mechanism — "Everyone
+   gets paid on time. In return you owe the banks $12.0B..." instead of
+   "Payroll clears. You now owe the banks money, at a price they set."
+3. **Faction-naming consistency.** While doing this pass, found and fixed a
+   real inconsistency: the ending verdict and some threat headlines were
+   using factions' full internal names (`"The Sable Office"`, `"The Public"`)
+   while the always-visible Files panel calls the same factions by their
+   short display labels (`"Security"`, `"Street"`). Fixed to read from
+   `DISPLAY_FACTIONS` consistently — see `endings.ts`'s `verdict()` and
+   `briefing.ts`'s faction-demand pushes.
+
+### What did NOT ship — scope this was deliberately bounded to
+
+This was **not** a line-by-line rewrite of all ~4,000 lines of card prose.
+The option hints were already largely plain (that was most of the round-1
+fix); this pass targeted the specific failure mode the owner named — jargon
+with no accessible definition — rather than re-litigating every sentence.
+If further playtesting turns up more terms that need glossing, add them to
+`GLOSSARY` in `glossary.ts`; that is the intended extension point and needs
+no new UI work.

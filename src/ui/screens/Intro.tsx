@@ -1,26 +1,28 @@
-import { COUNTRY, FACTIONS, FACTION_ORDER, CHARACTERS } from '../../game/content/country';
+import { COUNTRY, CHARACTERS } from '../../game/content/country';
 import type { GameState } from '../../game/types';
-import { computeBudget, usd, usdFlow } from '../../game/economy';
-import { currentOpening } from '../../game/state';
+import { computeResources, DISPLAY_FACTIONS } from '../../game/display';
+import { FACTIONS } from '../../game/content/country';
+import { currentOpening, HONORIFICS } from '../../game/state';
 
 /**
- * Shown once before Day 1, and reachable any time from the top bar.
+ * Shown once before Day 1, and reachable any time from the "Brief me" button.
  * Answers, in order: who am I, what is this place, what am I trying to do,
- * how do I lose, who are these people, and how do I play.
+ * how does the money work, how do I lose, who are these people.
  */
 export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: () => void; returning?: boolean }) {
   const opening = currentOpening(s);
-  const budget = computeBudget(s);
+  const resources = computeResources(s);
   const keyPeople = CHARACTERS.filter((c) => ['varkov', 'sarran', 'brask', 'doran', 'adamek', 'hess'].includes(c.id));
+  const honorific = HONORIFICS.find((h) => h.id === s.honorific) ?? HONORIFICS[0];
 
   return (
     <div className="screen">
       <div className="intro">
         <div className="intro-head">
-          <div className="stamp">Briefing for the incoming {COUNTRY.office}</div>
+          <div className="kicker">Briefing for the incoming {COUNTRY.office}</div>
           <h1>You are the {COUNTRY.office} of {COUNTRY.shortName}.</h1>
           <p className="intro-lead">
-            Everyone in this building will call you <b>{honorificWord(s)}</b>. Your name is{' '}
+            Everyone in this building will call you <b>{honorific.word}</b>. Your name is{' '}
             <b>{s.leaderName}</b>. You have had the job for nine hours.
           </p>
         </div>
@@ -41,25 +43,28 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
           </p>
         </Section>
 
-        <Section title="The money">
+        <Section title="The three numbers that matter">
           <p>
-            This is a dictatorship, so there is no line between the national treasury and your money. It
-            is all one pot and it is on the top bar as <b>CASH</b>.
+            Everything you are tracking boils down to three things, always visible at the top of the screen.
           </p>
           <div className="intro-ledger">
-            <div><span className="l">IN THE ACCOUNT</span><span className="v">{usd(s.stats.treasury)}</span></div>
-            <div><span className="l">COMING IN</span><span className="v" style={{ color: 'var(--good)' }}>{usdFlow(budget.revenue)}</span></div>
-            <div><span className="l">GOING OUT</span><span className="v" style={{ color: 'var(--bad)' }}>{usdFlow(-budget.spending)}</span></div>
-            <div><span className="l">NET</span><span className="v" style={{ color: budget.net >= 0 ? 'var(--good)' : 'var(--bad)' }}>{usdFlow(budget.net)}</span></div>
+            {resources.map((r) => (
+              <div key={r.key}>
+                <div className="l">{r.label.toUpperCase()}</div>
+                <div className="v">{r.display}</div>
+              </div>
+            ))}
           </div>
           <p>
-            Options that cost money say so on the card. Some decisions also create a permanent line in
-            the budget — a pay rise does not happen once, it happens every day forever. The{' '}
-            <b>Treasury</b> tab on the right shows exactly where the money goes.
+            <b>Money</b> is the national treasury, and since this is a dictatorship, it is also, in practice,
+            your money — one pot, no separate personal fortune. Options that cost money say so, and some
+            decisions create a standing cost that repeats every day until it ends (shown as a red line item
+            in Files &rarr; Standing costs).
           </p>
           <p>
-            If the account goes below zero the state starts missing payroll, and one in six working
-            adults is on the state payroll.
+            <b>Grip</b> is whether the machinery of state — the army, the police, your own information — still
+            does what you tell it. <b>Legitimacy</b> is whether people accept you are supposed to have this job
+            at all. Both run 0 to 100. If either one hits zero, the game usually ends badly within days.
           </p>
         </Section>
 
@@ -73,74 +78,62 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
             <li><b>A foreign government replaces you.</b> Push your main trading partner too far.</li>
           </ul>
           <p className="intro-note">
-            None of these happen out of nowhere. Each one builds for days, and your morning briefing
-            will tell you it is building — in words, not numbers.
+            None of these happen out of nowhere. Each one builds for days, and you will see it coming as a
+            card on your desk — under &ldquo;On your desk&rdquo; on the right — with a stage number and what it is about.
           </p>
         </Section>
 
         <Section title="Who you have to manage">
           <div className="intro-grid">
-            {FACTION_ORDER.map((id) => {
-              const f = FACTIONS[id];
+            {DISPLAY_FACTIONS.map((def) => {
+              const full = FACTIONS[def.id];
               return (
-                <div className="intro-card" key={id}>
-                  <div className="intro-card-head"><span style={{ color: 'var(--gold)' }}>{f.icon}</span> {f.name}</div>
-                  <p>{f.blurb}</p>
-                  <div className="intro-threat">Can do to you: {f.threat}</div>
+                <div className="intro-card" key={def.id}>
+                  <div className="intro-card-head">{def.icon} {def.label}</div>
+                  <p>{full.blurb}</p>
+                  <div className="intro-threat">Can do to you: {full.threat}</div>
                 </div>
               );
             })}
           </div>
+          <p className="intro-note">
+            Two more groups matter but do not get their own file — the civil service and the provincial
+            governors. You will meet them through the people below instead.
+          </p>
         </Section>
 
         <Section title="People you will deal with constantly">
           <div className="intro-grid">
             {keyPeople.map((c) => (
               <div className="intro-card" key={c.id}>
-                <div className="intro-card-head"><span style={{ color: c.accent }}>{c.portrait}</span> {c.name}</div>
+                <div className="intro-card-head">{c.portrait} {c.name}</div>
                 <div className="intro-role">{c.title}</div>
                 <p>{c.why}</p>
               </div>
             ))}
           </div>
           <p className="intro-note">
-            They remember what you do to them. The <b>People</b> tab on the right shows what each of
-            them is currently thinking about you.
-          </p>
-        </Section>
-
-        <Section title="Two things that will surprise you">
-          <p>
-            <b>Breaking alerts.</b> At unpredictable moments the day stops and something urgent takes
-            over the screen. These are not random — each one is driven by pressure your own decisions
-            have been building.
-          </p>
-          <p>
-            <b>Consequences arrive late.</b> Promise the army money today and they will come back for
-            it on a specific day. Your briefing keeps a diary of what is coming.
+            They remember what you do to them. Every card that features someone shows a line explaining who
+            they are and why it matters, right under the headline.
           </p>
         </Section>
 
         <Section title="Today's situation">
-          <div className="dossier-item s2">
-            <span className="src">{opening.name}</span>
-            {opening.summary}
+          <div className="headline-item">
+            <div className="src">{opening.name}</div>
+            <div className="b">{opening.summary}</div>
           </div>
         </Section>
 
         <div className="intro-foot">
           <button className="btn btn-primary" onClick={onBegin}>
-            {returning ? 'Back to the day →' : 'Start Day 1 →'}
+            {returning ? 'Back to the day →' : `Start Day ${s.day} →`}
           </button>
-          <span className="stamp">You can reopen this from the top bar at any time</span>
+          <span className="note">You can reopen this from &ldquo;Brief me&rdquo; at any time</span>
         </div>
       </div>
     </div>
   );
-}
-
-function honorificWord(s: GameState) {
-  return s.honorific === 'maam' ? "ma'am" : s.honorific === 'chair' ? 'Chair' : 'sir';
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

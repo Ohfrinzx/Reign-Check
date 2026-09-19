@@ -8,8 +8,8 @@ import {
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
 import { saveGame, loadGame, loadMeta, deleteSave } from './game/save';
-import { StatBar } from './ui/components/StatBar';
-import { SidePanel } from './ui/components/SidePanel';
+import { Ledger } from './ui/components/Ledger';
+import { Rail } from './ui/components/Rail';
 import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
 import { IntroScreen } from './ui/screens/Intro';
@@ -24,7 +24,7 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
-  const [flash, setFlash] = useState<Partial<Record<StatKey, number>>>({});
+  const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
   const toastTimer = useRef<number | undefined>(undefined);
 
   /* ---- detect an existing save on mount */
@@ -149,30 +149,55 @@ export default function App() {
   const card = activeCard(game);
   const inAlert = game.phase === 'alert' || game.phase === 'alertResolve';
   const stage = game.agenda[game.stageIndex];
+  const remaining = Math.max(0, game.todayDeck.length - game.stageIndex);
 
   return (
     <div className="app">
-      {/* ------------------------------------------------------------ top */}
-      <header className="topbar">
-        <div className="seal">⬢</div>
-        <div>
-          <div className="country">{COUNTRY.name}</div>
-          <div className="leader">{game.leaderTitle} {game.leaderName} · {COUNTRY.capital}</div>
+      {/* --------------------------------------------------------- masthead */}
+      <header className="masthead">
+        <div className="id">
+          <div className="mark">★</div>
+          <div>
+            <div className="n">{game.leaderName.toUpperCase()}</div>
+            <div className="r">{game.leaderTitle} &middot; {COUNTRY.shortName}</div>
+          </div>
         </div>
-        <div className="spacer" />
-        <div className={`threat threat-${brief.threatLevel}`} title={brief.threatNote}>
-          <span className="threat-dot" /> {brief.threatLevel}
+        <div className="mid">
+          <span className="lbl">Day {game.day} / {game.maxDays}</span>
+          <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
+            Brief me
+          </button>
+          <button className="btn btn-ghost" onClick={backToTitle} title="Your run is saved automatically">
+            Menu
+          </button>
         </div>
-        <div className="daychip">DAY {game.day} / {game.maxDays}</div>
-        <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
-          Brief me
-        </button>
-        <button className="btn btn-ghost" onClick={backToTitle} title="Your run is saved automatically">
-          Menu
-        </button>
+        <Ledger s={game} />
       </header>
 
-      <StatBar s={game} flash={flash} />
+      {/* ------------------------------------------------------------ strap */}
+      <div className="strap">
+        <span className={`threat ${brief.threatLevel}`} title={brief.threatNote}>
+          <span className="threat-dot" /> {brief.threatLevel.toUpperCase()}
+        </span>
+        {stage && <span>{STAGE_META[stage].label}</span>}
+        {(game.phase === 'stage' || game.phase === 'resolve') && (
+          <span><b>{remaining}</b> item{remaining === 1 ? '' : 's'} left today</span>
+        )}
+        <span className="sp">{brief.threatNote}</span>
+        {/* The primary "next" action lives here too, so it never requires
+            scrolling to reach — see .action-bar's note in index.css. */}
+        {game.phase === 'briefing' && (
+          <button className="strap-action" onClick={doContinue}>Begin the day →</button>
+        )}
+        {(game.phase === 'resolve' || game.phase === 'alertResolve') && (
+          <button className="strap-action" onClick={doContinue}>Continue →</button>
+        )}
+        {game.phase === 'night' && (
+          <button className="strap-action" onClick={doContinue}>
+            {game.day >= game.maxDays ? 'Face the vote →' : `Begin Day ${game.day + 1} →`}
+          </button>
+        )}
+      </div>
 
       {/* ----------------------------------------------------------- main */}
       <div className="main">
@@ -180,20 +205,13 @@ export default function App() {
           {game.phase === 'briefing' && <BriefingScreen s={game} onBegin={doContinue} />}
 
           {(game.phase === 'stage' || game.phase === 'resolve') && (
-            <div className="card-wrap">
+            <>
               <DayTrack s={game} />
-              {stage && (
-                <div className="stage-head">
-                  <span className="time">{STAGE_META[stage].time}</span>
-                  <h2>{STAGE_META[stage].label}</h2>
-                  <span className="blurb">{STAGE_META[stage].blurb}</span>
-                </div>
-              )}
               {game.phase === 'stage' && card && (
                 <CardView s={game} card={card} onChoose={doChoose} />
               )}
               {game.phase === 'resolve' && <OutcomeView s={game} onContinue={doContinue} />}
-            </div>
+            </>
           )}
 
           {game.phase === 'night' && <NightScreen s={game} onNext={doContinue} />}
@@ -202,13 +220,13 @@ export default function App() {
           )}
         </div>
 
-        <SidePanel s={game} />
+        <Rail s={game} />
       </div>
 
       {/* --------------------------------------------------- breaking alert */}
       {inAlert && (
         <div className="alert-scrim">
-          <div style={{ width: '100%', maxWidth: 820 }}>
+          <div className="alert-card">
             <div className="alert-banner">
               <span className="blip" />
               BREAKING ALERT
@@ -243,7 +261,7 @@ export default function App() {
 
 function DayTrack({ s }: { s: GameState }) {
   return (
-    <div className="daytrack">
+    <div className="day-track doc-wrap">
       {s.todayDeck.map((_, i) => (
         <span
           key={i}
@@ -252,7 +270,7 @@ function DayTrack({ s }: { s: GameState }) {
           <span className="node" />
         </span>
       ))}
-      <span className="stamp cap">
+      <span className="cap">
         {Math.min(s.stageIndex + 1, s.todayDeck.length)} / {s.todayDeck.length}
       </span>
     </div>

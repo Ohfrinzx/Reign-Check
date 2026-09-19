@@ -1,25 +1,38 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: after playtest round 2.
+> Last updated: after the Poster/Broadsheet rebuild, awaiting playtest round 3.
 
 > ## ⏸ WHERE WE STOPPED
 >
-> **V1 is complete, playable and tested. The owner has playtested twice.**
-> Round 1 feedback was fixed in full (see table below). Round 2 passed
-> functionally, but the owner raised a **design direction** concern:
-> too many things to track, wants a simpler and more visually distinctive
-> game, and wants to evolve toward roguelike runs, shops and unlocks.
+> **The Poster/Broadsheet visual rebuild is done and awaiting playtest.**
+> Timeline: V1 shipped → playtest 1 (context/scrolling/wording/economy) fixed
+> in full → playtest 2 passed functionally but flagged the design direction
+> ("too many things to keep track of", wanted something simpler and more
+> distinctive, wants a roguelike future) → three rounds of mockup review
+> (dark desk rejected as "too similar to the last"; three light skins, owner
+> picked **Poster**; four layouts, owner picked **Broadsheet** — "Go with 1")
+> → **built**: the real app now runs in Poster/Broadsheet, showing 3 resources
+> and 5 factions instead of 10 stats and 7 three-bar factions, plus a jargon
+> glossary system. All 13 tests pass; verified end to end in a real browser.
 >
-> **The project is paused on that decision.** The diagnosis (with measured
-> evidence), the proposed V2 target and the execution order are in
-> **`docs/DESIGN_V2.md`**. That document is marked PROPOSED and is not
-> approved. **Do not start the V2 refactor until the owner has chosen a
-> direction and it has been recorded at the top of that file.**
+> **This has NOT been playtested by the owner yet.** Do not treat it as
+> validated — it is built and self-verified (tests, Playwright, manual
+> screenshot review), not owner-approved. Report it as ready for playtest
+> round 3, the same way round 1 and round 2 were reported.
 >
-> If you are a new session and the owner has already answered: update
-> `docs/DESIGN_V2.md` with the decision, then follow its section 6
-> execution order. Otherwise, ask.
+> **What is still open, for whoever picks this up next:**
+> 1. Was showing 3 resources / 5 factions (via a display layer, engine
+>    unchanged) enough of a cut, or does it need the deeper data-model
+>    rewrite `docs/DESIGN_V2.md` section 3 originally proposed? That's a
+>    judgment only playtesting can make.
+> 2. The roguelike layer (acts, shop, mandates, run deck, meta-progression) —
+>    `docs/DESIGN_V2.md` section 4 — has **not been started** and has not
+>    been greenlit. Do not start it without asking first.
+>
+> Read `docs/DESIGN_V2.md` in full before touching the UI or the display
+> layer — it records what was proposed vs. what actually shipped, and they
+> differ in some specifics.
 
 ---
 
@@ -53,11 +66,9 @@ Playwright scripts for real-browser playthroughs.
 **MILESTONE 1 — PLAYABLE CORE: ✅ COMPLETE.**
 **PLAYTEST ROUND 1 FIXES: ✅ COMPLETE.**
 **PLAYTEST ROUND 2: ✅ PASSED functionally. Design direction question raised.**
+**POSTER/BROADSHEET REBUILD: ✅ COMPLETE. Awaiting playtest round 3.**
 
-Development is **paused on a design decision**, not on a bug. See
-`docs/DESIGN_V2.md`.
-
-### Playtest round 2 — what was reported
+### Playtest round 2 — what was reported, and what was done
 
 > "Second play test checks out. I am not sure I love the design direction
 > though. There seems to be too many things to be keeping track of. I want it
@@ -70,6 +81,48 @@ near-duplicates of a faction bar** (ELITE/Business and SECURITY/Security move
 together 100% of the time; MILITARY/Army 96%; STABILITY/Unions 89%;
 PUBLIC/Public 76%). **55 trackable numbers** can be on screen at once. Full
 analysis and proposal in `docs/DESIGN_V2.md`.
+
+Resolved through a design-exploration exchange (mockups reviewed, direction
+picked each round), then built:
+
+| What | Outcome |
+|---|---|
+| Visual direction | Dark desk mockup rejected ("way too similar to the last"). Three light skins mocked up; owner picked **Poster** (cream newsprint, condensed black type, one red). |
+| Layout | Four Poster-skinned layouts mocked up; owner picked **Broadsheet** ("Go with 1") — masthead, front-page briefing, card-as-lead-story, right rail. |
+| Information density | Implemented as a **display layer** (`src/game/display.ts`) over the unchanged engine: 3 resources (Money/Grip/Legitimacy) instead of 10 stats, 5 factions with one mood each instead of 7×3 bars, threat cards instead of a prose warning list. ~55 trackables → ~9–12. This was an engineering judgment on HOW to cut, not something the owner explicitly chose between (vs. a full data-model rewrite) — see `docs/DESIGN_V2.md` §3. |
+| Roguelike elements | **Not built.** Proposed in `docs/DESIGN_V2.md` §4, not started, not greenlit. |
+
+### Playtest round 3 — what was reported, and what was done
+
+> "Go with 1. Again though the text needs to be more clear for users who may
+> not understand this sort of political language. Example being most people
+> don't know what clearing the payroll means and how what their decision will
+> effect. Everything else so far is perfect. Go ahead and build in this
+> design and layout, fix wording some more, than check back with me."
+
+("Round 3" here refers to the design-direction check-in above, not a full
+gameplay playtest — the owner has not yet played the Poster/Broadsheet build.)
+
+| Reported | Status | What changed |
+|---|---|---|
+| Build the chosen design (Poster skin + Broadsheet layout) into the real app | Done | Full UI rebuild: `src/styles/index.css` replaced with the Poster design system; `Ledger.tsx` (was `StatBar.tsx`), `Rail.tsx` (was the tabbed `SidePanel.tsx`), `CardView.tsx`, and all of `Screens.tsx`/`Intro.tsx` rebuilt. Fonts self-hosted (`public/fonts/`) since Google Fonts is blocked in this environment — every earlier screenshot in this project's history was rendered in fallback fonts, not the real design. |
+| Text too dense with political/financial jargon for a general reader; example given: "clearing the payroll" | Done | New glossary system (`src/game/glossary.ts`): 18 recurring terms get a one-sentence plain definition, auto-applied as a hover/tap `<abbr>` on first occurrence in any rendered card text. The specific payroll card was also rewritten directly (not just glossed) to state what payroll is and what each option means in plain consequences. Scope was bounded to the reported failure mode (jargon with no accessible meaning), not a full rewrite of all card prose — see `docs/DESIGN_V2.md` §8 for what did and didn't ship. |
+
+Two real bugs were found and fixed during this build, both the same class of
+issue as the original V1 scroll bug — worth reading if you touch layout:
+1. **Double scroll container.** `.screen` had its own `overflow-y:auto` while
+   its parent `.stage-col` also scrolled. Same root cause as the V1 bug, in a
+   new place. Fixed by making `.screen` a plain block (`min-height:100%`,
+   no overflow) when nested in `.stage-col`, with a separate `.title-screen`
+   rule for the one place `.screen` is used standalone.
+2. **Sticky action bar overlapping tail content.** A `position:sticky;
+   bottom:0` bar could sit on top of the last bit of scrollable content
+   before the user had scrolled. Fixed by moving the primary action into the
+   always-visible top strap (`.strap-action`) and dropping `position:sticky`
+   from the bottom bar — it's now a plain convenience duplicate, not sticky,
+   not load-bearing for reachability.
+
+Both were caught by testing at 1366×700 specifically — keep testing there.
 
 ### Playtest round 1 — what was reported and what was done
 
@@ -185,19 +238,35 @@ analysis and proposal in `docs/DESIGN_V2.md`.
       historical-style epitaph, a humorous multi-clause verdict, and a run
       statistics grid.
 
-### UI / UX
-- [x] Dark intelligence-dossier aesthetic; editorial serif for prose, mono for
-      instrument labels, sans for structure.
-- [x] Top bar (country / leader / threat / day), 10-stat bar with hover
-      tooltips explaining what each stat means *and what happens at zero*,
-      main card area, three-tab side panel, day-progress track.
-- [x] Animations: card deal-in, staggered option entry, floating stat deltas,
-      delta pills, alert banner wipe, scrim fade.
-- [x] Side panel tabs: **Factions** (loyalty/power/patience bars + a live note
-      that reflects their actual state), **People** (disposition lines that
-      surface what a character *remembers* about you), **Dossier** (the full
-      briefing, always reachable).
-- [x] Progressive disclosure: nothing forces the player to read the side panel.
+### UI / UX — Poster / Broadsheet (current, replaces the earlier dark theme)
+- [x] **Poster design system** (`src/styles/index.css`): cream newsprint,
+      condensed black display type (`Anton`/`Archivo Black`), one red accent,
+      flat shapes, no dark surfaces anywhere. Self-hosted fonts
+      (`public/fonts/`) — `Anton`, `Archivo Black`, `Libre Franklin`, `Lora`,
+      `Courier Prime`, latin subset only, ~400KB.
+- [x] **Broadsheet layout**: persistent masthead (name/honorific + the 3-
+      resource ledger) and strap (day/act/threat + the primary "next" action,
+      always reachable without scrolling — see the two scroll bugs fixed
+      during this build, noted above); the daily briefing is a newspaper
+      front page; each card renders as a "lead story" document with a boxed,
+      numbered decision list; a right rail (not tabbed) shows Files
+      (factions), On Your Desk (threat cards), Diary, and Standing Costs.
+- [x] **Display layer** (`src/game/display.ts`): the masthead shows exactly
+      **Money / Grip / Legitimacy** (aggregated live from the full 10 stats)
+      and the rail shows exactly **5 factions** (Army/Security/Money/Workers/
+      Street) each as one mood word + one bar, instead of the old 10-stat bar
+      and 7×3-bar faction panel. The underlying engine and every card effect
+      are completely unchanged — see `docs/DESIGN_V2.md` §3.
+- [x] **Threat cards** (`buildThreats()` in `briefing.ts`, rendered by
+      `Rail.tsx`): the hidden-pressure warning system now also surfaces as up
+      to 3 physical-looking cards with a headline, body, and "stage N of 3"
+      pips, reusing the same underlying data as the full prose briefing.
+- [x] **Glossary system** (`src/game/glossary.ts` + `Prose.tsx`): 18
+      recurring institutional/financial terms get a plain-language
+      hover/tap definition on first occurrence in any card text.
+- [x] Animations: card rise-in, alert banner wipe, scrim fade, delta pills.
+- [x] Nothing is behind a tab in the right rail — the whole point of the
+      desk-derived layout is that everything has one fixed, visible place.
 
 ### Economy
 - [x] All money in **dollars, billions**. `usd()` / `usdFlow()` in `economy.ts`
@@ -258,30 +327,43 @@ These are deliberately deferred, not forgotten.
 | 1 | **Content volume.** 25 draftable standard cards for a 30-day run at 3–5 cards/day means a long run will exhaust fresh material and start reusing cards once the recency window passes. | Medium | The recency window and once-per-run flags keep repeats ≥4 days apart, and the engine shortens the day rather than repeating, but a 30-day run still feels thinner after ~day 18. **This is the single biggest quality gap.** |
 | 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for human playtest rather than over-tuned blind. |
 | 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it (Milestone 4/6). |
-| 4 | Google Fonts are loaded from CDN. With no network the game falls back to system fonts — it still looks fine, but not as intended. | Low | Acceptable; could be self-hosted later. |
-| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. |
-| 5 | Side panel is hidden below 1080px width. The game is desktop-first, as specified. | Low | Stat bar reflows to 5 columns; no tablet/mobile layout yet. |
+| 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
+| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. |
+| 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet. |
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
+| 8 | The 2 provinces/civil-service factions (`grey`, `provinces`) have no display bar — by design (see `docs/DESIGN_V2.md` §3.2) — but a player who never happens to draw Grebs's or Kostyn's cards has no way to check their standing at all. | Low | They still fully drive effects underneath; this is a pure visibility gap, not a simulation gap. |
+| 9 | The display-layer cut (§3 above) has not been owner-playtested. It might turn out to still feel like "too much to track" if the underlying 7-faction/10-stat depth leaks through card choices even though only 5/3 are shown. | Unknown until tested | If so, the next step is the deeper data-model rewrite `docs/DESIGN_V2.md` §3 originally proposed, not another display tweak. |
 
 ---
 
 ## 6. Recommended next task
 
-**In priority order, once playtest round 2 feedback has been received:**
+**In priority order:**
 
-1. **Act on playtest feedback first.** Do not start new systems before this.
-2. **Milestone 6 (content) partially, ahead of schedule** — the honest answer to
-   limitation #1 is more cards. Target ~20 more standard cards and ~6 more
-   alerts. This is pure content work in `src/game/content/cards2.ts` (or a new
-   `cards3.ts`), requires zero engine changes, and would do more for the
-   experience than any new system.
-3. **Milestone 2 — faction demands as a live mechanic.** Issue dated, formal
+1. **Get playtest round 3 feedback on the Poster/Broadsheet build first.**
+   Do not start the roguelike layer, do not start more content, and do not
+   start a deeper mechanical rewrite until the owner has actually played
+   this. Everything below is provisional on that feedback.
+2. **If the owner says the density cut isn't enough**: escalate from the
+   display-layer aggregation to the real data-model rewrite `docs/DESIGN_V2.md`
+   §3 originally proposed (new `StatKey`/`FactionId` unions, migrate all 42
+   cards' effects, re-balance, bump `SAVE_VERSION`). Bigger job, do it
+   properly rather than half-migrating.
+3. **If the owner is happy with the density and wants the roguelike layer
+   next**: start `docs/DESIGN_V2.md` §4 (acts, the Back Room shop, mandates,
+   a run deck, meta-progression), in the order given there.
+4. **If the owner wants more polish on the current build first**: the
+   honest answer to content volume (still true, see limitations #1 in the
+   original table this replaced) is more cards — ~20 more standard cards and
+   ~6 more alerts, pure content work in `src/game/content/cards2.ts` or a new
+   `cards3.ts`, zero engine changes.
+5. **Milestone 2 — faction demands as a live mechanic.** Issue dated, formal
    demands when patience drops, escalating murmur → formal → ultimatum, and
    spawn a card when one expires.
-4. **Milestone 3 — character-driven events.** Spawn cards when a character's
+6. **Milestone 3 — character-driven events.** Spawn cards when a character's
    `plotting` crosses a threshold. The data is already tracked.
-5. **Milestone 5 — mini-games.** Start with Budget Allocation and Cabinet
+7. **Milestone 5 — mini-games.** Start with Budget Allocation and Cabinet
    Negotiation; the `minigame` hook already exists on `CardDef`.
 
 ---
@@ -295,16 +377,20 @@ src/
   game/                     ← no React, no DOM, fully testable
     types.ts                ← the whole vocabulary. Start here.
     rng.ts                  ← seeded RNG; its state lives in the save
-    stats.ts                ← stat metadata, bands, formatting
+    stats.ts                ← stat metadata, bands, formatting (full 10 stats)
     state.ts                ← createGame(), opening scenarios
     effects.ts              ← THE CONSEQUENCE ENGINE — single entry point
     engine.ts               ← day loop, deck draw, alert weighting, endings
-    briefing.ts             ← turns hidden state into player-language warnings
-    economy.ts              ← the national accounts: budget lines, $ formatting
-    text.ts                 ← {sir}/{leader} token replacement for card prose
-    save.ts                 ← localStorage, defensive
+    briefing.ts             ← hidden state → plain-language warnings + threat cards
+    display.ts              ← engine state → what the player sees (3 resources,
+                               5 factions). READ THIS before touching UI stats.
+    glossary.ts              ← jargon term → plain definition, auto-applied to prose
+    economy.ts               ← the national accounts: budget lines, $ formatting
+    text.ts                  ← {sir}/{leader} token replacement for card prose
+    save.ts                  ← localStorage, defensive
     content/
-      country.ts            ← Velmorra, 7 factions, 13 characters
+      country.ts            ← Velmorra, 7 factions, 13 characters (unchanged
+                               by the display cut — still the full model)
       cards.ts              ← standard cards + follow-ups (tranche 1)
       cards2.ts             ← standard cards (tranche 2)
       followups.ts          ← cards only reachable via scheduling
@@ -312,12 +398,23 @@ src/
       endings.ts            ← endings, regime labelling, legacy verdict
     __tests__/              ← vitest simulation + content-integrity tests
   ui/
-    components/             ← StatBar, SidePanel, CardView, OutcomeView
-    screens/Screens.tsx     ← Title, Briefing, Night, Ending
-    screens/Intro.tsx       ← the opening brief / "Brief me" overlay
-  styles/index.css          ← the whole design system
-  App.tsx                   ← screen routing + keyboard + autosave
-tools/                      ← Playwright scripts for real-browser testing
+    components/
+      Ledger.tsx             ← the masthead's 3-resource ledger (was StatBar.tsx)
+      Rail.tsx                ← Files/Threats/Diary/Standing costs, not tabbed
+                                (was the tabbed SidePanel.tsx)
+      CardView.tsx            ← the doc: card-as-lead-story + decision box
+      Prose.tsx               ← renders card text, applies the glossary
+    screens/Screens.tsx      ← Title, Briefing (front page), Night, Ending
+    screens/Intro.tsx        ← the opening brief / "Brief me" overlay
+  styles/index.css           ← the Poster design system (cream/red/black,
+                               condensed display type, self-hosted fonts)
+public/fonts/                ← self-hosted latin-subset fonts, ~400KB
+docs/
+  DESIGN_V2.md                ← the design decisions, measured evidence, and
+                               what's still open — read before UI work
+  mockups/                    ← design exploration that led here (reference;
+                               poster.css there mirrors the app's real tokens)
+tools/                        ← Playwright scripts for real-browser testing
 ```
 
 ### Non-negotiable rules
@@ -341,11 +438,22 @@ tools/                      ← Playwright scripts for real-browser testing
    "don't make it a spreadsheet simulator" requirement.
 7. **The regime is named, not chosen.** `regimeLabel()` reads the regime axes
    at the end. There are no government classes anywhere.
+8. **The display layer shows a subset; it must never silently diverge from
+   the engine.** `display.ts` decides what the player sees (3 resources, 5
+   factions). If you add/change a stat or faction in the engine, decide
+   deliberately whether `display.ts` should reflect it.
+9. **The primary action on a screen must be reachable without scrolling.**
+   Learned twice: the V1 scroll bug, then a sticky-bar overlap in the Poster
+   rebuild. The fix both times: put the critical action somewhere always
+   visible (now: the top strap's `.strap-action`), not only at the bottom of
+   scrollable content.
 
-### Writing rules (added after playtest round 1)
+### Writing rules (added after playtest rounds 1 and 3)
 
 The original draft was rewritten because it read as ornate and hard to parse.
-Keep to these:
+A later pass added a glossary system because the remaining plain-English
+prose still used institutional/financial terms a general reader wouldn't
+know. Keep to these:
 
 1. **Short sentences.** If a sentence needs a second read, rewrite it.
 2. **Plain modern words.** No "which is to say", no inverted clauses, no
@@ -357,6 +465,13 @@ Keep to these:
 6. **Titles say what the card is about.** "Buying the Evening News", not
    "The Product".
 7. Use `{sir}` when a character addresses the player directly.
+8. **If a sentence needs a jargon term** (payroll, a currency peg, capital
+   controls, a deficit, a subsidy, a commitment, runway, the gazette,
+   procurement, a levy, a concession, a tranche...), either explain it in the
+   same sentence (preferred) or make sure it's in `GLOSSARY` in
+   `src/game/glossary.ts` — the first occurrence in any card gets an
+   automatic hover/tap definition. Check the list before assuming a term is
+   covered; it is a backstop, not a substitute for plain writing.
 
 ### Content authoring notes
 
@@ -403,7 +518,7 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production bundle into dist/
 npm test           # vitest: content integrity, 200 full simulated runs,
-                   # determinism, variety, and a balance probe
+                   # determinism, variety, glossary, and a balance probe
 ```
 
 Real-browser verification (requires `npm run dev` running):
@@ -415,8 +530,13 @@ node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/alert-shot.mjs    # captures a Breaking Alert
 ```
 
-`tools/verify.mjs` runs at 1366×700 specifically because the scroll bug only
-appeared on short viewports. Keep testing there.
+`tools/verify.mjs` runs at 1366×700 specifically because **both** real layout
+bugs found so far (the V1 scroll bug, and the Poster-rebuild sticky-bar
+overlap) only appeared on short viewports. Keep testing there. When taking
+screenshots to eyeball a fix, wait for CSS animations to finish first
+(`.doc`'s rise, `.alert-scrim`'s fade-in, `.delta-pill`'s fade) — several
+apparent rendering bugs during this build turned out to just be screenshots
+taken mid-animation, not real issues.
 
 ### Test coverage today
 
@@ -428,5 +548,11 @@ appeared on short viewports. Keep testing there.
 - Determinism: same seed + same choices ⇒ identical terminal state.
 - Variety: cards do not repeat within the recency window; <30% of days are
   short.
+- Glossary: first occurrence of a term gets annotated, later ones don't; text
+  with no glossary terms round-trips unchanged.
 - Balance probe (prints, does not gate): average run length and ending
   distribution across three play policies.
+- **Not covered by automated tests, verified manually instead:** the actual
+  Poster/Broadsheet rendering, since these are CSS/layout concerns vitest
+  can't see. That's what `tools/verify.mjs` + manual screenshot review is for
+  — re-run it after any layout change, at 1366×700.

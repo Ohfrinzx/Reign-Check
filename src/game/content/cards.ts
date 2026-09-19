@@ -298,16 +298,16 @@ export const CARDS: CardDef[] = [
   weight: (s) => (s.stats.treasury < 25 ? 30 : s.stats.treasury < 40 ? 12 : 2) + s.hidden.fiscal * 0.2,
   requires: (s) => s.stats.treasury < 45,
   body:
-    'Brask has the green notebook open, which means these are the real numbers.\n\n"State payroll clears on the 28th. That is one in six working adults in this country. At the current rate we are $11 billion short and I have run out of ways to describe it as a timing difference."',
+    'Brask has the green notebook open, which means these are the real numbers.\n\n"State payroll — the wages the government owes every soldier, teacher, and clerk on its books — clears on the 28th. That is one in six working adults in this country. We are $11 billion short. If nothing changes, none of them get paid that day."',
   flavor: 'He is not sweating. That is how you know he is not exaggerating.',
   options: [
     {
       id: 'borrow-concord',
       label: 'Borrow $12B from the Concord at their rate.',
-      hint: 'Payroll clears. You now owe the banks money, at a price they set.',
+      hint: 'Everyone gets paid on time. In return you owe the banks $12.0B, taken out of the treasury bit by bit until it is repaid.',
       outcome: {
         text:
-          'Adamek writes the rate on a card and slides it across. It is not a good rate and it is not an insulting one. It is exactly the rate of a man who knows precisely how short you are, which means somebody told him.\n\nBrask looks at the card and says nothing.',
+          'Adamek writes the rate on a card and slides it across. It is not a good rate and it is not an insulting one. It is exactly the rate of a man who knows precisely how short you are, which means somebody told him.\n\nPayroll clears on time. From now on, a slice of the treasury goes to repaying this loan before anything else gets funded.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +12, elite: +3, economy: -1 },
@@ -323,10 +323,10 @@ export const CARDS: CardDef[] = [
     {
       id: 'print',
       label: 'Have the central bank print the difference.',
-      hint: 'Payroll clears tonight. The currency finds out by Thursday.',
+      hint: 'Everyone gets paid tonight, in money that did not exist yesterday. That extra money makes every dollar already out there worth a little less.',
       outcome: {
         text:
-          'The central bank is independent in law. It is also physically inside the Finance Ministry, and the governor takes the lift up when asked.\n\nPayroll clears. On Thursday the currency opens four per cent weaker and three people who do not speak to each other all call it "a technical adjustment".',
+          'The central bank is independent in law. It is also physically inside the Finance Ministry, and the governor takes the lift up when asked.\n\nPayroll clears — but creating money without anything backing it means there is more of it chasing the same goods. On Thursday the currency opens four per cent weaker, imported goods cost more by the weekend, and three people who do not speak to each other all call it "a technical adjustment".',
         tone: 'mixed',
         effects: {
           stats: { treasury: +13, economy: -6, support: +2 },
@@ -343,10 +343,10 @@ export const CARDS: CardDef[] = [
     {
       id: 'delay',
       label: 'Delay payroll nine days. Say so publicly.',
-      hint: 'Saves $8.0B and your credibility with Brask. Two million people notice immediately.',
+      hint: 'Saves the $8.0B you would otherwise have to borrow or print. Nobody gets paid for nine extra days — two million people notice immediately.',
       outcome: {
         text:
-          'You go on the 7pm news and use the word "shortfall", which no Velmorran government has done since 1994.\n\nThe press is startled into something close to respect. The unions are not startled at all. Hess notes the date and says, on the record, "Nine days."',
+          'You go on the 7pm news and say plainly that the government cannot pay everyone on time this month — the first time any Velmorran government has admitted that since 1994.\n\nThe press is startled into something close to respect. The unions are not startled at all: nobody who is owed nine extra days of waiting for wages they were counting on finds that reassuring. Hess notes the date and says, on the record, "Nine days."',
         tone: 'mixed',
         effects: {
           stats: { treasury: +8, legitimacy: +6, support: -9, stability: -6 },

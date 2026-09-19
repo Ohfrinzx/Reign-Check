@@ -1,0 +1,35 @@
+/* Self-hosted type palette for the Poster design system.
+   Latin subset only. No network dependency at runtime. */
+
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/Anton-400-latin.woff2') format('woff2');}
+
+@font-face{font-family:'Archivo Black';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/ArchivoBlack-400-latin.woff2') format('woff2');}
+
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/LibreFranklin-400-latin.woff2') format('woff2');}
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:500;font-display:swap;
+  src:url('/fonts/LibreFranklin-500-latin.woff2') format('woff2');}
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:600;font-display:swap;
+  src:url('/fonts/LibreFranklin-600-latin.woff2') format('woff2');}
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:700;font-display:swap;
+  src:url('/fonts/LibreFranklin-700-latin.woff2') format('woff2');}
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:800;font-display:swap;
+  src:url('/fonts/LibreFranklin-800-latin.woff2') format('woff2');}
+@font-face{font-family:'Libre Franklin';font-style:normal;font-weight:900;font-display:swap;
+  src:url('/fonts/LibreFranklin-900-latin.woff2') format('woff2');}
+
+@font-face{font-family:'Lora';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/Lora-400-latin.woff2') format('woff2');}
+@font-face{font-family:'Lora';font-style:italic;font-weight:400;font-display:swap;
+  src:url('/fonts/Lora-400i-latin.woff2') format('woff2');}
+@font-face{font-family:'Lora';font-style:normal;font-weight:600;font-display:swap;
+  src:url('/fonts/Lora-600-latin.woff2') format('woff2');}
+
+@font-face{font-family:'Courier Prime';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/fonts/CourierPrime-400-latin.woff2') format('woff2');}
+@font-face{font-family:'Courier Prime';font-style:italic;font-weight:400;font-display:swap;
+  src:url('/fonts/CourierPrime-400i-latin.woff2') format('woff2');}
+@font-face{font-family:'Courier Prime';font-style:normal;font-weight:700;font-display:swap;
+  src:url('/fonts/CourierPrime-700-latin.woff2') format('woff2');}

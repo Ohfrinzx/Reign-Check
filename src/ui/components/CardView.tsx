@@ -1,25 +1,13 @@
 import type { GameState, CardDef, AlertDef, CardCategory } from '../../game/types';
 import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
+import { Prose } from './Prose';
 
-const CAT_COLOR: Record<CardCategory, string> = {
-  decision: '#9db4d0', person: '#b58ec9', crisis: '#d9635e', opportunity: '#6bbf8a',
-  policy: '#6fa8dc', scandal: '#e0a54e', intelligence: '#8f9fb5', foreign: '#5fa8a0',
-  economy: '#d9c47a', security: '#c8a45c', alert: '#d9534f', minigame: '#a98bc9',
-};
-
-function Prose({ text }: { text: string }) {
-  return (
-    <>
-      {text.split('\n\n').map((p, i) => (
-        <p key={i}>{p.split('\n').map((line, j, arr) => (
-          <span key={j}>{line}{j < arr.length - 1 && <br />}</span>
-        ))}</p>
-      ))}
-    </>
-  );
-}
-
+/**
+ * The document — a card rendered as the day's "lead story". Options are the
+ * decision box beneath it. See docs/mockups/layout-1-broadsheet.html for the
+ * design this is built from.
+ */
 export function CardView({
   s, card, onChoose, alert,
 }: {
@@ -33,60 +21,58 @@ export function CardView({
   const cat = (card.category ?? 'decision') as CardCategory;
 
   return (
-    <div className={alert ? 'alert-card' : 'card'} key={card.id}>
-      {!alert && (
-        <div className="card-top">
-          <span className="cat-chip" style={{ color: CAT_COLOR[cat] }}>{cat}</span>
-          {faction && <span className="stamp">{faction.icon} {faction.short}</span>}
+    <div className="doc-wrap">
+      <div className={`doc ${alert ? 'alert' : ''}`} key={card.id}>
+        <div className="dh">
+          <span className="k">{CAT_LABEL[cat] ?? cat}</span>
+          {faction && <span className="fct">{faction.icon} {faction.name}</span>}
           {actor && (
-            <span className="who">
+            <span className="f">
               <b>{actor.name}</b>
               {actor.title}
             </span>
           )}
         </div>
-      )}
-      <div className="card-body">
-        {alert && actor && (
-          <div className="row" style={{ marginBottom: 14 }}>
-            <div className="portrait" style={{ color: actor.accent }}>{actor.portrait}</div>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600 }}>{actor.name}</div>
-              <div className="stamp">{actor.title} · {actor.why}</div>
+        <div className="db">
+          {actor && (
+            <div className="who-context">
+              <b>{actor.name}</b> — {actor.title}. {actor.why}
             </div>
-          </div>
-        )}
-        <h2 className="card-title">{card.title}</h2>
-        {actor && !alert && (
-          <div className="who-context">
-            <b>{actor.name}</b> — {actor.title}. {actor.why}
-          </div>
-        )}
-        <div className="card-prose"><Prose text={fill(card.body, s)} /></div>
-        {card.flavor && <div className="card-flavor">{fill(card.flavor, s)}</div>}
-      </div>
-      <div className="options">
-        {card.options.map((o, i) => {
-          const locked = o.enabled ? !o.enabled(s) : false;
-          return (
-            <button
-              key={o.id}
-              className="opt"
-              disabled={locked}
-              onClick={() => onChoose(o.id)}
-              title={locked ? o.lockedText : undefined}
-            >
-              <span className="opt-key">{i + 1}</span>
-              <div className="opt-label">{fill(o.label, s)}</div>
-              {o.hint && <div className="opt-hint">{fill(o.hint, s)}</div>}
-              {locked && <div className="opt-locked">✕ {o.lockedText ?? 'Not available to you.'}</div>}
-            </button>
-          );
-        })}
+          )}
+          <h1>{card.title}</h1>
+          <Prose text={fill(card.body, s)} />
+          {card.flavor && <div className="q">{fill(card.flavor, s)}</div>}
+        </div>
+        <div className="opts">
+          {card.options.map((o, i) => {
+            const locked = o.enabled ? !o.enabled(s) : false;
+            return (
+              <button
+                key={o.id}
+                className="opt"
+                disabled={locked}
+                onClick={() => onChoose(o.id)}
+              >
+                <span className="n">{i + 1}</span>
+                <span className="body">
+                  <span className="lab">{fill(o.label, s)}</span>
+                  {o.hint && <span className="hint">{fill(o.hint, s)}</span>}
+                  {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 }
+
+const CAT_LABEL: Partial<Record<CardCategory, string>> = {
+  decision: 'Decision', person: 'People', crisis: 'Crisis', opportunity: 'Opportunity',
+  policy: 'Policy', scandal: 'Scandal', intelligence: 'Intelligence', foreign: 'Foreign',
+  economy: 'Treasury', security: 'Security', alert: 'Alert', minigame: 'Special',
+};
 
 export function OutcomeView({
   s, onContinue, alert,
@@ -95,31 +81,31 @@ export function OutcomeView({
   if (!o) return null;
   const tone = o.tone ?? 'neutral';
   return (
-    <div className={`outcome ${tone} ${alert ? 'alert-outcome' : ''}`}>
-      <div className="outcome-top">
-        <div className="stamp">{alert ? 'Alert resolved' : 'Decision recorded'} · Day {s.day}</div>
-        <h3>{o.cardTitle}</h3>
-        <div className="chose">“{fill(o.optionLabel, s)}”</div>
-      </div>
-      <div className="outcome-body"><Prose text={fill(o.text, s)} /></div>
-      {Object.keys(o.deltas).length > 0 && (
-        <div className="deltas">
-          {Object.entries(o.deltas).map(([k, v], i) => (
-            <span
-              key={k}
-              className={`delta-pill ${(v as number) > 0 ? 'pos' : 'neg'}`}
-              style={{ animationDelay: `${i * 45}ms` }}
-            >
-              {k.toUpperCase()} {(v as number) > 0 ? '+' : '−'}{Math.abs(v as number).toFixed(1)}
-            </span>
-          ))}
+    <div className="doc-wrap">
+      <div className={`outcome ${tone}`}>
+        <div className="outcome-top">
+          <div className="kicker">{alert ? 'RESOLVED' : 'RECORDED'} &middot; DAY {s.day}</div>
+          <h3>{o.cardTitle}</h3>
+          <div className="chose">“{fill(o.optionLabel, s)}”</div>
         </div>
-      )}
-      <div className="outcome-foot">
-        <button className="btn btn-primary" onClick={onContinue} autoFocus>
-          Continue →
-        </button>
-        <span className="stamp">or press Enter</span>
+        <div className="outcome-body"><Prose text={fill(o.text, s)} /></div>
+        {Object.keys(o.deltas).length > 0 && (
+          <div className="deltas">
+            {Object.entries(o.deltas).map(([k, v], i) => (
+              <span
+                key={k}
+                className={`delta-pill ${(v as number) > 0 ? 'pos' : 'neg'}`}
+                style={{ animationDelay: `${i * 40}ms` }}
+              >
+                {k.toUpperCase()} {(v as number) > 0 ? '+' : '−'}{Math.abs(v as number).toFixed(1)}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="outcome-foot">
+          <button className="btn btn-primary" onClick={onContinue}>Continue →</button>
+          <span className="note">or press Enter</span>
+        </div>
       </div>
     </div>
   );
