@@ -11,6 +11,22 @@ which nobody thought was an important job, including you.
 
 ## Play
 
+### In the browser, no install (GitHub Codespaces)
+
+On the repository page: **Code → Codespaces → Create codespace on
+claude/confident-meitner-lc0bgc**. Dependencies install automatically. When the
+terminal is ready, run:
+
+```bash
+npm run dev
+```
+
+A pop-up offers to open the forwarded port — click **Open in Browser**.
+
+### Locally
+
+Requires [Node.js](https://nodejs.org) 18 or newer.
+
 ```bash
 npm install
 npm run dev

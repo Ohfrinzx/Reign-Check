@@ -297,6 +297,11 @@ tools/                      ← Playwright scripts for real-browser testing
 
 ## 8. How to run, build and test
 
+The repository ships a `.devcontainer/` config, so **Code → Codespaces** on
+GitHub gives a working environment with dependencies already installed. The
+dev server binds `host: true` so it is reachable through container port
+forwarding.
+
 ```bash
 npm install
 npm run dev        # http://localhost:5173
