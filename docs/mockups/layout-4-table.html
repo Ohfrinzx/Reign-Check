@@ -1,0 +1,122 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Layout 4 — The Table</title>
+<link rel="stylesheet" href="poster.css">
+<style>
+.page{height:100%;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+
+.band1{background:var(--ink);color:var(--paper);display:grid;grid-template-columns:auto 1fr auto;
+  align-items:center;position:relative;overflow:hidden}
+.band1::after{content:'';position:absolute;top:0;bottom:0;right:41%;width:128px;background:var(--red);transform:skewX(-14deg)}
+.band1 .id{padding:11px 22px;position:relative;z-index:2}
+.band1 .id .n{font-family:var(--head);font-size:25px;line-height:1}
+.band1 .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.22em;color:#c9bfa8;margin-top:2px}
+.band1 .mid{position:relative;z-index:2;padding-left:26px;font-family:var(--sans);font-weight:800;font-size:10.5px;letter-spacing:.2em}
+.band1 .res{position:relative;z-index:2}
+
+.prompt{padding:16px 26px 12px;display:flex;align-items:baseline;gap:16px;border-bottom:3px solid var(--ink)}
+.prompt h2{font-family:var(--head);font-size:30px;margin:0;text-transform:uppercase;letter-spacing:.01em}
+.prompt .note{font-family:var(--body);font-style:italic;font-size:14.5px;color:#4a443a}
+.prompt .cnt{margin-left:auto;font-family:var(--black);font-size:10px;letter-spacing:.16em;
+  background:var(--red);color:var(--paper);padding:5px 11px;text-transform:uppercase}
+
+.table{min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:22px 26px;align-items:stretch}
+.sit{display:flex;flex-direction:column;background:var(--paper);border:3px solid var(--ink);
+  box-shadow:7px 7px 0 rgba(22,19,15,.15);cursor:pointer;transition:transform .16s, box-shadow .16s;
+  animation:rise .45s cubic-bezier(.2,.9,.25,1) both}
+.sit:nth-child(2){animation-delay:.07s}.sit:nth-child(3){animation-delay:.14s}
+.sit:hover{transform:translateY(-6px);box-shadow:7px 13px 0 rgba(22,19,15,.2)}
+.sit .top{background:var(--ink);color:var(--paper);padding:7px 14px;display:flex;align-items:center;gap:10px}
+.sit .top .k{font-family:var(--black);font-size:9px;letter-spacing:.2em}
+.sit .top .clock{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--mustard)}
+.sit.hot .top{background:var(--red)}
+.sit.hot .top .clock{color:var(--paper)}
+.sit .mid{padding:16px 18px 10px;flex:1}
+.sit h3{font-family:var(--head);font-size:33px;line-height:.94;margin:0 0 8px;text-transform:uppercase}
+.sit .who{font-family:var(--sans);font-weight:800;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--red);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--ink)}
+.sit p{font-size:14px;line-height:1.5;margin:0 0 8px;color:#3a352e}
+.sit .cost{display:flex;gap:8px;flex-wrap:wrap;padding:0 18px 12px}
+.sit .tagc{font-family:var(--mono);font-size:10.5px;border:1.5px solid var(--ink);padding:2px 7px}
+.sit .tagc.red{border-color:var(--red);color:var(--red)}
+.sit .foot{border-top:2px solid var(--ink);padding:10px 18px;display:flex;align-items:center;gap:10px;
+  font-family:var(--black);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;background:var(--paper-2)}
+.sit .foot .arrow{margin-left:auto;font-family:var(--head);font-size:17px;color:var(--red)}
+.sit .ignore{font-family:var(--sans);font-weight:700;font-size:9.5px;letter-spacing:.08em;
+  text-transform:none;color:var(--ash)}
+
+.band3{display:grid;grid-template-columns:repeat(5,1fr) 300px;border-top:3px solid var(--ink);background:var(--paper-2)}
+.band3 .f{padding:9px 15px;border-right:1px solid rgba(22,19,15,.2)}
+.band3 .f .nm{font-family:var(--black);font-size:12.5px;text-transform:uppercase}
+.band3 .f .md{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-top:1px}
+.band3 .f .bar{height:11px;background:var(--paper-3);border:2px solid var(--ink);margin-top:6px}
+.band3 .f .bar i{display:block;height:100%}
+.band3 .warn-col{background:var(--ink);color:var(--paper);padding:9px 15px}
+.band3 .warn-col .hl{font-family:var(--black);font-size:9px;letter-spacing:.18em;color:#b7ad97;margin-bottom:5px}
+.band3 .warn-col .w{display:flex;align-items:baseline;gap:8px;margin-bottom:3px}
+.band3 .warn-col .w .t{font-family:var(--black);font-size:10.5px;text-transform:uppercase;color:#ff8b7e}
+.band3 .warn-col .w .m{font-family:var(--mono);font-size:9.5px;color:#b7ad97;margin-left:auto}
+</style></head><body>
+<div class="page">
+  <div class="band1">
+    <div class="id"><div class="n">ADRIN VO</div><div class="r">EXECUTIVE CHAIR &middot; VELMORRA</div></div>
+    <div class="mid">DAY 4 &nbsp;&middot;&nbsp; ACT I</div>
+    <div class="res">
+      <div class="r"><div class="l">MONEY</div><div class="v">$38.6B</div><div class="s">+$0.34B/day</div></div>
+      <div class="r"><div class="l">GRIP</div><div class="v">61</div><div class="bar"><i class="bg-good" style="width:61%"></i></div></div>
+      <div class="r"><div class="l">LEGITIMACY</div><div class="v">44</div><div class="bar"><i class="bg-warn" style="width:44%"></i></div></div>
+    </div>
+  </div>
+
+  <div class="prompt">
+    <h2>Three things want you today.</h2>
+    <span class="note">You have time for two. Whatever you leave gets worse.</span>
+    <span class="cnt">2 actions left</span>
+  </div>
+
+  <div class="table">
+    <div class="sit hot">
+      <div class="top"><span class="k">TREASURY</span><span class="clock">URGENT</span></div>
+      <div class="mid">
+        <h3>Payroll<br>Is Short</h3>
+        <div class="who">Kel Brask &middot; Finance</div>
+        <p>$11 billion missing before the 28th. One in six working adults is paid by the state.</p>
+      </div>
+      <div class="cost"><span class="tagc red">MONEY</span><span class="tagc">WORKERS</span></div>
+      <div class="foot">Open <span class="arrow">&rarr;</span></div>
+    </div>
+
+    <div class="sit">
+      <div class="top"><span class="k">DEFENCE</span><span class="clock">3 DAYS</span></div>
+      <div class="mid">
+        <h3>The Army<br>Wants $9B</h3>
+        <div class="who">Dessa Varkov &middot; General Staff</div>
+        <p>Nineteen-year-old helicopters. Two of nineteen fly. She has put one sheet on the desk and not touched it again.</p>
+      </div>
+      <div class="cost"><span class="tagc red">MONEY</span><span class="tagc">ARMY</span></div>
+      <div class="foot">Open <span class="arrow">&rarr;</span></div>
+    </div>
+
+    <div class="sit">
+      <div class="top"><span class="k">PRESS</span><span class="clock">4 DAYS</span></div>
+      <div class="mid">
+        <h3>A Reporter<br>Is Asking</h3>
+        <div class="who">Unattributed &middot; two outlets</div>
+        <p>They want to know who was in the stairwell. Nobody has asked on the record before.</p>
+      </div>
+      <div class="cost"><span class="tagc">LEGITIMACY</span><span class="tagc">STREET</span></div>
+      <div class="foot"><span class="ignore">Leaving this escalates to stage 2</span><span class="arrow">&rarr;</span></div>
+    </div>
+  </div>
+
+  <div class="band3">
+    <div class="f"><div class="nm">Army</div><div class="md good">backing</div><div class="bar"><i class="bg-good" style="width:68%"></i></div></div>
+    <div class="f"><div class="nm">Security</div><div class="md warn">watchful</div><div class="bar"><i class="bg-warn" style="width:47%"></i></div></div>
+    <div class="f"><div class="nm">Money</div><div class="md good">content</div><div class="bar"><i class="bg-good" style="width:62%"></i></div></div>
+    <div class="f"><div class="nm">Workers</div><div class="md bad">angry</div><div class="bar"><i class="bg-bad" style="width:21%"></i></div></div>
+    <div class="f"><div class="nm">Street</div><div class="md warn">restless</div><div class="bar"><i class="bg-warn" style="width:38%"></i></div></div>
+    <div class="warn-col">
+      <div class="hl">WARNINGS &amp; DIARY</div>
+      <div class="w"><span class="t">Unions counting</span><span class="m">2/3 &middot; 2d</span></div>
+      <div class="w"><span class="t" style="color:#f2e9d5">Day 6 loan repayment</span><span class="m">2d</span></div>
+    </div>
+  </div>
+</div></body></html>

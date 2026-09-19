@@ -1,0 +1,127 @@
+/* ══════════════════════════════════════════════════════════════════
+   POSTER — shared design tokens and components.
+   Every layout variant imports this. Nothing here is layout-specific.
+   ══════════════════════════════════════════════════════════════════ */
+@import url("fonts/fonts.css");
+
+:root{
+  --paper:#f2e9d5;
+  --paper-2:#e7dcc2;
+  --paper-3:#dbcfb1;
+  --ink:#16130f;
+  --red:#cc2b1d;
+  --teal:#15525c;
+  --mustard:#e0a324;
+  --ash:#8b8275;
+
+  --head:'Anton',Impact,sans-serif;
+  --black:'Archivo Black',sans-serif;
+  --sans:'Libre Franklin',system-ui,sans-serif;
+  --body:'Lora',Georgia,serif;
+  --mono:'Courier Prime',monospace;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:var(--body);color:var(--ink);background:var(--paper);overflow:hidden;
+  background-image:radial-gradient(rgba(22,19,15,.055) 1px, transparent 1px);
+  background-size:4px 4px;
+}
+button{font-family:inherit;color:inherit}
+
+/* ── type helpers ─────────────────────────────────────────── */
+.kicker{font-family:var(--black);font-size:10px;letter-spacing:.18em;text-transform:uppercase}
+.label{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ash)}
+.rule{border:0;border-top:3px solid var(--ink);margin:0}
+.rule-thin{border:0;border-top:1px solid rgba(22,19,15,.22);margin:0}
+
+/* ── resources ────────────────────────────────────────────── */
+.res{display:flex}
+.res .r{padding:8px 18px;border-left:1px solid rgba(242,233,213,.22);text-align:right;min-width:124px}
+.res .r:first-child{border-left:0}
+.res .l{font-family:var(--sans);font-weight:800;font-size:8.5px;letter-spacing:.2em;color:#b7ad97}
+.res .v{font-family:var(--head);font-size:29px;line-height:1;margin-top:1px}
+.res .s{font-family:var(--mono);font-size:10px;color:var(--mustard)}
+.res .bar{height:4px;background:rgba(242,233,213,.2);margin-top:5px}
+.res .bar i{display:block;height:100%}
+
+/* on light ground */
+.res.light .r{border-left-color:rgba(22,19,15,.18)}
+.res.light .l{color:var(--ash)}
+.res.light .bar{background:var(--paper-3)}
+
+/* ── faction blocks ───────────────────────────────────────── */
+.fac{margin-bottom:11px}
+.fac .hd{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.fac .nm{font-family:var(--black);font-size:13.5px;flex:1;text-transform:uppercase;letter-spacing:.01em}
+.fac .md{font-family:var(--sans);font-weight:700;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+.fac .bar{height:13px;background:var(--paper-2);border:2px solid var(--ink)}
+.fac .bar i{display:block;height:100%}
+
+.good{color:var(--teal)} .warn{color:var(--mustard)} .bad{color:var(--red)}
+.bg-good{background:var(--teal)} .bg-warn{background:var(--mustard)} .bg-bad{background:var(--red)}
+
+/* ── threats ──────────────────────────────────────────────── */
+.threat{background:var(--red);color:var(--paper);padding:9px 11px;margin-bottom:8px}
+.threat.low{background:var(--ink)}
+.threat .t{font-family:var(--black);font-size:11.5px;text-transform:uppercase;line-height:1.15}
+.threat .d{font-family:var(--sans);font-size:11px;margin-top:4px;line-height:1.3;opacity:.92}
+.threat .m{font-family:var(--mono);font-size:9.5px;margin-top:5px;opacity:.82}
+.pip{display:inline-block;width:8px;height:8px;border:1.5px solid var(--paper);margin-left:3px;vertical-align:middle}
+.pip.on{background:var(--paper)}
+
+/* ── diary ────────────────────────────────────────────────── */
+.slip{border-left:5px solid var(--red);padding:5px 0 5px 10px;margin-bottom:9px}
+.slip .d{font-family:var(--black);font-size:9.5px;letter-spacing:.1em;color:var(--red)}
+.slip .t{font-family:var(--sans);font-size:11.5px;line-height:1.3;margin-top:2px}
+
+/* ── the document ─────────────────────────────────────────── */
+.doc{background:var(--paper);border:3px solid var(--ink);box-shadow:9px 9px 0 rgba(22,19,15,.16);
+  animation:rise .45s cubic-bezier(.2,.9,.25,1) both;position:relative}
+@keyframes rise{from{opacity:0;transform:translateY(54px)}to{opacity:1;transform:none}}
+.doc .dh{background:var(--ink);color:var(--paper);padding:8px 20px;display:flex;align-items:center;gap:12px}
+.doc .dh .k{font-family:var(--black);font-size:10px;letter-spacing:.2em}
+.doc .dh .f{margin-left:auto;text-align:right}
+.doc .dh .f b{display:block;font-family:var(--black);font-size:11.5px}
+.doc .dh .f span{font-family:var(--sans);font-weight:600;font-size:9px;letter-spacing:.14em;color:#b7ad97}
+.doc .db{padding:18px 24px 4px}
+.doc h1{font-family:var(--head);line-height:.92;margin:0 0 8px;text-transform:uppercase;letter-spacing:.005em}
+.doc .sub{font-family:var(--sans);font-weight:700;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--red);margin-bottom:13px;border-bottom:2px solid var(--ink);padding-bottom:9px}
+.doc p{font-size:15.5px;line-height:1.55;margin:0 0 11px}
+.doc .q{font-family:var(--sans);font-weight:600;font-size:12.5px;color:var(--teal);
+  border-left:5px solid var(--teal);padding-left:12px;margin:14px 0 4px}
+
+/* ── options ──────────────────────────────────────────────── */
+.opts{padding:6px 20px 18px;display:grid;border-top:2px solid var(--ink)}
+.opt{display:flex;align-items:center;gap:13px;text-align:left;width:100%;cursor:pointer;background:transparent;
+  border:0;border-bottom:1px solid rgba(22,19,15,.2);padding:12px 4px;
+  transition:background .12s,padding .12s,color .12s}
+.opt:last-child{border-bottom:0}
+.opt:hover{background:var(--ink);color:var(--paper);padding-left:12px}
+.opt:hover .hint{color:#c9bfa8}
+.opt:hover .n{background:var(--red);color:var(--paper);border-color:var(--red)}
+.opt:hover .c{color:var(--mustard)}
+.opt .n{font-family:var(--black);font-size:12.5px;width:25px;height:25px;flex:none;border:2px solid currentColor;
+  display:grid;place-items:center}
+.opt .lab{font-family:var(--black);font-size:14px}
+.opt .hint{display:block;font-family:var(--body);font-size:12.5px;color:var(--ash);margin-top:3px;font-weight:400}
+.opt .c{font-family:var(--head);font-size:17px;color:var(--red);margin-left:auto}
+
+/* ── in-tray ──────────────────────────────────────────────── */
+.tray{position:relative;height:80px}
+.tray .sh{position:absolute;left:0;right:0;height:54px;background:var(--paper);border:2px solid var(--ink)}
+.tray .sh:nth-child(1){top:22px;left:9px;right:9px;transform:rotate(-1.6deg);background:var(--paper-2)}
+.tray .sh:nth-child(2){top:11px;left:4px;right:4px;transform:rotate(1deg)}
+.tray .sh:nth-child(3){top:0;transform:rotate(-.4deg)}
+.tray .sh .st{padding:7px 10px;font-family:var(--sans);font-weight:800;font-size:8.5px;letter-spacing:.18em;color:var(--ash)}
+.tray .sh .st b{display:block;font-family:var(--head);font-size:15px;letter-spacing:0;color:var(--ink);margin-top:2px}
+
+/* ── running order ────────────────────────────────────────── */
+.run{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(22,19,15,.18)}
+.run:last-child{border-bottom:0}
+.run .t{font-family:var(--mono);font-size:10.5px;width:40px;color:var(--ash)}
+.run .n{font-family:var(--sans);font-weight:600;font-size:12px}
+.run.done{opacity:.4}.run.done .n{text-decoration:line-through}
+.run.now .n{color:var(--red);font-weight:800}

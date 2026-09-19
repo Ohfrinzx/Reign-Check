@@ -1,0 +1,87 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Layout 2 — Focus</title>
+<link rel="stylesheet" href="poster.css">
+<style>
+.page{height:100%;display:flex;flex-direction:column}
+
+/* thin top bar */
+.bar{background:var(--ink);color:var(--paper);display:flex;align-items:center;gap:0;padding:0 20px;flex:none}
+.bar .who{font-family:var(--head);font-size:19px;letter-spacing:.02em;padding:9px 0}
+.bar .who small{display:block;font-family:var(--sans);font-weight:700;font-size:7.5px;letter-spacing:.24em;color:#b7ad97}
+.bar .res{margin-left:auto}
+.bar .res .r{padding:8px 16px}
+.bar .res .v{font-size:22px}
+.bar .prog{display:flex;gap:5px;align-items:center;padding-left:22px;margin-left:22px;border-left:1px solid rgba(242,233,213,.22)}
+.bar .prog i{width:9px;height:9px;border:2px solid var(--paper);display:block}
+.bar .prog i.on{background:var(--red);border-color:var(--red)}
+.bar .prog i.done{background:var(--paper)}
+.bar .prog em{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.18em;font-style:normal;color:#b7ad97;margin-right:5px}
+
+/* the single card, centred */
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:22px 20px}
+.doc{width:100%;max-width:720px}
+.doc h1{font-size:56px}
+.doc .db{padding:22px 30px 4px}
+.doc p{font-size:16px}
+.doc .opts{padding:6px 26px 20px}
+
+/* collapsed periphery */
+.foot{flex:none;background:var(--paper-2);border-top:3px solid var(--ink);
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:18px;padding:0 20px}
+.moods{display:flex;gap:0}
+.mood{display:flex;align-items:center;gap:8px;padding:11px 16px;border-right:1px solid rgba(22,19,15,.18);cursor:pointer;
+  transition:background .14s}
+.mood:first-child{padding-left:0}
+.mood:hover{background:var(--paper-3)}
+.mood .dot{width:13px;height:13px;border:2px solid var(--ink);flex:none}
+.mood .nm{font-family:var(--black);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.mood .st{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.tabs{display:flex;gap:9px;padding:9px 0}
+.tab{display:flex;align-items:center;gap:8px;background:var(--ink);color:var(--paper);border:0;
+  padding:8px 14px;cursor:pointer;font-family:var(--black);font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.tab.alarm{background:var(--red)}
+.tab b{font-family:var(--head);font-size:15px;letter-spacing:0}
+</style></head><body>
+<div class="page">
+  <div class="bar">
+    <div class="who">ADRIN VO<small>EXECUTIVE CHAIR</small></div>
+    <div class="prog"><em>DAY 4</em><i class="done"></i><i class="on"></i><i></i><i></i></div>
+    <div class="res">
+      <div class="r"><div class="l">MONEY</div><div class="v">$38.6B</div><div class="s">+$0.34B/day</div></div>
+      <div class="r"><div class="l">GRIP</div><div class="v">61</div><div class="bar"><i class="bg-good" style="width:61%"></i></div></div>
+      <div class="r"><div class="l">LEGITIMACY</div><div class="v">44</div><div class="bar"><i class="bg-warn" style="width:44%"></i></div></div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="doc">
+      <div class="dh"><span class="k">TREASURY</span><span class="f"><b>KEL BRASK</b><span>FINANCE MINISTER</span></span></div>
+      <div class="db">
+        <h1>Payroll<br>Is Short</h1>
+        <div class="sub">$11 billion missing &middot; clears on the 28th</div>
+        <p>Brask has the green notebook open, which means these are the real numbers.</p>
+        <p>&ldquo;State payroll clears on the 28th. That is one in six working adults in this country. At the current rate we are $11 billion short and I have run out of ways to describe it as a timing difference.&rdquo;</p>
+        <div class="q">He is not sweating. That is how you know he is not exaggerating.</div>
+      </div>
+      <div class="opts">
+        <button class="opt"><span class="n">1</span><span class="lab">Borrow from the banks<span class="hint">Payroll clears. You owe the Concord, at a price they set.</span></span><span class="c">+$12B</span></button>
+        <button class="opt"><span class="n">2</span><span class="lab">Print the difference<span class="hint">Payroll clears tonight. The currency finds out by Thursday.</span></span><span class="c">+$13B</span></button>
+        <button class="opt"><span class="n">3</span><span class="lab">Delay nine days. Say so.<span class="hint">Two million people notice immediately.</span></span><span class="c">+$8B</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="moods">
+      <div class="mood"><span class="dot bg-good"></span><span class="nm">Army</span><span class="st good">backing</span></div>
+      <div class="mood"><span class="dot bg-warn"></span><span class="nm">Security</span><span class="st warn">watchful</span></div>
+      <div class="mood"><span class="dot bg-good"></span><span class="nm">Money</span><span class="st good">content</span></div>
+      <div class="mood"><span class="dot bg-bad"></span><span class="nm">Workers</span><span class="st bad">angry</span></div>
+      <div class="mood"><span class="dot bg-warn"></span><span class="nm">Street</span><span class="st warn">restless</span></div>
+    </div>
+    <div class="tabs">
+      <button class="tab alarm">Warnings <b>2</b></button>
+      <button class="tab">Diary <b>3</b></button>
+      <button class="tab">Files</button>
+    </div>
+  </div>
+</div></body></html>
