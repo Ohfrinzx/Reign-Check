@@ -10,12 +10,12 @@ import { FACTIONS, FACTION_ORDER } from './country';
 export const ENDINGS: EndingDef[] = [
   {
     id: 'coup',
-    title: 'THE GARRISON MOVED AT FOUR',
+    title: 'THE ARMY MOVED AT FOUR IN THE MORNING',
     kind: 'coup',
     priority: 100,
     check: (s) => s.hidden.coup >= 84 || (s.stats.military <= 10 && s.hidden.coup > 52),
     epitaph: (s) =>
-      `They came at four in the morning, which is when these things happen, and it took eleven minutes because nobody in the building had been given a reason to make it take longer.\n\nThe General Staff's statement cited "a period of instability" and promised elections. Nobody who has lived in Velmorra since 1979 believes the second half of that sentence, and nobody argues with the first.\n\nYou governed for ${s.day} days.`,
+      `They came at four in the morning, which is when these things happen, and it took eleven minutes, because nobody in the building had been given a reason to make it take longer.\n\nThe army's statement mentioned "a period of instability" and promised elections. Nobody who has lived here since 1979 believes the second half of that sentence, and nobody argues with the first.\n\nYou were in charge for ${s.day} days.`,
   },
   {
     id: 'revolution',
@@ -24,7 +24,7 @@ export const ENDINGS: EndingDef[] = [
     priority: 95,
     check: (s) => s.hidden.unrest >= 92 || (s.stats.stability <= 6 && s.stats.support < 20),
     epitaph: (s) =>
-      `It filled on a Tuesday and it did not empty on Wednesday, and by Friday there were kitchens, and by the second week there were committees, and a country that has committees in its main square has already decided.\n\nThe Sable Office recommended clearing it. The General Staff declined to provide the soldiers. That was the whole thing, really — two institutions disagreeing in a corridor, after ${s.day} days of your government.`,
+      `It filled on a Tuesday and it did not empty on Wednesday. By Friday there were kitchens. By the second week there were committees, and a country with committees in its main square has already made up its mind.\n\nThe Sable Office recommended clearing it. The army declined to provide the soldiers. That was the whole thing, really: two institutions disagreeing in a corridor, ${s.day} days into your government.`,
   },
   {
     id: 'elite',
@@ -33,34 +33,34 @@ export const ENDINGS: EndingDef[] = [
     priority: 90,
     check: (s) => s.stats.elite <= 6 && s.stats.power < 35,
     epitaph: (s) =>
-      `Nobody arrested you. Nobody besieged anything. Eleven people had lunch in Ilvet, and by the end of the week the Council of the Republic had discovered a procedural mechanism nobody had used since 1961, and by the end of the month you had a pension and a house on the coast.\n\nIt is, by Velmorran standards, an extremely civilised ending. It took ${s.day} days.`,
+      `Nobody arrested you. Nobody besieged anything. Eleven people had lunch in the Free Zone, and by the end of the week the Council of the Republic had rediscovered a procedure nobody had used since 1961, and by the end of the month you had a pension and a house on the coast.\n\nBy local standards it is an extremely civilised ending. It took ${s.day} days.`,
   },
   {
     id: 'collapse',
-    title: 'THE REPUBLIC MISSED PAYROLL',
+    title: 'THE STATE MISSED PAYROLL',
     kind: 'collapse',
     priority: 85,
     check: (s) => s.stats.treasury <= -38 || (s.stats.economy <= 6 && s.stats.treasury < 5),
     epitaph: (s) =>
-      `One in six working adults is on the state payroll. On the twenty-eighth, the state payroll did not clear.\n\nThere was no coup and no revolution. There was simply a fortnight in which nothing worked, followed by a Convocation session that lasted four hours, at the end of which somebody else had your office and your problems.\n\n${s.day} days, and ${money(s.stats.treasury)} in the account.`,
+      `One in six working adults is paid by the state. On the 28th, the state did not pay them.\n\nThere was no coup and no revolution. There was a fortnight in which nothing worked, followed by a four-hour parliamentary session, at the end of which somebody else had your office and your problems.\n\n${s.day} days, and ${money(s.stats.treasury)} in the account.`,
   },
   {
     id: 'fracture',
-    title: 'THE PROVINCES STOPPED FORWARDING THE RECEIPTS',
+    title: 'THE PROVINCES STOPPED SENDING THE MONEY',
     kind: 'fracture',
     priority: 80,
     check: (s) => s.hidden.separatism >= 90,
     epitaph: (s) =>
-      `It was never a declaration. Velmorra does not do declarations. It was a regional development secretariat, and then a regional tax office, and then a regional police liaison, and then one morning the Kordiva Basin simply did not send the quarter's receipts and nobody in Sarnica could think of a single thing to do about it.\n\nThe map is the same. The country is not. ${s.day} days.`,
+      `There was never a declaration. It was a regional development secretariat, then a regional tax office, then a regional police liaison, and then one morning the Kordiva Basin simply did not send the quarter's tax revenue and nobody in the capital could think of a single thing to do about it.\n\nThe map looks the same. The country does not. ${s.day} days.`,
   },
   {
     id: 'foreign',
-    title: 'THE COMPACT LOST PATIENCE',
+    title: 'OSTRENE RAN OUT OF PATIENCE',
     kind: 'foreign',
     priority: 78,
     check: (s) => s.hidden.foreign >= 92,
     epitaph: (s) =>
-      `The Ostrene Compact did not invade. The Compact has never needed to invade.\n\nIt stopped buying lithium on a Monday, repriced gas on a Tuesday, and on the Thursday its ambassador announced a meeting with four members of your cabinet to which you were not invited. By the following week there was a new government, and it was constitutional, and every signature on it was Velmorran.\n\n${s.day} days.`,
+      `Ostrene did not invade. Ostrene has never needed to invade.\n\nThey stopped buying lithium on the Monday, repriced gas on the Tuesday, and on the Thursday their ambassador scheduled a meeting with four of your ministers that you were not invited to. By the following week there was a new government. It was entirely constitutional and every signature on it was Velmorran.\n\n${s.day} days.`,
   },
   {
     id: 'scandal',
@@ -72,7 +72,7 @@ export const ENDINGS: EndingDef[] = [
       s.stats.legitimacy < 18 &&
       s.scandals.some((x) => !x.buried && x.heat > 45),
     epitaph: (s) =>
-      `It was not one thing. It was eleven things, published over nine days, by four outlets that do not normally agree about anything.\n\nThe Grand Convocation, which ratifies what it is given and has done since 1961, was given a removal motion, and for the first time in sixty-four years it did something other than ratify: it amended it, to make it harsher, and then ratified that.\n\n${s.day} days.`,
+      `It was not one thing. It was eleven things, published over nine days, by four outlets that do not normally agree about anything.\n\nParliament approves what it is handed and has done since 1961. It was handed a removal motion, and for the first time in sixty-four years it did something other than approve: it amended it, to make it harsher, and then approved that.\n\n${s.day} days.`,
   },
   {
     id: 'hollow',
@@ -81,17 +81,17 @@ export const ENDINGS: EndingDef[] = [
     priority: 70,
     check: (s) => s.stats.power <= 5,
     epitaph: (s) =>
-      `There was no single moment. Orders went out and came back marked for clarification. Meetings were held at times you were not told about. The Grey Floor, which has outlasted nine First Citizens, simply began routing around you the way water routes around a stone.\n\nYou were First Citizen for ${s.day} days. You were in charge for rather fewer.`,
+      `There was no single moment. Orders went out and came back marked for clarification. Meetings happened at times you were not told about. The civil service, which has outlasted nine governments, started routing around you the way water routes around a rock.\n\nYou held the office for ${s.day} days. You were in charge for rather fewer.`,
   },
 ];
 
 const SURVIVAL: EndingDef = {
   id: 'survival',
-  title: 'THE CONVOCATION CONFIRMED YOU',
+  title: 'PARLIAMENT CONFIRMED YOU',
   kind: 'survival',
   priority: 1,
   epitaph: (s) =>
-    `You reached the Grand Convocation still holding the office, which — given how you got it, and at four in the morning — is more than anybody in this building expected.\n\nThe confirmation vote was not close. Several people who voted for you have privately told several other people that they were surprised to be doing so. ${s.day} days, and the Republic is still, recognisably, a republic.`,
+    `You reached the confirmation vote still holding the job, which — given how you got it, and at four in the morning — is more than anybody in that building expected.\n\nThe vote was not close. Several people who voted for you have since privately told several other people that they were surprised to be doing so.\n\n${s.day} days, and the country is still, recognisably, a country.`,
 };
 
 export function checkEndings(s: GameState, forceEnd = false): EndingResult | undefined {
@@ -170,15 +170,16 @@ function verdict(s: GameState): string {
 
   if (s.hidden.cult > 55) bits.push('became, briefly, quite hard to avoid on television');
   if (s.hidden.corruption > 62) bits.push('ran a state that was, by the end, substantially for sale');
-  if (s.stats.support > 70) bits.push('was genuinely popular, which nobody predicted');
+  if (s.stats.support > 70) bits.push('left office more popular than you arrived, which nobody predicted');
   else if (s.stats.support < 18) bits.push('was, at the end, disliked with real energy');
   if (s.stats.information < 22) bits.push('governed the last stretch on information that was not true');
 
   // faction colour
   const loved = FACTION_ORDER.filter((f) => s.factions[f].loyalty > 74);
   const hated = FACTION_ORDER.filter((f) => s.factions[f].loyalty < 16);
-  if (loved.length) bits.push(`was adored by the ${FACTIONS[loved[0]].short}`);
-  if (hated.length) bits.push(`was loathed by the ${FACTIONS[hated[0]].short}`);
+  const fname = (id: (typeof FACTION_ORDER)[number]) => FACTIONS[id].name.replace(/^The /, 'the ');
+  if (loved.length) bits.push(`was genuinely popular with ${fname(loved[0])}`);
+  if (hated.length) bits.push(`was loathed by ${fname(hated[0])}`);
 
   if (s.flags.pigeonPatron) bits.push('left you Honorary Patron of the reunified Pigeon Federation');
   else if (s.flags.pigeonFriend) bits.push('is still spoken of warmly in pigeon-racing circles');

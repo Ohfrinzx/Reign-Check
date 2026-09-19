@@ -1,5 +1,6 @@
 import type { GameState, CardDef, AlertDef, CardCategory } from '../../game/types';
 import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
+import { fill } from '../../game/text';
 
 const CAT_COLOR: Record<CardCategory, string> = {
   decision: '#9db4d0', person: '#b58ec9', crisis: '#d9635e', opportunity: '#6bbf8a',
@@ -51,13 +52,18 @@ export function CardView({
             <div className="portrait" style={{ color: actor.accent }}>{actor.portrait}</div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600 }}>{actor.name}</div>
-              <div className="stamp">{actor.title}</div>
+              <div className="stamp">{actor.title} · {actor.why}</div>
             </div>
           </div>
         )}
         <h2 className="card-title">{card.title}</h2>
-        <div className="card-prose"><Prose text={card.body} /></div>
-        {card.flavor && <div className="card-flavor">{card.flavor}</div>}
+        {actor && !alert && (
+          <div className="who-context">
+            <b>{actor.name}</b> — {actor.title}. {actor.why}
+          </div>
+        )}
+        <div className="card-prose"><Prose text={fill(card.body, s)} /></div>
+        {card.flavor && <div className="card-flavor">{fill(card.flavor, s)}</div>}
       </div>
       <div className="options">
         {card.options.map((o, i) => {
@@ -71,8 +77,8 @@ export function CardView({
               title={locked ? o.lockedText : undefined}
             >
               <span className="opt-key">{i + 1}</span>
-              <div className="opt-label">{o.label}</div>
-              {o.hint && <div className="opt-hint">{o.hint}</div>}
+              <div className="opt-label">{fill(o.label, s)}</div>
+              {o.hint && <div className="opt-hint">{fill(o.hint, s)}</div>}
               {locked && <div className="opt-locked">✕ {o.lockedText ?? 'Not available to you.'}</div>}
             </button>
           );
@@ -93,9 +99,9 @@ export function OutcomeView({
       <div className="outcome-top">
         <div className="stamp">{alert ? 'Alert resolved' : 'Decision recorded'} · Day {s.day}</div>
         <h3>{o.cardTitle}</h3>
-        <div className="chose">“{o.optionLabel}”</div>
+        <div className="chose">“{fill(o.optionLabel, s)}”</div>
       </div>
-      <div className="outcome-body"><Prose text={o.text} /></div>
+      <div className="outcome-body"><Prose text={fill(o.text, s)} /></div>
       {Object.keys(o.deltas).length > 0 && (
         <div className="deltas">
           {Object.entries(o.deltas).map(([k, v], i) => (

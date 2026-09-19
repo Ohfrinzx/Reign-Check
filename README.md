@@ -1,13 +1,16 @@
 # DICTATOR SANDBOX
 
-A card-driven political leadership simulation set in the **Republic of
-Velmorra** — a fictional salt republic on a bad-tempered sea, with seven
-factions, thirteen ministers, a currency held together by optimism, and a
-national pigeon federation with more mobilising capacity than two of its
-political parties.
+A card-driven political leadership simulation set in the fictional **Republic
+of Velmorra** — lithium mines, a container port, an offshore banking zone,
+seven factions that all want something, and a national pigeon federation that
+can get more people into the street than either opposition party.
 
-Marshal Krast is nine days dead. You were his Vice-Chairman of the Council,
-which nobody thought was an important job, including you.
+The man who ran the country for nineteen years died in a stairwell nine days
+ago. You were his deputy. It was a job nobody wanted and nobody watched, which
+is exactly why you are still alive and now in charge.
+
+You are the **Executive Chair**. Parliament votes on confirming you in thirty
+days. Nobody thinks you will get there.
 
 ## Play
 
@@ -40,18 +43,26 @@ Then open http://localhost:5173.
 ## What it is
 
 Each **day** has three to five stages. Each stage deals you a **card**: a
-minister with a request, a crisis, an opportunity, a number written on a piece
-of paper and slid across a desk. You choose. The choice changes your ten
-visible statistics — and schedules something for a later day that you will have
-forgotten about by the time it arrives.
+minister with a request, a crisis, an offer, a number written on a card and
+slid across the desk. You pick an option. It changes your ten visible stats —
+and schedules something for a later day that you will have forgotten about by
+the time it arrives.
 
-At unpredictable moments a **BREAKING ALERT** interrupts the day. Alerts are
-not random: each one is driven by a hidden pressure that your own decisions
-have been feeding. Cut military spending often enough and an order will come
-back marked *requires clarification from the General Staff*.
+The treasury is in dollars and it is also, in practice, your money. Options
+that cost money say so. Some decisions create a permanent budget line: a pay
+rise does not happen once, it happens every day. The **Treasury** panel shows
+exactly where the money goes and how long you have before the account is empty.
 
-There are no government types to choose. The regime you end up running is
+At unpredictable moments a **BREAKING ALERT** takes over the screen. Alerts are
+not random: each one is driven by a hidden pressure your own decisions have
+been building. Underfund the army often enough and an order will come back
+marked *requires clarification from the General Staff*.
+
+There are no government types to choose. The kind of government you ran is
 **named at the end**, from what you actually did.
+
+A **Brief me** button in the top bar explains who you are, who everyone else
+is, and all six ways to lose, at any point.
 
 ## Notes
 

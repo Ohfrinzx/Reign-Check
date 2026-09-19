@@ -21,8 +21,8 @@ export interface Briefing {
 }
 
 const MONTHS = [
-  'Vessel', 'Salt', 'Thaw', 'Dovra', 'Green', 'High Sun',
-  'Harvest', 'Ash', 'Rain', 'Dark', 'Ice', 'Turning',
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
 /** Velmorra's own calendar, because a fictional country deserves one. */
@@ -30,43 +30,43 @@ export function dateLine(day: number): string {
   const d = 3 + day;
   const monthIndex = Math.floor((d - 1) / 30) % 12;
   const dayOfMonth = ((d - 1) % 30) + 1;
-  return `${dayOfMonth} ${MONTHS[monthIndex]}, Year 64 of the Republic`;
+  return `${MONTHS[monthIndex]} ${dayOfMonth}`;
 }
 
 const WEATHER = [
-  'Rain over Sarnica. Ninth consecutive day.',
-  'Rain over Sarnica. It is being discussed.',
-  'Low cloud, no rain. The Ministry considers this a result.',
+  'Rain in the capital. Ninth day running. People have opinions about this.',
+  'Rain in the capital. It is being discussed on television.',
+  'Cloudy, no rain. The press office is treating this as a win.',
   'Clear over the capital. Nobody trusts it.',
-  'Rain in the Basin, clear on the Coast, which is the wrong way round.',
-  'Fog on the Mavro approaches. Two ships waiting.',
+  'Rain in the farm belt, clear on the coast, which is the wrong way round.',
+  'Fog at Mavro. Two ships waiting to dock.',
   'Cold snap in Gorsk. Gas demand up nine per cent.',
-  'Heavy rain. The Ninth District is under water again.',
+  'Heavy rain. The Ninth District is flooded again.',
 ];
 
 /** Warning signs, in the player's language. Never raw numbers. */
 const WARNINGS: { key: HiddenKey; at: number; sev: 1 | 2 | 3; text: string; source: string }[] = [
-  { key: 'coup', at: 30, sev: 1, source: 'Sable Office', text: 'Unusual pattern of contact between officers in three separate commands. Probably social.' },
-  { key: 'coup', at: 52, sev: 2, source: 'Sable Office', text: 'Officers from three commands are meeting outside their chain of command. It is no longer probably social.' },
-  { key: 'coup', at: 72, sev: 3, source: 'Sable Office', text: 'The Office assesses that a decision has been taken somewhere in the officer corps. It does not yet know what the decision was.' },
-  { key: 'unrest', at: 32, sev: 1, source: 'Interior', text: 'Three unpermitted gatherings this week. All small. All in the same four streets.' },
-  { key: 'unrest', at: 55, sev: 2, source: 'Interior', text: 'Convocation Square has been filling in the evenings without an organiser. This is how it always starts.' },
+  { key: 'coup', at: 30, sev: 1, source: 'Security', text: 'Officers from three different commands have been meeting socially. Probably nothing.' },
+  { key: 'coup', at: 52, sev: 2, source: 'Security', text: 'Officers from three commands are meeting outside their chain of command. It is no longer probably nothing.' },
+  { key: 'coup', at: 72, sev: 3, source: 'Security', text: 'A decision has been taken somewhere in the officer corps. We do not yet know what it was.' },
+  { key: 'unrest', at: 32, sev: 1, source: 'Interior', text: 'Three unauthorised gatherings this week. All small. All in the same four streets.' },
+  { key: 'unrest', at: 55, sev: 2, source: 'Interior', text: 'The main square has been filling in the evenings with no organiser. This is how it always starts.' },
   { key: 'unrest', at: 75, sev: 3, source: 'Interior', text: 'The capital is one incident away from a crowd nobody can count.' },
-  { key: 'scandal', at: 35, sev: 1, source: 'Press Office', text: 'Two outlets are working on the same story. They are not the two that usually work together.' },
-  { key: 'scandal', at: 58, sev: 2, source: 'Press Office', text: 'The story has a name now, and the name is being used without explanation, which means everyone knows it.' },
-  { key: 'scandal', at: 78, sev: 3, source: 'Press Office', text: 'There is enough in circulation to remove a government, and it is no longer clear who is holding it.' },
-  { key: 'leak', at: 38, sev: 1, source: 'Grey Floor', text: 'Documents are leaving the Ministries Building. Not many. The wrong ones.' },
-  { key: 'leak', at: 62, sev: 2, source: 'Grey Floor', text: 'Internal paperwork is being quoted verbatim by people who should not have it.' },
+  { key: 'scandal', at: 35, sev: 1, source: 'Press office', text: 'Two outlets are working on the same story. They are not the two that usually work together.' },
+  { key: 'scandal', at: 58, sev: 2, source: 'Press office', text: 'The story has a name now, and people use the name without explaining it, which means everybody knows it.' },
+  { key: 'scandal', at: 78, sev: 3, source: 'Press office', text: 'There is enough material in circulation to bring down a government, and it is no longer clear who is holding it.' },
+  { key: 'leak', at: 38, sev: 1, source: 'Ministries', text: 'Documents are leaving the building. Not many. The wrong ones.' },
+  { key: 'leak', at: 62, sev: 2, source: 'Ministries', text: 'Internal paperwork is being quoted word for word by people who should not have it.' },
   { key: 'fiscal', at: 38, sev: 1, source: 'Finance', text: 'Brask has asked for eleven minutes. He never asks for eleven minutes about good news.' },
-  { key: 'fiscal', at: 60, sev: 2, source: 'Finance', text: 'The peg is being described internally as "under review", which is the word used before the word "gone".' },
-  { key: 'fiscal', at: 80, sev: 3, source: 'Finance', text: 'Payroll on the twenty-eighth is not currently funded.' },
-  { key: 'foreign', at: 35, sev: 1, source: 'Foreign Ministry', text: 'The Ostrene ambassador has requested nothing this week, which he has never done.' },
-  { key: 'foreign', at: 62, sev: 2, source: 'Foreign Ministry', text: 'Compact officials are speaking to members of your cabinet directly. Not through the Ministry.' },
-  { key: 'separatism', at: 35, sev: 1, source: 'Interior', text: 'Kordiva Basin Council has added items to its own agenda that are constitutionally the capital\'s.' },
-  { key: 'separatism', at: 62, sev: 2, source: 'Interior', text: 'Two provinces are late forwarding receipts. Both cite "collection difficulties". Neither has collection difficulties.' },
-  { key: 'corruption', at: 48, sev: 1, source: 'Grey Floor', text: 'The Ilvet wires are unusually busy for a quarter with no scheduled settlements.' },
-  { key: 'fear', at: 55, sev: 2, source: 'Chief of Staff', text: 'People have stopped disagreeing with you in meetings. Doran mentions this as a problem, not a compliment.' },
-  { key: 'cult', at: 55, sev: 1, source: 'Press Office', text: 'Coverage of you has become uniformly positive, which is itself now the story in three outlets.' },
+  { key: 'fiscal', at: 60, sev: 2, source: 'Finance', text: 'The currency peg is being described internally as "under review", which is the word used just before "gone".' },
+  { key: 'fiscal', at: 80, sev: 3, source: 'Finance', text: 'Payroll on the 28th is not currently funded.' },
+  { key: 'foreign', at: 35, sev: 1, source: 'Foreign ministry', text: 'The Ostrene ambassador has asked for nothing this week, which he has never done.' },
+  { key: 'foreign', at: 62, sev: 2, source: 'Foreign ministry', text: 'Ostrene officials are talking to your ministers directly, not through the ministry.' },
+  { key: 'separatism', at: 35, sev: 1, source: 'Interior', text: 'The Kordiva Basin Council has put items on its own agenda that are legally the capital\'s business.' },
+  { key: 'separatism', at: 62, sev: 2, source: 'Interior', text: 'Two provinces are late sending tax revenue. Both cite "collection difficulties". Neither has collection difficulties.' },
+  { key: 'corruption', at: 48, sev: 1, source: 'Ministries', text: 'Free Zone transfers are unusually busy for a quarter with nothing scheduled.' },
+  { key: 'fear', at: 55, sev: 2, source: 'Chief of staff', text: 'People have stopped disagreeing with you in meetings. Doran raises this as a problem, not a compliment.' },
+  { key: 'cult', at: 55, sev: 1, source: 'Press office', text: 'Coverage of you has become uniformly positive, which is now itself the story in three outlets.' },
 ];
 
 export function buildBriefing(s: GameState): Briefing {
@@ -113,12 +113,12 @@ export function buildBriefing(s: GameState): Briefing {
     if (f.patience < 30) {
       items.push({
         kind: 'demand', source: def.name, severity: f.patience < 16 ? 3 : 2,
-        text: `${def.short} patience is ${f.patience < 16 ? 'exhausted' : 'thin'}. ${def.redLine}`,
+        text: `${def.name} ${f.patience < 16 ? 'has run out of patience' : 'is losing patience'}. ${def.redLine}`,
       });
     } else if (f.loyalty < 30) {
       items.push({
         kind: 'warning', source: def.name, severity: 2,
-        text: `${def.short} loyalty is ${band(f.loyalty)}. ${def.threat}`,
+        text: `${def.name}: support is ${band(f.loyalty)}. ${def.threat}`,
       });
     }
   }
@@ -134,11 +134,11 @@ export function buildBriefing(s: GameState): Briefing {
   items.push(...byKey.values());
 
   /* --- opportunities */
-  if (s.stats.treasury > 60) items.push({ kind: 'opportunity', source: 'Finance', text: 'The treasury can currently absorb a large commitment without a fight.' });
-  if (s.stats.support > 68) items.push({ kind: 'opportunity', source: 'Press Office', text: 'You are popular enough this week to survive doing something unpopular.' });
-  if (s.factions.staff.loyalty > 72) items.push({ kind: 'opportunity', source: 'General Staff', text: 'The Staff would currently carry out an order it did not like.' });
-  if (s.stats.information > 72) items.push({ kind: 'opportunity', source: 'Sable Office', text: 'Your intelligence picture is unusually good. Act on it before it decays.' });
-  if (s.factions.chorus.loyalty > 62) items.push({ kind: 'opportunity', source: 'Press Office', text: 'The Chorus is briefly on your side. That is a window, not a state of affairs.' });
+  if (s.stats.treasury > 60) items.push({ kind: 'opportunity', source: 'Finance', text: 'The treasury can take on a large commitment right now without a fight.' });
+  if (s.stats.support > 68) items.push({ kind: 'opportunity', source: 'Press office', text: 'You are popular enough this week to survive doing something unpopular.' });
+  if (s.factions.staff.loyalty > 72) items.push({ kind: 'opportunity', source: 'Army', text: 'The army would currently carry out an order it did not like.' });
+  if (s.stats.information > 72) items.push({ kind: 'opportunity', source: 'Security', text: 'Your information is unusually good right now. Use it before it goes stale.' });
+  if (s.factions.chorus.loyalty > 62) items.push({ kind: 'opportunity', source: 'Press office', text: 'The press is briefly on your side. That is a window, not a situation.' });
 
   /* --- one or two hints about what today may become */
   const hints = buildHints(s);
@@ -160,10 +160,10 @@ export function buildBriefing(s: GameState): Briefing {
 }
 
 const THREAT_NOTE: Record<Briefing['threatLevel'], string> = {
-  quiet: 'Nothing on the board. Historically, this is when things happen.',
-  watchful: 'Several files are warm. The Office recommends a normal day.',
+  quiet: 'Nothing urgent on the board. Historically, this is when things happen.',
+  watchful: 'A few situations are warming up. Security expects a normal day.',
   tense: 'More than one situation could interrupt today without warning.',
-  critical: 'The Office advises that today may not follow the schedule.',
+  critical: 'Security advises that today will probably not follow the schedule.',
 };
 
 /** Hints are honest but non-specific: they tell the player where to look. */
@@ -182,9 +182,9 @@ function buildHints(s: GameState): BriefingItem[] {
   }
 
   const cats = new Set(deck.map((c) => c?.category));
-  if (cats.has('crisis')) out.push({ kind: 'hint', source: 'Chief of Staff', text: 'Doran has cleared an hour in the afternoon "in case". She does not do that for nothing.' });
-  if (cats.has('foreign')) out.push({ kind: 'hint', source: 'Foreign Ministry', text: 'There is a foreign matter on today\'s schedule that the Ministry has not fully briefed you on.' });
-  if (cats.has('scandal')) out.push({ kind: 'hint', source: 'Press Office', text: 'The press office has asked whether you would prefer to take questions today or not.' });
+  if (cats.has('crisis')) out.push({ kind: 'hint', source: 'Chief of staff', text: 'Doran has cleared an hour this afternoon "in case". She does not do that for nothing.' });
+  if (cats.has('foreign')) out.push({ kind: 'hint', source: 'Foreign ministry', text: 'There is something foreign on today\'s schedule that the ministry has not fully briefed you on.' });
+  if (cats.has('scandal')) out.push({ kind: 'hint', source: 'Press office', text: 'The press office wants to know whether you would rather take questions today or not.' });
 
   return out;
 }

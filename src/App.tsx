@@ -12,6 +12,7 @@ import { StatBar } from './ui/components/StatBar';
 import { SidePanel } from './ui/components/SidePanel';
 import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
+import { IntroScreen } from './ui/screens/Intro';
 
 type Screen = 'title' | 'game';
 
@@ -19,6 +20,8 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>('title');
   const [game, setGame] = useState<GameState | null>(null);
   const [name, setName] = useState('');
+  const [honorific, setHonorific] = useState('sir');
+  const [showIntro, setShowIntro] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [flash, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -47,17 +50,19 @@ export default function App() {
 
   /* ---- lifecycle */
   const newGame = useCallback(() => {
-    const g = prepareDay(createGame({ leaderName: name }));
+    const g = prepareDay(createGame({ leaderName: name, honorific }));
     setGame(g);
     setScreen('game');
+    setShowIntro(true);
     setFlash({});
-  }, [name]);
+  }, [name, honorific]);
 
   const continueGame = useCallback(() => {
     const g = loadGame();
     if (!g) { say('No readable save found.'); return; }
     setGame(g);
     setScreen('game');
+    setShowIntro(false);
   }, [say]);
 
   const backToTitle = useCallback(() => {
@@ -96,7 +101,7 @@ export default function App() {
 
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game) return;
+    if (screen !== 'game' || !game || showIntro) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -118,7 +123,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue]);
+  }, [screen, game, doChoose, doContinue, showIntro]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -128,6 +133,8 @@ export default function App() {
         <TitleScreen
           name={name}
           setName={setName}
+          honorific={honorific}
+          setHonorific={setHonorific}
           onNew={newGame}
           onContinue={savedDay ? continueGame : undefined}
           savedDay={savedDay}
@@ -157,6 +164,9 @@ export default function App() {
           <span className="threat-dot" /> {brief.threatLevel}
         </div>
         <div className="daychip">DAY {game.day} / {game.maxDays}</div>
+        <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
+          Brief me
+        </button>
         <button className="btn btn-ghost" onClick={backToTitle} title="Your run is saved automatically">
           Menu
         </button>
@@ -214,6 +224,14 @@ export default function App() {
                 <OutcomeView s={game} onContinue={doContinue} alert />
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {showIntro && (
+        <div className="intro-scrim">
+          <div className="intro-scroll">
+            <IntroScreen s={game} onBegin={() => setShowIntro(false)} returning={game.day > 1 || game.phase !== 'briefing'} />
           </div>
         </div>
       )}

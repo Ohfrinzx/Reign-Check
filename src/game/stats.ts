@@ -18,53 +18,53 @@ export interface StatMeta {
 export const STAT_META: Record<StatKey, StatMeta> = {
   power: {
     key: 'power', label: 'Power', short: 'POW', icon: '⬢', accent: '#e0b654',
-    tip: 'How much of the state actually does what you tell it to.',
-    danger: 'At zero you are a figurehead, and figureheads are replaced quietly.',
+    tip: 'How much of the government actually does what you tell it to.',
+    danger: 'At zero you are a figurehead, and figureheads get replaced quietly.',
   },
   legitimacy: {
     key: 'legitimacy', label: 'Legitimacy', short: 'LEG', icon: '⚖', accent: '#9db4d0',
-    tip: 'Whether people believe you are supposed to be in that chair.',
-    danger: 'At zero, removing you stops being a crime and becomes a duty.',
+    tip: 'Whether people accept that you are supposed to have this job.',
+    danger: 'At zero, removing you stops looking like a crime and starts looking like a duty.',
   },
   support: {
     key: 'support', label: 'Public Support', short: 'PUB', icon: '☗', accent: '#7fc99a',
-    tip: 'What the country thinks of you this week. Volatile. Shallow. Decisive.',
+    tip: 'What the country thinks of you this week. It moves fast and it decides a lot.',
     danger: 'At zero the street belongs to somebody else.',
   },
   treasury: {
-    key: 'treasury', label: 'Treasury', short: 'TRE', icon: '₩', accent: '#d9c47a', money: true,
-    tip: 'Liquid funds, in billions of velks. Everything costs this.',
-    danger: 'Below zero the Republic misses payroll, and payroll is one in six adults.',
+    key: 'treasury', label: 'Treasury', short: 'CASH', icon: '$', accent: '#d9c47a', money: true,
+    tip: 'Money you can actually spend, in billions of dollars. This is the national treasury and it is also, in practice, your money. Every decision with a price tag comes out of here.',
+    danger: 'Below zero the state starts missing payroll, and payroll is one in six working adults.',
   },
   economy: {
     key: 'economy', label: 'Economy', short: 'ECO', icon: '◱', accent: '#6fb3c9',
-    tip: 'Output, employment, and the exchange rate, rolled into one number.',
-    danger: 'At zero the velk goes, and when the velk goes, everything goes.',
+    tip: 'Output, jobs and the exchange rate in one number. It sets how much tax revenue you collect each day.',
+    danger: 'At zero the currency collapses, and everything else follows it.',
   },
   elite: {
     key: 'elite', label: 'Elite Loyalty', short: 'ELI', icon: '◆', accent: '#c9a36f',
-    tip: 'Whether the people who matter are still investing in your survival.',
-    danger: 'At zero they will simply agree on a successor over lunch.',
+    tip: 'Whether the rich and well-connected still think you are worth backing.',
+    danger: 'At zero they agree on a replacement over lunch.',
   },
   military: {
     key: 'military', label: 'Military Loyalty', short: 'MIL', icon: '★', accent: '#c8a45c',
-    tip: 'Whether the General Staff treats your orders as orders.',
-    danger: 'At zero the garrison takes instructions from somebody else.',
+    tip: 'Whether the army treats your orders as orders.',
+    danger: 'At zero the garrison starts taking instructions from somebody else.',
   },
   security: {
     key: 'security', label: 'Security', short: 'SEC', icon: '◈', accent: '#8f9fb5',
-    tip: 'Your ability to detect a plot before it becomes an event.',
-    danger: 'At zero the first you hear of anything is on the news.',
+    tip: 'Your ability to find out about a plot before it happens.',
+    danger: 'At zero, the first you hear about anything is on the news.',
   },
   stability: {
     key: 'stability', label: 'Social Stability', short: 'STA', icon: '▦', accent: '#b58ec9',
-    tip: 'How close the country is to strikes, riots, and worse.',
-    danger: 'At zero the Republic stops being governable from a desk.',
+    tip: 'How close the country is to strikes, riots and worse.',
+    danger: 'At zero the country stops being governable from a desk.',
   },
   information: {
     key: 'information', label: 'Information', short: 'INF', icon: '◉', accent: '#9ec4a0',
-    tip: 'How much of what you are told is true. Censorship lowers this.',
-    danger: 'At zero your briefings are fiction and you are the last to know.',
+    tip: 'How much of what you get told is actually true. Censoring the press lowers this.',
+    danger: 'At zero your morning briefing is fiction and you are the last to know anything.',
   },
 };
 
@@ -132,7 +132,8 @@ export function bandTone(v: number): 'good' | 'ok' | 'warn' | 'bad' {
   return 'bad';
 }
 
+/** Re-exported for convenience; the canonical formatter lives in economy.ts. */
 export function money(v: number): string {
-  const sign = v < 0 ? '−' : '';
-  return `${sign}₩${Math.abs(v).toFixed(1)}bn`;
+  const sign = v < 0 ? '-' : '';
+  return `${sign}$${Math.abs(v).toFixed(1)}B`;
 }

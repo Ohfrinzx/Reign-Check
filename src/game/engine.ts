@@ -11,6 +11,7 @@ import { ALERTS, ALERT_MAP } from './content/alerts';
 import { FACTION_ORDER, FACTIONS, CHARACTER_MAP } from './content/country';
 import { clampStat } from './stats';
 import { checkEndings } from './content/endings';
+import { computeBudget } from './economy';
 
 /* ------------------------------------------------------------- registries */
 
@@ -171,9 +172,19 @@ function dayUpkeep(s: GameState, rng: Rng) {
     }
   }
 
-  // --- the economy runs whether you attend to it or not
-  const revenue = (s.stats.economy / 100) * 3.4 - s.hidden.fiscal / 38 - s.hidden.corruption / 55;
-  s.stats.treasury = clampStat('treasury', s.stats.treasury + revenue);
+  // --- recurring commitments expire on their own schedule
+  for (const c of [...s.commitments]) {
+    if (c.daysLeft === undefined) continue;
+    c.daysLeft -= 1;
+    if (c.daysLeft <= 0) {
+      s.commitments = s.commitments.filter((x) => x.id !== c.id);
+      notes.push(`Commitment ended: ${c.label}.`);
+    }
+  }
+
+  // --- the national accounts run whether you attend to them or not
+  const budget = computeBudget(s);
+  s.stats.treasury = clampStat('treasury', s.stats.treasury + budget.net);
 
   // An empty account is not an abstraction here: one in six adults is on the payroll.
   if (s.stats.treasury < 0) {

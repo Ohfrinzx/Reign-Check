@@ -3,6 +3,7 @@ import type { GameState, FactionId } from '../../game/types';
 import { FACTIONS, FACTION_ORDER, CHARACTERS, CHARACTER_MAP } from '../../game/content/country';
 import { band } from '../../game/stats';
 import { buildBriefing } from '../../game/briefing';
+import { computeBudget, usd, usdFlow } from '../../game/economy';
 
 const tone = (v: number) =>
   v >= 65 ? 'var(--good)' : v >= 45 ? 'var(--ok)' : v >= 25 ? 'var(--warn)' : 'var(--bad)';
@@ -56,21 +57,82 @@ function mood(s: GameState, id: string): string {
   return 'Undecided, and entirely comfortable being so.';
 }
 
+function TreasuryTab({ s }: { s: GameState }) {
+  const b = computeBudget(s);
+  const revenue = b.lines.filter((l) => l.kind === 'revenue');
+  const spending = b.lines.filter((l) => l.kind === 'spending');
+  return (
+    <>
+      <div className="bud-summary">
+        <div className="bud-cell">
+          <div className="l">IN THE ACCOUNT</div>
+          <div className="v" style={{ color: s.stats.treasury < 0 ? 'var(--bad)' : s.stats.treasury < 15 ? 'var(--warn)' : 'var(--good)' }}>
+            {usd(s.stats.treasury)}
+          </div>
+        </div>
+        <div className="bud-cell">
+          <div className="l">NET PER DAY</div>
+          <div className="v" style={{ color: b.net >= 0 ? 'var(--good)' : 'var(--bad)' }}>{usdFlow(b.net)}</div>
+        </div>
+        <div className="bud-cell">
+          <div className="l">COMING IN</div>
+          <div className="v" style={{ color: 'var(--good)' }}>{usd(b.revenue, 2)}</div>
+        </div>
+        <div className="bud-cell">
+          <div className="l">GOING OUT</div>
+          <div className="v" style={{ color: 'var(--bad)' }}>{usd(b.spending, 2)}</div>
+        </div>
+      </div>
+
+      {b.runwayDays !== null && (
+        <div className="bud-warn">
+          Running a deficit. At this rate the account is empty in <b>{b.runwayDays} day{b.runwayDays === 1 ? '' : 's'}</b>.
+          {s.stats.treasury < 0 && ' The state is already paying late.'}
+        </div>
+      )}
+
+      <div className="stamp side-section-title" style={{ marginTop: 14 }}>Income</div>
+      {revenue.map((l, i) => (
+        <div className="bud-line" key={`r${i}`}>
+          <span className="n">{l.label}</span>
+          <span className="a" style={{ color: 'var(--good)' }}>+{usd(l.amount, 2)}</span>
+          {l.note && <span className="note">{l.note}</span>}
+        </div>
+      ))}
+
+      <div className="stamp side-section-title" style={{ marginTop: 14 }}>Spending</div>
+      {spending.map((l, i) => (
+        <div className="bud-line" key={`s${i}`}>
+          <span className="n">{l.label}</span>
+          <span className="a" style={{ color: 'var(--bad)' }}>-{usd(l.amount, 2)}</span>
+          {l.note && <span className="note">{l.note}</span>}
+        </div>
+      ))}
+
+      {s.commitments.length === 0 && (
+        <div className="empty">You have not committed to any ongoing spending yet.</div>
+      )}
+    </>
+  );
+}
+
 export function SidePanel({ s }: { s: GameState }) {
-  const [tab, setTab] = useState<'factions' | 'people' | 'dossier'>('factions');
+  const [tab, setTab] = useState<'treasury' | 'factions' | 'people' | 'dossier'>('treasury');
   const brief = buildBriefing(s);
   const inPlay = CHARACTERS.filter((c) => s.characters[c.id]);
 
   return (
     <aside className="side-col">
       <div className="side-tabs">
-        {(['factions', 'people', 'dossier'] as const).map((t) => (
+        {(['treasury', 'factions', 'people', 'dossier'] as const).map((t) => (
           <button key={t} className={`side-tab ${tab === t ? 'on' : ''}`} onClick={() => setTab(t)}>
             {t}
           </button>
         ))}
       </div>
       <div className="side-body">
+        {tab === 'treasury' && <TreasuryTab s={s} />}
+
         {tab === 'factions' && FACTION_ORDER.map((id) => {
           const f = s.factions[id];
           const def = FACTIONS[id];

@@ -162,6 +162,20 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
     bump(s.hidden as unknown as Record<string, number>, 'scandal', e.scandal.heat * 0.15);
   }
 
+  if (e.commitments) {
+    for (const c of e.commitments) {
+      const id = c.id ?? nextId('cmt', s);
+      if (s.commitments.some((x) => x.id === id)) continue;
+      s.commitments.push({ id, label: c.label, perDay: c.perDay, daysLeft: c.days });
+    }
+  }
+
+  if (e.endCommitment) {
+    s.commitments = s.commitments.filter(
+      (c) => c.id !== e.endCommitment && c.label !== e.endCommitment,
+    );
+  }
+
   if (e.buryScandal) {
     const sc = s.scandals.find((x) => x.id === e.buryScandal || x.name === e.buryScandal);
     if (sc) { sc.buried = true; sc.heat = Math.max(0, sc.heat - 45); }

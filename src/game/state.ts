@@ -6,7 +6,7 @@ import { FACTION_ORDER, CHARACTERS } from './content/country';
 import { makeRng, randomSeed } from './rng';
 import { clampStat } from './stats';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 export const DEFAULT_MAX_DAYS = 30;
 
 /** Opening conditions vary run to run, so no two First Citizens inherit the same mess. */
@@ -23,53 +23,53 @@ export interface OpeningScenario {
 export const OPENINGS: OpeningScenario[] = [
   {
     id: 'stairwell',
-    name: 'The Stairwell Succession',
+    name: 'The Stairwell',
     summary:
-      'Marshal Krast is nine days dead and the Sable Office has still not named who was in the stairwell with him. You were sworn in at 04:00 by a judge who asked no questions.',
+      'Krast has been dead nine days and the Sable Office still has not said who was in the stairwell with him. You were sworn in at 4am by a judge who asked no questions and left quickly.',
     stats: { power: 46, legitimacy: 34, security: 62, elite: 52, military: 48 },
     hidden: { scandal: 18, fear: 22, coup: 14 },
     factionTweak: { sable: { loyalty: 62, influence: 70 }, chorus: { loyalty: 28 } },
     openingNote:
-      'Nobody in this building believes you will last the month. Two of them have already drafted the statement.',
+      'Nobody in this building thinks you will last the month. Two of them have already drafted the statement.',
   },
   {
     id: 'empty-vault',
-    name: 'The Inherited Hole',
+    name: 'The Hole in the Accounts',
     summary:
-      'Krast left you the office, the residence, and a treasury with a hole in it the Finance Ministry has been describing, for two years, as "a timing difference".',
+      'Krast left you the office, the residence, and a gap in the budget that the Finance Ministry has spent two years describing as "a timing difference".',
     stats: { treasury: 24, economy: 41, legitimacy: 44, elite: 44 },
     hidden: { fiscal: 34, corruption: 26 },
     factionTweak: { concord: { loyalty: 44, power: 72 }, combine: { patience: 44 } },
     openingNote:
-      'Brask has asked for eleven minutes of your time. Brask never asks for eleven minutes about good news.',
+      'Brask has asked for eleven minutes of your time. He never asks for eleven minutes about good news.',
   },
   {
     id: 'restive-south',
-    name: 'The Marches Are Awake',
+    name: 'Trouble on the Border',
     summary:
-      'Three weeks of Hadeni-language broadcasts from across the Drovnan border, two burned customs posts, and a governor who has stopped returning calls from the capital.',
+      'Three weeks of Hadeni-language broadcasts from across the Drovnan border, two burned-out customs posts, and a regional governor who has stopped returning calls.',
     stats: { stability: 38, security: 52, support: 48, military: 56 },
     hidden: { separatism: 32, foreign: 24, unrest: 20 },
     factionTweak: { provinces: { loyalty: 40, patience: 42 }, staff: { loyalty: 58 } },
     openingNote:
-      'The Staff would like a decision about the Marches. The Staff would like it this week.',
+      'The army wants a decision about the border region. They want it this week.',
   },
   {
     id: 'cold-winter',
-    name: 'A Long Cold Quarter',
+    name: 'A Cold Quarter',
     summary:
-      'Gas came in eleven per cent over budget, the Gorsk shafts are running short shifts, and the Combine has scheduled a "consultative meeting" that everyone understands is a countdown.',
+      'Gas came in 11% over budget, the Gorsk mines are running short shifts, and the unions have scheduled a meeting that everyone understands is a countdown.',
     stats: { economy: 38, support: 42, stability: 44, treasury: 36 },
     hidden: { unrest: 28, fiscal: 26 },
     factionTweak: { combine: { loyalty: 38, power: 68 }, concord: { loyalty: 56 } },
     openingNote:
-      'Hess has requested a meeting. He has never once requested a meeting that was about nothing.',
+      'Hess has requested a meeting. He has never requested a meeting about nothing.',
   },
   {
     id: 'clean-hands',
-    name: 'The Reformer\'s Window',
+    name: 'The Clean Hands Promise',
     summary:
-      'You came in on a promise of "an honest audit of everything", which was a superb line at 04:00 and is now a policy commitment that thirty thousand officials are reading very carefully.',
+      'You took the job promising "an honest audit of everything". It was a great line at 4am. It is now a policy commitment that thirty thousand officials are reading very carefully.',
     stats: { legitimacy: 58, support: 58, elite: 38, security: 44 },
     hidden: { scandal: 10, corruption: 34, fear: 10 },
     factionTweak: { chorus: { loyalty: 58 }, grey: { patience: 45 }, concord: { loyalty: 40 } },
@@ -102,8 +102,15 @@ function emptyRunStats(): RunStats {
   };
 }
 
+export const HONORIFICS = [
+  { id: 'sir', label: 'Sir', word: 'sir' },
+  { id: 'maam', label: "Ma'am", word: "ma'am" },
+  { id: 'chair', label: 'Chair', word: 'Chair' },
+] as const;
+
 export interface NewGameOptions {
   leaderName?: string;
+  honorific?: string;
   seed?: number;
   maxDays?: number;
   openingId?: string;
@@ -171,7 +178,8 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     seed,
     rngState: rng.state(),
     leaderName: (opts.leaderName || '').trim() || 'Adrin Vo',
-    leaderTitle: 'First Citizen',
+    leaderTitle: 'Executive Chair',
+    honorific: opts.honorific || 'sir',
     startedAt: Date.now(),
 
     day: 1,
@@ -195,6 +203,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     promises: [],
     projects: [],
     scandals: [],
+    commitments: [],
 
     todayDeck: [],
     queued: [],

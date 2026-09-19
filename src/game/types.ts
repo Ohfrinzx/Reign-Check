@@ -114,6 +114,8 @@ export interface CharacterDef {
   portrait: string;       // emoji/glyph stand-in
   accent: string;         // hex
   blurb: string;
+  /** one line the player sees on every card: who this is, why they matter */
+  why: string;
   quirk: string;
   /** starting personality — these barely move */
   ambition: number;       // 0..100
@@ -231,6 +233,10 @@ export interface Effects {
   promise?: PromiseSpec;
   project?: ProjectSpec;
   scandal?: ScandalSpec;
+  /** recurring budget lines this choice creates */
+  commitments?: CommitmentSpec[];
+  /** cancel a recurring budget line by id or label */
+  endCommitment?: string;
   /** resolve a named scandal */
   buryScandal?: string;
   /** push a card into an upcoming day's deck */
@@ -266,6 +272,22 @@ export interface ProjectSpec {
   upkeep?: number;
   onComplete?: Effects;
   legacy?: string;
+}
+
+export interface Commitment {
+  id: string;
+  label: string;
+  /** $bn per day. Positive = money going out. */
+  perDay: number;
+  /** undefined = permanent until cancelled */
+  daysLeft?: number;
+}
+
+export interface CommitmentSpec {
+  id?: string;
+  label: string;
+  perDay: number;
+  days?: number;
 }
 
 export interface ScandalSpec {
@@ -392,6 +414,8 @@ export interface GameState {
   rngState: number;
   leaderName: string;
   leaderTitle: string;
+  /** how people in the room address you: "sir", "ma'am", "chair" */
+  honorific: string;
   startedAt: number;
 
   day: number;
@@ -416,6 +440,8 @@ export interface GameState {
   promises: PromiseRecord[];
   projects: ProjectRecord[];
   scandals: ScandalRecord[];
+  /** recurring budget lines created by your decisions */
+  commitments: Commitment[];
 
   /** cards drawn today, in order */
   todayDeck: string[];

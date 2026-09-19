@@ -1,17 +1,17 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read this file first. It is the handover document between sessions.
-> Last updated: end of Milestone 1.
+> Last updated: after the first playtest round.
 
 ---
 
 ## 1. Project overview
 
 **Dictator Sandbox** is a browser-based, card-driven political leadership
-simulation. The player is the **First Citizen** of the fictional **Republic of
-Velmorra** and must stay in power while managing seven factions, thirteen
-recurring characters, an economy held together by optimism, and a schedule that
-is regularly interrupted by **Breaking Alerts**.
+simulation. The player is the **Executive Chair** of the fictional **Republic of
+Velmorra** and must stay in power for 30 days while managing seven factions,
+thirteen recurring characters, a real budget, and a schedule that is regularly
+interrupted by **Breaking Alerts**.
 
 Design pillars, in priority order:
 
@@ -32,10 +32,21 @@ Playwright scripts for real-browser playthroughs.
 
 ## 2. Current milestone
 
-**MILESTONE 1 — PLAYABLE CORE: ✅ COMPLETE. Awaiting playtest feedback.**
+**MILESTONE 1 — PLAYABLE CORE: ✅ COMPLETE.**
+**PLAYTEST ROUND 1 FIXES: ✅ COMPLETE. Awaiting playtest round 2.**
 
 Development is **paused here by request**. Do not start Milestone 2 until the
-project owner has playtested and given feedback.
+project owner has playtested again and given feedback.
+
+### Playtest round 1 — what was reported and what was done
+
+| Reported | Status | What changed |
+|---|---|---|
+| "First Citizen" was never explained; no context on who anyone is or why they matter | Fixed | New full-screen **opening brief** before Day 1 (`src/ui/screens/Intro.tsx`), reopenable any time via **Brief me** in the top bar. Covers who you are, how you got the job, the goal, the money, the six ways to lose, all seven factions and the six people you deal with most. Every card that features a person now carries a one-line "who is this and why do they matter" under the title, from the new `CharacterDef.why` field. |
+| The daily briefing screen did not scroll — most of it was unreachable | Fixed | Real layout bug. `.screen` was a fixed-height column flex container, so its children shrank instead of overflowing, and `.dossier`'s `overflow:hidden` then clipped the rest — `scrollHeight === clientHeight` even with 4,900px of content. `.stage-col` is now the single scroll container and `.screen` is a plain block with `min-height:100%`. Also: briefing sections are capped at 4 items with a "+N more" pointer, and the primary action moved into a **pinned bar** that is always on screen. Verified in a real browser at 1366×700 and 1280×640. |
+| Writing was "word salad", too archaic for a modern setting — "The Product" named as an example | Fixed | **Every line of prose in the game was rewritten** in plain modern English: short sentences, concrete nouns, humour from the situation rather than the phrasing. That is all 42 cards, 9 alerts, 9 endings, all faction and character text, the country description, all briefing warnings and every stat tooltip. "The Product" is now **"Buying the Evening News"** and states the offer and the price in the first three lines. |
+| Money should be dollars, with a real economic system and visible prices | Fixed | Currency is now **$ (billions)**. New `src/game/economy.ts` computes a daily budget from live game state: itemised income (lithium/salt, port fees, taxes, Free Zone) and spending (payroll, energy, security, debt service, corruption leakage, plus every commitment you have made). New **Treasury tab** in the side panel shows all of it, the net per day, and a runway countdown when you are in deficit. Decisions can now create **recurring budget lines** (`Effects.commitments`) — a pay rise costs money every day, not once. Every option that costs money states the amount in its hint. |
+| The player should be addressed as "sir" or similar | Fixed | The office is now **Executive Chair**. A picker on the title screen chooses **Sir / Ma'am / Chair**, and card text uses a `{sir}` token resolved at render (`src/game/text.ts`), so authored lines work for any choice. |
 
 ---
 
@@ -104,6 +115,9 @@ project owner has playtested and given feedback.
 - [x] **42 cards / 155 authored options**: 25 standard cards drawn from the
       weighted deck + 17 follow-up cards that are never drawn randomly — they
       exist only because an earlier decision scheduled them.
+- [x] All card prose written in plain modern English, with every money cost
+      stated explicitly in the option hint.
+- [x] Cards featuring a person show a one-line explanation of who they are.
 - [x] 2–4 options per card, each with a hint that telegraphs the obvious
       trade-off (hidden second-order effects stay hidden).
 - [x] Options can be locked behind state (`enabled` + `lockedText`) — e.g. you
@@ -152,6 +166,20 @@ project owner has playtested and given feedback.
       briefing, always reachable).
 - [x] Progressive disclosure: nothing forces the player to read the side panel.
 
+### Economy
+- [x] All money in **dollars, billions**. `usd()` / `usdFlow()` in `economy.ts`
+      are the only formatters.
+- [x] `computeBudget(state)` derives an itemised daily budget from live state —
+      four income lines and up to a dozen spending lines, including every
+      commitment the player has made.
+- [x] **Commitments**: decisions can create recurring budget lines, permanent or
+      time-limited (`Effects.commitments`, `Effects.endCommitment`). This is how
+      a pay settlement or a loan keeps costing you.
+- [x] Treasury side tab: balance, net per day, income and spending broken down
+      line by line with explanatory notes, and a runway warning in deficit.
+- [x] Going below zero is modelled as missed payroll with a daily penalty that
+      scales with how far under you are.
+
 ### Save / load
 - [x] `localStorage` autosave after every state change.
 - [x] New Game / Continue / Restart / Delete save.
@@ -198,6 +226,7 @@ These are deliberately deferred, not forgotten.
 | 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for human playtest rather than over-tuned blind. |
 | 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it (Milestone 4/6). |
 | 4 | Google Fonts are loaded from CDN. With no network the game falls back to system fonts — it still looks fine, but not as intended. | Low | Acceptable; could be self-hosted later. |
+| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. |
 | 5 | Side panel is hidden below 1080px width. The game is desktop-first, as specified. | Low | Stat bar reflows to 5 columns; no tablet/mobile layout yet. |
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
@@ -206,7 +235,7 @@ These are deliberately deferred, not forgotten.
 
 ## 6. Recommended next task
 
-**In priority order, once playtest feedback has been received:**
+**In priority order, once playtest round 2 feedback has been received:**
 
 1. **Act on playtest feedback first.** Do not start new systems before this.
 2. **Milestone 6 (content) partially, ahead of schedule** — the honest answer to
@@ -238,6 +267,8 @@ src/
     effects.ts              ← THE CONSEQUENCE ENGINE — single entry point
     engine.ts               ← day loop, deck draw, alert weighting, endings
     briefing.ts             ← turns hidden state into player-language warnings
+    economy.ts              ← the national accounts: budget lines, $ formatting
+    text.ts                 ← {sir}/{leader} token replacement for card prose
     save.ts                 ← localStorage, defensive
     content/
       country.ts            ← Velmorra, 7 factions, 13 characters
@@ -250,6 +281,7 @@ src/
   ui/
     components/             ← StatBar, SidePanel, CardView, OutcomeView
     screens/Screens.tsx     ← Title, Briefing, Night, Ending
+    screens/Intro.tsx       ← the opening brief / "Brief me" overlay
   styles/index.css          ← the whole design system
   App.tsx                   ← screen routing + keyboard + autosave
 tools/                      ← Playwright scripts for real-browser testing
@@ -277,6 +309,22 @@ tools/                      ← Playwright scripts for real-browser testing
 7. **The regime is named, not chosen.** `regimeLabel()` reads the regime axes
    at the end. There are no government classes anywhere.
 
+### Writing rules (added after playtest round 1)
+
+The original draft was rewritten because it read as ornate and hard to parse.
+Keep to these:
+
+1. **Short sentences.** If a sentence needs a second read, rewrite it.
+2. **Plain modern words.** No "which is to say", no inverted clauses, no
+   stacked subordinate clauses. This is a contemporary setting.
+3. **Concrete nouns and real numbers.** "The army wants $9 billion for
+   helicopters", not "the Staff would like a number".
+4. **Humour comes from the situation**, never from vocabulary.
+5. **State the price in the hint**, money first: `'Cost: $9.0B. ...'`.
+6. **Titles say what the card is about.** "Buying the Evening News", not
+   "The Product".
+7. Use `{sir}` when a character addresses the player directly.
+
 ### Content authoring notes
 
 - Every option needs a `hint` stating the **obvious** trade-off. Hide only
@@ -288,10 +336,25 @@ tools/                      ← Playwright scripts for real-browser testing
   `once: true`.
 - Follow-up cards use `base: 0, weight: () => 0` so they are never drawn at
   random.
-- **Watch your closing braces.** Options written as
-  `{ id, label, hint, outcome: { text, effects: { … } } }` need *three*
-  closers: `} } },`. The test suite will catch a missing card id, but the
-  compiler is your first line of defence — run `npx tsc --noEmit` often.
+- **Author options with one property per line and explicit closers on their
+  own lines.** The compact single-line style caused repeated brace-balance
+  errors during the first draft. Use:
+
+  ```ts
+  {
+    id: 'fund',
+    label: '…',
+    hint: 'Cost: $9.0B. …',
+    outcome: {
+      text: '…',
+      tone: 'good',
+      effects: { … },
+    },
+  },
+  ```
+
+  Verify with `npx esbuild src/game/content/<file>.ts --outfile=/dev/null`
+  (fast, precise parse errors) then `npx tsc --noEmit`.
 
 ---
 
@@ -313,10 +376,14 @@ npm test           # vitest: content integrity, 200 full simulated runs,
 Real-browser verification (requires `npm run dev` running):
 
 ```bash
+node tools/verify.mjs        # full pass: intro, scrolling, prices, ending, save
 node tools/playthrough.mjs   # plays ~9 days, checks save/reload, screenshots
 node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/alert-shot.mjs    # captures a Breaking Alert
 ```
+
+`tools/verify.mjs` runs at 1366×700 specifically because the scroll bug only
+appeared on short viewports. Keep testing there.
 
 ### Test coverage today
 
