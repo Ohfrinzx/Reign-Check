@@ -163,21 +163,76 @@ run".
 Completed runs unlock mandates, advisors and cards for future runs. Small,
 persistent, stored in `localStorage` next to the save.
 
-## 5. Visual direction
+## 5. Visual direction — the desk
 
-Current look is a competent dark dashboard, which is generic and is part of
-why it reads as a spreadsheet. Three candidates:
+**Direction: a flat, top-down desk layout. Mockup: `docs/mockups/desk.html`.**
 
-1. **State print shop / propaganda poster.** Newsprint cream, heavy black slab
-   headlines, a single accent red, rubber stamps, halftone texture, big flat
-   shapes. Thematically exact for the subject, visually distinctive, and it
-   *forces* simplicity — you cannot fit 55 numbers on a poster. **Recommended.**
-2. **The desk.** The whole UI is the Chair's desk. Cards are papers you are
-   handed. Resources are objects: a cash box, a seal, a telephone. Faction
-   moods are portraits on the wall. Very characterful, more work to build, and
-   risks getting fiddly.
-3. **Keep the dossier look, simplified.** Lowest risk, lowest reward, does not
-   answer "more creative and fitting".
+Not skeuomorphic. No wood texture, no lamp, no perspective, no illustrated
+objects. A dark surface divided into zones, where **every piece of information
+has one permanent physical home** and nothing is behind a tab.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ NAMEPLATE        DAY · ACT · STAGE            MONEY GRIP LEGIT│
+├────────────┬───────────────────────────────┬─────────────────┤
+│ IN TRAY    │                               │ FILES           │
+│ (stack of  │        THE DOCUMENT           │ (5 factions,    │
+│  papers)   │        (current card)         │  one bar each)  │
+├────────────┤                               ├─────────────────┤
+│ TODAY      │        [ option 1 ]           │ ON YOUR DESK    │
+│ (running   │        [ option 2 ]           │ (threat cards)  │
+│  order)    │        [ option 3 ]           │                 │
+├────────────┤                               │                 │
+│ DIARY      │                               │                 │
+│ (delayed   │                               │                 │
+│  effects)  │                               │                 │
+└────────────┴───────────────────────────────┴─────────────────┘
+```
+
+### Why this direction
+
+- **It solves the tracking problem differently and better than hiding things.**
+  Tabs were the old answer: fewer things on screen, but the player has to
+  remember where everything lives and go looking. On the desk everything is
+  always in the same place and always visible — which only becomes possible
+  once the model is collapsed to ~9 trackables.
+- **Consequences become spatial.** You stamp the paper, it slides off, and the
+  Army folder jolts and its bar moves. Cause and effect are something you
+  watch happen rather than a row of +/- pills.
+- **It needs no illustration.** Flat shapes, type, and CSS. No art assets, so
+  no risk of half-finished skeuomorphism.
+- **It fits the roguelike layer.** The shop is a drawer that opens over the
+  desk. The run deck is a card box. Advisors are business cards under the
+  blotter. These are all desk objects, so the metaphor survives contact with
+  systems UI instead of being a skin on one screen.
+
+### Measured: it fits
+
+The mockup was rendered at **1366×700** — the viewport where the V1 scroll bug
+appeared — with a real card at full length (132 words including options). The
+whole game fits with room to spare and **no scrolling anywhere**. That was the
+main risk and it is resolved.
+
+### Risks that remain
+
+1. **Fixed viewport is a hard constraint.** Everything visible at once means
+   everything must fit at ~1280×640. This caps card length (~150 words total),
+   the faction count (5), and how many threat cards can be live (2–3). These
+   are healthy limits but they are real and content must respect them.
+2. **Below ~1100px wide the three columns cannot hold.** Needs a stacked
+   fallback, or accept desktop-only, which the original spec already does.
+3. **Execution risk, not concept risk:** a flat desk can read as "a dashboard
+   with different labels" unless the physical cues are committed to — paper
+   stock colour, real drop shadows, slight rotation, tactile motion, stamps.
+   Half-committing is the failure mode.
+
+### Rejected: full skeuomorphic desk
+
+An illustrated 3D-ish desk was considered and rejected. Our cards average 132
+words, which is 4–8× a *Reigns* card, so a readable "sheet of paper" has to be
+roughly 700×500px — it *is* the screen, and the desk would only survive as a
+picture frame around it. It would also need illustration assets that cannot be
+produced to a good standard here, and it fights the shop and deck screens.
 
 ## 6. How to execute it
 
@@ -192,7 +247,9 @@ Suggested order, each step shippable and playtestable on its own:
    every existing card's effects with a mapping table. Bump `SAVE_VERSION`.
    Keep all 42 cards — only their numbers get remapped.
 2. **Threat cards.** Replace prose-only warnings with the threat tray.
-3. **Reskin.** New visual direction applied to the simplified screen.
+3. **Rebuild the screen as the desk**, from `docs/mockups/desk.html`. This
+   replaces the briefing screen too: the morning briefing becomes the desk at
+   the start of a day, with the in-tray full and the diary showing.
 4. **Acts and the shop.** 3 × 6 days, Back Room between acts.
 5. **Mandates.** Run-start rules.
 6. **Run deck + meta-progression.**
@@ -202,7 +259,8 @@ Steps 4–6 are the roguelike turn.
 
 ## 7. Open questions for the owner
 
-1. How radical should the mechanical cut be — the full 3-resource collapse, or
-   something more moderate?
-2. Which visual direction?
-3. Simplify first and add the roguelike layer after, or do both as one V2?
+1. How radical should the mechanical cut be — the full 3-resource collapse
+   (10 → 3 stats, 7 → 5 factions), or something more moderate?
+2. Simplify first and add the roguelike layer after, or do both as one V2?
+
+Visual direction is settled: the flat top-down desk, per section 5.
