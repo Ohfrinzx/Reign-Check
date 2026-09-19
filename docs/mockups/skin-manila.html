@@ -1,0 +1,194 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Skin A — Manila</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --desk:#9c8763; --desk-2:#8d7a58;
+  --manila:#d9c491; --manila-tab:#cdb67f; --manila-edge:#b39f6c;
+  --bond:#fdfbf3; --bond-edge:#ddd5bf;
+  --pink:#f1d6d1; --yellow:#f7efc6;
+  --ink:#2a2521; --ink-2:#5c554a; --ink-3:#8b8172;
+  --stamp:#b3322a; --pen:#27457a; --green:#4f7a4a; --amber:#b8862b;
+  --tw:'Special Elite',serif; --mono:'Courier Prime',monospace;
+  --body:'Lora',Georgia,serif; --sans:'Libre Franklin',sans-serif;
+}
+*{box-sizing:border-box} html,body{height:100%;margin:0}
+body{
+  font-family:var(--body);color:var(--ink);overflow:hidden;
+  background:
+    radial-gradient(1400px 800px at 50% -15%, rgba(255,255,255,.10), transparent 60%),
+    repeating-linear-gradient(94deg, rgba(0,0,0,.035) 0 2px, transparent 2px 6px),
+    var(--desk);
+}
+.desk{height:100%;display:grid;grid-template-columns:238px minmax(0,1fr) 274px;
+      grid-template-rows:auto minmax(0,1fr);gap:16px;padding:16px 18px 18px}
+
+/* top */
+.top{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.plate{background:linear-gradient(180deg,#6b5c3f,#4e4230);border:1px solid #2f2819;border-radius:2px;
+  padding:9px 18px;box-shadow:0 2px 0 rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.16)}
+.plate .n{font-family:var(--sans);font-weight:800;font-size:15px;letter-spacing:.1em;color:#f3e7c8}
+.plate .r{font-family:var(--tw);font-size:10px;color:#c2ad84;letter-spacing:.04em}
+.slot{font-family:var(--tw);font-size:12px;color:#5d5038;letter-spacing:.02em}
+.ledger{display:flex;gap:10px}
+.chit{background:var(--bond);border:1px solid var(--bond-edge);border-radius:2px;padding:7px 14px;min-width:112px;
+  box-shadow:0 2px 4px rgba(0,0,0,.25);position:relative}
+.chit:nth-child(2){background:var(--yellow)} .chit:nth-child(3){background:var(--pink)}
+.chit .l{font-family:var(--tw);font-size:9.5px;color:var(--ink-3);letter-spacing:.06em}
+.chit .v{font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:-.02em;margin-top:1px}
+.chit .s{font-family:var(--mono);font-size:10px;color:var(--green)}
+.rule{height:3px;background:rgba(0,0,0,.12);margin-top:5px;border-radius:0}
+.rule i{display:block;height:100%}
+
+/* columns */
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+.card{background:var(--manila);border:1px solid var(--manila-edge);border-radius:2px;
+  padding:12px 13px;box-shadow:0 2px 5px rgba(0,0,0,.24);position:relative}
+.card>h3{margin:0 0 9px;font-family:var(--tw);font-size:11px;letter-spacing:.05em;color:#6b6047;
+  display:flex;justify-content:space-between;border-bottom:1px solid var(--manila-edge);padding-bottom:6px}
+.card>h3 b{color:var(--stamp);font-weight:400}
+
+.tray{position:relative;height:92px}
+.tray .sh{position:absolute;left:0;right:0;height:58px;background:var(--bond);border:1px solid var(--bond-edge);
+  box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.tray .sh:nth-child(1){top:28px;left:8px;right:8px;transform:rotate(-1.8deg);background:#efe7d4}
+.tray .sh:nth-child(2){top:15px;left:3px;right:3px;transform:rotate(1.2deg);background:#f6f0e0}
+.tray .sh:nth-child(3){top:2px;transform:rotate(-.5deg)}
+.tray .sh .st{font-family:var(--tw);font-size:10px;color:var(--ink-3);padding:8px 11px}
+.tray .sh .st b{display:block;font-family:var(--sans);font-weight:700;font-size:12.5px;color:var(--ink);margin-top:3px}
+.clip{position:absolute;top:-7px;left:26px;width:15px;height:34px;border:2.5px solid #8d8f93;
+  border-radius:8px;border-bottom-color:transparent;z-index:5}
+
+.run{display:flex;gap:10px;padding:5px 0;border-bottom:1px dotted var(--manila-edge);font-family:var(--mono);font-size:11.5px}
+.run:last-child{border-bottom:0}
+.run .t{width:40px;color:var(--ink-3)}
+.run.done{color:#9d937c;text-decoration:line-through}
+.run.now{color:var(--stamp);font-weight:700}
+
+.slip{background:var(--pink);border:1px solid #dcbdb8;padding:6px 9px;margin-bottom:7px;box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.slip .d{font-family:var(--tw);font-size:10px;color:var(--stamp)}
+.slip .t{font-family:var(--sans);font-size:11.5px;line-height:1.35;margin-top:2px}
+
+/* folders */
+.folder{position:relative;background:var(--manila-tab);border:1px solid var(--manila-edge);
+  border-radius:0 3px 3px 3px;padding:8px 11px 10px;margin-bottom:11px;box-shadow:0 2px 3px rgba(0,0,0,.2)}
+.folder::before{content:'';position:absolute;top:-9px;left:0;width:56px;height:9px;background:var(--manila-tab);
+  border:1px solid var(--manila-edge);border-bottom:0;border-radius:4px 4px 0 0}
+.folder .hd{display:flex;align-items:baseline;gap:8px}
+.folder .nm{font-family:var(--sans);font-weight:700;font-size:13px;flex:1;letter-spacing:.01em}
+.folder .md{font-family:var(--tw);font-size:11px}
+.folder .bar{height:5px;margin-top:7px;background:rgba(0,0,0,.14)}
+.folder .bar i{display:block;height:100%}
+.good{color:var(--green)} .warn{color:var(--amber)} .bad{color:var(--stamp)}
+.bg-good{background:var(--green)} .bg-warn{background:var(--amber)} .bg-bad{background:var(--stamp)}
+
+.threat{background:var(--bond);border:1px solid var(--bond-edge);border-left:4px solid var(--stamp);
+  padding:8px 10px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.threat .t{font-family:var(--tw);font-size:11.5px;color:var(--stamp)}
+.threat .d{font-family:var(--sans);font-size:11.5px;color:var(--ink-2);margin-top:3px;line-height:1.35}
+.threat .m{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:5px}
+.pip{display:inline-block;width:7px;height:7px;border:1px solid var(--stamp);margin-left:3px;vertical-align:middle}
+.pip.on{background:var(--stamp)}
+
+/* the document */
+.work{position:relative;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px}
+.doc{width:100%;max-width:672px;background:var(--bond);border:1px solid var(--bond-edge);
+  box-shadow:0 14px 30px rgba(0,0,0,.35), 0 2px 0 rgba(0,0,0,.2);transform:rotate(-.4deg);
+  position:relative;animation:in .5s cubic-bezier(.2,.9,.25,1) both}
+@keyframes in{from{opacity:0;transform:translateY(64px) rotate(-2.6deg)}to{opacity:1;transform:rotate(-.4deg)}}
+.doc .punch{position:absolute;left:16px;width:11px;height:11px;border-radius:50%;background:var(--desk);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.4)}
+.doc .punch.a{top:78px}.doc .punch.b{top:50%}.doc .punch.c{bottom:78px}
+.dh{padding:13px 24px 11px 40px;border-bottom:2px solid var(--ink);display:flex;align-items:center;gap:12px}
+.dh .k{font-family:var(--tw);font-size:11px;letter-spacing:.08em;border:1.5px solid var(--ink);padding:2px 8px}
+.dh .f{margin-left:auto;text-align:right}
+.dh .f b{display:block;font-family:var(--sans);font-weight:700;font-size:13px}
+.dh .f span{font-family:var(--tw);font-size:10.5px;color:var(--ink-2)}
+.db{padding:18px 24px 6px 40px}
+.db h1{font-family:var(--sans);font-weight:900;font-size:31px;line-height:1.05;letter-spacing:-.03em;margin:0 0 5px}
+.db .sub{font-family:var(--tw);font-size:11px;color:var(--ink-3);margin-bottom:13px}
+.db p{font-size:15.5px;line-height:1.58;margin:0 0 11px}
+.db .q{font-style:italic;color:var(--ink-2);font-size:14px;border-left:2px solid #cdc4ad;padding-left:12px;margin:13px 0 4px}
+.opts{padding:10px 20px 20px 40px;display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer;
+  background:#f4eeda;border:1px solid var(--bond-edge);padding:10px 13px;font-family:inherit;color:var(--ink);
+  transition:background .14s,border-color .14s,transform .14s}
+.opt:hover{background:#fffaea;border-color:var(--stamp);transform:translateX(4px)}
+.opt .n{font-family:var(--tw);font-size:13px;width:22px;height:22px;flex:none;border:1.5px solid var(--ink-2);
+  border-radius:50%;display:grid;place-items:center}
+.opt .lab{font-family:var(--sans);font-weight:700;font-size:14px}
+.opt .hint{display:block;font-family:var(--body);font-style:italic;font-weight:400;font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.opt .c{font-family:var(--mono);font-weight:700;font-size:12px;color:var(--stamp);margin-left:auto}
+.stamp{position:absolute;right:20px;top:60px;width:104px;height:104px;border:2.5px solid var(--stamp);
+  border-radius:50%;color:var(--stamp);font-family:var(--tw);display:grid;place-content:center;text-align:center;
+  font-size:9.5px;line-height:1.3;transform:rotate(-13deg);opacity:.3;letter-spacing:.06em}
+.stamp::before{content:'';position:absolute;inset:6px;border:1px solid var(--stamp);border-radius:50%}
+.stamp b{display:block;font-size:12.5px;margin:2px 0}
+.ring{position:absolute;right:30px;bottom:26px;width:86px;height:86px;border-radius:50%;
+  border:9px solid rgba(92,60,25,.13);pointer-events:none}
+</style></head><body>
+<div class="desk">
+  <div class="top">
+    <div class="plate"><div class="n">ADRIN VO</div><div class="r">Executive Chair &middot; Velmorra</div></div>
+    <div class="slot">Day 4 &nbsp;/&nbsp; Act I &nbsp;/&nbsp; 09:30 Government business</div>
+    <div class="ledger">
+      <div class="chit"><div class="l">MONEY</div><div class="v">$38.6B</div><div class="s">+$0.34B/day</div></div>
+      <div class="chit"><div class="l">GRIP</div><div class="v">61</div><div class="rule"><i class="bg-good" style="width:61%"></i></div></div>
+      <div class="chit"><div class="l">LEGITIMACY</div><div class="v">44</div><div class="rule"><i class="bg-warn" style="width:44%"></i></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card"><div class="clip"></div><h3>In tray <b>2 left</b></h3>
+      <div class="tray"><div class="sh"></div><div class="sh"></div>
+        <div class="sh"><div class="st">next up<b>Political business</b></div></div></div>
+    </div>
+    <div class="card"><h3>Today</h3>
+      <div class="run done"><span class="t">09:30</span>Government business</div>
+      <div class="run now"><span class="t">12:00</span>Political business</div>
+      <div class="run"><span class="t">14:30</span>National development</div>
+      <div class="run"><span class="t">16:45</span>Afternoon</div>
+    </div>
+    <div class="card" style="flex:1"><h3>Diary</h3>
+      <div class="slip"><div class="d">DAY 6</div><div class="t">First loan repayment to the banks</div></div>
+      <div class="slip"><div class="d">DAY 7</div><div class="t">The army expects its $9B</div></div>
+      <div class="slip"><div class="d">DAY 9</div><div class="t">Unions: the wage clause comes due</div></div>
+    </div>
+  </div>
+
+  <div class="work"><div class="ring"></div>
+    <div class="doc">
+      <span class="punch a"></span><span class="punch b"></span><span class="punch c"></span>
+      <div class="dh"><span class="k">TREASURY</span>
+        <span class="f"><b>Kel Brask</b><span>Finance Minister</span></span></div>
+      <div class="db">
+        <h1>Payroll Is Short</h1>
+        <div class="sub">Has read the whole budget. Tells you the truth about money.</div>
+        <p>Brask has the green notebook open, which means these are the real numbers.</p>
+        <p>&ldquo;State payroll clears on the 28th. That is one in six working adults in this country. At the current rate we are $11 billion short and I have run out of ways to describe it as a timing difference.&rdquo;</p>
+        <div class="q">He is not sweating. That is how you know he is not exaggerating.</div>
+      </div>
+      <div class="opts">
+        <button class="opt"><span class="n">1</span><span class="lab">Borrow from the banks at their rate.<span class="hint">Payroll clears. You owe the Concord, at a price they set.</span></span><span class="c">+$12.0B</span></button>
+        <button class="opt"><span class="n">2</span><span class="lab">Have the central bank print it.<span class="hint">Payroll clears tonight. The currency finds out by Thursday.</span></span><span class="c">+$13.0B</span></button>
+        <button class="opt"><span class="n">3</span><span class="lab">Delay payroll nine days. Say so publicly.<span class="hint">Two million people notice immediately.</span></span><span class="c">+$8.0B</span></button>
+      </div>
+      <div class="stamp">MINISTRY OF<b>FINANCE</b>RECEIVED</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="card" style="padding-top:16px"><h3>Files</h3>
+      <div class="folder"><div class="hd"><span class="nm">Army</span><span class="md good">backing you</span></div><div class="bar"><i class="bg-good" style="width:68%"></i></div></div>
+      <div class="folder"><div class="hd"><span class="nm">Security</span><span class="md warn">watchful</span></div><div class="bar"><i class="bg-warn" style="width:47%"></i></div></div>
+      <div class="folder"><div class="hd"><span class="nm">Money</span><span class="md good">content</span></div><div class="bar"><i class="bg-good" style="width:62%"></i></div></div>
+      <div class="folder"><div class="hd"><span class="nm">Workers</span><span class="md bad">angry</span></div><div class="bar"><i class="bg-bad" style="width:21%"></i></div></div>
+      <div class="folder"><div class="hd"><span class="nm">Street</span><span class="md warn">restless</span></div><div class="bar"><i class="bg-warn" style="width:38%"></i></div></div>
+    </div>
+    <div class="card"><h3>On your desk</h3>
+      <div class="threat"><div class="t">The unions are counting</div><div class="d">Hess has the gazette clause circled in pencil.</div>
+        <div class="m">STAGE 2 OF 3 <span class="pip on"></span><span class="pip on"></span><span class="pip"></span> &middot; 2 DAYS</div></div>
+      <div class="threat" style="opacity:.82"><div class="t">A reporter is asking</div><div class="d">Two outlets are working the same story.</div>
+        <div class="m">STAGE 1 OF 3 <span class="pip on"></span><span class="pip"></span><span class="pip"></span> &middot; 4 DAYS</div></div>
+    </div>
+  </div>
+</div></body></html>

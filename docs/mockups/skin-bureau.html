@@ -1,0 +1,165 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Skin C — Bureau</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root{
+  --bg:#e7e3d9; --card:#fbfaf7; --line:#d4cfc2;
+  --ink:#22262a; --ink-2:#5c6469; --ink-3:#8e948f;
+  --olive:#6d7a54; --mustard:#c99a33; --brick:#a94f3d; --slate:#42586b;
+  --sans:'Libre Franklin',system-ui,sans-serif; --body:'Lora',Georgia,serif; --mono:'Courier Prime',monospace;
+}
+*{box-sizing:border-box} html,body{height:100%;margin:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);overflow:hidden}
+.desk{height:100%;display:grid;grid-template-columns:232px minmax(0,1fr) 276px;
+  grid-template-rows:auto minmax(0,1fr);gap:16px;padding:16px 18px 18px}
+
+.top{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.id{display:flex;align-items:center;gap:13px}
+.id .mark{width:38px;height:38px;background:var(--olive);color:#fff;display:grid;place-items:center;
+  font-weight:800;font-size:17px;border-radius:2px}
+.id .n{font-weight:800;font-size:17px;letter-spacing:-.02em;line-height:1.1}
+.id .r{font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.slot{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.nums{display:flex;gap:10px}
+.n-card{background:var(--card);border-radius:3px;padding:9px 16px;min-width:126px;
+  box-shadow:0 1px 2px rgba(34,38,42,.1), 0 2px 8px rgba(34,38,42,.05)}
+.n-card .l{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.n-card .v{font-size:25px;font-weight:800;letter-spacing:-.035em;margin-top:1px;font-variant-numeric:tabular-nums}
+.n-card .s{font-size:10.5px;font-weight:600;color:var(--olive);margin-top:1px}
+.track{height:5px;background:#e9e6de;border-radius:3px;margin-top:6px;overflow:hidden}
+.track i{display:block;height:100%;border-radius:3px}
+
+.col{display:flex;flex-direction:column;gap:16px;min-height:0}
+.panel{background:var(--card);border-radius:3px;padding:13px 14px;
+  box-shadow:0 1px 2px rgba(34,38,42,.1), 0 2px 8px rgba(34,38,42,.05)}
+.panel>h3{margin:0 0 10px;font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;justify-content:space-between}
+.panel>h3 b{color:var(--brick)}
+
+.tray{position:relative;height:80px}
+.tray .sh{position:absolute;left:0;right:0;height:54px;background:#f2efe7;border-radius:2px;
+  box-shadow:0 1px 3px rgba(34,38,42,.14)}
+.tray .sh:nth-child(1){top:22px;left:8px;right:8px;transform:rotate(-1.4deg);background:#eae6dc}
+.tray .sh:nth-child(2){top:11px;left:4px;right:4px;transform:rotate(.9deg);background:#efece3}
+.tray .sh:nth-child(3){top:0;transform:rotate(-.3deg);background:#fff}
+.tray .sh .st{padding:9px 12px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.tray .sh .st b{display:block;font-size:13px;letter-spacing:0;text-transform:none;color:var(--ink);margin-top:3px;font-weight:700}
+
+.run{display:flex;gap:11px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--line)}
+.run:last-child{border-bottom:0}
+.run .t{font-family:var(--mono);font-size:11px;width:40px;color:var(--ink-3)}
+.run .n{font-size:12.5px;font-weight:600}
+.run.done{opacity:.42}.run.done .n{text-decoration:line-through}
+.run.now .n{color:var(--brick);font-weight:800}
+
+.slip{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line)}
+.slip:last-child{border-bottom:0}
+.slip .d{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--slate);width:42px;flex:none}
+.slip .t{font-size:12px;line-height:1.35;color:var(--ink-2)}
+
+.fac{padding:9px 0;border-bottom:1px solid var(--line)}
+.fac:last-child{border-bottom:0}
+.fac .hd{display:flex;align-items:baseline;gap:8px}
+.fac .nm{font-size:13px;font-weight:700;flex:1}
+.fac .md{font-size:10.5px;font-weight:700;letter-spacing:.04em}
+.fac .bar{height:6px;background:#e9e6de;border-radius:3px;margin-top:6px;overflow:hidden}
+.fac .bar i{display:block;height:100%;border-radius:3px}
+.good{color:var(--olive)} .warn{color:var(--mustard)} .bad{color:var(--brick)}
+.bg-good{background:var(--olive)} .bg-warn{background:var(--mustard)} .bg-bad{background:var(--brick)}
+
+.threat{border-radius:3px;padding:10px 12px;margin-bottom:9px;background:#f7ece9;border-left:4px solid var(--brick)}
+.threat.low{background:#eef0f3;border-left-color:var(--slate)}
+.threat .t{font-size:12.5px;font-weight:800;color:var(--brick);letter-spacing:-.01em}
+.threat.low .t{color:var(--slate)}
+.threat .d{font-size:11.5px;color:var(--ink-2);margin-top:3px;line-height:1.35}
+.threat .m{font-family:var(--mono);font-size:10px;color:var(--ink-3);margin-top:6px}
+.pip{display:inline-block;width:7px;height:7px;border-radius:50%;background:#d9c4bf;margin-left:3px;vertical-align:middle}
+.threat.low .pip{background:#ccd3da}
+.pip.on{background:var(--brick)} .threat.low .pip.on{background:var(--slate)}
+
+.work{min-height:0;display:flex;align-items:center;justify-content:center}
+.doc{width:100%;max-width:680px;background:var(--card);border-radius:4px;
+  box-shadow:0 2px 4px rgba(34,38,42,.1), 0 16px 40px rgba(34,38,42,.14);
+  animation:in .45s cubic-bezier(.2,.9,.25,1) both;overflow:hidden}
+@keyframes in{from{opacity:0;transform:translateY(46px)}to{opacity:1;transform:none}}
+.dh{padding:14px 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:13px}
+.dh .k{font-size:9.5px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#fff;
+  background:var(--slate);padding:4px 9px;border-radius:2px}
+.dh .f{margin-left:auto;text-align:right}
+.dh .f b{display:block;font-size:13px;font-weight:700}
+.dh .f span{font-size:10.5px;color:var(--ink-3);font-weight:600;letter-spacing:.04em}
+.db{padding:22px 26px 6px}
+.db h1{font-size:33px;font-weight:800;letter-spacing:-.035em;line-height:1.06;margin:0 0 6px}
+.db .sub{font-size:11px;font-weight:600;color:var(--ink-3);margin-bottom:16px;letter-spacing:.02em}
+.db p{font-family:var(--body);font-size:15.5px;line-height:1.6;margin:0 0 12px;color:#2f3439}
+.db .q{font-family:var(--body);font-style:italic;font-size:14px;color:var(--ink-2);
+  background:#f1efe8;border-radius:3px;padding:11px 14px;margin:15px 0 4px}
+.opts{padding:10px 22px 22px;display:grid;gap:8px}
+.opt{display:flex;align-items:center;gap:13px;text-align:left;width:100%;cursor:pointer;
+  background:#f4f2ec;border:1px solid var(--line);border-radius:3px;padding:12px 14px;font-family:inherit;color:var(--ink);
+  transition:background .14s,border-color .14s,box-shadow .14s,transform .14s}
+.opt:hover{background:#fff;border-color:var(--olive);box-shadow:0 3px 10px rgba(34,38,42,.1);transform:translateY(-1px)}
+.opt .n{font-size:11px;font-weight:800;width:23px;height:23px;flex:none;border-radius:50%;
+  background:var(--slate);color:#fff;display:grid;place-items:center}
+.opt .lab{font-size:14.5px;font-weight:700;letter-spacing:-.012em}
+.opt .hint{display:block;font-family:var(--body);font-size:12.5px;color:var(--ink-2);margin-top:3px;font-weight:400}
+.opt .c{font-size:13px;font-weight:800;color:var(--brick);margin-left:auto;font-variant-numeric:tabular-nums}
+</style></head><body>
+<div class="desk">
+  <div class="top">
+    <div class="id"><div class="mark">V</div>
+      <div><div class="n">Adrin Vo</div><div class="r">Executive Chair</div></div></div>
+    <div class="slot">Day 4 &nbsp;·&nbsp; Act I &nbsp;·&nbsp; Government business</div>
+    <div class="nums">
+      <div class="n-card"><div class="l">Money</div><div class="v">$38.6B</div><div class="s">+$0.34B / day</div></div>
+      <div class="n-card"><div class="l">Grip</div><div class="v">61</div><div class="track"><i class="bg-good" style="width:61%"></i></div></div>
+      <div class="n-card"><div class="l">Legitimacy</div><div class="v">44</div><div class="track"><i class="bg-warn" style="width:44%"></i></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel"><h3>In tray <b>2 left</b></h3>
+      <div class="tray"><div class="sh"></div><div class="sh"></div>
+        <div class="sh"><div class="st">Next up<b>Political business</b></div></div></div></div>
+    <div class="panel"><h3>Today</h3>
+      <div class="run done"><span class="t">09:30</span><span class="n">Government business</span></div>
+      <div class="run now"><span class="t">12:00</span><span class="n">Political business</span></div>
+      <div class="run"><span class="t">14:30</span><span class="n">National development</span></div>
+      <div class="run"><span class="t">16:45</span><span class="n">Afternoon</span></div></div>
+    <div class="panel" style="flex:1"><h3>Diary</h3>
+      <div class="slip"><span class="d">DAY 6</span><span class="t">First loan repayment to the banks</span></div>
+      <div class="slip"><span class="d">DAY 7</span><span class="t">The army expects its $9B</span></div>
+      <div class="slip"><span class="d">DAY 9</span><span class="t">Unions: the wage clause comes due</span></div></div>
+  </div>
+
+  <div class="work">
+    <div class="doc">
+      <div class="dh"><span class="k">Treasury</span><span class="f"><b>Kel Brask</b><span>Finance Minister</span></span></div>
+      <div class="db">
+        <h1>Payroll Is Short</h1>
+        <div class="sub">Has read the whole budget. Tells you the truth about money.</div>
+        <p>Brask has the green notebook open, which means these are the real numbers.</p>
+        <p>&ldquo;State payroll clears on the 28th. That is one in six working adults in this country. At the current rate we are $11 billion short and I have run out of ways to describe it as a timing difference.&rdquo;</p>
+        <div class="q">He is not sweating. That is how you know he is not exaggerating.</div>
+      </div>
+      <div class="opts">
+        <button class="opt"><span class="n">1</span><span class="lab">Borrow from the banks at their rate.<span class="hint">Payroll clears. You owe the Concord, at a price they set.</span></span><span class="c">+$12.0B</span></button>
+        <button class="opt"><span class="n">2</span><span class="lab">Have the central bank print it.<span class="hint">Payroll clears tonight. The currency finds out by Thursday.</span></span><span class="c">+$13.0B</span></button>
+        <button class="opt"><span class="n">3</span><span class="lab">Delay payroll nine days. Say so publicly.<span class="hint">Two million people notice immediately.</span></span><span class="c">+$8.0B</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="panel"><h3>Files</h3>
+      <div class="fac"><div class="hd"><span class="nm">Army</span><span class="md good">backing you</span></div><div class="bar"><i class="bg-good" style="width:68%"></i></div></div>
+      <div class="fac"><div class="hd"><span class="nm">Security</span><span class="md warn">watchful</span></div><div class="bar"><i class="bg-warn" style="width:47%"></i></div></div>
+      <div class="fac"><div class="hd"><span class="nm">Money</span><span class="md good">content</span></div><div class="bar"><i class="bg-good" style="width:62%"></i></div></div>
+      <div class="fac"><div class="hd"><span class="nm">Workers</span><span class="md bad">angry</span></div><div class="bar"><i class="bg-bad" style="width:21%"></i></div></div>
+      <div class="fac"><div class="hd"><span class="nm">Street</span><span class="md warn">restless</span></div><div class="bar"><i class="bg-warn" style="width:38%"></i></div></div></div>
+    <div class="panel"><h3>Warnings</h3>
+      <div class="threat"><div class="t">The unions are counting</div><div class="d">Hess has the gazette clause circled in pencil.</div>
+        <div class="m">Stage 2 of 3 <span class="pip on"></span><span class="pip on"></span><span class="pip"></span> · 2 days</div></div>
+      <div class="threat low"><div class="t">A reporter is asking</div><div class="d">Two outlets are working the same story.</div>
+        <div class="m">Stage 1 of 3 <span class="pip on"></span><span class="pip"></span><span class="pip"></span> · 4 days</div></div></div>
+  </div>
+</div></body></html>
