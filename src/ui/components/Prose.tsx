@@ -22,7 +22,9 @@ export function Prose({ text, gloss = true }: { text: string; gloss?: boolean })
   );
 }
 
-function Glossed({ text }: { text: string }) {
+/** Same first-occurrence glossing as <Prose>, for a single line outside a
+ *  full prose block — option hints, pull-quotes, threat-card bodies. */
+export function Glossed({ text }: { text: string }) {
   const parts = annotateTerms(text);
   if (parts.length === 1 && !parts[0].def) return <>{text}</>;
   return (

@@ -174,7 +174,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Cost: $6.0B and some authority. Crowds go home when they win something.',
       outcome: {
         text:
-          'You are on air within forty minutes, which is itself remarkable, and you give them one real thing — not a review, not a commitment, a thing that happens on Monday.\n\nThe square thins by midnight. It does not empty. But a square that thins is a square that has decided to give you one more go.',
+          'You are on air within forty minutes, which is itself remarkable, and you give them one real thing — not a review, not a promise, a thing that happens on Monday.\n\nThe square thins by midnight. It does not empty. But a square that thins is a square that has decided to give you one more go.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -6, support: +8, stability: +9, legitimacy: +3, power: -5 },
@@ -270,13 +270,13 @@ export const ALERTS: AlertDef[] = [
   base: 0,
   weight: (s) => Math.max(0, s.hidden.fiscal - 28) * 1.2 + Math.max(0, 38 - s.stats.economy) * 0.7,
   body:
-    'The currency opened down four per cent, went down another six by eleven, and is currently not trading in any meaningful sense because nobody will quote a price.\n\nBrask is in your office without the notebook, which is worse than the notebook.\n\n"The peg is gone. It went at about half past ten. The only question left is whether we are the ones who announce it."',
+    'The currency opened down four per cent, went down another six by eleven, and is currently not trading in any meaningful sense because nobody will quote a price. For two years the government has promised to exchange the velor for dollars at a fixed rate no matter what the market thinks it is worth — the peg. Keeping that promise costs cash, and the cash just ran out.\n\nBrask is in your office without the notebook, which is worse than the notebook.\n\n"The peg is gone. It went at about half past ten. The only question left is whether we are the ones who announce it."',
   flavor: 'The peg has been indefensible for two years. Today is the day it found out.',
   options: [
     {
       id: 'float',
       label: 'Float the currency. Announce it yourself, today.',
-      hint: 'Free, brutal and honest. The currency finds its level and so does your approval rating.',
+      hint: 'Free, brutal and honest. Stop defending the fixed rate and let the market set a new one — the currency finds its level, and so does your approval rating.',
       outcome: {
         text:
           'You say the word "float" on live television at 4pm. The currency loses nineteen per cent in forty minutes and then, remarkably, stops.\n\nImports are now catastrophic. Exports are suddenly excellent. Gorsk lithium is the cheapest in the region and the Concord, who were screaming at noon, are quietly buying by four.\n\nBrask says: "That was the correct decision and I would like it noted that it was also the brave one."',
@@ -330,7 +330,7 @@ export const ALERTS: AlertDef[] = [
     {
       id: 'controls',
       label: 'Impose capital controls. Close the Free Zone transfers tonight.',
-      hint: 'Stops the bleeding instantly and gains $7.0B. Declares war on every bank at once.',
+      hint: 'Block money from leaving the country tonight. Stops the bleeding instantly and gains $7.0B — but declares war on every bank at once.',
       outcome: {
         text:
           'The transfers close at 6pm. $40 billion that was leaving stops leaving, which is the point. $40 billion that intended to arrive next quarter changes its mind, which is also the point and nobody mentions it.\n\nAdamek calls once. You do not take it. That will be discussed later, at length, in rooms you are not in.',

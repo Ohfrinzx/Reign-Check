@@ -1,7 +1,7 @@
 import type { GameState, CardDef, AlertDef, CardCategory } from '../../game/types';
 import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
-import { Prose } from './Prose';
+import { Prose, Glossed } from './Prose';
 
 /**
  * The document — a card rendered as the day's "lead story". Options are the
@@ -41,7 +41,7 @@ export function CardView({
           )}
           <h1>{card.title}</h1>
           <Prose text={fill(card.body, s)} />
-          {card.flavor && <div className="q">{fill(card.flavor, s)}</div>}
+          {card.flavor && <div className="q"><Glossed text={fill(card.flavor, s)} /></div>}
         </div>
         <div className="opts">
           {card.options.map((o, i) => {
@@ -56,7 +56,7 @@ export function CardView({
                 <span className="n">{i + 1}</span>
                 <span className="body">
                   <span className="lab">{fill(o.label, s)}</span>
-                  {o.hint && <span className="hint">{fill(o.hint, s)}</span>}
+                  {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
                   {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
                 </span>
               </button>

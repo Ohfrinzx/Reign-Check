@@ -2,6 +2,7 @@ import type { GameState } from '../../game/types';
 import { DISPLAY_FACTIONS, factionMood } from '../../game/display';
 import { buildThreats } from '../../game/briefing';
 import { fill } from '../../game/text';
+import { Glossed } from './Prose';
 /**
  * The right-hand rail: Files (factions), On Your Desk (threats), Diary.
  *
@@ -39,7 +40,7 @@ export function Rail({ s }: { s: GameState }) {
         {threats.map((t, i) => (
           <div className={`threat ${t.severity === 1 ? 'low' : ''}`} key={i}>
             <div className="t">{t.headline}</div>
-            <div className="d">{fill(t.body, s)}</div>
+            <div className="d"><Glossed text={fill(t.body, s)} /></div>
             <div className="m">
               STAGE {t.severity} OF 3
               {[1, 2, 3].map((n) => (
