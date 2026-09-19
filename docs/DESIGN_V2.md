@@ -1,22 +1,35 @@
 # Design V2 — simplification and the roguelike turn
 
-**Status: Layout and simplification IMPLEMENTED (this pass). Roguelike layer
-(acts, shop, mandates, run deck) is STILL PROPOSED, not built.**
+**Status: PHASE 1 (layout, simplification, wording) IMPLEMENTED AND
+OWNER-APPROVED.** The owner played the real Poster/Broadsheet build and
+said: *"Ok everything seems to run and look good. So I believe Phase one
+playtests are complete."* **PHASE 2 — the roguelike layer (acts, shop,
+mandates, run deck, meta-progression) in section 4 — is GREENLIT and is the
+current task.** Nothing has been built for it yet; see `CLAUDE.md`'s "PHASE
+2 IS GREENLIT" section for the recommended entry point.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
    (section 5), then the **Broadsheet** layout (section 5b) — "Go with 1."
 2. Mechanical scope: implemented as a **presentation-layer aggregation**
-   (section 2b) rather than a deep engine rewrite — this was an engineering
-   call made without an explicit owner sign-off on that specific tradeoff;
-   flag it back to them if it doesn't feel like enough of a cut in play.
+   (section 2b) rather than a deep engine rewrite. This was an engineering
+   call made without an explicit owner sign-off on that specific tradeoff at
+   the time — **since resolved**: the owner played the shipped build and
+   raised no density/tracking complaint, so treat the display-layer cut as
+   sufficient unless a future playtest says otherwise. See section 7.
 3. Wording: card prose needed to be more accessible to players without
    political/financial literacy — addressed with a glossary system plus a
-   rewrite of the specific example given (section 8).
+   rewrite of the specific example given (section 8), then widened to cover
+   option hints/flavor/threat cards and one more dense card (the currency
+   peg alert) after a follow-up owner note to prefer inline text over
+   relying on the hover tooltip where inline is the better fix.
+4. **Phase 1 declared complete; proceed to Phase 2.** *"So I believe Phase
+   one playtests are complete... begin phase two of building."* No further
+   Phase 1 polish is being requested — do not reopen it speculatively.
 
 **What is NOT built yet**: the roguelike layer in section 4 (acts, the Back
-Room shop, mandates, a run deck, meta-progression). That is still exactly as
-proposed below and needs its own go-ahead.
+Room shop, mandates, a run deck, meta-progression). It is greenlit — start
+with §4.1 (run structure) as its own shippable slice; see `CLAUDE.md`.
 
 ---
 
@@ -377,32 +390,58 @@ Suggested order, each step shippable and playtestable on its own:
    there; it was not merged into a single persistent "desk" screen the way
    the original desk.html mockup showed (cards still get their own doc view
    once the day starts, per Broadsheet).
-4. ⬜ **NOT STARTED.** Acts and the shop.
-5. ⬜ **NOT STARTED.** Mandates.
-6. ⬜ **NOT STARTED.** Run deck + meta-progression.
+4. ⬜ **NOT STARTED. GREENLIT — start here.** Acts and the confidence vote
+   (§4.1) first, as its own shippable slice; the Back Room shop (§4.2) is a
+   separate later slice once acts are playtested.
+5. ⬜ **NOT STARTED. GREENLIT**, after step 4. Mandates (§4.3).
+6. ⬜ **NOT STARTED. GREENLIT**, after step 5. Run deck (§4.4) +
+   meta-progression (§4.5).
 
-Steps 1–3 (done) answer "too much to track" and "more creative and fitting".
-Steps 4–6 (not started) are the roguelike turn and need their own go-ahead
-before anyone builds them — see `CLAUDE.md`.
+Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
+— the owner has now played that build and confirmed it. Steps 4–6 are the
+roguelike turn: the owner has greenlit the whole layer, but each step should
+still ship and get played on its own before the next one starts, the same
+pattern that got steps 1–3 right. See `CLAUDE.md`'s "PHASE 2" section.
 
 ## 7. Open questions — updated
 
 Resolved by the owner during this pass:
 - ~~Visual direction~~ → Poster skin, Broadsheet layout (5a/5b).
 - ~~Wording accessibility~~ → glossary system + targeted rewrites (section 8
-  below); the owner should re-judge this in play, since "fix wording some
-  more" is inherently a matter of degree and this was one pass, not
-  presumed-finished.
+  below), then widened once more to hints/flavor/threat cards. The owner has
+  now playtested this build and confirmed it: *"everything seems to run and
+  look good."* Treat wording as sufficient unless a specific future note
+  says otherwise — this is no longer an open question, but if a *specific*
+  new term or line comes up in Phase 2 playtesting, fix it the same way
+  (inline explanation preferred, `GLOSSARY` as backstop).
+- ~~Was the display-layer cut enough?~~ → Yes, per the same playtest note
+  above — no density/tracking complaint was raised. Do not start the deeper
+  data-model rewrite section 3 originally proposed unless a future playtest
+  specifically asks for it again.
+- ~~Roguelike layer next, or another polish/playtest round first?~~ →
+  Roguelike layer next. *"So I believe Phase one playtests are complete...
+  begin phase two of building."*
 
 Still genuinely open, for whoever picks this up next:
-1. **Was the display-layer cut (not a data-model rewrite) the right call?**
-   The owner did not explicitly choose between these two approaches — it was
-   an engineering judgment made to ship a testable result quickly and
-   reversibly. If playtesting this build still feels like too much to track,
-   that is the signal the deeper cut (section 3's original proposal) is
-   actually needed, not just a display tweak.
-2. **Roguelike layer next, or another polish/playtest round on the current
-   build first?** Nothing in sections 4 has been started.
+1. **Nothing Phase-1-shaped remains open.** The two questions this section
+   used to carry (display-layer sufficiency, wording sufficiency) are both
+   resolved above by the same playtest note. If either resurfaces during
+   Phase 2 playtesting, treat it as new information, not a reopened old
+   question — the display layer and glossary system are both easy to extend
+   without redesigning them (see `CLAUDE.md` ground rule 8 and the writing
+   rules).
+2. **Within Phase 2, section 4 leaves a few implementation choices
+   unspecified** — these are for whoever builds each slice to decide, not
+   blockers to ask the owner about first:
+   - Exact confidence-vote check (§4.1): what state it reads and the pass/
+     fail threshold. Suggest reusing the existing ending-check pattern in
+     `engine.ts`/`endings.ts` rather than inventing a parallel system.
+   - Whether "The Table" layout's triage mechanic (rejected as the base
+     layout in 5b, but flagged there as "a good candidate for the Act
+     structure") gets folded into how a day/act presents multiple live
+     situations. Worth a look when building §4.1, not required.
+   - Exact shop pricing and advisor/policy/favour balance (§4.2) — needs
+     playtesting once it exists, not a design decision up front.
 
 
 ## 8. Wording — making the language accessible

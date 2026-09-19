@@ -1,38 +1,56 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: after the Poster/Broadsheet rebuild, awaiting playtest round 3.
+> Last updated: Phase 1 declared complete by the owner. Phase 2 (roguelike
+> layer) is greenlit and has not been started yet — that is the next task.
 
-> ## ⏸ WHERE WE STOPPED
+> ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
-> **The Poster/Broadsheet visual rebuild is done and awaiting playtest.**
-> Timeline: V1 shipped → playtest 1 (context/scrolling/wording/economy) fixed
-> in full → playtest 2 passed functionally but flagged the design direction
-> ("too many things to keep track of", wanted something simpler and more
-> distinctive, wants a roguelike future) → three rounds of mockup review
-> (dark desk rejected as "too similar to the last"; three light skins, owner
-> picked **Poster**; four layouts, owner picked **Broadsheet** — "Go with 1")
-> → **built**: the real app now runs in Poster/Broadsheet, showing 3 resources
-> and 5 factions instead of 10 stats and 7 three-bar factions, plus a jargon
-> glossary system. All 13 tests pass; verified end to end in a real browser.
+> **Phase 1 is done and owner-approved. Phase 2 is greenlit and unstarted.
+> If you are a new agent picking this up cold, this is everything you need
+> to know before writing code:**
 >
-> **This has NOT been playtested by the owner yet.** Do not treat it as
-> validated — it is built and self-verified (tests, Playwright, manual
-> screenshot review), not owner-approved. Report it as ready for playtest
-> round 3, the same way round 1 and round 2 were reported.
+> The owner played the real Poster/Broadsheet build (3 resources, 5
+> factions, the jargon glossary) and said, verbatim: *"Ok everything seems
+> to run and look good. So I believe Phase one playtests are complete."*
+> They then said: *"begin phase [t]wo of building... I will be starting a
+> new [chat] to begin Phase 2 so the agent needs to be able to easily
+> understand EXACTLY where to continue from and what to do."* This file, plus
+> `CLAUDE.md` and `docs/DESIGN_V2.md`, is that handover — written for exactly
+> this moment.
 >
-> **What is still open, for whoever picks this up next:**
-> 1. Was showing 3 resources / 5 factions (via a display layer, engine
->    unchanged) enough of a cut, or does it need the deeper data-model
->    rewrite `docs/DESIGN_V2.md` section 3 originally proposed? That's a
->    judgment only playtesting can make.
-> 2. The roguelike layer (acts, shop, mandates, run deck, meta-progression) —
->    `docs/DESIGN_V2.md` section 4 — has **not been started** and has not
->    been greenlit. Do not start it without asking first.
+> **Timeline that got here:** V1 shipped → playtest 1 (context/scrolling/
+> wording/economy) fixed in full → playtest 2 passed functionally but
+> flagged the design direction ("too many things to keep track of") → three
+> rounds of mockup review (dark desk rejected; owner picked the **Poster**
+> skin, then the **Broadsheet** layout) → built, plus a glossary system for
+> jargon → owner playtested the real build and passed it, twice (once after
+> the initial build, again after the jargon-coverage follow-up) → **Phase 1
+> closed.**
 >
-> Read `docs/DESIGN_V2.md` in full before touching the UI or the display
-> layer — it records what was proposed vs. what actually shipped, and they
-> differ in some specifics.
+> **Both formerly-open questions are now resolved, not just Phase-1-complete
+> in general:**
+> 1. ~~Was the display-layer cut (3 resources/5 factions over the unchanged
+>    engine) enough, or does it need the deeper data-model rewrite?~~ →
+>    **Enough.** The owner played it and raised no density/tracking
+>    complaint. Do not start the deeper rewrite in `docs/DESIGN_V2.md` §3
+>    speculatively.
+> 2. ~~Roguelike layer next, or more polish first?~~ → **Roguelike layer
+>    next.** This is now the only outstanding work.
+>
+> **What to do next:** Start `docs/DESIGN_V2.md` §4 (the roguelike layer —
+> acts, the Back Room shop, mandates, a run deck, meta-progression), in the
+> staged order §6 gives, beginning with §4.1 (run structure: 3 acts of ~6
+> days ending in a confidence vote) as its own shippable, playtestable slice.
+> **Build that first slice, then STOP and report back for playtest before
+> touching the shop/mandates/deck** — the same build → report → playtest →
+> iterate loop that got Phase 1 right three times running. See `CLAUDE.md`'s
+> "PHASE 2 IS GREENLIT" section for the concrete first steps (which files,
+> which fields, the `SAVE_VERSION` bump this will need).
+>
+> Read `docs/DESIGN_V2.md` in full before touching the UI, the display
+> layer, or starting Phase 2 — it records what was proposed vs. what
+> actually shipped for Phase 1, and has the complete Phase 2 spec.
 
 ---
 
@@ -66,7 +84,12 @@ Playwright scripts for real-browser playthroughs.
 **MILESTONE 1 — PLAYABLE CORE: ✅ COMPLETE.**
 **PLAYTEST ROUND 1 FIXES: ✅ COMPLETE.**
 **PLAYTEST ROUND 2: ✅ PASSED functionally. Design direction question raised.**
-**POSTER/BROADSHEET REBUILD: ✅ COMPLETE. Awaiting playtest round 3.**
+**POSTER/BROADSHEET REBUILD + WORDING WIDENING: ✅ COMPLETE.**
+**PLAYTEST ROUND 3 (the actual Poster/Broadsheet build): ✅ PASSED.** *"Ok
+everything seems to run and look good."* **PHASE 1: ✅ DECLARED COMPLETE BY
+THE OWNER.**
+**PHASE 2 — THE ROGUELIKE LAYER: 🟢 GREENLIT. NOT STARTED. This is the
+current task — see the "WHERE WE STOPPED" block above and `CLAUDE.md`.**
 
 ### Playtest round 2 — what was reported, and what was done
 
@@ -90,7 +113,7 @@ picked each round), then built:
 | Visual direction | Dark desk mockup rejected ("way too similar to the last"). Three light skins mocked up; owner picked **Poster** (cream newsprint, condensed black type, one red). |
 | Layout | Four Poster-skinned layouts mocked up; owner picked **Broadsheet** ("Go with 1") — masthead, front-page briefing, card-as-lead-story, right rail. |
 | Information density | Implemented as a **display layer** (`src/game/display.ts`) over the unchanged engine: 3 resources (Money/Grip/Legitimacy) instead of 10 stats, 5 factions with one mood each instead of 7×3 bars, threat cards instead of a prose warning list. ~55 trackables → ~9–12. This was an engineering judgment on HOW to cut, not something the owner explicitly chose between (vs. a full data-model rewrite) — see `docs/DESIGN_V2.md` §3. |
-| Roguelike elements | **Not built.** Proposed in `docs/DESIGN_V2.md` §4, not started, not greenlit. |
+| Roguelike elements | **Not built at the time of this table.** Proposed in `docs/DESIGN_V2.md` §4. Since greenlit by the owner — see the "WHERE WE STOPPED" block at the top of this file, this is now current work. |
 
 ### Playtest round 3 — what was reported, and what was done
 
@@ -123,6 +146,35 @@ issue as the original V1 scroll bug — worth reading if you touch layout:
    not load-bearing for reachability.
 
 Both were caught by testing at 1366×700 specifically — keep testing there.
+
+### Playtest round 3b — jargon-clarity follow-up
+
+After the round 3 report above, the owner replied: *"If adding more text
+and context into the cards is the best fix then go with that as long as
+it's designed accordingly and seamlessly."* — read as: prefer inline
+explanation over relying on the hover tooltip, where inline is the better
+fix, per the writing rules' own stated preference.
+
+| Reported | Status | What changed |
+|---|---|---|
+| Glossary coverage was incomplete | Done | The hover-tooltip system only covered card body and outcome text. Extended it to option hints, flavor/pull-quote text, and the right-rail threat cards (`Glossed` exported from `Prose.tsx`, wired into `CardView.tsx` and `Rail.tsx`). |
+| The other genuinely dense economics moment besides payroll | Done | The currency-peg Breaking Alert (`alert-velk` in `alerts.ts`) was rewritten to explain the peg, floating the currency, and capital controls inline in the body/hints, not just via the glossary backstop. |
+| Audit for mismatched tooltips | Done, found one | An outcome line used "commitment" in its ordinary English sense; the glossary would have shown the unrelated recurring-cost game-mechanic definition on hover. Reworded to "promise" to remove the false match. Full audit of all 18 glossary terms across every content file confirmed no other mismatches. |
+
+13/13 tests still pass; verified live via Playwright that glossed terms
+render correctly across a real playthrough.
+
+### Playtest round 4 — the real thing, and Phase 1 closes
+
+The owner then actually played the Poster/Broadsheet build (not just the
+mockups) and said, verbatim: *"Ok everything seems to run and look good. So
+I believe Phase one playtests are complete."* No specific bug or complaint
+was raised — this is an unconditional pass. They then asked to prepare the
+repo for Phase 2 with a fresh chat in mind: *"the agent needs to be able to
+easily understand EXACTLY where to continue from and what to do."* This
+document, `CLAUDE.md`, and `docs/DESIGN_V2.md` were rewritten (again) to
+make that handover explicit — see the "WHERE WE STOPPED" block at the top
+of this file.
 
 ### Playtest round 1 — what was reported and what was done
 
@@ -302,7 +354,14 @@ Both were caught by testing at 1366×700 specifically — keep testing there.
 
 ## 4. What is NOT built yet
 
-These are deliberately deferred, not forgotten.
+**The roguelike layer — acts, the Back Room shop, mandates, a run deck,
+meta-progression (`docs/DESIGN_V2.md` §4) — is GREENLIT and is the current
+task.** It is listed here only as "not yet built", not as deferred; see the
+"WHERE WE STOPPED" block at the top of this file and `CLAUDE.md` for how to
+start it.
+
+Everything else below remains deliberately deferred, not forgotten, and
+still needs to be asked about before starting:
 
 - **Mini-games** (Milestone 5). `MinigameKey` and `CardDef.minigame` exist in
   the type system as the hook; no minigame components are implemented.
@@ -315,7 +374,9 @@ These are deliberately deferred, not forgotten.
   (Milestone 3).
 - **Crisis chains** — multi-card escalating sequences (Milestone 4).
 - **Assassination, election-defeat and constitutional-removal endings.**
-- **Run history / legacy across runs** (Milestone 7).
+- **Run history / legacy across runs** (Milestone 7) — note this overlaps
+  with Phase 2's meta-progression (§4.5); worth building together rather than
+  twice.
 - **Sound.**
 
 ---
@@ -333,38 +394,48 @@ These are deliberately deferred, not forgotten.
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
 | 8 | The 2 provinces/civil-service factions (`grey`, `provinces`) have no display bar — by design (see `docs/DESIGN_V2.md` §3.2) — but a player who never happens to draw Grebs's or Kostyn's cards has no way to check their standing at all. | Low | They still fully drive effects underneath; this is a pure visibility gap, not a simulation gap. |
-| 9 | The display-layer cut (§3 above) has not been owner-playtested. It might turn out to still feel like "too much to track" if the underlying 7-faction/10-stat depth leaks through card choices even though only 5/3 are shown. | Unknown until tested | If so, the next step is the deeper data-model rewrite `docs/DESIGN_V2.md` §3 originally proposed, not another display tweak. |
+| 9 | ~~The display-layer cut has not been owner-playtested~~ | Resolved | The owner played it and said "everything seems to run and look good," raising no density/tracking complaint. Treat the cut as sufficient; do not start the deeper data-model rewrite speculatively. If it resurfaces during Phase 2 playtesting, treat that as new information. |
 
 ---
 
 ## 6. Recommended next task
 
-**In priority order:**
+**This is no longer conditional — the owner has answered the question this
+section used to branch on. Do this, in order:**
 
-1. **Get playtest round 3 feedback on the Poster/Broadsheet build first.**
-   Do not start the roguelike layer, do not start more content, and do not
-   start a deeper mechanical rewrite until the owner has actually played
-   this. Everything below is provisional on that feedback.
-2. **If the owner says the density cut isn't enough**: escalate from the
-   display-layer aggregation to the real data-model rewrite `docs/DESIGN_V2.md`
-   §3 originally proposed (new `StatKey`/`FactionId` unions, migrate all 42
-   cards' effects, re-balance, bump `SAVE_VERSION`). Bigger job, do it
-   properly rather than half-migrating.
-3. **If the owner is happy with the density and wants the roguelike layer
-   next**: start `docs/DESIGN_V2.md` §4 (acts, the Back Room shop, mandates,
-   a run deck, meta-progression), in the order given there.
-4. **If the owner wants more polish on the current build first**: the
-   honest answer to content volume (still true, see limitations #1 in the
-   original table this replaced) is more cards — ~20 more standard cards and
-   ~6 more alerts, pure content work in `src/game/content/cards2.ts` or a new
-   `cards3.ts`, zero engine changes.
-5. **Milestone 2 — faction demands as a live mechanic.** Issue dated, formal
-   demands when patience drops, escalating murmur → formal → ultimatum, and
-   spawn a card when one expires.
-6. **Milestone 3 — character-driven events.** Spawn cards when a character's
-   `plotting` crosses a threshold. The data is already tracked.
-7. **Milestone 5 — mini-games.** Start with Budget Allocation and Cabinet
-   Negotiation; the `minigame` hook already exists on `CardDef`.
+1. **Start `docs/DESIGN_V2.md` §4 — the roguelike layer.** Begin with §4.1,
+   the run structure: 3 acts of ~6 days each, ending in a confidence vote,
+   replacing the current flat 30-day run. Build this as its own shippable,
+   playtestable slice — do not also build the shop (§4.2), mandates (§4.3),
+   or run deck (§4.4) in the same pass.
+2. **Then STOP and report back for playtest**, the same way Milestone 1 and
+   the Poster/Broadsheet rebuild were reported: what was built, how to test
+   it, any known bugs/limitations, then wait. Do not chain straight into
+   §4.2 without a check-in — that pattern is what got Phase 1 right three
+   times in a row.
+3. **After that slice is approved, continue in order**: §4.2 (the Back Room
+   shop) → §4.3 (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each
+   its own shippable slice per `docs/DESIGN_V2.md` §6's checklist.
+4. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
+   original proposal, migrating from 10 stats/7 factions to a native 3/5
+   model) — this was implicitly resolved by the same playtest approval and
+   is not needed unless a future note specifically asks for it again.
+
+**Backlog — not the current task, but worth knowing about if Phase 2 stalls
+or the owner asks for something else instead:**
+
+- **More content.** Still true (see limitations #1): ~20 more standard cards
+  and ~6 more alerts would fix the "thins out after day ~18" problem — pure
+  content work in `src/game/content/cards2.ts` or a new `cards3.ts`, zero
+  engine changes. Note the roguelike run length is shortening to 18 days
+  (§4.1: 3×6), which independently reduces how exposed this gap is.
+- **Milestone 2 — faction demands as a live mechanic.** Issue dated, formal
+  demands when patience drops, escalating murmur → formal → ultimatum, and
+  spawn a card when one expires.
+- **Milestone 3 — character-driven events.** Spawn cards when a character's
+  `plotting` crosses a threshold. The data is already tracked.
+- **Milestone 5 — mini-games.** Start with Budget Allocation and Cabinet
+  Negotiation; the `minigame` hook already exists on `CardDef`.
 
 ---
 
@@ -447,6 +518,12 @@ tools/                        ← Playwright scripts for real-browser testing
    rebuild. The fix both times: put the critical action somewhere always
    visible (now: the top strap's `.strap-action`), not only at the bottom of
    scrollable content.
+10. **Bump `SAVE_VERSION` (`src/game/state.ts`, currently `2`) whenever
+    `GameState`'s shape changes.** Has not needed to happen since the
+    honorific/commitments fields were added. Phase 2 (acts, mandates, the
+    run deck, meta-progression) will very likely be the next time it does —
+    `save.ts` discards mismatched-version saves rather than crashing, so
+    this is safe as long as the bump actually happens.
 
 ### Writing rules (added after playtest rounds 1 and 3)
 
