@@ -303,6 +303,15 @@ abbr.term{
 .opt .locked{display:block;font-family:var(--mono);font-size:10.5px;color:var(--red);margin-top:4px;letter-spacing:.02em}
 .opt .c{font-family:var(--head);font-size:16px;color:var(--red);margin-left:auto;white-space:nowrap;flex:none}
 
+/* plain-text glossary footnote — replaces the old hover-only <abbr>, so a
+   term's definition is visible without a mouse (see Prose.tsx) */
+.card-glossary{
+  padding:8px 20px 14px;border-top:1px dashed rgba(22,19,15,.25);
+  display:flex;flex-direction:column;gap:4px;
+}
+.card-glossary span{font-family:var(--body);font-style:italic;font-size:11.5px;color:var(--ink-soft);line-height:1.4}
+.card-glossary b{font-style:normal;text-transform:capitalize}
+
 /* alert variant of the doc: red frame, "EXTRA" masthead corner */
 .doc.alert{border-color:var(--red-deep)}
 .doc.alert .dh{background:var(--red)}

@@ -1,6 +1,7 @@
 import type { GameState, CardDef, AlertDef, CardCategory } from '../../game/types';
 import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
+import { termsIn } from '../../game/glossary';
 import { Prose, Glossed } from './Prose';
 
 /**
@@ -19,6 +20,11 @@ export function CardView({
   const actor = card.actor ? CHARACTER_MAP[card.actor] : undefined;
   const faction = card.faction ? FACTIONS[card.faction] : undefined;
   const cat = (card.category ?? 'decision') as CardCategory;
+  const glossaryTerms = termsIn([
+    fill(card.body, s),
+    card.flavor ? fill(card.flavor, s) : '',
+    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+  ]);
 
   return (
     <div className="doc-wrap">
@@ -63,6 +69,13 @@ export function CardView({
             );
           })}
         </div>
+        {glossaryTerms.length > 0 && (
+          <div className="card-glossary">
+            {glossaryTerms.map((t) => (
+              <span key={t.term}><b>{t.term}</b>: {t.def}</span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -86,3 +86,25 @@ export function annotateTerms(text: string): TextPart[] {
 function escapeRe(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+/**
+ * Every glossary term that actually appears anywhere in `texts` (body,
+ * flavor, option hints, …), each returned once. Used to print a plain
+ * "Terms" footnote at the bottom of a card instead of hiding definitions
+ * behind an inline hover — see CardView.tsx.
+ */
+export function termsIn(texts: string[]): GlossaryEntry[] {
+  const found: GlossaryEntry[] = [];
+  const used = new Set<string>();
+  for (const text of texts) {
+    for (const entry of SORTED) {
+      if (used.has(entry.term)) continue;
+      const re = new RegExp(`\\b${escapeRe(entry.term)}\\b`, 'i');
+      if (re.test(text)) {
+        used.add(entry.term);
+        found.push(entry);
+      }
+    }
+  }
+  return found;
+}
