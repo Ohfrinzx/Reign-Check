@@ -99,12 +99,8 @@ abbr.term{
 
 .masthead{
   background:var(--ink);color:var(--paper);
-  display:grid;grid-template-columns:auto 1fr auto;align-items:center;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;
   position:relative;overflow:hidden;flex:none;
-}
-.masthead::after{
-  content:'';position:absolute;top:0;bottom:0;right:41%;width:128px;
-  background:var(--red);transform:skewX(-14deg);
 }
 .masthead .id{padding:11px 22px;position:relative;z-index:2;display:flex;align-items:center;gap:11px}
 .masthead .id .mark{
@@ -113,7 +109,16 @@ abbr.term{
 }
 .masthead .id .n{font-family:var(--head);font-size:23px;line-height:1;letter-spacing:.01em}
 .masthead .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.2em;color:#c9bfa8;margin-top:2px;text-transform:uppercase}
+
+/* the red stripe lives on .mid itself (not the whole masthead), so it is
+   always centered directly behind the Act/Day label no matter how wide the
+   left (nameplate) or right (buttons+ledger) columns end up being */
 .masthead .mid{position:relative;z-index:2;padding-left:24px;display:flex;align-items:center;justify-content:center}
+.masthead .mid::before{
+  content:'';position:absolute;top:0;bottom:0;left:50%;width:128px;
+  transform:translateX(-50%) skewX(-14deg);
+  background:var(--red);z-index:-1;
+}
 .masthead .mid .lbl{font-family:var(--sans);font-weight:800;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
 
 /* buttons live with the ledger, past the red stripe, so the header reads
