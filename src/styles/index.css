@@ -580,3 +580,127 @@ abbr.term{
 }
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes fadeOut{to{opacity:0}}
+
+/* =========================================================================
+   THE BACK ROOM — the end-of-day shop (docs/DESIGN_V2.md §4.2).
+
+   Deliberately NOT a new visual language: same cream card, same 3px ink
+   frame, same condensed headline as .doc, so the shop reads as the day's
+   last document rather than a menu bolted onto a newspaper. Offers are laid
+   out as classified ads down one column — each one carries its own price AND
+   its catch in plain text, because nothing needed to make the decision may
+   live behind a hover (ground rule 11).
+   ========================================================================= */
+
+.shop{
+  background:var(--paper);border:3px solid var(--ink);
+  box-shadow:8px 8px 0 rgba(22,19,15,.15);
+  animation:rise .42s cubic-bezier(.2,.9,.25,1) both;
+}
+.shop.big{border-color:var(--red);box-shadow:8px 8px 0 rgba(204,43,29,.18)}
+
+.shop-head{padding:13px 24px 11px;border-bottom:3px solid var(--ink);position:relative}
+.shop.big .shop-head{background:var(--ink);color:var(--paper);border-bottom-color:var(--red)}
+.shop-head .kicker{color:var(--red)}
+.shop.big .shop-head .kicker{color:var(--mustard)}
+.shop-head h1{
+  font-family:var(--head);font-size:33px;line-height:.94;margin:3px 0 5px;
+  text-transform:uppercase;letter-spacing:.005em;
+}
+.shop-sub{font-family:var(--body);font-size:14px;line-height:1.45;color:var(--ink-soft);max-width:56ch}
+.shop.big .shop-sub{color:#c9bfa8}
+.shop-purse{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;margin-top:9px;
+  color:var(--ink-soft);
+}
+.shop.big .shop-purse{color:#c9bfa8}
+.shop-purse b{font-family:var(--head);font-size:19px;letter-spacing:.01em;color:var(--ink);vertical-align:-1px}
+.shop.big .shop-purse b{color:var(--paper)}
+
+.shop-grid{display:flex;flex-direction:column}
+
+.offer{padding:12px 24px 13px;border-bottom:1px solid rgba(22,19,15,.2);position:relative}
+.offer:last-child{border-bottom:0}
+.offer.broke{opacity:.62}
+
+.offer-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.offer-top .k{
+  font-family:var(--black);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);padding:3px 9px;
+}
+.offer-top .rare-tag,
+.offer-top .unc-tag{
+  font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  border:1.5px solid currentColor;padding:2px 7px;
+}
+.offer-top .rare-tag{color:var(--red)}
+.offer-top .unc-tag{color:var(--teal)}
+.offer-top .num{
+  margin-left:auto;font-family:var(--black);font-size:11.5px;
+  width:22px;height:22px;flex:none;border:2px solid var(--ink);display:grid;place-items:center;
+}
+.offer.rare{background:linear-gradient(90deg, rgba(204,43,29,.055), transparent 62%)}
+
+.offer h2{
+  font-family:var(--head);font-size:22px;line-height:1.04;margin:0 0 3px;
+  text-transform:uppercase;letter-spacing:.005em;
+}
+.offer .seller{
+  font-family:var(--body);font-style:italic;font-size:12.5px;color:var(--ink-soft);
+  line-height:1.38;margin-bottom:7px;
+}
+
+.offer .line{
+  display:flex;gap:10px;align-items:baseline;
+  font-family:var(--sans);font-size:12.5px;line-height:1.4;margin-bottom:5px;
+}
+.offer .line .tag{
+  font-family:var(--black);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;
+  flex:none;width:96px;padding-top:2px;line-height:1.25;
+}
+.offer .line.up .tag{color:var(--teal)}
+.offer .line.down .tag{color:var(--red)}
+.offer .line.down{color:var(--red-deep)}
+.offer .line.none .tag{color:var(--ash)}
+.offer .line.none{color:var(--ash);font-style:italic}
+
+.offer-foot{display:flex;align-items:flex-end;gap:14px;margin-top:9px}
+.offer-foot .price{flex:1;min-width:0}
+.offer-foot .price > span:first-child{
+  display:block;font-family:var(--head);font-size:18px;letter-spacing:.01em;color:var(--ink);
+}
+.offer-foot .price .pays{color:var(--teal)}
+.offer-foot .price .kn{
+  display:block;font-family:var(--mono);font-size:10px;color:var(--ash);margin-top:2px;
+}
+.offer-foot .btn{padding:8px 18px;font-size:10.5px}
+.offer .locked{font-family:var(--mono);font-size:10.5px;color:var(--red);margin-top:7px;letter-spacing:.02em}
+
+.shop-receipt{padding:12px 24px 13px;border-top:2px solid var(--ink);background:var(--paper-2)}
+.shop-receipt .kicker{color:var(--red);margin-bottom:6px;display:block}
+.shop-receipt .line{display:flex;gap:12px;align-items:baseline;margin-bottom:3px}
+.shop-receipt .line .n{font-family:var(--black);font-size:12px;text-transform:uppercase}
+.shop-receipt .line .v{font-family:var(--mono);font-size:11px;color:var(--ink-soft);margin-left:auto;text-align:right}
+
+.shop-foot{
+  padding:14px 24px 16px;border-top:2px solid var(--ink);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.shop-foot .note{font-family:var(--body);font-style:italic;font-size:12px;color:var(--ash)}
+
+/* --- the rail's record of what you bought, visible for the whole run --- */
+.kept{
+  border-left:3px solid var(--ink);padding:6px 0 7px 9px;margin-bottom:9px;
+}
+.kept:last-child{margin-bottom:0}
+.kept.fav{border-left-color:var(--red)}
+.kept .n{font-family:var(--black);font-size:11.5px;text-transform:uppercase;line-height:1.2}
+.kept .d{font-family:var(--sans);font-size:11px;color:var(--ink-soft);line-height:1.35;margin-top:3px}
+.kept .c{font-family:var(--sans);font-size:10.5px;color:var(--red-deep);line-height:1.35;margin-top:3px}
+.kept .btn{margin-top:6px;padding:5px 11px;font-size:9.5px}
+.shop-purse .limit{font-family:var(--mono);font-size:11px;color:var(--red)}
+.shop.big .shop-purse .limit{color:var(--mustard)}
+.shop-closed{
+  padding:16px 24px;font-family:var(--body);font-style:italic;font-size:13.5px;
+  color:var(--ink-soft);line-height:1.5;border-bottom:1px solid rgba(22,19,15,.2);
+}

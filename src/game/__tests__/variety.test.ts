@@ -1,6 +1,6 @@
 import { it, expect } from 'vitest';
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, advanceToNextDay, activeCard } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop } from '../engine';
 import { makeRng } from '../rng';
 import type { GameState } from '../types';
 
@@ -29,7 +29,8 @@ it('does not repeat the same card within four days, and keeps days full', () => 
         s = chooseOption(s, opts[rng.int(opts.length)].id);
       } else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
-      else if (s.phase === 'night') s = advanceToNextDay(s);
+      else if (s.phase === 'night') s = openShop(s);
+      else if (s.phase === 'shop') s = leaveShop(s);
     }
   }
   // follow-up cards can legitimately be re-queued by a decision, so allow 1;

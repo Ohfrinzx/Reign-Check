@@ -3,7 +3,7 @@ import type {
 } from './types';
 import { STAT_KEYS } from './types';
 import { makeRng } from './rng';
-import { applyEffects } from './effects';
+import { applyEffects, mergeDeltas } from './effects';
 import { CARDS, CARD_MAP } from './content/cards';
 import { CARDS2 } from './content/cards2';
 import { FOLLOWUPS } from './content/followups';
@@ -13,6 +13,12 @@ import { clampStat } from './stats';
 import { checkEndings } from './content/endings';
 import { computeBudget } from './economy';
 import { NUM_ACTS, isActEndDay } from './state';
+import { SHOP_MAP } from './content/shop';
+import type { ShopItemDef } from './content/shop';
+import {
+  buyLimit, dailyFromOwned, isActRoom, rememberOffers, rollStock, roomIsClosed,
+  shopOpensTonight, shopPrice,
+} from './shop';
 
 /* ------------------------------------------------------------- registries */
 
@@ -182,6 +188,12 @@ function dayUpkeep(s: GameState, rng: Rng) {
       notes.push(`Commitment ended: ${c.label}.`);
     }
   }
+
+  // --- advisors and policies you bought in the Back Room do their work.
+  // This is data, not code: each owned item's `daily` block is merged in
+  // shop.ts and pushed through applyEffects() like anything else.
+  const owned = dailyFromOwned(s);
+  if (owned) applyEffects(s, owned, rng, 'shop:daily');
 
   // --- the national accounts run whether you attend to them or not
   const budget = computeBudget(s);
@@ -517,6 +529,127 @@ function moodLine(s: GameState): string {
   if (net > -14) return 'A bad day. The kind that is only obvious in retrospect.';
   return 'A genuinely terrible day. Somebody in this building is writing it down.';
 }
+
+/* ----------------------------------------------------------- the Back Room
+ *
+ * The whole shop needs exactly ONE engine hook: resolve a purchase through
+ * applyEffects(), the same single mutation entry point a card option uses
+ * (ground rule 2, and docs/DESIGN_V2.md §4's architecture principle).
+ * Everything else — what is for sale, what it costs, what it does — is data
+ * in content/shop.ts, so adding items needs no change in this file.
+ */
+
+/** Night → the Back Room, or straight to tomorrow on the run's last night. */
+export function openShop(prev: GameState): GameState {
+  const s = clone(prev);
+  if (!shopOpensTonight(s)) return advanceToNextDay(s);
+
+  s.shopBuysTonight = 0;
+  withRng(s, (rng) => {
+    s.shopStock = rollStock(s, rng);
+  });
+  if (!s.shopStock.length) return advanceToNextDay(s);
+
+  s.shopRecent = rememberOffers(s, s.shopStock);
+  s.phase = 'shop';
+  return s;
+}
+
+/**
+ * Buy one item from tonight's stock. In the nightly room that closes the room;
+ * in an act room the rest of the stock stays on offer (see buyLimit()).
+ */
+export function buyShopItem(prev: GameState, itemId: string): GameState {
+  const s = clone(prev);
+  if (s.phase !== 'shop') return s;
+  if (!s.shopStock.includes(itemId)) return s;
+  if (roomIsClosed(s)) return s;
+
+  const def: ShopItemDef | undefined = SHOP_MAP[itemId];
+  if (!def) return s;
+
+  const price = shopPrice(s, def);
+  if (price > s.stats.treasury) return s;
+
+  // The price, then what you bought — both through applyEffects, so the money
+  // lands in RunStats and any owned modifier applies to both.
+  const paid = withRng(s, (rng) => applyEffects(s, { stats: { treasury: -price } }, rng, `shop:${def.id}`));
+  const got = withRng(s, (rng) => applyEffects(s, def.effects, rng, `shop:${def.id}`));
+
+  if (def.kind === 'advisor' || def.kind === 'policy') s.owned.push(def.id);
+  if (def.kind === 'favour') s.heldFavours.push(def.id);
+
+  s.shopBought.push(def.id);
+  s.shopBuysTonight += 1;
+  s.shopStock = s.shopBuysTonight >= buyLimit(s)
+    ? []
+    : s.shopStock.filter((id) => id !== def.id);
+  s.stat.dealsStruck += 1;
+  s.stat.bigMoments.push({ day: s.day, text: `Back Room: ${def.name}.` });
+
+  s.log.push({
+    day: s.day,
+    kind: 'purchase',
+    title: def.name,
+    text: price < 0
+      ? `Taken in the Back Room. They paid $${Math.abs(price).toFixed(1)}B.`
+      : `Bought in the Back Room for $${price.toFixed(1)}B.`,
+    tone: def.downside ? 'mixed' : 'good',
+  });
+
+  s.lastOutcome = {
+    text: def.downside ? `${def.upside} ${def.downside}` : def.upside,
+    tone: def.downside ? 'mixed' : 'good',
+    cardTitle: def.name,
+    optionLabel: priceLabel(price),
+    deltas: mergeDeltas(paid, got),
+  };
+  return s;
+}
+
+/** Spend a favour you are holding. Available on any day, not only in the shop. */
+export function useFavour(prev: GameState, itemId: string): GameState {
+  const s = clone(prev);
+  const idx = s.heldFavours.indexOf(itemId);
+  if (idx < 0) return s;
+
+  const def = SHOP_MAP[itemId];
+  if (!def?.use) return s;
+
+  s.heldFavours.splice(idx, 1);
+  const deltas = withRng(s, (rng) => applyEffects(s, def.use!.effects, rng, `favour:${def.id}`));
+
+  s.log.push({
+    day: s.day,
+    kind: 'purchase',
+    title: def.name,
+    text: def.use.text,
+    tone: 'good',
+  });
+  s.lastOutcome = {
+    text: def.use.text,
+    tone: 'good',
+    cardTitle: def.name,
+    optionLabel: def.use.label,
+    deltas,
+  };
+  return s;
+}
+
+/** Leave the Back Room without buying anything else. */
+export function leaveShop(prev: GameState): GameState {
+  const s = clone(prev);
+  s.shopStock = [];
+  s.lastOutcome = undefined;
+  return advanceToNextDay(s);
+}
+
+function priceLabel(price: number): string {
+  return price < 0 ? `Took $${Math.abs(price).toFixed(1)}B` : `Paid $${price.toFixed(1)}B`;
+}
+
+/** Re-exported so the UI never has to reach into shop.ts and content/shop.ts both. */
+export { isActRoom };
 
 /** Night → next day. */
 export function advanceToNextDay(prev: GameState): GameState {

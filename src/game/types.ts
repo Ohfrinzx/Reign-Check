@@ -377,7 +377,7 @@ export interface Rng {
 
 export interface LogEntry {
   day: number;
-  kind: 'decision' | 'event' | 'alert' | 'consequence' | 'system' | 'news';
+  kind: 'decision' | 'event' | 'alert' | 'consequence' | 'system' | 'news' | 'purchase';
   title: string;
   text: string;
   tone?: 'good' | 'bad' | 'mixed' | 'neutral';
@@ -401,6 +401,7 @@ export type Phase =
   | 'alertResolve'
   | 'minigame'
   | 'night'
+  | 'shop'
   | 'ended';
 
 export interface PendingCard {
@@ -458,6 +459,23 @@ export interface GameState {
   alertsToday: number;
   lastAlertDay: number;
 
+  /* ------------------------------------------------- the Back Room (shop)
+   * All four are plain string-id arrays, so the save stays JSON and adding a
+   * new shop item needs no engine change (ground rules 1 and 5). Definitions
+   * live in content/shop.ts; the logic that reads them is in shop.ts. */
+  /** ids on offer in tonight's Back Room */
+  shopStock: string[];
+  /** advisors and policies you own — their `daily`/`lossMult` rules are live */
+  owned: string[];
+  /** favours bought and not yet used */
+  heldFavours: string[];
+  /** every shop id bought this run, for `once` gating and the legacy report */
+  shopBought: string[];
+  /** rolling window of recently offered ids, so stock does not repeat nightly */
+  shopRecent: string[];
+  /** purchases made in tonight's room — the nightly room allows exactly one */
+  shopBuysTonight: number;
+
   log: LogEntry[];
   history: DaySummary[];
   newsQueue: string[];
@@ -470,6 +488,8 @@ export interface GameState {
 
 export interface RunStats {
   decisions: number;
+  /** purchases made in the Back Room */
+  dealsStruck: number;
   alertsSurvived: number;
   moneySpent: number;
   moneyTaken: number;

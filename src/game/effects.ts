@@ -4,6 +4,7 @@ import type {
 import { STAT_KEYS } from './types';
 import { clampStat } from './stats';
 import { FACTION_ORDER } from './content/country';
+import { ownedStatMult } from './shop';
 
 let idCounter = 0;
 function nextId(prefix: string, s: GameState) {
@@ -201,9 +202,13 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
 /**
  * Systemic coupling: a raw stat change is bent by the state of the world, so
  * the same choice does not cost the same thing on day 3 and day 23.
+ *
+ * This is also the one place advisors and policies bought in the Back Room
+ * bend a number — see shop.ts's ownedStatMult(). Adding a new item with a
+ * lossMult/gainMult needs no change here.
  */
 function applyCoupling(s: GameState, k: StatKey, d: number): number {
-  let out = d;
+  let out = d * ownedStatMult(s, k, d);
   switch (k) {
     case 'support':
       // A well-fed propaganda apparatus amplifies good news and muffles bad.

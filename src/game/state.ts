@@ -6,7 +6,11 @@ import { FACTION_ORDER, CHARACTERS } from './content/country';
 import { makeRng, randomSeed } from './rng';
 import { clampStat } from './stats';
 
-export const SAVE_VERSION = 3;
+/** Bump whenever GameState's shape changes — save.ts discards mismatched
+ *  saves rather than crashing (ground rule 10). 3→4: the Back Room's
+ *  shopStock/owned/heldFavours/shopBought/shopRecent fields and
+ *  RunStats.dealsStruck. */
+export const SAVE_VERSION = 4;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -112,7 +116,7 @@ const BASE_FACTION: Record<FactionId, Omit<FactionState, 'id'>> = {
 
 function emptyRunStats(): RunStats {
   return {
-    decisions: 0, alertsSurvived: 0, moneySpent: 0, moneyTaken: 0,
+    decisions: 0, dealsStruck: 0, alertsSurvived: 0, moneySpent: 0, moneyTaken: 0,
     peopleJailed: 0, peoplePromoted: 0, protestsCrushed: 0, protestsAppeased: 0,
     liesTold: 0, promisesKept: 0, promisesBroken: 0, coupAttempts: 0, ministersLost: 0,
     projectsBuilt: [], bigMoments: [],
@@ -229,6 +233,13 @@ export function createGame(opts: NewGameOptions = {}): GameState {
 
     alertsToday: 0,
     lastAlertDay: 0,
+
+    shopStock: [],
+    owned: [],
+    heldFavours: [],
+    shopBought: [],
+    shopRecent: [],
+    shopBuysTonight: 0,
 
     log: [
       {

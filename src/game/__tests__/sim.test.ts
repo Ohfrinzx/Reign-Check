@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, OPENINGS } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve,
-  continueAfterAlert, advanceToNextDay, activeCard, lookupCard,
+  continueAfterAlert, activeCard, lookupCard, openShop, leaveShop,
 } from '../engine';
 import { buildBriefing } from '../briefing';
 import { CARDS } from '../content/cards';
@@ -11,6 +11,9 @@ import { ALERTS } from '../content/alerts';
 import { STAT_KEYS, HIDDEN_KEYS } from '../types';
 import type { GameState } from '../types';
 import { makeRng } from '../rng';
+
+/** How the simulated player treats the Back Room. Overridden per test. */
+const shopPolicy: (s: GameState) => GameState = (s) => leaveShop(s);
 
 /** Play one full run with a policy function; returns the terminal state. */
 function playRun(seed: number, pick: (s: GameState, n: number) => number): GameState {
@@ -42,7 +45,12 @@ function playRun(seed: number, pick: (s: GameState, n: number) => number): GameS
         s = continueAfterAlert(s);
         break;
       case 'night':
-        s = advanceToNextDay(s);
+        // The Back Room opens at the end of every day; a player who buys
+        // nothing just walks through it.
+        s = openShop(s);
+        break;
+      case 'shop':
+        s = shopPolicy(s);
         break;
       default:
         throw new Error(`unexpected phase ${s.phase}`);
@@ -160,7 +168,8 @@ describe('simulation', () => {
         else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
         else if (s.phase === 'resolve') s = continueAfterResolve(s);
         else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
-        else if (s.phase === 'night') s = advanceToNextDay(s);
+        else if (s.phase === 'night') s = openShop(s);
+        else if (s.phase === 'shop') s = leaveShop(s);
       }
       expect(s.flags.__alertSeen ?? (s.phase === 'ended' ? 1 : 0), `seed ${i}`).toBeTruthy();
     }
