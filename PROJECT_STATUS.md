@@ -51,6 +51,20 @@
 > Read `docs/DESIGN_V2.md` in full before touching the UI, the display
 > layer, or starting Phase 2 — it records what was proposed vs. what
 > actually shipped for Phase 1, and has the complete Phase 2 spec.
+>
+> **Since then, the owner asked for the full plan beyond Phase 2 too** —
+> "finish and polish this game out with the proper architecture to continue
+> adding and building," plus keeping future iOS/mobile support in mind
+> without doing that work now. That plan now exists: `docs/DESIGN_V2.md` §4
+> was expanded with a content quota folded into each Phase 2 sub-step (so
+> "add more content" happens as part of building the systems, not as a
+> separate pass), §9 lays out Phases 3–5 (content/systems depth → mobile/iOS
+> → remaining nice-to-haves), and §10 gives the mobile guardrails to follow
+> while building Phase 2 (mainly: keep new engine logic in `src/game/` with
+> zero React/DOM, ground rule 11). None of this changes what to build right
+> now — it's still §4.1 first, per above — it just means the next several
+> check-ins after that already have a planned runway instead of stopping at
+> "what next?"
 
 ---
 
@@ -360,11 +374,11 @@ task.** It is listed here only as "not yet built", not as deferred; see the
 "WHERE WE STOPPED" block at the top of this file and `CLAUDE.md` for how to
 start it.
 
-Everything else below remains deliberately deferred, not forgotten, and
-still needs to be asked about before starting:
+Everything else below is Phase 3, 4, or 5 per `docs/DESIGN_V2.md` §9 — all
+genuinely deferred until Phase 2 ships and is playtested, and all still need
+to be asked about before starting:
 
-- **Mini-games** (Milestone 5). `MinigameKey` and `CardDef.minigame` exist in
-  the type system as the hook; no minigame components are implemented.
+**Phase 3 — content & systems depth (after Phase 2):**
 - **Faction demands as a live mechanic.** `FactionState.demand` and the
   `FactionDemand` type exist and the briefing renders impatience, but nothing
   issues formal, dated faction demands yet (Milestone 2).
@@ -372,7 +386,23 @@ still needs to be asked about before starting:
   character's own plotting score. `plotting` is tracked and feeds hidden
   pressures, but no card is yet spawned *by* a character crossing a threshold
   (Milestone 3).
-- **Crisis chains** — multi-card escalating sequences (Milestone 4).
+- **Crisis chains** — multi-card escalating sequences (Milestone 4), worth
+  building against the Phase 2 act structure rather than the old flat 30
+  days.
+- **A balance pass** on the difficulty asymmetry and coup-ending rarity
+  below (limitations #2, #3) — deliberately held until Phase 2's shop
+  economy and 18-day acts change the difficulty curve anyway.
+
+**Phase 4 — mobile/iOS (not scheduled):**
+- See `docs/DESIGN_V2.md` §10. Nothing to build now; §10 lists what to
+  preserve (`src/game/` stays zero-React/DOM, including everything Phase 2
+  adds) and what to avoid introducing (a second hover-only mechanism for
+  anything gameplay-critical) so this stays possible later without a
+  rewrite.
+
+**Phase 5 — remaining nice-to-haves:**
+- **Mini-games** (Milestone 5). `MinigameKey` and `CardDef.minigame` exist in
+  the type system as the hook; no minigame components are implemented.
 - **Assassination, election-defeat and constitutional-removal endings.**
 - **Run history / legacy across runs** (Milestone 7) — note this overlaps
   with Phase 2's meta-progression (§4.5); worth building together rather than
@@ -385,12 +415,12 @@ still needs to be asked about before starting:
 
 | # | Issue | Severity | Notes |
 |---|-------|----------|-------|
-| 1 | **Content volume.** 25 draftable standard cards for a 30-day run at 3–5 cards/day means a long run will exhaust fresh material and start reusing cards once the recency window passes. | Medium | The recency window and once-per-run flags keep repeats ≥4 days apart, and the engine shortens the day rather than repeating, but a 30-day run still feels thinner after ~day 18. **This is the single biggest quality gap.** |
-| 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for human playtest rather than over-tuned blind. |
-| 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it (Milestone 4/6). |
+| 1 | **Content volume.** 25 draftable standard cards for a 30-day run at 3–5 cards/day means a long run will exhaust fresh material and start reusing cards once the recency window passes. | Medium | The recency window and once-per-run flags keep repeats ≥4 days apart, and the engine shortens the day rather than repeating, but a 30-day run still feels thinner after ~day 18. **Slated to be fixed as part of Phase 2 §4.4** (run deck), which calls for ~20 more standard cards + ~6 alerts; the shorter 18-day act structure also independently reduces exposure to this gap. |
+| 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for a Phase 3 balance pass (`docs/DESIGN_V2.md` §9) rather than tuned now, since Phase 2's shop economy will change the curve anyway. |
+| 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it — part of the same Phase 3 balance pass. |
 | 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
-| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. |
-| 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet. |
+| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. **Will very likely need to bump again for Phase 2** (ground rule 10). |
+| 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet — this is the real remaining gap for a future Phase 4 (mobile/iOS, `docs/DESIGN_V2.md` §10), not scheduled. |
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
 | 8 | The 2 provinces/civil-service factions (`grey`, `provinces`) have no display bar — by design (see `docs/DESIGN_V2.md` §3.2) — but a player who never happens to draw Grebs's or Kostyn's cards has no way to check their standing at all. | Low | They still fully drive effects underneath; this is a pure visibility gap, not a simulation gap. |
@@ -415,27 +445,35 @@ section used to branch on. Do this, in order:**
    times in a row.
 3. **After that slice is approved, continue in order**: §4.2 (the Back Room
    shop) → §4.3 (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each
-   its own shippable slice per `docs/DESIGN_V2.md` §6's checklist.
+   its own shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author
+   content as part of each slice, not separately** — §4.2 carries its own
+   shop-item quota (~8 advisors/8 policies/8 favours), §4.3 carries a
+   mandate quota (2–4 more beyond the 4 already specified), and §4.4 is
+   where the long-standing "~20 more standard cards + ~6 alerts" content gap
+   (limitation #1) gets closed, not a separate pass — see `docs/DESIGN_V2.md`
+   §4 for the exact quotas and §4.6 for suggested data shapes.
 4. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
    is not needed unless a future note specifically asks for it again.
+5. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
+   (`docs/DESIGN_V2.md` §9): faction demands as a live mechanic (Milestone
+   2), character-driven events (Milestone 3), crisis chains (Milestone 4),
+   then a balance pass on the difficulty asymmetry and coup-ending rarity
+   (limitations #2/#3) now that the shop economy and 18-day acts have
+   changed the curve. Do not start Phase 3 before Phase 2 is done — building
+   these against the old flat-day model would be work that has to be redone
+   against the act structure.
 
-**Backlog — not the current task, but worth knowing about if Phase 2 stalls
-or the owner asks for something else instead:**
+**Backlog — Phase 4/5 items, not scheduled, see `docs/DESIGN_V2.md` §9–10
+for the full reasoning:**
 
-- **More content.** Still true (see limitations #1): ~20 more standard cards
-  and ~6 more alerts would fix the "thins out after day ~18" problem — pure
-  content work in `src/game/content/cards2.ts` or a new `cards3.ts`, zero
-  engine changes. Note the roguelike run length is shortening to 18 days
-  (§4.1: 3×6), which independently reduces how exposed this gap is.
-- **Milestone 2 — faction demands as a live mechanic.** Issue dated, formal
-  demands when patience drops, escalating murmur → formal → ultimatum, and
-  spawn a card when one expires.
-- **Milestone 3 — character-driven events.** Spawn cards when a character's
-  `plotting` crosses a threshold. The data is already tracked.
-- **Milestone 5 — mini-games.** Start with Budget Allocation and Cabinet
-  Negotiation; the `minigame` hook already exists on `CardDef`.
+- **Mobile/iOS (Phase 4).** Not scheduled. Keep `src/game/` free of React/
+  DOM dependency as Phase 2 is built (ground rule 11) so this stays possible
+  later without a rewrite.
+- **Mini-games (Phase 5, Milestone 5).** Start with Budget Allocation and
+  Cabinet Negotiation; the `minigame` hook already exists on `CardDef`.
+- **Sound, remaining ending types, run history/legacy (Phase 5).**
 
 ---
 
@@ -524,6 +562,13 @@ tools/                        ← Playwright scripts for real-browser testing
     run deck, meta-progression) will very likely be the next time it does —
     `save.ts` discards mismatched-version saves rather than crashing, so
     this is safe as long as the bump actually happens.
+11. **Keep all game logic, including everything Phase 2 adds, in
+    `src/game/` with zero React or DOM dependency.** This is what keeps a
+    future mobile/iOS port (`docs/DESIGN_V2.md` §10, not scheduled)
+    possible without a rewrite. Also: don't add a second hover-only
+    mechanism for anything gameplay-critical (a price, a trade-off, a
+    required condition) — the glossary's hover tooltip can stay as-is, but
+    nothing new should depend on hover alone for required information.
 
 ### Writing rules (added after playtest rounds 1 and 3)
 

@@ -26,10 +26,18 @@ Decisions made by the owner, in order:
 4. **Phase 1 declared complete; proceed to Phase 2.** *"So I believe Phase
    one playtests are complete... begin phase two of building."* No further
    Phase 1 polish is being requested — do not reopen it speculatively.
+5. **The owner asked for a full plan to "finish and polish" the game with
+   architecture that supports continued building, and asked that future
+   iOS/mobile support be kept in mind without doing that work now.** That
+   plan is section 9 (Phases 2 through 5, in order, with content quotas
+   folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
+   what to preserve and what to avoid, no mobile work scheduled).
 
 **What is NOT built yet**: the roguelike layer in section 4 (acts, the Back
 Room shop, mandates, a run deck, meta-progression). It is greenlit — start
-with §4.1 (run structure) as its own shippable slice; see `CLAUDE.md`.
+with §4.1 (run structure) as its own shippable slice; see `CLAUDE.md`. Read
+section 9 for what comes after Phase 2, and section 10 before writing any
+UI code, so mobile stays an open door rather than an afterthought.
 
 ---
 
@@ -179,15 +187,32 @@ detail view is wanted later, the data is already there.
 
 ## 4. The roguelike layer
 
-The owner wants unique runs, shops and meta-progression. The simplification
-above is the precondition: shops and relics are unreadable on top of 55
-numbers.
+The owner wants unique runs, shops and meta-progression, **and** more
+content — these are not competing asks. Each sub-section below is scoped as
+its own shippable slice (per §6) with a concrete content quota folded in, so
+"add more content" happens as part of building the systems that give new
+content somewhere to live, rather than as a separate, disconnected content
+sprint. The simplification in sections 1–3 is the precondition: shops and
+relics are unreadable on top of 55 numbers.
+
+**Architecture principle for all of 4.1–4.5, carried over from the existing
+discipline that has made 42 cards/9 alerts/9 endings need zero engine
+changes to add (ground rule 5):** each sub-system needs exactly one engine
+hook, built once, then everything else is data. Acts need one hook (the
+confidence-vote check). The shop needs one hook (resolve a purchase through
+`applyEffects()`, same as a card option). Mandates need one hook (apply a
+start-of-run effect + register a run-long rule). Once each hook exists,
+individual mandates/advisors/policies/favours are just objects in an array,
+exactly like cards are today — see §4.6 for suggested shapes.
 
 ### 4.1 Run structure
 
 A run becomes **3 acts of ~6 days** (18 days) instead of 30 flat days. Each
 act ends with a **confidence vote** — a real check against your current state
-rather than an arbitrary day counter.
+rather than an arbitrary day counter. *Content: none required — this is the
+one purely mechanical slice.* Suggested approach: reuse the existing ending-
+check pattern in `engine.ts`/`endings.ts` for the vote's pass/fail logic
+rather than inventing a parallel system.
 
 ### 4.2 Between acts: The Back Room
 
@@ -200,6 +225,13 @@ A shop screen. Spend MONEY on:
 - **Favours** — one-shot cards playable at any time. *"A Quiet Word: cancel one
   threat card."*
 - **Burn a file** — remove a card permanently from your run's deck.
+
+*Content target: ~8 advisors, ~8 policies, ~8 favours (24 items) to launch
+with — enough that the shop feels different each visit without being a huge
+authoring lift before the slice can ship. Expand the pool after playtesting,
+the same way standard cards have grown across `cards.ts`/`cards2.ts`.* This
+is real new game content, and the natural home for most of "I want to add
+more content."
 
 ### 4.3 Mandate — how you took power
 
@@ -214,7 +246,8 @@ unique rule for the whole run.
 | **The Accident** | everything neutral | You draw one extra card per day. |
 
 This is where "unique runs" actually comes from — not from procedural noise,
-but from a rule that changes how the whole run plays.
+but from a rule that changes how the whole run plays. *Content target: the 4
+above plus 2–4 more for variety (6–8 total) before calling this slice done.*
 
 ### 4.4 Deck
 
@@ -222,12 +255,73 @@ Today, events are drawn from a global weighted pool. In V2 the player has a
 **run deck** that shops add to and remove from. Situation cards still get
 injected by the world, but a growing share of what you see is what you built.
 That is the difference between "random things happen to me" and "I built this
-run".
+run". *Content target: this is where the long-standing content-volume gap
+(known limitation #1 — a 30-day run thins out after ~day 18) should actually
+get fixed: roughly ~20 more standard cards and ~6 more alerts, authored as
+part of this slice rather than deferred, since a run deck with too few cards
+to add/burn meaningfully defeats the point of this feature. Pure content
+work in `cards2.ts` or a new `cards3.ts`, zero engine changes (ground rule 5)
+— note the act structure also independently helps here, since a run is now
+18 days instead of 30.*
 
 ### 4.5 Meta-progression
 
 Completed runs unlock mandates, advisors and cards for future runs. Small,
-persistent, stored in `localStorage` next to the save.
+persistent, stored in `localStorage` next to the save (a separate key —
+this is cross-run data, not part of any one run's save, and must not be
+wiped by "delete save"/"restart run").
+
+**Suggested simplification, to de-risk this slice the same way the
+display-layer cut de-risked Phase 1's simplification:** ship 4.1–4.4 with
+*everything* unlocked by default first — every mandate and shop item
+available from run one. Layer in actual locked-by-default content and real
+unlock conditions as a follow-up once the base loop (acts → shop → mandate →
+deck) is built and playtested, rather than gating content behind a
+progression system on the first pass. This keeps the biggest, riskiest slice
+of Phase 2 (4.1–4.4) from also having to get a meta-progression system right
+on the first attempt. *Content: whatever of §4.3/§4.2's pool ends up
+held back for unlocks — no new authoring beyond what 4.2/4.3 already
+produced.*
+
+### 4.6 Suggested data shapes (a starting sketch, not gospel)
+
+These are suggestions for whoever builds each slice to adapt, in the same
+spirit as the rest of this document — not a locked spec. Follow the existing
+`CardDef`/`Effects` patterns in `types.ts`/`effects.ts` rather than inventing
+a parallel shape where an existing one already fits:
+
+```ts
+interface MandateDef {
+  id: string;
+  name: string;
+  flavor: string;
+  startEffects: Effects;   // reuse the existing Effects type — same shape a card outcome uses
+  ruleText: string;        // plain-English description shown to the player
+  // The rule itself: some mandates (Stairwell, Accident) are one-shot or
+  // additive and may fit inside startEffects/a flag effects.ts already
+  // checks. Others (Landslide's daily decay, Handover's shop discount) need
+  // effects.ts or the shop/day-upkeep logic to check a flag on the state —
+  // follow the existing pattern for regime axes / hidden pressures rather
+  // than adding a special case per mandate.
+}
+
+interface ShopItemDef {
+  id: string;
+  kind: 'advisor' | 'policy' | 'favour';
+  name: string;
+  cost: number;             // in MONEY, same unit as everywhere else
+  description: string;      // plain language, same writing rules as cards
+  oneShot?: boolean;        // favours are consumed on use; advisors/policies are not
+  effects?: Effects;        // policies/advisors: a permanent modifier, same shape as a card outcome's effects where possible
+  apply?: (s: GameState) => GameState; // for anything effects.ts's existing shape can't express
+}
+```
+
+A policy or advisor's "permanent" effect likely needs a small persistent
+list on `GameState` (e.g. `s.activePolicies: string[]`) that `effects.ts`'s
+coupling logic and `engine.ts`'s upkeep both check — the same shape as how
+`regime` axes already influence behaviour persistently, not a new parallel
+mechanism.
 
 ## 5. Visual direction — the desk (superseded by 5a/5b below)
 
@@ -487,3 +581,116 @@ with no accessible definition — rather than re-litigating every sentence.
 If further playtesting turns up more terms that need glossing, add them to
 `GLOSSARY` in `glossary.ts`; that is the intended extension point and needs
 no new UI work.
+
+## 9. The road beyond Phase 2 — Phases 3–5
+
+Written after the owner asked for a plan covering "finishing and polishing
+this game out with the proper architecture to continue adding and building."
+This is that plan. Phase 2 (section 4) is the current task; the phases below
+are sequenced after it, not concurrent with it — finish and playtest Phase 2
+in full (§4.1 through §4.5) before starting Phase 3, same discipline as
+every phase so far.
+
+### Phase 3 — Content & systems depth
+
+Everything here is genuinely deferred (needs an explicit go-ahead per
+`CLAUDE.md`), listed in the order it makes most sense to build:
+
+1. **Faction demands as a live mechanic** (Milestone 2 in `PROJECT_STATUS.md`
+   §4). Issue dated, formal demands when patience drops, escalating murmur →
+   formal → ultimatum, spawn a card when one expires. `FactionState.demand`
+   and the `FactionDemand` type already exist as the hook.
+2. **Character-driven events** (Milestone 3). Spawn a card when a
+   character's `plotting` crosses a threshold. The data is already tracked;
+   this is new spawn logic plus new cards.
+3. **Crisis chains** (Milestone 4). Multi-card escalating sequences — this
+   pairs naturally with the act structure from §4.1 (a chain could span an
+   act) and is worth revisiting with that structure in hand rather than
+   against the old flat 30-day timeline.
+4. **A balance pass.** Difficulty asymmetry (known limitation #2) and the
+   rare coup ending (#3) are real, but deliberately not tuned yet —
+   rebalancing now would be wasted work, since the shop economy and 18-day
+   acts from Phase 2 will change the difficulty curve regardless. Re-run the
+   existing balance probe (`npm test` → `balance.test.ts`) once Phase 2 is
+   playable and tune against that, not against the pre-roguelike numbers.
+
+Why this order and not sooner: all three systems (demands, character events,
+crisis chains) are additive content/logic that layers on top of whatever
+run structure exists. Building them against the old flat-day model and then
+having to reconcile them with acts would be double work.
+
+### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
+
+Not started, not scheduled. See section 10 below for what "keep it in mind"
+concretely means for Phase 2/3 work, and what Phase 4 itself would involve
+when it's actually picked up.
+
+### Phase 5 — Remaining nice-to-haves
+
+Lowest priority, no dependencies forcing an order: mini-games (Milestone 5 —
+`MinigameKey`/`CardDef.minigame` already exist as the hook; start with
+Budget Allocation and Cabinet Negotiation), sound, assassination/election-
+defeat/constitutional-removal endings, run history/legacy across runs (note
+this likely folds into Phase 2's meta-progression, §4.5, rather than being
+built twice).
+
+### What "finished and polished" means for this project
+
+Feature-complete for a 1.0 is Phases 2–3 done and balanced: the roguelike
+layer playable end to end with enough content that a run deck feels
+different each time, plus the systems-depth items above. Phases 4–5 are
+platform expansion and extra polish respectively, not required to call the
+game done — they're listed so the next several sessions of work have a
+clear runway instead of stopping at "what next?" after Phase 2.
+
+## 10. Mobile / iOS — deferred, but keep the door open
+
+The owner wants this eventually but explicitly does not want it slowing
+Phase 2 down: *"that may be pushed back to a different time for now as I
+iron this out before further complication, but keep that consideration in
+mind while building and coding this moving forward."* Concretely, that
+means one thing to preserve and a short list of things to avoid — nothing
+to build now.
+
+**The one thing to preserve — this is already done, don't undo it:**
+`src/game/` has zero React or DOM dependency (ground rule 1's discipline).
+This is what actually keeps iOS open, more than any specific UI choice.
+Whichever way a native port eventually happens — a **Capacitor**-wrapped
+build of this same web app (the lower-effort path: the existing React/CSS
+UI runs in a native WebView largely as-is, no rewrite), or a heavier native
+rewrite — the entire simulation (`effects.ts`, `engine.ts`, the content
+files, and whatever Phase 2 adds: the shop, mandates, run deck, meta-
+progression) ports untouched either way, because it was never coupled to a
+browser. **When building Phase 2's engine hooks (§4's "architecture
+principle"), keep them in `src/game/` with zero UI dependency, same as
+every existing system.** That is the single highest-leverage thing "keeping
+iOS in mind" means in practice.
+
+**Things to avoid introducing, without doing any mobile work now:**
+1. **Don't make anything gameplay-critical hover-only.** The glossary's
+   `<abbr title="…">` tooltip (`Prose.tsx`/`glossary.ts`) already is — it
+   works fine with a mouse and degrades acceptably on touch (most mobile
+   browsers show the title on long-press), so it does not need fixing now,
+   but don't add a *second* hover-only mechanism for anything that conveys
+   required information (a price, a trade-off, a required condition). If it
+   matters to the decision, it should be visible without hovering, the same
+   spirit as ground rule 9 (reachable without scrolling) — reachable
+   without a mouse is the same idea for a later touch target.
+2. **Don't deepen the desktop-only-viewport assumption beyond where it
+   already sits.** The right rail is already hidden below 1080px width
+   (known limitation #5) and that is fine to leave as-is — just don't add
+   new UI that assumes a mouse-hover state or a fixed pixel width with no
+   fallback path at all if it can reasonably use a relative unit or an
+   existing CSS variable instead.
+3. **Don't add a hard dependency on a desktop-only browser API.** Nothing
+   currently does this (keyboard shortcuts are a convenience layered on top
+   of click, per `App.tsx`'s keydown handler) — keep it that way.
+
+**What Phase 4 itself would actually involve, when it's picked up:** most
+likely Capacitor wrapping the existing build, plus the one real gap this
+list doesn't paper over — a responsive/touch layout tier for the Broadsheet
+UI (the right rail and multi-column layout need a real stacked/mobile
+treatment, not just "shrink it"). That is genuine design and layout work,
+comparable in size to the Poster/Broadsheet rebuild itself, and should be
+scoped and mocked up the same way that was — not squeezed in as an
+afterthought once Phase 2/3 are done.

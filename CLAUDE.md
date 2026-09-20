@@ -50,6 +50,26 @@ now gone through that build → report → playtest → iterate loop three times
 and it has worked well each time; don't abandon it just because the roguelike
 layer is a bigger feature.
 
+**"Add more content" is folded into this, not a separate task.** Each of
+§4.2–§4.4 in `docs/DESIGN_V2.md` carries its own content quota (e.g. ~8
+advisors/8 policies/8 favours for the shop; 2–4 more mandates beyond the 4
+already specified; ~20 more standard cards + ~6 alerts as part of building
+the run deck). Author that content as part of building the slice it belongs
+to, not as a separate pass before or after.
+
+**What comes after Phase 2, and how mobile/iOS fits in, is now planned in
+`docs/DESIGN_V2.md` §9 and §10** — read those too before starting. Short
+version: Phase 3 is content/systems depth (faction demands, character-driven
+events, crisis chains, a balance pass), Phase 4 is mobile/iOS (explicitly
+NOT scheduled), Phase 5 is remaining nice-to-haves (mini-games, sound). The
+one thing that matters for Phase 2 *right now* re: mobile: **any new engine
+logic (the shop, mandates, run deck, meta-progression) goes in
+`src/game/` with zero React/DOM dependency**, same as everything else there
+— that discipline, not any UI decision, is what keeps a later iOS port
+possible without a rewrite. See §10 for the full reasoning and what to
+avoid (mainly: don't add a second hover-only mechanism for anything
+gameplay-critical).
+
 **Recommended first slice: §4.1, the run structure.** Turn the flat 30-day
 run into 3 acts of ~6 days with a confidence-vote check at the end of each
 act (a real check against current state, not just a day counter — see §4.1).
@@ -111,6 +131,13 @@ tracks — read its header comment before changing what's on screen.
     construction as long as the bump actually happens. It has not needed to
     happen since the honorific/commitments fields were added; Phase 2 will
     very likely be the next time it does.
+11. **Keep all game logic — including everything Phase 2 adds — in
+    `src/game/` with zero React or DOM dependency.** This is the whole
+    reason a future mobile/iOS port stays possible without a rewrite (see
+    `docs/DESIGN_V2.md` §10). Don't add a second hover-only mechanism for
+    anything gameplay-critical (a price, a trade-off, a required condition)
+    either — the glossary's hover tooltip is allowed to stay as-is, but
+    nothing new should depend on hover alone to convey required information.
 
 ## Writing rules
 
@@ -221,14 +248,19 @@ tools/                     Playwright scripts for real-browser testing
 
 ## What is deliberately NOT built
 
-Mini-games, live faction demands as a formal mechanic, character-initiated
-betrayals, crisis chains, sound. Listed in `PROJECT_STATUS.md`. Do not start
-any of these without asking first.
+**The roguelike layer (acts/shop/mandates/run deck/meta-progression,
+`docs/DESIGN_V2.md` §4) IS greenlit — see "PHASE 2" above.** Build it in the
+staged order §4/§6 lay out, checking back in after each shippable slice,
+same as everything else in this project so far.
 
-**The roguelike layer (acts/shop/mandates/run deck/meta-progression) is the
-one exception — it IS greenlit, see "PHASE 2" above.** Build it in the
-staged order `docs/DESIGN_V2.md` §4/§6 lay out, checking back in after each
-shippable slice, same as everything else in this project so far.
+Everything else is genuinely deferred and needs an explicit go-ahead before
+starting — full detail and ordering in `docs/DESIGN_V2.md` §9 (Phases 3–5):
+faction demands as a live mechanic, character-initiated events, crisis
+chains, and a balance pass (Phase 3, comes after Phase 2 is done and
+playtested); mobile/iOS (Phase 4, not scheduled — see §10 for the
+guardrails to keep it possible without doing the work); mini-games, sound,
+and the remaining ending types (Phase 5). Do not start any of these without
+asking first.
 
 ## Git
 
