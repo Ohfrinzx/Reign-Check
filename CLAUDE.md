@@ -267,5 +267,33 @@ asking first.
 
 ## Git
 
-Work on `claude/confident-meitner-lc0bgc` (this is the repo's default branch).
-Commit with clear messages. Do not open a pull request unless asked.
+`claude/confident-meitner-lc0bgc` is the repo's actual default branch — the
+one the owner looks at. **Each Claude Code session gets its own separate
+working branch** (a fresh auto-named one, e.g. `claude/exciting-dijkstra-
+jtlmbh`), not `claude/confident-meitner-lc0bgc` directly, as a deliberate
+safety net so an in-progress session can't land bad code straight on
+default. Commit with clear messages. Do not open a pull request unless
+asked — merge directly (see below).
+
+**Standing workflow, owner-approved — do this every time, not just when
+asked:**
+
+1. Do the work, committing on the session's own branch as you go.
+2. Before telling the owner it's ready to playtest, run the full
+   verification pass: `npm test` (all suites must pass), `npm run build`
+   (typecheck + production build must be clean), and a real-browser check
+   for anything UI-facing (Playwright at 1366×700, or the existing
+   `tools/*.mjs` scripts) — not just "should work," actually run it.
+3. **Only if everything in step 2 passes**, merge the session branch into
+   `claude/confident-meitner-lc0bgc` yourself (`git merge`, direct push —
+   no PR needed) and push. If anything in step 2 fails, do NOT merge —
+   fix it and re-verify first.
+4. **Announce the merge explicitly, both before and after** — say you're
+   about to merge into the default branch right before doing it, and
+   confirm it succeeded (with the resulting commit) right after. The owner
+   needs to know exactly when a merge happened without having to ask.
+5. Only after the merge is confirmed, tell the owner it's ready to
+   playtest.
+
+If verification turns up a real failure, report that instead of merging —
+never merge broken or unverified work just to close out a session.
