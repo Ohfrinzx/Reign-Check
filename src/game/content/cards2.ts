@@ -11,7 +11,7 @@ export const CARDS2: CardDef[] = [
   faction: 'grey',
   stages: ['government', 'politics'],
   base: 8,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 7 + (50 - s.stats.power) * 0.12,
   body:
     'The Interior Minister resigned on Tuesday citing his health, which around here means either his health or a phone call.\n\nInterior runs the police, the provincial administration and the electoral register. It is the third most important job in the country and nobody outside this building can name who holds it.\n\nThere are three names on your desk.',
@@ -83,7 +83,7 @@ export const CARDS2: CardDef[] = [
   faction: 'sable',
   stages: ['government'],
   base: 7,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 6 + s.hidden.fear * 0.12 + (50 - s.factions.sable.loyalty) * 0.1,
   body:
     'Director Sarran wants a budget line that does not appear in the accounts laid before parliament.\n\n"$3 billion. It pays for the things that cannot be paid for openly, which are the things that have kept every government in this building alive since 1979." A pause. "Your predecessor approved it for nineteen years. I am telling you it exists because you are entitled to be the first person not to."',
@@ -156,7 +156,7 @@ export const CARDS2: CardDef[] = [
   category: 'economy',
   stages: ['development', 'government'],
   base: 7,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 6 + Math.max(0, 48 - s.stats.economy) * 0.25 + s.hidden.fiscal * 0.12,
   body:
     'Gas came in eleven per cent under contract and the cold snap in Gorsk has another nine days to run.\n\nSomething has to be rationed. The grid engineers have brought three plans and a pot of extremely bad coffee, and they are standing rather than sitting, which means they expect this to be quick.',
@@ -225,7 +225,7 @@ export const CARDS2: CardDef[] = [
   category: 'opportunity',
   stages: ['politics'],
   base: 6,
-  minDay: 3,
+  minDay: 2,
   weight: () => 6,
   body:
     'The country decorates forty people a year. It is entirely symbolic, costs about $20 million in medals, and is followed with an intensity that baffles every foreign diplomat who has tried to explain it home.\n\nThe list is drafted. There is room for one name that will be read as a statement, and everyone in the building knows which slot that is.',
@@ -317,7 +317,7 @@ export const CARDS2: CardDef[] = [
   faction: 'chorus',
   stages: ['afternoon', 'politics'],
   base: 6,
-  minDay: 3,
+  minDay: 2,
   weight: (s) => 5 + s.characters.vel.influence * 0.1 + Math.max(0, 50 - s.stats.legitimacy) * 0.1,
   body:
     'Sanna Vel has challenged you to ninety minutes, live, no moderator, no agreed questions.\n\nShe announced it on her walk to work, to two hundred thousand people, so the challenge is already a fact whatever you do about it.\n\nShe is thirty-four, a constitutional lawyer, and has never been caught out on a detail.',
@@ -401,7 +401,7 @@ export const CARDS2: CardDef[] = [
   faction: 'provinces',
   stages: ['government', 'development'],
   base: 6,
-  minDay: 3,
+  minDay: 2,
   weight: (s) => 5 + s.hidden.separatism * 0.2,
   body:
     'The ten-yearly census goes to print in eleven days and the civil service needs a decision on Question 9.\n\nQuestion 9 asks what language you speak at home. It has not been asked since 1994, when the answer was inconvenient. If it is asked, the country will officially learn how many Hadeni speakers live in the border region.\n\nNobody in this building knows the real number. Several people have guesses they will not say out loud.',
@@ -473,7 +473,7 @@ export const CARDS2: CardDef[] = [
   category: 'foreign',
   stages: ['development', 'government'],
   base: 6,
-  minDay: 3,
+  minDay: 2,
   weight: (s) => 5 + (s.stats.treasury < 35 ? 7 : 0),
   body:
     'Sereth would like to buy forty per cent of the Mavro container terminal, the naming rights to the national stadium, and Mavro Dockers FC.\n\nThe offer is $22 billion. There are no conditions and the paperwork is two pages. Their representative flew in this morning and would like to conclude today.\n\nSereth money arrives fast. What they want in return arrives later.',
@@ -594,6 +594,318 @@ export const CARDS2: CardDef[] = [
           factions: { chorus: { loyalty: +10 }, sable: { loyalty: +7 }, concord: { loyalty: -9 } },
           characters: { sarran: { loyalty: +7, trust: +7 }, adamek: { loyalty: -7 } },
           news: ['CHAIR DESCRIBES "A REQUEST WE TURNED DOWN", DECLINES TO NAME COUNTRY'],
+        },
+      },
+    },
+  ],
+},
+
+/* --------------------------------------------------------------- DAY ONE */
+
+{
+  id: 'old-cabinet',
+  title: 'The Cabinet You Inherited',
+  category: 'decision',
+  actor: 'grebs',
+  faction: 'grey',
+  stages: ['government'],
+  base: 8,
+  minDay: 1,
+  weight: (s) => 8 + s.hidden.corruption * 0.1,
+  body:
+    'Six of your ministers were appointed by your predecessor. None of them owe you anything, and all of them know their own ministry better than you do.\n\nGrebs puts a one-page list on your desk: who is competent, who is loyal to the old government, and who is both.\n\n"You can keep them, replace them, or wait. Every option tells the building something about you."',
+  flavor: 'Six ministers. Krast chose all of them.',
+  options: [
+    {
+      id: 'keep',
+      label: 'Keep the cabinet exactly as it is.',
+      hint: 'Free. Steady start. None of them owe their job to you.',
+      outcome: {
+        text:
+          'Nothing changes on the surface. The ministries keep running the way they always have, which this week counts as an achievement.\n\nGrebs approves in her own quiet way: she stops bringing you memos about them.',
+        tone: 'good',
+        effects: {
+          stats: { stability: +5, power: +1 },
+          regime: { technocracy: +5 },
+          factions: { grey: { loyalty: +6, patience: +4 } },
+          characters: { grebs: { loyalty: +5, trust: +4 } },
+        },
+      },
+    },
+    {
+      id: 'replace',
+      label: 'Replace three of them with your own people.',
+      hint: 'Free in money. Three ministries stop working properly while new appointees learn the job.',
+      outcome: {
+        text:
+          'The three new ministers are loyal to you personally and understand almost nothing about their departments yet.\n\nGrebs says nothing about the decision. She says a great deal about the paperwork it generates.',
+        tone: 'mixed',
+        effects: {
+          stats: { power: +6, information: -6, economy: -2 },
+          hidden: { corruption: +4 },
+          regime: { personalism: +9, patronage: +6 },
+          factions: { grey: { loyalty: -8, patience: -6 } },
+          characters: { grebs: { loyalty: -6, trust: -5 } },
+          remember: [{ who: 'grebs', text: 'You replaced three ministers in your first week.', weight: -2 }],
+        },
+      },
+    },
+    {
+      id: 'wait',
+      label: 'Make no changes yet. Watch them work first.',
+      hint: 'Free. You learn who is competent before you decide who is loyal.',
+      outcome: {
+        text:
+          'You say nothing to any of them. Two ministers report to you unprompted within the week. Four do not.\n\nGrebs approves of patience. She has seen impatience end governments.',
+        tone: 'good',
+        effects: {
+          stats: { information: +6 },
+          factions: { grey: { loyalty: +3 } },
+          characters: { grebs: { loyalty: +4, trust: +5 } },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'first-address',
+  title: 'Your First Address',
+  category: 'decision',
+  actor: 'doran',
+  stages: ['politics', 'afternoon'],
+  base: 7,
+  minDay: 1,
+  weight: () => 7,
+  body:
+    'The country has not heard your voice yet. Doran has booked ten minutes on every channel at 7pm, whether you use them or not.\n\n"They are not listening for policy," she says. "They are listening to find out what kind of person you are. You have ten minutes to show them, or they will decide it themselves."',
+  flavor: 'Ten minutes, on every channel, tonight.',
+  options: [
+    {
+      id: 'honest',
+      label: 'Tell them the truth: you do not have a plan yet.',
+      hint: 'Free. Honest, and untested leaders are not usually rewarded for saying so.',
+      outcome: {
+        text:
+          'You say, plainly, that you took this job nine days ago and are still finding out what is in it.\n\nThe clip runs everywhere. Some of the country finds it refreshing. Some finds it alarming. Both reactions are about equally loud.',
+        tone: 'mixed',
+        effects: {
+          stats: { legitimacy: +7, support: -2 },
+          regime: { reform: +7 },
+          characters: { doran: { trust: +4 } },
+        },
+      },
+    },
+    {
+      id: 'confident',
+      label: 'Project total confidence. Promise stability.',
+      hint: 'Free. Reassures people tonight with a promise you have not earned yet.',
+      outcome: {
+        text:
+          'You speak for ten minutes about steady hands and continuity, and mean perhaps six of those minutes.\n\nSupport rises overnight. Nobody has actually been reassured about anything specific.',
+        tone: 'mixed',
+        effects: {
+          stats: { support: +7, legitimacy: -2 },
+          hidden: { cult: +3 },
+          regime: { personalism: +6 },
+        },
+      },
+    },
+    {
+      id: 'skip',
+      label: 'Use the slot for a retrospective on your predecessor instead.',
+      hint: 'Free. Safe, forgettable, and says nothing about you at all.',
+      outcome: {
+        text:
+          'Ten minutes of Krast\'s old speeches run instead, with a short introduction from you at the start and end.\n\nNobody is offended. Nobody is impressed either.',
+        tone: 'neutral',
+        effects: {
+          stats: { legitimacy: +1 },
+          characters: { doran: { trust: -2 } },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'welcome-gift',
+  title: 'A Welcome Gift',
+  category: 'opportunity',
+  actor: 'adamek',
+  faction: 'concord',
+  stages: ['government', 'politics'],
+  base: 7,
+  minDay: 1,
+  weight: (s) => 7 + (s.stats.treasury < 40 ? 5 : 0),
+  body:
+    'Adamek sends a card before he sends himself: congratulations on the office, and a $4 billion "infrastructure contribution" to the treasury, no conditions attached, no meeting requested.\n\nEveryone in this building has learned what an unconditional gift from Adamek is worth. It has never once turned out to be unconditional.',
+  flavor: 'Rulf Adamek owns the port cranes, a bank, and a football club.',
+  options: [
+    {
+      id: 'accept',
+      label: 'Accept the money. Say thank you, nothing more.',
+      hint: 'Gains $4.0B. Owed to a man who collects debts precisely.',
+      outcome: {
+        text:
+          'The money clears the same day. Adamek sends no further message.\n\nHe does not need to send one. Everyone in the Free Zone already knows you took it.',
+        tone: 'mixed',
+        effects: {
+          stats: { treasury: +4 },
+          hidden: { corruption: +6 },
+          regime: { graft: +7 },
+          factions: { concord: { loyalty: +7, influence: +4 } },
+          characters: { adamek: { loyalty: +6, influence: +5 } },
+        },
+      },
+    },
+    {
+      id: 'refuse',
+      label: 'Return the gift. Publicly.',
+      hint: 'Turns down $4.0B. Costs him nothing and tells everyone where you stand.',
+      outcome: {
+        text:
+          'Your office returns the money with a one-line statement about the appearance of impropriety.\n\nAdamek has been refused before, by people who later took the second offer.',
+        tone: 'good',
+        effects: {
+          stats: { legitimacy: +6 },
+          hidden: { corruption: -4 },
+          regime: { reform: +6 },
+          factions: { concord: { loyalty: -4 }, chorus: { loyalty: +4 } },
+          characters: { adamek: { loyalty: -3 } },
+        },
+      },
+    },
+    {
+      id: 'redirect',
+      label: 'Accept it, and put it toward Gorsk\'s back pay instead of general funds.',
+      hint: 'Gains $4.0B, earmarked. Adamek notices what you spent his money on.',
+      outcome: {
+        text:
+          'The money clears and is gone again within the week, into wages the mines were already owed.\n\nHess notices where it went before Adamek\'s office issues a single statement about it.',
+        tone: 'good',
+        effects: {
+          stats: { treasury: +4, support: +4 },
+          hidden: { corruption: +2 },
+          factions: { concord: { loyalty: +2 }, combine: { loyalty: +6 } },
+          characters: { adamek: { loyalty: +2 }, hess: { loyalty: +5, trust: +4 } },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'state-funeral',
+  title: 'Arrangements for Krast',
+  category: 'decision',
+  stages: ['government', 'development'],
+  base: 6,
+  minDay: 1,
+  weight: () => 6,
+  body:
+    'Krast has been dead for nine days and has not yet been buried. The state funeral committee wants a decision on scale: a full state funeral with a public lying-in-state, or a private burial with a brief public notice.\n\nHis widow has not been consulted about either option. Nobody has thought to ask her.',
+  flavor: 'Nine days dead. Not yet buried.',
+  options: [
+    {
+      id: 'full',
+      label: 'Full state funeral. Three days of public mourning.',
+      hint: 'Cost: $2.0B. Nineteen years in office gets a send-off to match. You inherit the comparison.',
+      outcome: {
+        text:
+          'The lying-in-state draws lines that stretch for blocks. Three days of coverage, all of it about Krast.\n\nBy the fourth day the coverage is still about Krast, and you are the person standing next to the coffin in every photograph.',
+        tone: 'mixed',
+        effects: {
+          stats: { treasury: -2, legitimacy: +4, stability: +3 },
+          regime: { technocracy: +3 },
+          factions: { all: { loyalty: +1 } },
+        },
+      },
+    },
+    {
+      id: 'private',
+      label: 'A private burial. A short public notice.',
+      hint: 'Cost: $0.2B. Quick and cheap. Some people will call it disrespectful.',
+      outcome: {
+        text:
+          'The burial is small and over by Tuesday. The public notice is four sentences long.\n\nA few commentators call it graceless. Most people have already moved on to asking what you intend to do about the helicopters, the payroll, or the weather.',
+        tone: 'mixed',
+        effects: {
+          stats: { treasury: -0.2, legitimacy: -3, stability: +1 },
+        },
+      },
+    },
+    {
+      id: 'ask-widow',
+      label: 'Ask his widow what she wants, and do that.',
+      hint: 'Free. Costs you the chance to make it about you.',
+      outcome: {
+        text:
+          'She asks for a quiet service and a single line in the gazette: "He served." Nothing else.\n\nYou grant it exactly as asked. It is the least political funeral this country has held in decades.',
+        tone: 'good',
+        effects: {
+          stats: { legitimacy: +6, support: +3 },
+          regime: { reform: +4 },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'hess-first-meeting',
+  title: 'Hess Wants to Take Your Measure',
+  category: 'person',
+  actor: 'hess',
+  faction: 'combine',
+  stages: ['politics'],
+  base: 7,
+  minDay: 1,
+  weight: (s) => 7 + (50 - s.factions.combine.loyalty) * 0.1,
+  body:
+    'Bogdan Hess has asked for twenty minutes. He is not bringing a demand, a list, or a lawyer — he says he just wants to see who he will be dealing with for the next few years.\n\nHe does not sit down. He never does. He says the chairs are a tactic.',
+  flavor: 'Twenty-two years underground. Eighteen running the union.',
+  options: [
+    {
+      id: 'listen',
+      label: 'Give him the full twenty minutes. Let him talk.',
+      hint: 'Free. Costs you time and nothing else. He remembers who listens.',
+      outcome: {
+        text:
+          'He talks about the mines, his father, and a strike in 1994 that you were not alive for. He does not ask you for anything.\n\nHe shakes your hand on the way out. Doran later tells you he does not do that for everyone.',
+        tone: 'good',
+        effects: {
+          stats: { support: +2 },
+          factions: { combine: { loyalty: +6, patience: +4 } },
+          characters: { hess: { loyalty: +6, trust: +6 } },
+        },
+      },
+    },
+    {
+      id: 'brief',
+      label: 'Give him ten minutes. You have a full schedule.',
+      hint: 'Free. Efficient. He notices which of the twenty minutes you kept.',
+      outcome: {
+        text:
+          'He finishes what he came to say in nine minutes and leaves on the tenth, exactly on time.\n\n"Efficient," he says, on his way out. It is not a compliment.',
+        tone: 'mixed',
+        effects: {
+          factions: { combine: { patience: -3 } },
+          characters: { hess: { trust: -2 } },
+        },
+      },
+    },
+    {
+      id: 'reschedule',
+      label: 'Reschedule. Today is full.',
+      hint: 'Free today. He will remember being the one who got rescheduled.',
+      outcome: {
+        text:
+          'Doran reschedules him for next month. Hess says that is fine.\n\nHe does not raise his voice about it. He does not raise it again, either — he simply remembers.',
+        tone: 'bad',
+        effects: {
+          factions: { combine: { loyalty: -4, patience: -6 } },
+          characters: { hess: { trust: -5 } },
         },
       },
     },

@@ -1,57 +1,97 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: Phase 2's first slice (§4.1, run structure) is BUILT and
-> awaiting playtest. Do not start §4.2 (the Back Room shop) until the owner
-> has played this slice and signed off — see the block immediately below.
+> Last updated: Phase 2's first slice (§4.1, run structure) is BUILT and has
+> been through one full round of owner playtesting + fixes. Still iterating
+> on this slice — do not start §4.2 (the Back Room shop) until the owner
+> says this one is done. See the block immediately below.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
-> **§4.1 (acts + confidence vote) is built, tested, and waiting on a
-> playtest. Nothing else in Phase 2 (shop/mandates/run deck/meta-progression)
-> has been started. If you are a new agent picking this up cold:**
+> **§4.1 (acts + confidence vote) is built and has had one playtest-and-fix
+> round on top of it. Nothing else in Phase 2 (shop/mandates/run deck/
+> meta-progression) has been started. If you are a new agent picking this
+> up cold, read in this order:**
 >
-> **What shipped in this slice:** a run is now **3 acts of 6 days (18 days
+> **1. The slice itself:** a run is now **3 acts of 6 days (18 days
 > total)** instead of a flat 30. Each act ends with a **confidence vote** — a
 > real check of the player's Grip/Legitimacy composite (the same numbers
 > already on the masthead), not a day-counter formality. The threshold rises
-> each act (40 / 47 / 54, tuned against simulated play so it bites reckless
-> and mediocre runs measurably without ever touching careful/generous play).
-> Failing a vote ends the run immediately with a new ending
-> (`noConfidence`, `src/game/content/endings.ts`) — acts are real
-> checkpoints, not just a re-skinned day counter. Passing the final act's
-> vote is the existing survival ending. Concretely: `GameState.act` was
-> added (`types.ts`), `SAVE_VERSION` bumped 2→3 (`state.ts`), the vote logic
-> lives in `finishDay()` (`engine.ts`) reusing the existing
-> `checkEndings()`/`EndingDef` pattern rather than a parallel system, and the
-> masthead/briefing/night-review/intro screens were updated to show
-> Act N of 3 and to frame the vote (a same-day heads-up on act-end
-> mornings, the outcome in that night's "What came due today", and a
-> "Begin Act N →" button label right after a pass). All 13 existing tests
-> pass unchanged in intent — the balance probe now also reports how often
-> each policy loses the vote, confirming it fires (`~8%` of random play,
-> `~6%` of reckless play, `~2.5%` of careful play) without dominating the
-> other failure endings. `npm run build` and a real-browser pass
-> (`tools/verify.mjs` at 1366×700) are both clean, and a scripted playthrough
-> confirmed the Night Review vote line and act-transition button text render
-> correctly.
+> each act (40 / 47 / 54, tuned against simulated play). Failing a vote ends
+> the run immediately with a new ending (`noConfidence`,
+> `src/game/content/endings.ts`). Passing the final act's vote is the
+> existing survival ending. `GameState.act` was added (`types.ts`),
+> `SAVE_VERSION` bumped 2→3 (`state.ts`), the vote logic lives in
+> `finishDay()` (`engine.ts`) reusing the existing `checkEndings()`/
+> `EndingDef` pattern.
 >
-> **What was NOT touched in this slice, on purpose:** the Back Room shop
-> (§4.2), mandates (§4.3), the run deck (§4.4), and meta-progression (§4.5).
-> Per `CLAUDE.md`'s "PHASE 2" section and the owner's own build → report →
-> playtest → iterate loop, **stop here and get this slice played before
-> starting §4.2.**
+> **2. Playtest round 1 — what the owner found, and what was fixed:**
+> - Masthead was left-heavy (Brief me/Menu crowded the nameplate, the whole
+>   right side past the red stripe was empty). Fixed by moving the buttons
+>   to sit with the Ledger on the right.
+> - Two duplicated elements: the bottom "Begin the day"/"Begin Day N" button
+>   on the Briefing/Night screens (the top strap button already covers
+>   reachability) and the Money/Grip/Legitimacy ledger repeated on the front
+>   page (masthead already shows it). Both removed; the freed front-page
+>   space now holds a real itemized daily budget (`computeBudget()`,
+>   previously had no UI surface anywhere in the game).
+> - The glossary's hover-only `<abbr>` was retired entirely — `Prose`/
+>   `Glossed` (`src/ui/components/Prose.tsx`) now render plain text
+>   everywhere. Replaced with a plain-text "Terms" footnote at the bottom of
+>   the main decision card (`CardView.tsx`), listing any glossary term that
+>   specific card actually uses.
+> - Card voice: cut a recurring rhetorical tic — "[quiet action], which is
+>   [somehow] worse than/the point of X" — that made the player decode an
+>   implication instead of being told what happened (~30 instances across
+>   `cards.ts`/`cards2.ts`/`followups.ts`/`alerts.ts`). Every flavor line
+>   was rewritten to state a plain fact from the card's own body instead of
+>   mood-setting. No effects/mechanics touched — prose only.
+> - The header's red Act/Day badge was a fixed-width shape sized for the
+>   old, shorter label; once "Act N of 3 ·" was added it straddled the text
+>   messily. Now sized to the label text itself (padding, not a guessed
+>   width) — see `.masthead .mid .lbl` in `src/styles/index.css`.
+> - **Day-1 card repetition, diagnosed with data, not guesswork:** simulated
+>   300 new games and found only 6 of 31 standard cards had no `minDay`
+>   restriction, so day 1's 3–5 slots were drawing from the same tiny pool
+>   every run (top card in 85% of games). 25 cards were gated to `minDay: 2`
+>   or `3` for pure pacing reasons left over from the old flat-30-day
+>   design, with no actual narrative dependency on elapsed time. Loosened
+>   `minDay` on 19 of them and added 5 new day-1 cards
+>   (`old-cabinet`/`first-address`/`welcome-gift`/`state-funeral`/
+>   `hess-first-meeting` in `cards2.ts`). Day-1 variety is now 24 distinct
+>   cards, top one at 29%. **If a future session hears "I keep seeing the
+>   same cards" again for a LATER day (not day 1), run the same kind of
+>   simulation before assuming it's fixed** — `minDay` gating on other days
+>   was not audited, only day 1.
 >
-> **One deliberate scope call worth flagging for playtest feedback:** the act
-> length (18 days total) and the failure-on-vote-loss behavior were both
-> confirmed with the owner directly before building (not just inferred from
-> `docs/DESIGN_V2.md` — see the design doc's §4.1 note). If playtesting the
-> shorter run or the immediate-loss framing feels wrong, that is exactly the
-> kind of thing this checkpoint is for — say so before §4.2 starts.
+> All of round 2 is prose/UI/content-gating only — no engine mechanics were
+> touched. 13/13 tests pass, build is clean, and every visual change was
+> checked in a real headless-browser pass (Playwright, 1366×700) before
+> being called done, not just eyeballed in source.
+>
+> **3. Where this stands / what to do next:** this is round 1 of live
+> playtesting on the §4.1 slice, not round 1 of the whole Phase 2 feature.
+> The owner's framing: keep "iron[ing] out" this build before moving to the
+> next content-development step (§4.2, the Back Room shop). Concretely:
+> - If the next session opens with more playtest feedback on this same
+>   slice, handle it the same way this round was: don't guess at causes —
+>   simulate/measure where the game's own vitest+Playwright tooling makes
+>   that possible (see how the day-1 repetition question was answered
+>   above), make the targeted fix, verify with `npm test` + `npm run build`
+>   + a real browser check, commit with a clear message.
+> - Do NOT start §4.2 (shop)/§4.3 (mandates)/§4.4 (run deck)/§4.5
+>   (meta-progression) until the owner explicitly says this slice is done.
+> - **Branch note:** this session's work happens on
+>   `claude/exciting-dijkstra-jtlmbh` (per runtime instructions), which is
+>   **not** the repo's default branch — that's `claude/confident-meitner-lc0bgc`
+>   (per `CLAUDE.md`'s Git section). The owner has been merging one into the
+>   other via PR after each session. If a fresh agent's pushes don't appear
+>   where the owner is looking, check which branch they're viewing before
+>   assuming anything went wrong — see git log on both branches.
 >
 > **The rest of this "WHERE WE STOPPED" block (below) is the PRE-EXISTING
 > Phase 1 handover, kept for context on how the project got here — it is no
-> longer the current task, §4.1 above is:**
+> longer the current task, the block above is:**
 >
 > The owner played the real Poster/Broadsheet build (3 resources, 5
 > factions, the jargon glossary) and said, verbatim: *"Ok everything seems
@@ -473,20 +513,25 @@ to be asked about before starting:
 
 ## 6. Recommended next task
 
-**§4.1 is now built (see "WHERE WE STOPPED" at the top) and waiting on a
-playtest. Do this, in order:**
+**§4.1 is built and has had one playtest-and-fix round (see "WHERE WE
+STOPPED" at the top). Do this, in order:**
 
 1. ✅ **DONE.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3 acts of 6
    days each (18 total), ending in a confidence vote checked against Grip/
    Legitimacy, replacing the flat 30-day run. Shipped as its own slice; the
    shop (§4.2), mandates (§4.3), and run deck (§4.4) were deliberately not
    touched.
-2. ⬜ **STOP AND WAIT FOR PLAYTEST HERE.** Report back what was built (see
-   the top block), then wait for the owner to actually play it — the same
-   way Milestone 1 and the Poster/Broadsheet rebuild were reported. Do not
-   chain straight into §4.2 without a check-in — that pattern is what got
-   Phase 1 right three times in a row.
-3. **Once that playtest is positive, continue in order**: §4.2 (the Back Room
+2. ✅ **DONE — round 1 playtest fixes applied**, see "WHERE WE STOPPED":
+   header balance, duplicate UI removed, real budget panel, glossary moved
+   from hover to a plain-text footnote, card-voice rewrite, and a day-1
+   card-variety fix backed by simulation data.
+3. ⬜ **STOP AND WAIT FOR THE NEXT PLAYTEST HERE.** This round's fixes are
+   pushed but not yet confirmed by the owner as playing well. Do not chain
+   straight into §4.2 without that confirmation — handle any further
+   feedback on this slice the same way round 1 was handled (diagnose with
+   real data where the tooling allows it, fix, verify, commit) before
+   calling §4.1 done.
+4. **Once the owner says this slice is done, continue in order**: §4.2 (the Back Room
    shop) → §4.3 (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each
    its own shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author
    content as part of each slice, not separately** — §4.2 carries its own
@@ -495,11 +540,11 @@ playtest. Do this, in order:**
    where the long-standing "~20 more standard cards + ~6 alerts" content gap
    (limitation #1) gets closed, not a separate pass — see `docs/DESIGN_V2.md`
    §4 for the exact quotas and §4.6 for suggested data shapes.
-4. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
+5. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
    is not needed unless a future note specifically asks for it again.
-5. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
+6. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
    (`docs/DESIGN_V2.md` §9): faction demands as a live mechanic (Milestone
    2), character-driven events (Milestone 3), crisis chains (Milestone 4),
    then a balance pass on the difficulty asymmetry and coup-ending rarity

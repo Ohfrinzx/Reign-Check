@@ -198,7 +198,7 @@ export const CARDS: CardDef[] = [
   faction: 'concord',
   stages: ['government', 'development'],
   base: 7,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 7 + s.hidden.corruption * 0.22 + (s.stats.treasury < 30 ? 6 : 0),
   body:
     'Ilyana Grebs brings you a memo herself, which means it matters.\n\n"The Ilvet Free Zone moved $61 billion last quarter and paid $400 million in tax. That is not a loophole, {sir}. A loophole is an accident. This was built on purpose."',
@@ -372,7 +372,7 @@ export const CARDS: CardDef[] = [
   faction: 'sable',
   stages: ['politics', 'afternoon'],
   base: 8,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 8 + s.factions.sable.loyalty * 0.08 + s.hidden.fear * 0.1,
   body:
     'Director Sarran brings you a folder. It is eleven pages and it concerns somebody currently in your cabinet. She has not opened it.\n\n"You may have it, {sir}. I would only point out that once you know a thing, everyone can see that you know it."',
@@ -543,7 +543,7 @@ export const CARDS: CardDef[] = [
   faction: 'staff',
   stages: ['politics', 'government'],
   base: 6,
-  minDay: 3,
+  minDay: 2,
   weight: (s) => 5 + s.hidden.coup * 0.35,
   body:
     'Colonel Tern requests the routine six-monthly rotation of the Capital Garrison. Two battalions out to Gorsk, two fresh battalions in from the Kordiva depots.\n\nIt is genuinely routine. It has happened twenty-two times since 1994.\n\nIt is also the most consequential piece of paperwork on your desk this week, because the Capital Garrison is the only armed force inside the capital.',
@@ -698,7 +698,7 @@ export const CARDS: CardDef[] = [
   faction: 'provinces',
   stages: ['development', 'politics'],
   base: 6,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 6 + (s.stats.support < 45 ? 6 : 0) + s.hidden.unrest * 0.1,
   body:
     'Dovra Day is the national holiday. Four-hour parade, two hundred thousand people, and one tradition: the head of state walks the last kilometre on foot, in whatever weather there is.\n\nIt has rained in the capital for nine days straight. A lot of Velmorrans think the weather in the capital reflects how honest the government is.\n\nArchon Vask would like to know your plans.',
@@ -790,7 +790,7 @@ export const CARDS: CardDef[] = [
   actor: 'piek',
   stages: ['government', 'afternoon'],
   base: 7,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 7 + s.hidden.foreign * 0.15 + (s.stats.treasury < 35 ? 5 : 0),
   body:
     'Ostrene wants to fix the price of Velmorran lithium for five years. Their offer is eleven per cent below today\'s market price and sixteen per cent above what Brask thinks the market will be doing in a year.\n\nOstrene buys 44% of your exports. Their ambassador does not request meetings, he schedules them. He has scheduled this one for Thursday and sent the draft in advance.',
@@ -980,7 +980,7 @@ export const CARDS: CardDef[] = [
   category: 'decision',
   stages: ['development', 'politics'],
   base: 5,
-  minDay: 2,
+  minDay: 1,
   weight: () => 5,
   body:
     'The Velmorran Pigeon Federation has split in two.\n\nThe northern clubs say a bird released from a moving vehicle has not been properly released. The coastal clubs say that is "rich talk from people who own cars". Both have written to you. Between them they have 400,000 members and all of them vote.\n\nThey want a ruling from the head of state. They are completely serious.',
@@ -1062,7 +1062,7 @@ export const CARDS: CardDef[] = [
   faction: 'chorus',
   stages: ['politics', 'afternoon'],
   base: 6,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 5 + (50 - s.stats.legitimacy) * 0.15 + s.hidden.unrest * 0.12,
   body:
     'Sanna Vel walks the petition to your gate herself, live, with two hundred thousand people watching the stream.\n\nForty thousand signatures. One demand: repeal Article 19, the law that lets the Sable Office hold someone for ninety days without charge.\n\n"You did not write Article 19," she says. "That is exactly why you can repeal it."',
@@ -1160,7 +1160,7 @@ export const CARDS: CardDef[] = [
   actor: 'doran',
   stages: ['politics', 'night', 'afternoon'],
   base: 7,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 6 + s.hidden.coup * 0.15 + s.hidden.scandal * 0.12,
   body:
     'Doran shuts the door and uses your first name, which is how you know it is serious.\n\n"Somebody in this building is taking meetings they are not putting in the diary. I know because I am the person who keeps the diary." She lets that sit. "I can find out who. It will cost you something, and I want to be straight with you about what."',
@@ -1242,7 +1242,7 @@ export const CARDS: CardDef[] = [
   faction: 'concord',
   stages: ['politics', 'government'],
   base: 6,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 5 + (s.stats.treasury < 35 ? 8 : 0) + s.hidden.corruption * 0.15,
   body:
     'Adamek never says a number out loud. He writes it down and slides it across the desk.\n\nThe card says what Ilvet Instruments will put into the national infrastructure fund this quarter. It says $14 billion.\n\nOn the back, in the same handwriting, is the name of a ministry he would like a say in.',
@@ -1312,7 +1312,7 @@ export const CARDS: CardDef[] = [
   category: 'scandal',
   stages: ['afternoon', 'politics'],
   base: 5,
-  minDay: 3,
+  minDay: 2,
   once: true,
   weight: (s) => 4 + s.hidden.scandal * 0.25 + s.hidden.leak * 0.2,
   body:
@@ -1390,7 +1390,7 @@ export const CARDS: CardDef[] = [
   actor: 'brask',
   stages: ['government', 'night'],
   base: 6,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 5 + s.hidden.fiscal * 0.2,
   body:
     'Brask puts the green notebook on your desk and opens it. He has done this twice in nineteen years.\n\n"These are the real numbers. Not the folder ones. If you want, I will close it and we will use the folder, and I will never mention this meeting again." He does not look up. "I wanted you to know I was offering you both."',
@@ -1444,7 +1444,7 @@ export const CARDS: CardDef[] = [
   category: 'decision',
   stages: ['night', 'development'],
   base: 4,
-  minDay: 2,
+  minDay: 1,
   weight: (s) => 4 + (s.stats.legitimacy < 45 ? 5 : 0),
   body:
     'It has rained in the capital for nine days straight.\n\nA lot of Velmorrans believe the weather here reflects how honest the government is. The state weather service has formally asked for guidance on how to word its forecasts, which is a sentence that should not exist and is nevertheless on your desk.',
