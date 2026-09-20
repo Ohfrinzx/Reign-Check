@@ -30,17 +30,18 @@ body, outcome text, option hints, flavor text, and threat cards. 13 vitest
 tests pass and this was verified end to end in a real browser at 1366×700,
 the viewport that has caught every real layout bug so far.
 
-## PHASE 2 IS GREENLIT — START HERE
+## PHASE 2 IS GREENLIT — §4.1 IS BUILT, AWAITING PLAYTEST
 
-**The owner has approved starting the roguelike layer.** This is the next
-and only outstanding piece of work. It is fully specified in
-`docs/DESIGN_V2.md` section 4: **3 acts of ~6 days each** (instead of 30 flat
-days) ending in a confidence vote, an end-of-act shop ("**The Back Room**":
-advisors, policies, favours, burn-a-card), run-start **mandates** (a rolled
-or chosen starting condition + a whole-run rule), a **run deck** the shop
-adds to/removes from instead of a fixed global pool, and **meta-progression**
-across runs stored in `localStorage`. Read section 4 in full before writing
-any code — it has the exact mandate table, shop item categories, and the
+**The owner has approved starting the roguelike layer, fully specified in
+`docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
+each, ending in a confidence vote) has been built: see
+`PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for exactly what shipped,
+how it was tested, and what to check when playtesting it. **Do not start
+§4.2 (the Back Room shop), §4.3 (mandates), §4.4 (the run deck), or §4.5
+(meta-progression) until the owner has played §4.1 and signed off** — same
+build → report → playtest → iterate discipline as every milestone before
+this one. Read `docs/DESIGN_V2.md` section 4 in full before touching any of
+§4.2–§4.5 — it has the exact mandate table, shop item categories, and the
 reasoning for why depth should live in cards/combinations, not more UI.
 
 **Do this as its own vertical slice, the same way Milestone 1 and the
@@ -70,18 +71,15 @@ possible without a rewrite. See §10 for the full reasoning and what to
 avoid (mainly: don't add a second hover-only mechanism for anything
 gameplay-critical).
 
-**Recommended first slice: §4.1, the run structure.** Turn the flat 30-day
-run into 3 acts of ~6 days with a confidence-vote check at the end of each
-act (a real check against current state, not just a day counter — see §4.1).
-This alone is testable end-to-end (a run now has 3 "endings" to reach
-instead of 1) without yet touching the shop, mandates, or the run deck.
-Concretely this means: extending `GameState` (`src/game/types.ts`) with an
-`act` field alongside the existing `day`/`maxDays` (`types.ts:422-423`),
-adding the confidence-vote check to `engine.ts`'s end-of-run logic, and — per
-ground rule 1 below — **bumping `SAVE_VERSION`** in `src/game/state.ts`
-(currently `2`) since this changes `GameState`'s shape for the first time
-since the Poster rebuild. Do NOT build the shop, mandates, or run deck in
-the same pass; those are §4.2–§4.5 and are separate, later slices.
+**§4.1, the run structure — DONE.** The flat 30-day run is now 3 acts of 6
+days (18 total) with a confidence-vote check at the end of each act (a real
+check of the Grip/Legitimacy composite, not just a day counter — see §4.1 in
+`docs/DESIGN_V2.md` for the as-built details). `GameState.act` was added
+(`types.ts`), the vote runs through `engine.ts`'s `finishDay()` reusing the
+existing `checkEndings()` pattern, and `SAVE_VERSION` was bumped 2→3
+(`state.ts`). The shop, mandates, and run deck were deliberately NOT
+touched — those are §4.2–§4.5 and remain separate, later slices, not to be
+started until §4.1 is playtested and approved.
 
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
@@ -124,13 +122,12 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `2`) whenever
-    `GameState`'s shape changes** — adding fields for acts, mandates, the run
-    deck, or meta-progression all count. `save.ts` already discards saves
-    with a mismatched version rather than crashing, so this is safe by
-    construction as long as the bump actually happens. It has not needed to
-    happen since the honorific/commitments fields were added; Phase 2 will
-    very likely be the next time it does.
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `3`) whenever
+    `GameState`'s shape changes** — adding fields for mandates, the run deck,
+    or meta-progression all count. `save.ts` already discards saves with a
+    mismatched version rather than crashing, so this is safe by construction
+    as long as the bump actually happens. Last bumped 2→3 for §4.1's `act`
+    field; mandates/run-deck/meta-progression will likely be the next time.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see

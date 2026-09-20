@@ -3,7 +3,7 @@ import { COUNTRY } from '../../game/content/country';
 import { STAT_ORDER, money } from '../../game/stats';
 import { computeResources } from '../../game/display';
 import { buildBriefing, dateLine } from '../../game/briefing';
-import { currentOpening, HONORIFICS } from '../../game/state';
+import { currentOpening, HONORIFICS, NUM_ACTS, isActEndDay, justAdvancedAct } from '../../game/state';
 import { usd } from '../../game/economy';
 import { fill } from '../../game/text';
 
@@ -32,8 +32,8 @@ export function TitleScreen({
           why you are still alive and now in charge.
           <br /><br />
           You have {COUNTRY.population} people, an army, a secret police, five power blocs that all
-          want something, and a treasury held together by optimism. Parliament votes on confirming
-          you in thirty days. Nobody thinks you will get there.
+          want something, and a treasury held together by optimism. Parliament holds a confidence
+          vote roughly every six days, three times in all. Nobody thinks you will survive the first one.
         </p>
 
         <div className="name-field">
@@ -98,7 +98,7 @@ export function BriefingScreen({ s, onBegin }: { s: GameState; onBegin: () => vo
     <div className="screen">
       <div className="frontpage">
         <div className="fp-mast">
-          <div className="edition">DAY {s.day} OF {s.maxDays}<br />{dateLine(s.day)}<br />{COUNTRY.capital}</div>
+          <div className="edition">ACT {s.act} OF {NUM_ACTS} &middot; DAY {s.day} OF {s.maxDays}<br />{dateLine(s.day)}<br />{COUNTRY.capital}</div>
           <div className="title">The Velmorran<small>Office of the {COUNTRY.office}</small></div>
           <div className="weather">{b.weather}</div>
         </div>
@@ -106,6 +106,7 @@ export function BriefingScreen({ s, onBegin }: { s: GameState; onBegin: () => vo
         <div className="fp-strap">
           <span><b>{b.threatLevel.toUpperCase()}</b></span>
           <span>{b.threatNote}</span>
+          {isActEndDay(s) && <span className="sp">Parliament holds its confidence vote tonight.</span>}
           {s.day === 1 && <span className="sp">{opening.name}</span>}
         </div>
 
@@ -273,9 +274,9 @@ export function NightScreen({ s, onNext }: { s: GameState; onNext: () => void })
       </div>
 
       <div className="action-bar">
-        <span className="note">Day {s.day} of {s.maxDays}</span>
+        <span className="note">Act {s.act} of {NUM_ACTS} &middot; Day {s.day} of {s.maxDays}</span>
         <button className="btn btn-primary" onClick={onNext} style={{ marginLeft: 'auto' }}>
-          {s.day >= s.maxDays ? 'Face the confirmation vote →' : `Begin Day ${s.day + 1} →`}
+          {justAdvancedAct(s) ? `Begin Act ${s.act} →` : `Begin Day ${s.day + 1} →`}
         </button>
       </div>
     </div>

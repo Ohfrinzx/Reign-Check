@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, StatKey } from './game/types';
-import { createGame } from './game/state';
+import { createGame, justAdvancedAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   advanceToNextDay, activeCard, STAGE_META,
@@ -163,7 +163,7 @@ export default function App() {
           </div>
         </div>
         <div className="mid">
-          <span className="lbl">Day {game.day} / {game.maxDays}</span>
+          <span className="lbl">Act {game.act} of {NUM_ACTS} &middot; Day {game.day} / {game.maxDays}</span>
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
             Brief me
           </button>
@@ -194,7 +194,7 @@ export default function App() {
         )}
         {game.phase === 'night' && (
           <button className="strap-action" onClick={doContinue}>
-            {game.day >= game.maxDays ? 'Face the vote →' : `Begin Day ${game.day + 1} →`}
+            {justAdvancedAct(game) ? `Begin Act ${game.act} →` : `Begin Day ${game.day + 1} →`}
           </button>
         )}
       </div>
