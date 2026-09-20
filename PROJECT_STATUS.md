@@ -8,6 +8,62 @@
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
+> **§4.2 (the Back Room shop) CHUNK 1 IS BUILT AND AWAITING PLAYTEST.** The
+> owner greenlit it with one amendment to the spec: **the shop opens at the
+> end of EVERY day**, not only between acts. It was deliberately split into
+> two chunks; chunk 2 has NOT been started and should not be until the owner
+> has played chunk 1.
+>
+> **What chunk 1 is:** a two-size room. The **nightly room** offers 3 cheap-to-
+> mid items and sells you exactly one — taking something closes the room. The
+> **act room**, on the night an act's confidence vote is passed, offers 5 from
+> the whole pool including at least one expensive item, and sells you as much
+> as you can pay for. 17 items across four kinds: advisors (permanent
+> passives), policies (permanent rule changes), favours (one-shot, kept in the
+> right rail and spent on any later day) and deals (one-off transactions,
+> several of which PAY you and charge the real price elsewhere). Every item
+> states its price and its catch in plain text before you buy; only `rare`
+> items have no catch.
+>
+> **Architecture:** one engine hook, as §4 demands — `buyShopItem()` resolves
+> a purchase through `applyEffects()` exactly like a card option. Two small
+> ongoing hooks: `applyCoupling()` in `effects.ts` reads owned items'
+> `lossMult`, and `dayUpkeep()` in `engine.ts` applies their `daily` rules.
+> Everything else is data in `src/game/content/shop.ts`. `SAVE_VERSION` 3→4,
+> so **any in-progress owner save is discarded** — that is by design
+> (ground rule 10) and the owner should be told their old run will reset.
+>
+> **Pricing and variety were MEASURED, not guessed** — `shop.probe.ts` is the
+> instrument and it is kept in the repo for exactly that reason. First pass
+> was wrong: an unrestricted buyer bought all 17 items in a single run. That
+> produced the one-buy-a-night rule, a reprice against the real treasury curve
+> (median ~$35–40B), and the once-per-run rule. See `docs/DESIGN_V2.md` §4.2
+> for the table of what was found and what changed.
+>
+> **Known and deliberate:** 17 items is a small pool for 17 nightly visits —
+> an efficient buyer still sees ~12 of them. That is the pool-size ceiling and
+> it is what chunk 2 fixes (target ~35–40 items for a nightly shop, not the
+> ~24 the original between-acts spec asked for). **If the owner says the shop
+> feels samey, that is this, and the fix is content, not mechanics — run
+> `shop.probe.ts` before changing any rule.**
+>
+> **Also fixed in passing:** `tools/verify.mjs`, `tools/to-ending.mjs` and
+> `tools/playthrough.mjs` had been stale since the Poster rebuild (they still
+> looked for `Take Office`, `.card`, `.action-bar`, `.dossier`, `.daychip` and
+> the removed night-sheet button, so none of them could complete a run). All
+> three now run clean, handle the shop step, and are back to being a usable
+> merge gate.
+>
+> **Verified before merge:** 32/32 vitest tests pass (was 13, +19 shop tests),
+> `npm run build` clean, and all three Playwright tools run at 1366×700 with
+> zero console/page errors — a full 18-day run visiting 17 shops and making 12
+> purchases, an aggressive run to a non-survival ending, and a save/reload
+> resume across the version bump.
+>
+> ---
+>
+> ### The §4.1 block below is the previous slice, now superseded as the current task
+>
 > **§4.1 (acts + confidence vote) is built and has had one playtest-and-fix
 > round on top of it. Nothing else in Phase 2 (shop/mandates/run deck/
 > meta-progression) has been started. If you are a new agent picking this

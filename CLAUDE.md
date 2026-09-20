@@ -50,6 +50,17 @@ rather than treating the feedback as done and moving on. Read
 has the exact mandate table, shop item categories, and the reasoning for
 why depth should live in cards/combinations, not more UI.
 
+**§4.2, the Back Room shop — CHUNK 1 BUILT, awaiting playtest.** Owner
+amendment to the spec: the shop opens at the **end of every day**, not only
+between acts. The nightly room offers 3 items and sells you one; the act room
+(the night a confidence vote is passed) offers 5 including the expensive tier
+and sells you as much as you can pay for. 17 items in `src/game/content/shop.ts`,
+logic in `src/game/shop.ts`, one engine hook (`buyShopItem()` → `applyEffects()`),
+`SAVE_VERSION` bumped 3→4. Pricing and variety were measured with
+`src/game/__tests__/shop.probe.ts` — **run that probe before changing any shop
+rule.** Chunk 2 (grow the pool to ~35–40 items) is NOT started and should wait
+for the owner's playtest of chunk 1.
+
 **Do this as its own vertical slice, the same way Milestone 1 and the
 Poster/Broadsheet rebuild were done — build the smallest testable piece,
 then STOP and report back for playtest before continuing.** This project has
@@ -128,12 +139,13 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `3`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `4`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 2→3 for §4.1's `act`
-    field; mandates/run-deck/meta-progression will likely be the next time.
+    as long as the bump actually happens. Last bumped 3→4 for §4.2's shop
+    fields; mandates/run-deck/meta-progression will likely be the next time.
+    A bump discards the owner's in-progress run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see
@@ -192,7 +204,8 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 13 tests: integrity, 200 full runs, determinism, variety, glossary
+npm test           # 32 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, and 19 covering the Back Room shop
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -217,13 +230,16 @@ src/game/                 no React, no DOM, fully testable
   display.ts              engine state → what the player actually sees
                            (3 resources, 5 factions) — read this before
                            touching anything stat- or faction-related in the UI
+  shop.ts                 THE BACK ROOM — stock rolling, prices, owned-item
+                           rules. No React. Content lives in content/shop.ts
   glossary.ts             jargon term → plain definition, auto-applied to prose
   economy.ts              national accounts, budget lines, $ formatting
   stats.ts                stat metadata, bands, tooltips (still full 10 stats;
                            display.ts is what narrows this for the player)
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
-  content/                country, cards, cards2, followups, alerts, endings
+  content/                country, cards, cards2, followups, alerts, endings,
+                           shop (the 17 Back Room items — pure data)
                            (all UNCHANGED by the display-layer cut — still the
                            full 10-stat/7-faction effects)
 src/ui/
@@ -235,6 +251,7 @@ src/ui/
     Prose.tsx               renders card text, applies the glossary
   screens/
     Screens.tsx             Title, Briefing (front page), Night, Ending
+    Shop.tsx                 The Back Room + the rail's record of what you own
     Intro.tsx                the "Brief me" explainer overlay
 src/styles/index.css      the whole Poster design system
 public/fonts/              self-hosted type (Anton, Archivo Black, Libre

@@ -32,7 +32,7 @@ await page.waitForSelector('.frontpage');
 await page.waitForTimeout(400);
 await page.screenshot({ path: '/tmp/claude-0/shots/P-briefing.png', fullPage: false });
 
-let cards = 0, alerts = 0, days = 0, priced = 0;
+let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0;
 for (let i = 0; i < 220; i++) {
   if (await page.locator('.ending-title').count()) break;
   if (await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count()) {
@@ -42,10 +42,16 @@ for (let i = 0; i < 220; i++) {
     await page.locator('.alert-scrim .alert-card .opt:not([disabled])').nth(i % Math.max(1, aCount)).click();
   } else if (await page.locator('.alert-scrim .outcome').count()) {
     await page.locator('.alert-scrim .outcome .btn-primary').click();
-  } else if (await page.locator('.action-bar .btn-primary').count()) {
-    const t = await page.locator('.action-bar .btn-primary').innerText();
-    if (/Begin the day/.test(t)) days++;
-    await page.locator('.action-bar .btn-primary').click();
+  } else if (await page.locator('.shop .offer .btn-primary:not([disabled])').count()) {
+    // The Back Room: buy the first thing we can afford, then move on.
+    shopBuys++;
+    if (shopBuys === 1) await page.screenshot({ path: '/tmp/claude-0/shots/P-shop.png' });
+    await page.locator('.shop .offer .btn-primary:not([disabled])').first().click();
+  } else if (await page.locator('.strap-action').count()) {
+    const t = await page.locator('.strap-action').innerText();
+    if (/begin the day/i.test(t)) days++;
+    if (/back room/i.test(t)) shops++;
+    await page.locator('.strap-action').click();
   } else if (await page.locator('.stage-col .outcome').count()) {
     if (cards === 1) await page.screenshot({ path: '/tmp/claude-0/shots/P-outcome.png' });
     await page.locator('.stage-col .outcome .btn-primary').click();
@@ -54,20 +60,17 @@ for (let i = 0; i < 220; i++) {
     if (cards === 2) await page.screenshot({ path: '/tmp/claude-0/shots/P-card.png' });
     const hints = await page.locator('.stage-col .doc .opt .hint').allInnerTexts();
     if (hints.some(h => /\$\d/.test(h))) priced++;
-    // hover a glossary term if present, to confirm it renders
+    // the glossary is a plain-text footnote now, not a hover (see Prose.tsx)
     if (cards === 3) {
-      const term = page.locator('.stage-col abbr.term').first();
-      if (await term.count()) {
-        const title = await term.getAttribute('title');
-        notes.push('glossary term found on card 3: "' + (await term.innerText()) + '" -> ' + (title||'').slice(0,60));
-      }
+      const foot = page.locator('.stage-col .card-glossary span').first();
+      if (await foot.count()) notes.push('glossary footnote on card 3: ' + (await foot.innerText()).slice(0, 70));
     }
     const optCount = await page.locator('.stage-col .doc .opt:not([disabled])').count();
     await page.locator('.stage-col .doc .opt:not([disabled])').nth(i % Math.max(1, optCount)).click();
   } else break;
   await page.waitForTimeout(45);
 }
-notes.push(`days=${days} cards=${cards} alerts=${alerts} priced=${priced}`);
+notes.push(`days=${days} cards=${cards} alerts=${alerts} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys}`);
 
 if (await page.locator('.ending-title').count()) {
   notes.push('ENDING: ' + await page.locator('.ending-title').innerText());

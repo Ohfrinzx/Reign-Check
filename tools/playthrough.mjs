@@ -11,8 +11,11 @@ await page.screenshot({ path: '/tmp/claude-0/shots/01-title.png' });
 
 // name + take office
 await page.fill('.name-field input', 'Adrin Vo');
-await page.click('button:has-text("Take Office")');
-await page.waitForSelector('.dossier', { timeout: 5000 });
+await page.click('button:has-text("Take the job")');
+await page.waitForTimeout(400);
+const introBtn0 = page.locator('.intro-foot .btn-primary');
+if (await introBtn0.count()) { await introBtn0.click(); await page.waitForTimeout(300); }
+await page.waitForSelector('.frontpage', { timeout: 5000 });
 await page.screenshot({ path: '/tmp/claude-0/shots/02-briefing-day1.png', fullPage: true });
 
 const log = [];
@@ -27,7 +30,7 @@ for (let step = 0; step < 90; step++) {
   // breaking alert
   if (await page.locator('.alert-scrim .alert-card .opt').count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-ALERT.png`, fullPage: true }); }
-    log.push('ALERT: ' + (await page.locator('.alert-card .card-title').innerText()));
+    log.push('ALERT: ' + (await page.locator('.alert-card .doc h1').innerText()));
     const opts = page.locator('.alert-scrim .alert-card .opt:not([disabled])');
     await opts.nth(0).click();
     await page.waitForTimeout(160);
@@ -39,19 +42,29 @@ for (let step = 0; step < 90; step++) {
     await page.waitForTimeout(160);
     continue;
   }
-  // briefing
-  if (await page.locator('button:has-text("Begin the day")').count()) {
-    await page.click('button:has-text("Begin the day")');
+  // the Back Room
+  if (await page.locator('.shop').count()) {
+    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-shop.png`, fullPage: true }); }
+    const names = await page.locator('.shop .offer h2').allInnerTexts();
+    log.push('SHOP: ' + (names.join(' | ') || 'room closed'));
+    const buy = page.locator('.shop .offer .btn-primary:not([disabled])');
+    if (await buy.count()) { await buy.first().click(); await page.waitForTimeout(200); continue; }
+    await page.locator('.strap-action').click();
     await page.waitForTimeout(200);
     continue;
   }
-  // night
-  const nightBtn = page.locator('.night-sheet .btn-primary');
-  if (await nightBtn.count()) {
+  // night review
+  if (await page.locator('.night-sheet').count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-night.png`, fullPage: true }); }
     log.push('NIGHT: ' + (await page.locator('.night-head h2').innerText()));
-    await nightBtn.click();
+    await page.locator('.strap-action').click();
     await page.waitForTimeout(220);
+    continue;
+  }
+  // briefing (and anything else the top strap drives)
+  if (await page.locator('.strap-action').count()) {
+    await page.locator('.strap-action').click();
+    await page.waitForTimeout(200);
     continue;
   }
   // outcome
@@ -62,10 +75,10 @@ for (let step = 0; step < 90; step++) {
     continue;
   }
   // card
-  const cardOpts = page.locator('.stage-col .card .opt:not([disabled])');
+  const cardOpts = page.locator('.stage-col .doc .opt:not([disabled])');
   if (await cardOpts.count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-card.png`, fullPage: true }); }
-    log.push('CARD: ' + (await page.locator('.stage-col .card-title').innerText()));
+    log.push('CARD: ' + (await page.locator('.stage-col .doc h1').innerText()));
     await cardOpts.nth(0).click();
     await page.waitForTimeout(160);
     continue;
@@ -83,7 +96,7 @@ log.push('CONTINUE BUTTON AFTER RELOAD: ' + hasContinue);
 if (hasContinue) {
   await page.click('button:has-text("Continue — Day")');
   await page.waitForTimeout(500);
-  log.push('RESUMED OK: ' + (await page.locator('.daychip').count() ? 'yes' : 'no'));
+  log.push('RESUMED OK: ' + (await page.locator('.masthead .mid .lbl').count() ? 'yes' : 'no'));
   await page.screenshot({ path: '/tmp/claude-0/shots/98-resumed.png', fullPage: true });
 }
 

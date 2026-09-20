@@ -229,7 +229,55 @@ balance pass is still Phase 3). Passing act 3's vote with nothing else
 having ended the run resolves to the existing `survival` ending via
 `checkEndings(s, true)`. `SAVE_VERSION` bumped 2→3.
 
-### 4.2 Between acts: The Back Room
+### 4.2 The Back Room — CHUNK 1 BUILT, awaiting playtest
+
+**Owner amendment to this section, made when the slice was greenlit:** the
+shop opens at the **end of every day**, not only between acts. The spec below
+was written for a between-acts shop; what shipped is a two-size room:
+
+- **the nightly room** — 3 offers from the cheap-to-mid `small` pool, and it
+  sells you **exactly one thing**. Taking something closes the room.
+- **the act room** — on the night an act's confidence vote is passed, 5 offers
+  from the whole pool, guaranteed to include at least one expensive `big`
+  item, and it sells you as much as you can pay for.
+
+Every item states its price AND its catch in plain language before you buy.
+`rarity: 'rare'` is the only kind allowed to have no catch, and rare items are
+priced for it. The four downside mechanisms are the ones the engine already
+had — an immediate cost in another resource, a recurring `commitments` line, a
+`schedule`/`queueCard` consequence that arrives later, and raised `hidden`
+pressure that surfaces as a threat card.
+
+**As built (chunk 1):** `content/shop.ts` (17 items, all data),
+`shop.ts` (logic, no React), one engine hook — `buyShopItem()` resolves a
+purchase through `applyEffects()` exactly like a card option — plus one
+ongoing hook in `effects.ts`'s `applyCoupling()` for owned advisors'/policies'
+`lossMult`, and one in `dayUpkeep()` for their `daily` rules. `Phase` gained
+`'shop'`; `GameState` gained `shopStock`/`owned`/`heldFavours`/`shopBought`/
+`shopRecent`/`shopBuysTonight`; `SAVE_VERSION` bumped 3→4.
+
+**Three pricing/variety decisions were measured, not guessed** — see
+`src/game/__tests__/shop.probe.ts`, which exists so the next session can
+re-measure instead of guessing:
+
+| Problem the probe found | Fix |
+|---|---|
+| An unrestricted buyer bought **all 17 items in one 18-day run** (~1.00 purchases/item/run) — the opposite of "runs feel different" | The nightly room sells one thing; nothing is offered twice in a run |
+| Prices were too low against the measured treasury curve (median ~$35–40B, ~±$1B/day); a $2B favour was bought 2.7× a run | Repriced: small $3–9B, big $14–22B |
+| `foreign`-collapse endings spiked 14→43 per 120 runs — two items shoved the same hidden pressure | The Ilvet levy's catch moved onto the Concord, where it belongs |
+
+After the fixes, realistic (random-play) purchase frequency is **0.24–0.84 per
+item per run**, and a buy-everything player collapses in 57/120 runs while a
+careful one still survives — the catches bite exactly as intended.
+
+**Known and deliberate: 17 items is a small pool for 17 nightly visits.** A
+maximally efficient buyer still sees ~12 of them. That is the pool-size
+ceiling, and it is what **chunk 2** is for — take the pool to the §4.2 quota
+and beyond (nightly shops want more like 35–40 items, not the ~24 this section
+originally specified for a between-acts shop), plus "burn a file", which needs
+§4.4's run deck to exist first.
+
+**The original spec, for reference:**
 
 A shop screen. Spend MONEY on:
 

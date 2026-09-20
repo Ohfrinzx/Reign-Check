@@ -1,5 +1,5 @@
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, advanceToNextDay, activeCard } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop } from '../engine';
 import { makeRng } from '../rng';
 import type { GameState } from '../types';
 
@@ -20,7 +20,8 @@ export function probe(n: number, policy: 'random' | 'first' | 'last') {
         s = chooseOption(s, opts[idx].id);
       } else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
-      else if (s.phase === 'night') s = advanceToNextDay(s);
+      else if (s.phase === 'night') s = openShop(s);
+      else if (s.phase === 'shop') s = leaveShop(s);
     }
     endings[s.ending?.id ?? 'none'] = (endings[s.ending?.id ?? 'none'] ?? 0) + 1;
     totalDays += s.day; alerts += s.stat.alertsSurvived;

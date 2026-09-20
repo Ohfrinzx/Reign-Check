@@ -3,7 +3,7 @@ import type { GameState, StatKey } from './game/types';
 import { createGame, justAdvancedAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  advanceToNextDay, activeCard, STAGE_META,
+  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
@@ -12,6 +12,7 @@ import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
 import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
+import { ShopScreen } from './ui/screens/Shop';
 import { IntroScreen } from './ui/screens/Intro';
 
 type Screen = 'title' | 'game';
@@ -94,10 +95,31 @@ export default function App() {
       if (g.phase === 'resolve') return continueAfterResolve(g);
       if (g.phase === 'alertResolve') return continueAfterAlert(g);
       if (g.phase === 'briefing') return beginStages(g);
-      if (g.phase === 'night') return advanceToNextDay(g);
+      // The Back Room sits between the nightly review and tomorrow morning.
+      if (g.phase === 'night') return openShop(g);
+      if (g.phase === 'shop') return leaveShop(g);
       return g;
     });
   }, []);
+
+  const doBuy = useCallback((itemId: string) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = buyShopItem(g, itemId);
+      setFlash(next.lastOutcome?.deltas ?? {});
+      return next;
+    });
+  }, []);
+
+  const doUseFavour = useCallback((itemId: string) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = useFavour(g, itemId);
+      setFlash(next.lastOutcome?.deltas ?? {});
+      say('Favour spent.');
+      return next;
+    });
+  }, [say]);
 
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
@@ -106,6 +128,11 @@ export default function App() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
+      if (game.phase === 'shop' && /^[1-9]$/.test(e.key)) {
+        const id = game.shopStock[Number(e.key) - 1];
+        if (id) { e.preventDefault(); doBuy(id); }
+        return;
+      }
       if ((game.phase === 'stage' || game.phase === 'alert') && /^[1-9]$/.test(e.key)) {
         const card = activeCard(game);
         const opt = card?.options[Number(e.key) - 1];
@@ -116,14 +143,14 @@ export default function App() {
         return;
       }
       if ((e.key === 'Enter' || e.key === ' ') &&
-          ['resolve', 'alertResolve', 'briefing', 'night'].includes(game.phase)) {
+          ['resolve', 'alertResolve', 'briefing', 'night', 'shop'].includes(game.phase)) {
         e.preventDefault();
         doContinue();
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, showIntro]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -195,6 +222,9 @@ export default function App() {
           <button className="strap-action" onClick={doContinue}>Continue →</button>
         )}
         {game.phase === 'night' && (
+          <button className="strap-action" onClick={doContinue}>To the Back Room →</button>
+        )}
+        {game.phase === 'shop' && (
           <button className="strap-action" onClick={doContinue}>
             {justAdvancedAct(game) ? `Begin Act ${game.act} →` : `Begin Day ${game.day + 1} →`}
           </button>
@@ -217,12 +247,15 @@ export default function App() {
           )}
 
           {game.phase === 'night' && <NightScreen s={game} />}
+          {game.phase === 'shop' && (
+            <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} />
+          )}
           {game.phase === 'ended' && (
             <EndingScreen s={game} onRestart={restart} onTitle={backToTitle} />
           )}
         </div>
 
-        <Rail s={game} />
+        <Rail s={game} onUseFavour={doUseFavour} />
       </div>
 
       {/* --------------------------------------------------- breaking alert */}

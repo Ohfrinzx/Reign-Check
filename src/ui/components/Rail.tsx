@@ -3,6 +3,7 @@ import { DISPLAY_FACTIONS, factionMood } from '../../game/display';
 import { buildThreats } from '../../game/briefing';
 import { fill } from '../../game/text';
 import { Glossed } from './Prose';
+import { Pocket } from '../screens/Shop';
 /**
  * The right-hand rail: Files (factions), On Your Desk (threats), Diary.
  *
@@ -10,7 +11,7 @@ import { Glossed } from './Prose';
  * nothing is hidden behind a click — everything that matters has one fixed,
  * always-visible place. See docs/DESIGN_V2.md.
  */
-export function Rail({ s }: { s: GameState }) {
+export function Rail({ s, onUseFavour }: { s: GameState; onUseFavour: (id: string) => void }) {
   const threats = buildThreats(s, 3);
   const diary = s.scheduled.filter((d) => d.visible).slice(0, 5);
 
@@ -51,6 +52,8 @@ export function Rail({ s }: { s: GameState }) {
           </div>
         ))}
       </div>
+
+      <Pocket s={s} onUseFavour={onUseFavour} />
 
       <div className="panel">
         <h3>Diary</h3>

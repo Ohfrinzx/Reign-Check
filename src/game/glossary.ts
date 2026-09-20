@@ -38,6 +38,8 @@ export const GLOSSARY: GlossaryEntry[] = [
   { term: 'the gazette', def: "The government's official public record. Something printed here is a formal, checkable promise." },
   { term: 'procurement', def: "Buying equipment — here, mostly for the military — through official contracts." },
   { term: 'levy', def: 'A tax or fee charged on a specific thing, rather than income in general.' },
+  { term: 'retainer', def: 'A regular payment that keeps someone available to you, whether or not you use them that day.' },
+  { term: 'debt service', def: 'The daily cost of having borrowed money — interest, paid whether or not you ever repay the loan itself.' },
   { term: 'concession', def: 'The right to run something — a port, a terminal — that is normally granted for years at a time.' },
   { term: 'tranche', def: 'One instalment of a larger payment, released in parts rather than all at once.' },
   { term: 'legitimacy', def: 'Whether people accept you are supposed to have this job. Low legitimacy means people see removing you as fair, not as a crime.' },
