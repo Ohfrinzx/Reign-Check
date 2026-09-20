@@ -31,8 +31,8 @@ export const CARDS: CardDef[] = [
   tags: ['military', 'budget'],
   weight: (s) => 10 + (55 - s.factions.staff.loyalty) * 0.3 + s.hidden.coup * 0.2,
   body:
-    'General Varkov puts one sheet of paper on your desk and does not touch it again.\n\n"The transport helicopters are nineteen years old. Two of the nineteen can fly. I am not asking you to like the number. I am asking you to say it out loud so that it exists."\n\nThe number is $9 billion.',
-  flavor: 'She checks her watch. She is not in a hurry. She is making the point that she could be.',
+    'General Varkov reports that the army\'s transport helicopters are nineteen years old. Only two of the nineteen can currently fly.\n\n"I am not asking you to like the number. I am asking you to say it out loud so that it exists."\n\nThe number is $9 billion.',
+  flavor: 'Nineteen helicopters. Two can fly.',
   options: [
     {
       id: 'fund',
@@ -40,7 +40,7 @@ export const CARDS: CardDef[] = [
       hint: 'Cost: $9.0B now. The army gets what it asked for and learns that asking works.',
       outcome: {
         text:
-          'Varkov reads the figure, folds the paper into quarters and puts it in her pocket. "Thank you." It is the warmest thing she has said to a civilian in four years.\n\nBy the evening, three officers who had been avoiding your calls have returned them.',
+          'Varkov reads the figure, folds the paper, and says thank you.\n\nBy the evening, three officers who had been avoiding your calls have returned them.',
         tone: 'good',
         effects: {
           stats: { treasury: -9, military: +8, power: +3, economy: -1 },
@@ -63,7 +63,7 @@ export const CARDS: CardDef[] = [
       hint: 'Costs nothing today. Creates a debt to the army with a date attached.',
       outcome: {
         text:
-          '"Next quarter," she repeats, like she is checking a translation. Then she nods once and writes it in her own notebook.\n\nVarkov does not write down things she intends to forget.',
+          '"Next quarter," she says, and writes it down.\n\nThe army will expect it delivered on that date.',
         tone: 'mixed',
         effects: {
           stats: { military: +4, power: +1 },
@@ -79,10 +79,10 @@ export const CARDS: CardDef[] = [
     {
       id: 'half',
       label: 'Approve half. Call it a first instalment.',
-      hint: 'Cost: $4.0B. Satisfies nobody completely, which is often the job.',
+      hint: 'Cost: $4.0B. Satisfies nobody completely.',
       outcome: {
         text:
-          'Varkov takes the half without comment, which is worse than an argument.\n\nTwo hours later Colonel Tern sends a handwritten note thanking you for your support of the armed forces. The note is charming. It is also a record.',
+          'Varkov accepts the partial payment without objection.\n\nColonel Tern separately sends a note thanking you for supporting the armed forces.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -4, military: +4 },
@@ -101,7 +101,7 @@ export const CARDS: CardDef[] = [
       hint: 'Saves $9.0B. The army finds out what your word is worth under pressure.',
       outcome: {
         text:
-          'Varkov takes the sheet back, unread by you, and leaves at exactly the speed she arrived.\n\nAt 9:40pm the Sable Office logs a dinner in Gorsk attended by four officers who do not normally eat together. Director Sarran notes this. She does not mention it yet.',
+          'Varkov takes the sheet back, unread by you, and leaves.\n\nAt 9:40pm the Sable Office logs a dinner in Gorsk attended by four officers who do not normally eat together. Director Sarran notes it and says nothing yet.',
         tone: 'bad',
         effects: {
           stats: { military: -7, power: -2, treasury: +1 },
@@ -299,7 +299,7 @@ export const CARDS: CardDef[] = [
   requires: (s) => s.stats.treasury < 45,
   body:
     'Brask has the green notebook open, which means these are the real numbers.\n\n"State payroll — the wages the government owes every soldier, teacher, and clerk on its books — clears on the 28th. That is one in six working adults in this country. We are $11 billion short. If nothing changes, none of them get paid that day."',
-  flavor: 'He is not sweating. That is how you know he is not exaggerating.',
+  flavor: 'Short by $11 billion. Due on the 28th.',
   options: [
     {
       id: 'borrow-concord',
@@ -307,7 +307,7 @@ export const CARDS: CardDef[] = [
       hint: 'Everyone gets paid on time. In return you owe the banks $12.0B, taken out of the treasury bit by bit until it is repaid.',
       outcome: {
         text:
-          'Adamek writes the rate on a card and slides it across. It is not a good rate and it is not an insulting one. It is exactly the rate of a man who knows precisely how short you are, which means somebody told him.\n\nPayroll clears on time. From now on, a slice of the treasury goes to repaying this loan before anything else gets funded.',
+          'Adamek writes the rate on a card and slides it across. It is not a good rate and it is not an insulting one — it is the rate of a man who already knows exactly how short you are. The number reached him before you offered it.\n\nPayroll clears on time. From now on, a slice of the treasury goes to repaying this loan before anything else gets funded.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +12, elite: +3, economy: -1 },
@@ -376,7 +376,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 8 + s.factions.sable.loyalty * 0.08 + s.hidden.fear * 0.1,
   body:
     'Director Sarran brings you a folder. It is eleven pages and it concerns somebody currently in your cabinet. She has not opened it.\n\n"You may have it, {sir}. I would only point out that once you know a thing, everyone can see that you know it."',
-  flavor: 'The Sable Office has files on everyone. That is not a rumour, it is a budget line.',
+  flavor: 'The Sable Office keeps files on every minister in the cabinet.',
   options: [
     {
       id: 'read',
@@ -547,7 +547,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 5 + s.hidden.coup * 0.35,
   body:
     'Colonel Tern requests the routine six-monthly rotation of the Capital Garrison. Two battalions out to Gorsk, two fresh battalions in from the Kordiva depots.\n\nIt is genuinely routine. It has happened twenty-two times since 1994.\n\nIt is also the most consequential piece of paperwork on your desk this week, because the Capital Garrison is the only armed force inside the capital.',
-  flavor: 'Between 2am and 5am, Ravik Tern is the most important man in the country.',
+  flavor: 'The rotation window runs from 2am to 5am.',
   options: [
     {
       id: 'approve',
@@ -555,7 +555,7 @@ export const CARDS: CardDef[] = [
       hint: 'Normal and correct. You will not know who is in those barracks.',
       outcome: {
         text:
-          'You sign. Tern sends a handwritten note thanking you for your trust.\n\nIt is charming. It is also a record, and it will be produced later by somebody, in some context, for some purpose.',
+          'You sign. Tern sends a handwritten note thanking you for your trust — he keeps a copy of every note he sends.',
         tone: 'neutral',
         effects: {
           stats: { military: +3, security: -2 },
@@ -572,7 +572,7 @@ export const CARDS: CardDef[] = [
       hint: 'You will know who is in the barracks. The army will know you checked.',
       outcome: {
         text:
-          'Sarran\'s people go through the officer lists overnight. Two names are quietly moved. Nobody says why.\n\nVarkov does not raise it. Tern raises it pleasantly, twice, and then stops raising it. The stopping is the part to remember.',
+          'Sarran\'s people go through the officer lists overnight. Two names are quietly moved. Nobody says why.\n\nVarkov does not raise it. Tern raises it pleasantly, twice, then stops.',
         tone: 'mixed',
         effects: {
           stats: { security: +8, military: -4, information: +5 },
@@ -590,7 +590,7 @@ export const CARDS: CardDef[] = [
       hint: 'Nothing changes, which is the point. The army will want to know why.',
       outcome: {
         text:
-          'The order goes out and the garrison stays exactly as Krast left it.\n\nVarkov asks you directly, in a corridor, whether there is something she should know. It is the first time she has asked you a question she did not already have the answer to.',
+          'The order goes out and the garrison stays exactly as Krast left it.\n\nVarkov asks you directly, in a corridor, whether there is something she should know.',
         tone: 'mixed',
         effects: {
           stats: { power: +4, military: -5, security: +3 },
@@ -618,7 +618,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 6 + s.hidden.separatism * 0.3,
   body:
     'There are two paved roads into the Hadem border region. A third has been "under consideration" since 1968 and is, in practice, a riverbed.\n\nThe Hadem councils have sent a delegation. They send one every four years. This is the first time a head of state has agreed to see them within two weeks of taking office.\n\nBuilding it costs $8 billion.',
-  flavor: 'Everyone counts the roads. The army counts them differently than the councils do.',
+  flavor: 'Two paved roads in. A third has waited since 1968.',
   options: [
     {
       id: 'build',
@@ -674,7 +674,7 @@ export const CARDS: CardDef[] = [
       hint: 'Free today. They have heard this exact sentence fourteen times.',
       outcome: {
         text:
-          'The older woman on the delegation writes the date in a small notebook.\n\nYou get the strong impression the notebook has other dates in it.',
+          'The older woman on the delegation writes the date in a small notebook. It is not the first date she has written in it.',
         tone: 'mixed',
         effects: {
           stats: { support: +2, legitimacy: -2 },
@@ -702,7 +702,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 6 + (s.stats.support < 45 ? 6 : 0) + s.hidden.unrest * 0.1,
   body:
     'Dovra Day is the national holiday. Four-hour parade, two hundred thousand people, and one tradition: the head of state walks the last kilometre on foot, in whatever weather there is.\n\nIt has rained in the capital for nine days straight. A lot of Velmorrans think the weather in the capital reflects how honest the government is.\n\nArchon Vask would like to know your plans.',
-  flavor: 'Governments that cancel the parade do not last the year.',
+  flavor: 'Nine days of rain, straight.',
   options: [
     {
       id: 'walk',
@@ -727,7 +727,7 @@ export const CARDS: CardDef[] = [
             }
           : {
               text:
-                'You walk it. Eight hundred metres in, a gust takes the ceremonial sash into a storm drain and you spend a genuinely difficult forty seconds deciding whether to go after it.\n\nYou go after it. The clip is watched four million times. Opinion is split on whether it was humble or humiliating, which in this country means it was both.',
+                'You walk it. Eight hundred metres in, a gust takes the ceremonial sash into a storm drain and you spend a genuinely difficult forty seconds deciding whether to go after it.\n\nYou go after it. The clip is watched four million times. Opinion is split on whether it was humble or humiliating.',
               tone: 'mixed',
               effects: {
                 stats: { support: +4, legitimacy: +2 },
@@ -802,7 +802,7 @@ export const CARDS: CardDef[] = [
       hint: 'Gains $9.0B now and steady income. Hands your only real leverage to one buyer.',
       outcome: {
         text:
-          'The signing is warm and takes eleven minutes. The ambassador calls Velmorra "a mature partner", which is the highest compliment Ostrene has ever paid a country it can see from its own border.\n\nBrask files a one-page note recommending against it. He files it after you sign, which is its own kind of loyalty.',
+          'The signing is warm and takes eleven minutes. The ambassador calls Velmorra "a mature partner", which is the highest compliment Ostrene has ever paid a country it can see from its own border.\n\nBrask files a one-page note recommending against it — after you have already signed.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +9, economy: +4, legitimacy: -3 },
@@ -844,7 +844,7 @@ export const CARDS: CardDef[] = [
             }
           : {
               text:
-                'They do not take it. The ambassador smiles, closes the folder, and mentions — apparently at random — that gas contracts are also renewed annually.\n\nThe offer is withdrawn. The point about gas is not.',
+                'They do not take it. The ambassador smiles, closes the folder, and mentions — apparently at random — that gas contracts are also renewed annually.\n\nThe offer is withdrawn. The mention of gas contracts was a warning, not small talk.',
               tone: 'bad',
               effects: {
                 stats: { economy: -4, treasury: -1, legitimacy: +2 },
@@ -893,7 +893,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 6 + (55 - s.factions.combine.loyalty) * 0.3 + s.hidden.unrest * 0.2,
   body:
     'Bogdan Hess will not sit down. He says the chairs are a tactic.\n\n"Ten days\' notice. The Gorsk mines and the Mavro cranes, together. Not a protest — a stoppage. I am giving you notice because the law requires it, and because my father gave notice to your predecessor\'s predecessor and got shot at for it. I would like this one to go differently."\n\nThe wage claim is worth about $6 billion a year.',
-  flavor: 'He has never had to make the phone call. That is the point of being able to.',
+  flavor: 'The wage claim is worth $6 billion a year.',
   options: [
     {
       id: 'meet-wages',
@@ -1066,7 +1066,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 5 + (50 - s.stats.legitimacy) * 0.15 + s.hidden.unrest * 0.12,
   body:
     'Sanna Vel walks the petition to your gate herself, live, with two hundred thousand people watching the stream.\n\nForty thousand signatures. One demand: repeal Article 19, the law that lets the Sable Office hold someone for ninety days without charge.\n\n"You did not write Article 19," she says. "That is exactly why you can repeal it."',
-  flavor: 'She has no known price. That is either true or the most expensive secret in the country.',
+  flavor: 'Forty thousand signatures. Two hundred thousand watching live.',
   options: [
     {
       id: 'repeal',
@@ -1097,7 +1097,7 @@ export const CARDS: CardDef[] = [
       hint: 'Buys time. Grebs will actually do the review, which may not be what you meant.',
       outcome: {
         text:
-          'Vel looks at you for a long moment. "A review," she says, with no inflection at all, and the two hundred thousand people on the stream hear exactly what she means by it.\n\nGrebs accepts. In nineteen years she has never chaired a review that produced nothing.',
+          'Vel looks at you for a long moment. "A review," she says, with no inflection at all.\n\nGrebs accepts. In nineteen years she has never chaired a review that produced nothing.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +3, support: +1, information: +2 },
@@ -1200,7 +1200,7 @@ export const CARDS: CardDef[] = [
       hint: 'More thorough. Now the security service is investigating your own staff.',
       outcome: {
         text:
-          'Doran\'s expression does not change, which from Doran is a slammed door. "Of course, {sir}." She has not called you that since the swearing-in.\n\nThe Sable Office is extremely thorough. Within a week four people in the building have stopped speaking freely in any room, including the ones who were not doing anything.',
+          'Doran\'s expression does not change. "Of course, {sir}." She has not called you that since the swearing-in.\n\nThe Sable Office is extremely thorough. Within a week four people in the building have stopped speaking freely in any room, including the ones who were not doing anything.',
         tone: 'mixed',
         effects: {
           stats: { security: +9, information: +6, power: +2 },
@@ -1290,7 +1290,7 @@ export const CARDS: CardDef[] = [
       hint: 'Turns down $14.0B. He will remember the gesture exactly.',
       outcome: {
         text:
-          'Adamek looks at the card lying between you, then picks it up and tears it once, neatly, before putting it in his pocket.\n\n"I have done this with nine heads of state," he says. "You are the third to do that."\n\nHe does not say what happened to the other two.',
+          'Adamek looks at the card lying between you, then picks it up and tears it once, neatly, before putting it in his pocket.\n\n"I have done this with nine heads of state," he says. "You are the third to do that."',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +8, elite: -6, treasury: -1 },
@@ -1317,7 +1317,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 4 + s.hidden.scandal * 0.25 + s.hidden.leak * 0.2,
   body:
     'At the end of a routine press session, a young reporter from a paper nobody reads asks the question nobody has asked on the record.\n\n"Who was in the stairwell with Tomas Krast?"\n\nThe room goes quiet enough that you can hear the building.',
-  flavor: 'Official cause of death: heart attack. Unofficial cause of death: heart attack, at close range.',
+  flavor: 'The state autopsy says heart attack. Krast was fifty-one, with no history of heart problems.',
   options: [
     {
       id: 'honest',
@@ -1325,7 +1325,7 @@ export const CARDS: CardDef[] = [
       hint: 'True, probably. It also announces that you do not control your own security service.',
       outcome: {
         text:
-          'The clip runs everywhere. Half the country finds it disarmingly honest. The other half notices that the head of state has said on camera that there is something the security service will not tell him.\n\nSarran watched it twice. You are told she watched it twice.',
+          'The clip runs everywhere. Half the country finds it disarmingly honest. The other half notices that the head of state has said on camera that there is something the security service will not tell him.\n\nSarran watches the clip twice.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +6, power: -5, support: +3 },
@@ -1365,7 +1365,7 @@ export const CARDS: CardDef[] = [
       lockedText: 'The Sable Office would have to supply the name, and it is not minded to.',
       outcome: {
         text:
-          'The Sable Office produces a name within the hour, along with a confession, a motive, and a photograph of a very tired-looking man.\n\nThe story dies instantly. It has been buried in shallow ground, in a country with a long memory and an excellent archive.',
+          'The Sable Office produces a name within the hour, along with a confession, a motive, and a photograph of a very tired-looking man.\n\nThe story dies today. It has not been proven false — only buried, and not deeply.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: -3, support: +4, power: +5, information: -6 },
@@ -1448,7 +1448,7 @@ export const CARDS: CardDef[] = [
   weight: (s) => 4 + (s.stats.legitimacy < 45 ? 5 : 0),
   body:
     'It has rained in the capital for nine days straight.\n\nA lot of Velmorrans believe the weather here reflects how honest the government is. The state weather service has formally asked for guidance on how to word its forecasts, which is a sentence that should not exist and is nevertheless on your desk.',
-  flavor: 'Nobody in this country has ever been argued out of this belief. Nobody has tried twice.',
+  flavor: 'Nine days of rain, and counting.',
   options: [
     {
       id: 'joke',
@@ -1609,8 +1609,8 @@ export const CARDS: CardDef[] = [
   base: 0,
   weight: () => 0,
   body:
-    'Varkov puts a second sheet on the desk, face down, exactly like the first.\n\n"The helicopters fly. Thank you. The air defence radars are from 1989, and one of them has been quietly replaced with a civilian weather unit bought in Mavro."\n\nThe number is $7 billion. She checks her watch.',
-  flavor: 'This is what funding something in full teaches an organisation.',
+    'Varkov puts a second sheet on the desk, face down, exactly like the first.\n\n"The helicopters fly. Thank you. The air defence radars are from 1989, and one of them has been quietly replaced with a civilian weather unit bought in Mavro."\n\nThe number is $7 billion.',
+  flavor: 'The air defence radars are from 1989.',
   options: [
     {
       id: 'fund',
@@ -1637,7 +1637,7 @@ export const CARDS: CardDef[] = [
       hint: 'Cost: $7.0B with strings. You are stepping on the army\'s stated red line.',
       outcome: {
         text:
-          'Varkov goes very still. "An audit," she says. "Of the officer corps." She does not raise her voice. Varkov has never needed to.\n\nThe radars get funded. The audit is agreed. Neither of you mentions 1979, which is all either of you is thinking about.',
+          'Varkov goes very still. "An audit," she says. "Of the officer corps." She does not raise her voice.\n\nThe radars get funded. The audit is agreed. Neither of you mentions 1979.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -7, military: -4, legitimacy: +8, power: +5, information: +6 },
@@ -1655,7 +1655,7 @@ export const CARDS: CardDef[] = [
       hint: 'Saves $7.0B. She funded a habit and you have just broken it.',
       outcome: {
         text:
-          '"Not this quarter." She repeats it back in your exact tone, which is a very mild way of reminding you that you said something similar once before.\n\nShe takes the sheet. She does not write the date down. That is either progress or the opposite.',
+          '"Not this quarter." She repeats it back in your exact tone.\n\nShe takes the sheet. She does not write the date down.',
         tone: 'mixed',
         effects: {
           stats: { military: -5, treasury: +1 },
@@ -1677,7 +1677,7 @@ export const CARDS: CardDef[] = [
   weight: () => 0,
   body:
     'Gorsk stops at 6:00am. Mavro stops at 6:02, because the dockers wanted the miners to go first.\n\nNothing is moving: no lithium, no salt, no containers. The Concord estimates $1.4 billion a day in lost output. Hess is standing outside the union hall in the rain, saying nothing, being photographed.',
-  flavor: 'He never had to make the phone call. He made the phone call.',
+  flavor: 'The Concord estimates $1.4 billion a day in lost output.',
   options: [
     {
       id: 'concede',
@@ -1741,7 +1741,7 @@ export const CARDS: CardDef[] = [
       lockedText: 'The army would not carry out that order today.',
       outcome: {
         text:
-          'Varkov asks for the order in writing. That should have told you something.\n\nTwo companies reach the Gorsk perimeter and stop, because six thousand miners and their families are sitting on the road. Nobody fires. Nobody moves. It is photographed from a hillside and by morning the photograph is on every front page on the continent.',
+          'Varkov asks for the order in writing.\n\nTwo companies reach the Gorsk perimeter and stop, because six thousand miners and their families are sitting on the road. Nobody fires. Nobody moves. It is photographed from a hillside and by morning the photograph is on every front page on the continent.',
         tone: 'bad',
         effects: {
           stats: { stability: -18, legitimacy: -16, support: -12, military: -9, power: -4 },
@@ -1769,7 +1769,7 @@ export const CARDS: CardDef[] = [
   weight: () => 0,
   body:
     'Four Kordiva mayors have given the same interview to four different outlets. In a region with one farm lobby that is not a coincidence, it is a memo.\n\nThe message: the Basin will "review its arrangements" with the capital. Around here, "arrangements" means tax revenue, and reviewing them means not sending it.',
-  flavor: 'Kostyn has said nothing at all, which is the loudest thing in the file.',
+  flavor: 'Four mayors, four interviews, one message.',
   options: [
     {
       id: 'summon',
@@ -1780,7 +1780,7 @@ export const CARDS: CardDef[] = [
         return win
           ? {
               text:
-                '"They are mayors," she says. "They talk." You ask her to state, on the record, that the Basin will send its tax revenue.\n\nShe pauses exactly long enough to decide she is not ready yet, and then says it. She will be ready eventually. But not today.',
+                '"They are mayors," she says. "They talk." You ask her to state, on the record, that the Basin will send its tax revenue.\n\nShe pauses, then says it, on the record.',
               tone: 'good',
               effects: {
                 stats: { power: +7, stability: +4 },
@@ -1827,7 +1827,7 @@ export const CARDS: CardDef[] = [
       hint: 'Free. Kordiva is patient and never forgets a silence.',
       outcome: {
         text:
-          'It burns for eleven days and stops, which looks like a win.\n\nThe quarter\'s tax revenue arrives four per cent light, with a covering letter citing "collection difficulties". Nobody mentions the interviews again. Nobody needs to.',
+          'It burns for eleven days and stops, which looks like a win.\n\nThe quarter\'s tax revenue arrives four per cent light, with a covering letter citing "collection difficulties". Nobody mentions the interviews again.',
         tone: 'bad',
         effects: {
           stats: { treasury: -4 },
@@ -1876,7 +1876,7 @@ export const CARDS: CardDef[] = [
       hint: 'Cost: $4.0B. Cheaper in power terms. She did not ask for money.',
       outcome: {
         text:
-          'She looks at the figure for a while.\n\n"You know what the difference is?" she says. "Money runs out. A job is somewhere to stand."\n\nShe takes the money. She was always going to take the money. But something in the room has changed weight.',
+          'She looks at the figure for a while.\n\n"You know what the difference is?" she says. "Money runs out. A job is somewhere to stand."\n\nShe takes the money. She will remember that you offered money when she asked for a job.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -4 },

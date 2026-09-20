@@ -15,7 +15,7 @@ export const CARDS2: CardDef[] = [
   weight: (s) => 7 + (50 - s.stats.power) * 0.12,
   body:
     'The Interior Minister resigned on Tuesday citing his health, which around here means either his health or a phone call.\n\nInterior runs the police, the provincial administration and the electoral register. It is the third most important job in the country and nobody outside this building can name who holds it.\n\nThere are three names on your desk.',
-  flavor: 'Doran has put them in the order she thinks you should read them, which is itself a recommendation.',
+  flavor: 'Interior runs the police, the provinces, and the electoral register.',
   options: [
     {
       id: 'grebs-pick',
@@ -23,7 +23,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Free. Competent, procedural, dull. Interior will run properly and answer to the civil service.',
       outcome: {
         text:
-          'He is sworn in on Thursday and by Monday has already found $400 million of duplicated provincial payments, which is exactly the kind of thing that makes a man deeply unpopular and extremely useful.\n\nGrebs does not thank you. Grebs never thanks anyone. But the ministries move a little faster for you now.',
+          'He is sworn in on Thursday and by Monday has already found $400 million of duplicated provincial payments.\n\nGrebs does not thank you. Grebs never thanks anyone. But the ministries move a little faster for you now.',
         tone: 'good',
         effects: {
           stats: { power: +3, treasury: +2, security: +3, information: +5, legitimacy: +3 },
@@ -59,7 +59,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Gains $6.0B. A businessman now controls the police and the electoral register.',
       outcome: {
         text:
-          'The money clears before the appointment is even announced, which is either efficiency or a message.\n\nThe new minister is genuinely good at the job. He is good at it the way a well-maintained tool is good: for whoever is holding it.',
+          'The money clears before the appointment is even announced.\n\nThe new minister is genuinely good at the job — good for whoever is paying him, which for now is you.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +6, power: -3, legitimacy: -6, security: +4, economy: +2 },
@@ -87,7 +87,7 @@ export const CARDS2: CardDef[] = [
   weight: (s) => 6 + s.hidden.fear * 0.12 + (50 - s.factions.sable.loyalty) * 0.1,
   body:
     'Director Sarran wants a budget line that does not appear in the accounts laid before parliament.\n\n"$3 billion. It pays for the things that cannot be paid for openly, which are the things that have kept every government in this building alive since 1979." A pause. "Your predecessor approved it for nineteen years. I am telling you it exists because you are entitled to be the first person not to."',
-  flavor: 'One true thing and one useful thing. Today she led with the true one.',
+  flavor: '$3 billion, off the books, since 1979.',
   options: [
     {
       id: 'approve',
@@ -114,7 +114,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Cost: $3.0B. You keep the capability and the knowledge. She keeps neither entirely.',
       outcome: {
         text:
-          '"Every month," she repeats, and something happens behind her eyes that does not have a name. "Very well."\n\nThe first ledger arrives on the 30th. It is complete, legible, and the single most alarming document you have ever read.',
+          '"Every month," she repeats. "Very well."\n\nThe first ledger arrives on the 30th. It is complete, legible, and the single most alarming document you have ever read.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -3, security: +7, information: +12, power: +5, legitimacy: -2 },
@@ -134,7 +134,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Saves $3.0B and is genuinely unprecedented. They will find the money another way.',
       outcome: {
         text:
-          '"As you wish, {sir}." She does not argue, which is the alarming part.\n\nThe accounts are published, the press is astonished, and the Aureth Union sends a letter. Three weeks later the Office\'s capabilities are exactly what they were and nobody can explain where the money came from.',
+          '"As you wish, {sir}." She does not argue.\n\nThe accounts are published, the press is astonished, and the Aureth Union sends a letter. Three weeks later the Office\'s capabilities are exactly what they were and nobody can explain where the money came from.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +11, security: -5, information: -4 },
@@ -160,7 +160,7 @@ export const CARDS2: CardDef[] = [
   weight: (s) => 6 + Math.max(0, 48 - s.stats.economy) * 0.25 + s.hidden.fiscal * 0.12,
   body:
     'Gas came in eleven per cent under contract and the cold snap in Gorsk has another nine days to run.\n\nSomething has to be rationed. The grid engineers have brought three plans and a pot of extremely bad coffee, and they are standing rather than sitting, which means they expect this to be quick.',
-  flavor: 'A cold winter here is not a weather event. It is a budget crisis.',
+  flavor: 'Gas is 11% short. Nine days of cold remain.',
   options: [
     {
       id: 'industry',
@@ -186,7 +186,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Protects output and the treasury. Cold houses in a country that keeps score.',
       outcome: {
         text:
-          'Rolling four-hour cuts to households, starting in the provinces because that is where the grid is weakest. That is true and it is also going to be the entire story.\n\nThe Concord is delighted. Kordiva is in the dark.',
+          'Rolling four-hour cuts to households, starting in the provinces because that is where the grid is weakest.\n\nThe Concord is delighted. Kordiva is in the dark.',
         tone: 'bad',
         effects: {
           stats: { support: -11, stability: -7, economy: +5, treasury: +2 },
@@ -205,7 +205,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Cost: $9.0B. Nobody gets rationed. Ostrene sets the price and learns what cold is worth to you.',
       outcome: {
         text:
-          'Nobody in the country notices anything at all, which is the most expensive possible outcome and occasionally the right one.\n\nThe Ostrene trading desk is delighted to help. Their price is not friendly, and they now know exactly how cold it has to get before Velmorra will pay anything.',
+          'Nobody in the country notices anything at all.\n\nThe Ostrene trading desk is delighted to help. Their price is not friendly, and they now know exactly how cold it has to get before Velmorra will pay anything.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -9, support: +3, stability: +3, economy: +2 },
@@ -256,7 +256,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Free. The army is pleased and becomes, in the public mind, a bit more central than you.',
       outcome: {
         text:
-          'She accepts it correctly, thanks the country rather than you, and checks her watch.\n\nThe officer corps is delighted. Three newspapers run profiles of her. One uses the phrase "the steadiest hand in the country", which is a compliment to her and something else entirely to you.',
+          'She accepts it correctly and thanks the country rather than you.\n\nThe officer corps is delighted. Three newspapers run profiles of her. One uses the phrase "the steadiest hand in the country."',
         tone: 'mixed',
         effects: {
           stats: { military: +8, power: -2, legitimacy: +2 },
@@ -405,7 +405,7 @@ export const CARDS2: CardDef[] = [
   weight: (s) => 5 + s.hidden.separatism * 0.2,
   body:
     'The ten-yearly census goes to print in eleven days and the civil service needs a decision on Question 9.\n\nQuestion 9 asks what language you speak at home. It has not been asked since 1994, when the answer was inconvenient. If it is asked, the country will officially learn how many Hadeni speakers live in the border region.\n\nNobody in this building knows the real number. Several people have guesses they will not say out loud.',
-  flavor: 'A census is a list of people. In the border region it is also a claim.',
+  flavor: 'Question 9 has not been asked since 1994.',
   options: [
     {
       id: 'ask',
@@ -477,7 +477,7 @@ export const CARDS2: CardDef[] = [
   weight: (s) => 5 + (s.stats.treasury < 35 ? 7 : 0),
   body:
     'Sereth would like to buy forty per cent of the Mavro container terminal, the naming rights to the national stadium, and Mavro Dockers FC.\n\nThe offer is $22 billion. There are no conditions and the paperwork is two pages. Their representative flew in this morning and would like to conclude today.\n\nSereth money arrives fast. What they want in return arrives later.',
-  flavor: 'Nobody has ever been able to say in advance what the later part is.',
+  flavor: 'The offer is $22 billion. There are no conditions on paper.',
   options: [
     {
       id: 'all',
@@ -542,7 +542,7 @@ export const CARDS2: CardDef[] = [
   weight: () => 0,
   body:
     'The Sereth representative is back. He is as pleasant as before and this time he has three pages.\n\nThey would like: a Velmorran vote at an international body that has never once mattered to Velmorra, an aviation agreement that costs you nothing, and the release of a man currently held by the Sable Office on charges nobody has ever seen.\n\nThe first two are free. The third is the point.',
-  flavor: 'Now you know what the later part was.',
+  flavor: 'The first two requests are free. The third is a prisoner.',
   options: [
     {
       id: 'all',
@@ -585,7 +585,7 @@ export const CARDS2: CardDef[] = [
       hint: 'Free. A very good speech, and a $22B investor who now knows what you are.',
       outcome: {
         text:
-          'You describe the request on the record, in general terms, without naming the country — which names the country.\n\nThe country is briefly magnificent about it. Sereth suspend the remaining investment within a week, and the stadium keeps its new name, because they own that outright.',
+          'You describe the request on the record, in general terms, without naming the country. Everyone watching already knows which country you mean.\n\nThe country is briefly magnificent about it. Sereth suspend the remaining investment within a week, and the stadium keeps its new name, because they own that outright.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +12, support: +8, economy: -7, treasury: -5 },

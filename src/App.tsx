@@ -163,7 +163,7 @@ export default function App() {
           </div>
         </div>
         <div className="mid">
-          <span className="lbl">Act {game.act} of {NUM_ACTS} &middot; Day {game.day} / {game.maxDays}</span>
+          <span className="lbl"><span>Act {game.act} of {NUM_ACTS} &middot; Day {game.day} / {game.maxDays}</span></span>
         </div>
         <div className="masthead-right">
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">

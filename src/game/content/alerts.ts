@@ -174,7 +174,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Cost: $6.0B and some authority. Crowds go home when they win something.',
       outcome: {
         text:
-          'You are on air within forty minutes, which is itself remarkable, and you give them one real thing — not a review, not a promise, a thing that happens on Monday.\n\nThe square thins by midnight. It does not empty. But a square that thins is a square that has decided to give you one more go.',
+          'You are on air within forty minutes, and you give them one real thing — not a review, not a promise, a thing that happens on Monday.\n\nThe square thins by midnight. It does not empty.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -6, support: +8, stability: +9, legitimacy: +3, power: -5 },
@@ -247,7 +247,7 @@ export const ALERTS: AlertDef[] = [
             }
           : {
               text:
-                'It rains harder at eleven and nobody goes home, which is the thing about this country that outsiders never understand.\n\nBy morning there are tents. By afternoon there are tents with kitchens. By evening the Pigeon Federation has sent food, which sounds funny until you remember they have 400,000 members and have never taken a side before.',
+                'It rains harder at eleven and nobody goes home.\n\nBy morning there are tents. By afternoon there are tents with kitchens. By evening the Pigeon Federation has sent food — 400,000 members, and they have never taken a side before.',
               tone: 'bad',
               effects: {
                 stats: { stability: -12, support: -7, legitimacy: -8, power: -6 },
@@ -270,8 +270,8 @@ export const ALERTS: AlertDef[] = [
   base: 0,
   weight: (s) => Math.max(0, s.hidden.fiscal - 28) * 1.2 + Math.max(0, 38 - s.stats.economy) * 0.7,
   body:
-    'The currency opened down four per cent, went down another six by eleven, and is currently not trading in any meaningful sense because nobody will quote a price. For two years the government has promised to exchange the velor for dollars at a fixed rate no matter what the market thinks it is worth — the peg. Keeping that promise costs cash, and the cash just ran out.\n\nBrask is in your office without the notebook, which is worse than the notebook.\n\n"The peg is gone. It went at about half past ten. The only question left is whether we are the ones who announce it."',
-  flavor: 'The peg has been indefensible for two years. Today is the day it found out.',
+    'The currency opened down four per cent, went down another six by eleven, and is currently not trading in any meaningful sense because nobody will quote a price. For two years the government has promised to exchange the velor for dollars at a fixed rate no matter what the market thinks it is worth — the peg. Keeping that promise costs cash, and the cash just ran out.\n\nBrask is in your office. He has not brought the notebook — there is nothing left to calculate.\n\n"The peg is gone. It went at about half past ten. The only question left is whether we are the ones who announce it."',
+  flavor: 'The currency is down ten per cent since 11am.',
   options: [
     {
       id: 'float',
@@ -333,7 +333,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Block money from leaving the country tonight. Stops the bleeding instantly and gains $7.0B — but declares war on every bank at once.',
       outcome: {
         text:
-          'The transfers close at 6pm. $40 billion that was leaving stops leaving, which is the point. $40 billion that intended to arrive next quarter changes its mind, which is also the point and nobody mentions it.\n\nAdamek calls once. You do not take it. That will be discussed later, at length, in rooms you are not in.',
+          'The transfers close at 6pm. $40 billion that was leaving the country stays. $40 billion that was due to arrive next quarter does not come either.\n\nAdamek calls once. You do not take it.',
         tone: 'mixed',
         effects: {
           stats: { economy: -7, treasury: +7, power: +6, elite: -14, legitimacy: -4 },
@@ -358,7 +358,7 @@ export const ALERTS: AlertDef[] = [
   minDay: 3,
   weight: (s) => Math.max(0, s.hidden.leak - 25) * 1.3 + s.hidden.scandal * 0.4 + Math.max(0, 40 - s.stats.information) * 0.3,
   body:
-    'A reporter has 900 pages. Not a summary — actual pages, photographed, with the ministry stamp in the corner of every one.\n\nThey have sent four of them over for comment, which is a courtesy and also a countdown. Publication is in eleven hours.\n\nNobody knows who gave it to them. Grebs has a theory. Grebs always has a theory.',
+    'A reporter has 900 pages. Not a summary — actual pages, photographed, with the ministry stamp in the corner of every one.\n\nThey have sent four of them over for comment. Publication is in eleven hours.\n\nNobody knows who gave it to them. Grebs has a theory. Grebs always has a theory.',
   flavor: 'Nine hundred pages. Somebody carried those out of the building.',
   options: [
     {
@@ -628,7 +628,7 @@ export const ALERTS: AlertDef[] = [
   weight: (s) => Math.max(0, s.hidden.coup - 40) * 0.9 + Math.max(0, s.hidden.fear - 45) * 0.5,
   body:
     'Sarran comes at eleven at night, which she has never done.\n\n"There is a plan. It is not a rumour and it is not bar talk. It involves the route between the residence and the ministries, it involves at least two people with access to your schedule, and it is for some time in the next fortnight."\n\nShe puts down one sheet. "Four names. Three of them are certainly involved. One of them is on the list because I want to see what you do."',
-  flavor: 'One true thing and one useful thing. Tonight they are in the same envelope.',
+  flavor: 'Four names. Three are certainly involved.',
   options: [
     {
       id: 'all-four',
@@ -636,7 +636,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Free. Certain of the plot. Certain of arresting an innocent person.',
       outcome: {
         text:
-          'All four are taken before dawn. Three of them were involved.\n\nThe fourth is a scheduling clerk with two children who has never done anything at all, and whose arrest is the thing the civil service will talk about quietly for the rest of your government.\n\nThe route is changed. The plot is over. Sarran never mentions the fourth name again, which is its own kind of comment.',
+          'All four are taken before dawn. Three of them were involved.\n\nThe fourth is a scheduling clerk with two children who has never done anything at all, and whose arrest is the thing the civil service will talk about quietly for the rest of your government.\n\nThe route is changed. The plot is over. Sarran never mentions the fourth name again.',
         tone: 'mixed',
         effects: {
           stats: { security: +12, power: +8, legitimacy: -9, information: +5 },
@@ -657,7 +657,7 @@ export const ALERTS: AlertDef[] = [
         rng.chance(0.6 + s.stats.information / 300)
           ? {
               text:
-                'You name the three. Sarran\'s expression does not change, which from Sarran is applause.\n\nThey are taken at four. The plot dies with them. The scheduling clerk goes to work on Monday and never learns her name was on a piece of paper in your hand.',
+                'You name the three. Sarran\'s expression does not change. "Correct," is all she says.\n\nThey are taken at four. The plot dies with them. The scheduling clerk goes to work on Monday and never learns her name was on a piece of paper in your hand.',
               tone: 'good',
               effects: {
                 stats: { security: +11, power: +6, information: +8, legitimacy: +2 },
@@ -671,7 +671,7 @@ export const ALERTS: AlertDef[] = [
             }
           : {
               text:
-                'You name three. One of them is the clerk.\n\nThe two you did take were involved. The one you missed was the one with access to your schedule, and he is out of the country within nine hours — which, Sarran observes with no emphasis at all, means he was warned.',
+                'You name three. One of them is the clerk.\n\nThe two you did take were involved. The one you missed was the one with access to your schedule, and he is out of the country within nine hours. Sarran states plainly that this means he was warned.',
               tone: 'bad',
               effects: {
                 stats: { security: +3, power: -4, legitimacy: -5 },
@@ -720,12 +720,12 @@ export const ALERTS: AlertDef[] = [
   weight: (s) => 6 + Math.max(0, 45 - s.stats.economy) * 0.3 + Math.max(0, 50 - s.factions.combine.loyalty) * 0.2,
   body:
     'A roof collapse at the Number Four shaft in Gorsk at 5:40am. Nineteen men underground. Eleven are out. Eight are not.\n\nThe shaft was flagged in a 2022 inspection report that recommended closing it. The report was not acted on. Somebody will find that report by about Thursday.\n\nHess is already on a train.',
-  flavor: 'Eight men. Everything else today is a footnote to that.',
+  flavor: 'Eleven are out. Eight are not.',
   options: [
     {
       id: 'go',
       label: 'Go to Gorsk now. Be there when they come up.',
-      hint: 'Cancels everything else today. It is also, obviously, the right thing to do.',
+      hint: 'Cancels everything else today. Nobody will think less of you for going.',
       outcome: (_s, rng) => {
         const saved = rng.int(6) + 2;
         return {
@@ -804,7 +804,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Free. Brings her inside. Inside is where successors are made.',
       outcome: {
         text:
-          'You call the speech "the best defence of this country anyone has given all year" and appoint her to the Council, and everybody understands that you have just made her the second most important person in Velmorra because you could not make her the least.\n\nShe is gracious. She sends honey. Numbered.',
+          'You call the speech "the best defence of this country anyone has given all year" and appoint her to the Council. She is now the second most powerful person in the government.\n\nShe is gracious. She sends honey. Numbered.',
         tone: 'mixed',
         effects: {
           stats: { stability: +7, support: +5, legitimacy: +5, power: -6 },
@@ -823,7 +823,7 @@ export const ALERTS: AlertDef[] = [
       hint: 'Cost: $5.0B. Buys the mayors out from under her. She will know exactly what you did.',
       outcome: {
         text:
-          'Four mayors receive money direct from the capital with no provincial middleman, which has not happened since 1979 and which every one of them accepts within a day.\n\nKostyn says nothing publicly. She sends no honey at all this time, which Doran — who notices these things — describes as "the loudest thing that has happened all week".',
+          'Four mayors receive money direct from the capital with no provincial middleman — the first time that has happened since 1979 — and every one of them accepts within a day.\n\nKostyn says nothing publicly. She sends no honey at all this time. Doran, who keeps track of these things, flags it as the biggest change in Kostyn\'s behavior all week.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -5, power: +7, support: +3 },
