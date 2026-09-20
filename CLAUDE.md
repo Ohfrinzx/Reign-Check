@@ -30,19 +30,25 @@ body, outcome text, option hints, flavor text, and threat cards. 13 vitest
 tests pass and this was verified end to end in a real browser at 1366×700,
 the viewport that has caught every real layout bug so far.
 
-## PHASE 2 IS GREENLIT — §4.1 IS BUILT, AWAITING PLAYTEST
+## PHASE 2 IS GREENLIT — §4.1 IS BUILT, ONE PLAYTEST ROUND IN
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
-each, ending in a confidence vote) has been built: see
-`PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for exactly what shipped,
-how it was tested, and what to check when playtesting it. **Do not start
+each, ending in a confidence vote) has been built AND has been through one
+full round of owner playtesting and fixes (header balance, duplicate UI
+removed, glossary moved off hover, a card-voice rewrite, and a day-1
+card-variety fix found by simulation) — see `PROJECT_STATUS.md`'s "WHERE WE
+STOPPED" block for the full list and how each was verified. **Do not start
 §4.2 (the Back Room shop), §4.3 (mandates), §4.4 (the run deck), or §4.5
-(meta-progression) until the owner has played §4.1 and signed off** — same
+(meta-progression) until the owner says §4.1 itself is done** — same
 build → report → playtest → iterate discipline as every milestone before
-this one. Read `docs/DESIGN_V2.md` section 4 in full before touching any of
-§4.2–§4.5 — it has the exact mandate table, shop item categories, and the
-reasoning for why depth should live in cards/combinations, not more UI.
+this one, and this slice is still mid-loop. If a fresh session opens with
+more feedback on §4.1, keep iterating on it the same way round 1 was
+handled (measure before guessing where the game's tests/tooling allow it)
+rather than treating the feedback as done and moving on. Read
+`docs/DESIGN_V2.md` section 4 in full before touching any of §4.2–§4.5 — it
+has the exact mandate table, shop item categories, and the reasoning for
+why depth should live in cards/combinations, not more UI.
 
 **Do this as its own vertical slice, the same way Milestone 1 and the
 Poster/Broadsheet rebuild were done — build the smallest testable piece,
