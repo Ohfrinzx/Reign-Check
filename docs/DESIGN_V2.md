@@ -4,9 +4,11 @@
 OWNER-APPROVED.** The owner played the real Poster/Broadsheet build and
 said: *"Ok everything seems to run and look good. So I believe Phase one
 playtests are complete."* **PHASE 2 — the roguelike layer (acts, shop,
-mandates, run deck, meta-progression) in section 4 — is GREENLIT and is the
-current task.** Nothing has been built for it yet; see `CLAUDE.md`'s "PHASE
-2 IS GREENLIT" section for the recommended entry point.
+mandates, run deck, meta-progression) in section 4 — is GREENLIT.
+§4.1 (run structure: 3 acts of 6 days, confidence vote) IS NOW BUILT and
+awaiting playtest — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for
+what shipped. §4.2–§4.5 (shop, mandates, run deck, meta-progression) are
+NOT started; do not begin them until §4.1 is played and approved.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -205,7 +207,7 @@ start-of-run effect + register a run-long rule). Once each hook exists,
 individual mandates/advisors/policies/favours are just objects in an array,
 exactly like cards are today — see §4.6 for suggested shapes.
 
-### 4.1 Run structure
+### 4.1 Run structure — BUILT, awaiting playtest
 
 A run becomes **3 acts of ~6 days** (18 days) instead of 30 flat days. Each
 act ends with a **confidence vote** — a real check against your current state
@@ -213,6 +215,19 @@ rather than an arbitrary day counter. *Content: none required — this is the
 one purely mechanical slice.* Suggested approach: reuse the existing ending-
 check pattern in `engine.ts`/`endings.ts` for the vote's pass/fail logic
 rather than inventing a parallel system.
+
+**As built:** `GameState.act` (1..3), `ACT_LENGTH=6`/`NUM_ACTS=3` in
+`state.ts`. The vote is a `noConfidence` entry in `ENDINGS`
+(`content/endings.ts`) — `isActEndDay(s) && !passesConfidenceVote(s)` — so it
+runs through the exact same `checkEndings()` call every other ending already
+uses, gated to fire only on act-boundary days. `passesConfidenceVote()`
+checks the Grip/Legitimacy composite already shown on the masthead against a
+threshold that rises per act (40/47/54), tuned against simulated play to
+bite reckless/mediocre runs without touching careful play (docs/known
+limitation #2, the difficulty asymmetry, is unchanged by design — a real
+balance pass is still Phase 3). Passing act 3's vote with nothing else
+having ended the run resolves to the existing `survival` ending via
+`checkEndings(s, true)`. `SAVE_VERSION` bumped 2→3.
 
 ### 4.2 Between acts: The Back Room
 
@@ -484,9 +499,9 @@ Suggested order, each step shippable and playtestable on its own:
    there; it was not merged into a single persistent "desk" screen the way
    the original desk.html mockup showed (cards still get their own doc view
    once the day starts, per Broadsheet).
-4. ⬜ **NOT STARTED. GREENLIT — start here.** Acts and the confidence vote
-   (§4.1) first, as its own shippable slice; the Back Room shop (§4.2) is a
-   separate later slice once acts are playtested.
+4. ✅ **BUILT, awaiting playtest.** Acts and the confidence vote (§4.1),
+   shipped as its own slice; the Back Room shop (§4.2) is a separate later
+   slice, not to be started until acts are played and approved.
 5. ⬜ **NOT STARTED. GREENLIT**, after step 4. Mandates (§4.3).
 6. ⬜ **NOT STARTED. GREENLIT**, after step 5. Run deck (§4.4) +
    meta-progression (§4.5).

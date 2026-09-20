@@ -6,8 +6,25 @@ import { FACTION_ORDER, CHARACTERS } from './content/country';
 import { makeRng, randomSeed } from './rng';
 import { clampStat } from './stats';
 
-export const SAVE_VERSION = 2;
-export const DEFAULT_MAX_DAYS = 30;
+export const SAVE_VERSION = 3;
+
+/** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
+ *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
+ *  than running as one flat block of days. */
+export const ACT_LENGTH = 6;
+export const NUM_ACTS = 3;
+export const DEFAULT_MAX_DAYS = ACT_LENGTH * NUM_ACTS;
+
+/** True on the last day of the current act — the day its confidence vote is held. */
+export function isActEndDay(s: GameState): boolean {
+  return s.day === s.act * ACT_LENGTH;
+}
+
+/** True on the Night Review for the day whose confidence vote was just passed —
+ *  by then `act` has already advanced, so this looks one act back. */
+export function justAdvancedAct(s: GameState): boolean {
+  return s.act > 1 && s.day === (s.act - 1) * ACT_LENGTH;
+}
 
 /** Opening conditions vary run to run, so no two First Citizens inherit the same mess. */
 export interface OpeningScenario {
@@ -184,6 +201,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
 
     day: 1,
     maxDays: opts.maxDays ?? DEFAULT_MAX_DAYS,
+    act: 1,
     phase: 'briefing',
 
     agenda: [],

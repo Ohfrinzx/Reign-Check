@@ -12,6 +12,7 @@ import { FACTION_ORDER, FACTIONS, CHARACTER_MAP } from './content/country';
 import { clampStat } from './stats';
 import { checkEndings } from './content/endings';
 import { computeBudget } from './economy';
+import { NUM_ACTS, isActEndDay } from './state';
 
 /* ------------------------------------------------------------- registries */
 
@@ -486,6 +487,23 @@ function finishDay(s: GameState): GameState {
     s.ending = ending;
     s.phase = 'ended';
     s.log.push({ day: s.day, kind: 'system', title: ending.title, text: ending.epitaph, tone: 'bad' });
+  } else if (isActEndDay(s)) {
+    if (s.act < NUM_ACTS) {
+      s.act += 1;
+      s.log.push({
+        day: s.day, kind: 'consequence', title: 'Confidence vote',
+        text: `Parliament held its confidence vote and let you keep the job. Act ${s.act} begins tomorrow.`,
+        tone: 'good',
+      });
+    } else {
+      // Final act's vote passed and nothing else forced an ending today — the run is won.
+      const survival = checkEndings(s, true);
+      if (survival) {
+        s.ending = survival;
+        s.phase = 'ended';
+        s.log.push({ day: s.day, kind: 'system', title: survival.title, text: survival.epitaph, tone: 'bad' });
+      }
+    }
   }
   return s;
 }

@@ -2,7 +2,7 @@ import { COUNTRY, CHARACTERS } from '../../game/content/country';
 import type { GameState } from '../../game/types';
 import { computeResources, DISPLAY_FACTIONS } from '../../game/display';
 import { FACTIONS } from '../../game/content/country';
-import { currentOpening, HONORIFICS } from '../../game/state';
+import { currentOpening, HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
 
 /**
  * Shown once before Day 1, and reachable any time from the "Brief me" button.
@@ -33,8 +33,10 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
 
         <Section title="What you are trying to do">
           <p>
-            Stay in the job for <b>{s.maxDays} days</b>. On day {s.maxDays}, parliament votes on whether to
-            confirm you. Get there still holding the office and you have won.
+            The run is <b>{NUM_ACTS} acts</b> of about {ACT_LENGTH} days each ({s.maxDays} days in all).
+            Every act ends with a <b>confidence vote</b> in parliament — a real check of your Grip and
+            Legitimacy, not a countdown. Lose one and the job ends there and then. Survive all {NUM_ACTS} and
+            you have won.
           </p>
           <p>
             Every day you will be handed three to five <b>cards</b>: a minister with a request, a crisis,
@@ -70,6 +72,7 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
 
         <Section title="How you lose">
           <ul className="intro-list">
+            <li><b>Parliament votes no confidence.</b> Let Grip and Legitimacy both sag going into an end-of-act vote and you are out, no matter what else is going well.</li>
             <li><b>The army removes you.</b> Underfund them, break a promise to them, or order them to shoot at civilians.</li>
             <li><b>The street removes you.</b> Let public anger build with nothing to release it.</li>
             <li><b>The money runs out.</b> Spend faster than you earn for long enough.</li>

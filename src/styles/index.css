@@ -99,12 +99,8 @@ abbr.term{
 
 .masthead{
   background:var(--ink);color:var(--paper);
-  display:grid;grid-template-columns:auto 1fr auto;align-items:center;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;
   position:relative;overflow:hidden;flex:none;
-}
-.masthead::after{
-  content:'';position:absolute;top:0;bottom:0;right:41%;width:128px;
-  background:var(--red);transform:skewX(-14deg);
 }
 .masthead .id{padding:11px 22px;position:relative;z-index:2;display:flex;align-items:center;gap:11px}
 .masthead .id .mark{
@@ -113,11 +109,24 @@ abbr.term{
 }
 .masthead .id .n{font-family:var(--head);font-size:23px;line-height:1;letter-spacing:.01em}
 .masthead .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.2em;color:#c9bfa8;margin-top:2px;text-transform:uppercase}
-.masthead .mid{position:relative;z-index:2;padding-left:24px;display:flex;align-items:center;gap:14px}
-.masthead .mid .lbl{font-family:var(--sans);font-weight:800;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
-.masthead .mid .btn{padding:6px 12px;font-size:9.5px}
-.masthead .mid .btn-ghost{color:#c9bfa8;border-color:transparent}
-.masthead .mid .btn-ghost:hover{color:var(--paper);border-color:var(--paper)}
+
+/* the red badge is sized to the label text itself (padding, not a fixed
+   width guessed in advance) so it never straddles the text at the edges
+   the way a fixed-width stripe did once "Act N of 3" made the label longer */
+.masthead .mid{position:relative;z-index:2;padding-left:24px;display:flex;align-items:center;justify-content:center}
+.masthead .mid .lbl{
+  font-family:var(--sans);font-weight:800;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  background:var(--red);color:var(--paper);padding:9px 22px;display:inline-block;
+  transform:skewX(-14deg);
+}
+.masthead .mid .lbl span{display:inline-block;transform:skewX(14deg)}
+
+/* buttons live with the ledger, past the red stripe, so the header reads
+   balanced left-to-right instead of everything clustering by the nameplate */
+.masthead-right{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding-right:6px}
+.masthead-right .btn{padding:6px 12px;font-size:9.5px}
+.masthead-right .btn-ghost{color:#c9bfa8;border-color:transparent}
+.masthead-right .btn-ghost:hover{color:var(--paper);border-color:var(--paper)}
 
 /* resource ledger, lives in the masthead */
 .res{display:flex;position:relative;z-index:2}
@@ -226,6 +235,9 @@ abbr.term{
 .cmt:last-child{border-bottom:0}
 .cmt .n{color:var(--ink-soft)}
 .cmt .v{font-family:var(--mono);font-weight:700;color:var(--red);white-space:nowrap}
+.cmt .v.pos{color:var(--teal)}
+.cmt.budget-net{border-bottom:2px solid var(--ink);margin-bottom:4px;font-size:13px}
+.cmt.budget-net .n{color:var(--ink);font-weight:700}
 
 /* ============================================================== THE DOC */
 
@@ -295,6 +307,15 @@ abbr.term{
 .opt .hint{display:block;font-family:var(--body);font-size:12.5px;color:var(--ash);margin-top:3px;font-weight:400;line-height:1.4}
 .opt .locked{display:block;font-family:var(--mono);font-size:10.5px;color:var(--red);margin-top:4px;letter-spacing:.02em}
 .opt .c{font-family:var(--head);font-size:16px;color:var(--red);margin-left:auto;white-space:nowrap;flex:none}
+
+/* plain-text glossary footnote — replaces the old hover-only <abbr>, so a
+   term's definition is visible without a mouse (see Prose.tsx) */
+.card-glossary{
+  padding:8px 20px 14px;border-top:1px dashed rgba(22,19,15,.25);
+  display:flex;flex-direction:column;gap:4px;
+}
+.card-glossary span{font-family:var(--body);font-style:italic;font-size:11.5px;color:var(--ink-soft);line-height:1.4}
+.card-glossary b{font-style:normal;text-transform:capitalize}
 
 /* alert variant of the doc: red frame, "EXTRA" masthead corner */
 .doc.alert{border-color:var(--red-deep)}

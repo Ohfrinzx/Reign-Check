@@ -1,18 +1,20 @@
-import { annotateTerms } from '../../game/glossary';
-
 /**
- * Renders card prose: splits on blank lines into paragraphs, and — inside
- * each paragraph — wraps the first occurrence of any glossary term with a
- * plain-language hover/tap definition. See src/game/glossary.ts.
+ * Renders card prose: splits on blank lines into paragraphs.
+ *
+ * Institutional/financial jargon used to be glossed inline via a hover-only
+ * <abbr title="…">. That's gone — a definition only the mouse can find isn't
+ * "everything you need to decide" in front of you. See CardView.tsx's
+ * glossary footnote, which lists any term a card actually uses in plain
+ * text at the bottom of the card instead.
  */
-export function Prose({ text, gloss = true }: { text: string; gloss?: boolean }) {
+export function Prose({ text }: { text: string }) {
   return (
     <>
       {text.split('\n\n').map((para, i) => (
         <p key={i}>
           {para.split('\n').map((line, j, arr) => (
             <span key={j}>
-              {gloss ? <Glossed text={line} /> : line}
+              {line}
               {j < arr.length - 1 && <br />}
             </span>
           ))}
@@ -22,20 +24,8 @@ export function Prose({ text, gloss = true }: { text: string; gloss?: boolean })
   );
 }
 
-/** Same first-occurrence glossing as <Prose>, for a single line outside a
- *  full prose block — option hints, pull-quotes, threat-card bodies. */
+/** Plain text. Kept as its own component so call sites (option hints,
+ *  flavor text, threat cards) don't need to change. */
 export function Glossed({ text }: { text: string }) {
-  const parts = annotateTerms(text);
-  if (parts.length === 1 && !parts[0].def) return <>{text}</>;
-  return (
-    <>
-      {parts.map((p, i) =>
-        p.def ? (
-          <abbr className="term" title={p.def} key={i}>{p.text}</abbr>
-        ) : (
-          <span key={i}>{p.text}</span>
-        ),
-      )}
-    </>
-  );
+  return <>{text}</>;
 }

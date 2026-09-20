@@ -2,7 +2,28 @@ import type { GameState, EndingDef, EndingResult } from '../types';
 import { REGIME_KEYS } from '../types';
 import { money } from '../stats';
 import { FACTIONS, FACTION_ORDER } from './country';
-import { DISPLAY_FACTIONS } from '../display';
+import { DISPLAY_FACTIONS, computeResources } from '../display';
+import { isActEndDay } from '../state';
+
+/**
+ * Confidence vote: held at the end of every act (see ACT_LENGTH/NUM_ACTS in
+ * state.ts), checked against the same Grip/Legitimacy composite the player
+ * already watches on the masthead — no new hidden number. Parliament expects
+ * more of you each time, so the bar rises act to act.
+ */
+function passesConfidenceVote(s: GameState): boolean {
+  const resources = computeResources(s);
+  const grip = resources.find((r) => r.key === 'grip')?.value ?? 0;
+  const legitimacy = resources.find((r) => r.key === 'legitimacy')?.value ?? 0;
+  const composite = (grip + legitimacy) / 2;
+  const threshold = 33 + s.act * 7; // act 1: 40, act 2: 47, act 3: 54 — tuned against
+  // simulated play so it bites reckless/mediocre runs (measurably, per act) without
+  // ever touching careful/generous play, which already survives at ~98% by design
+  // (docs/DESIGN_V2.md known limitation #2 — a balance pass is deferred to Phase 3).
+  return composite >= threshold;
+}
+
+const ACT_NAMES = ['first', 'second', 'third'];
 
 /**
  * Failure states are never a dice roll. Each one is the terminus of a pressure
@@ -83,6 +104,15 @@ export const ENDINGS: EndingDef[] = [
     check: (s) => s.stats.power <= 5,
     epitaph: (s) =>
       `There was no single moment. Orders went out and came back marked for clarification. Meetings happened at times you were not told about. The civil service, which has outlasted nine governments, started routing around you the way water routes around a rock.\n\nYou held the office for ${s.day} days. You were in charge for rather fewer.`,
+  },
+  {
+    id: 'noConfidence',
+    title: 'PARLIAMENT WITHDREW ITS CONFIDENCE',
+    kind: 'noConfidence',
+    priority: 65,
+    check: (s) => isActEndDay(s) && !passesConfidenceVote(s),
+    epitaph: (s) =>
+      `Every act ends with the vote parliament always holds, and this time the numbers were not there.\n\nNobody staged anything. Nobody needed to. Enough of the chamber decided you had stopped being worth the trouble and voted accordingly, in an afternoon, with no drama at all.\n\nYou did not survive the ${ACT_NAMES[s.act - 1] ?? 'latest'} confidence vote, on day ${s.day}.`,
   },
 ];
 

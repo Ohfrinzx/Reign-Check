@@ -16,7 +16,7 @@ export const FOLLOWUPS: CardDef[] = [
   weight: () => 0,
   body:
     'Eleven people had lunch in the Free Zone on Tuesday. Between them they own the port cranes, the cement, the banks and the football.\n\nNo agenda, no minutes. By Wednesday afternoon the currency had moved three per cent and two scheduled bond auctions were "postponed for technical reasons".\n\nAdamek has sent his regrets that he was unable to invite you.',
-  flavor: 'The Concord does not make threats. It makes arrangements.',
+  flavor: 'The currency moved three per cent on Tuesday. Two bond auctions were postponed.',
   options: [
     {
       id: 'settle',
@@ -95,7 +95,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Settles the debt. Mavro customs stops being yours.',
       outcome: {
         text:
-          'The appointment is uncontroversial because the man is genuinely qualified, which is how the best of these are always done.\n\nIn six weeks the country\'s customs data will be extremely tidy and completely fictional. But that is six weeks away.',
+          'The appointment is uncontroversial because the man is genuinely qualified.\n\nIn six weeks the country\'s customs data will be extremely tidy and completely fictional. That is six weeks away.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +3, information: -9, elite: +6 },
@@ -165,7 +165,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Free. Costs you airtime and pride. Buys something this country has not seen in years.',
       outcome: {
         text:
-          'You announce a guaranteed weekly opposition slot on Channel Seven, and you announce it by reading the student\'s numbers out yourself.\n\nLoz is appalled. The press is disoriented. Sanna Vel, given eleven minutes a week on national television, uses the first four to thank you, which is the most dangerous thing she could possibly have done.',
+          'You announce a guaranteed weekly opposition slot on Channel Seven, and you announce it by reading the student\'s numbers out yourself.\n\nLoz is appalled. The press is disoriented. Sanna Vel, given eleven minutes a week on national television, uses the first four to thank you.',
         tone: 'good',
         effects: {
           stats: { legitimacy: +13, support: +5, information: +7, power: -4 },
@@ -254,7 +254,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Free and brutal. Also the first true sentence the region has had from a head of state.',
       outcome: {
         text:
-          'She stops, looks at you for a long moment, and closes the notebook.\n\n"Thank you," she says, and means it, and it is somehow far worse than being shouted at.\n\nThe Hadem councils withdraw from the regional assembly eleven days later. They give no reason. They do not need to.',
+          'She stops, looks at you for a long moment, and closes the notebook.\n\n"Thank you," she says, and means it.\n\nThe Hadem councils withdraw from the regional assembly eleven days later. They give no reason.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +4, support: -4 },
@@ -524,7 +524,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Keeps the port. They buy 44% of your exports and reprice gas every year.',
       outcome: {
         text:
-          'The ambassador accepts the refusal with complete calm, which is how you know it has been written down somewhere permanent.\n\nThe gas contract is renewed on the forty-first day, eleven per cent higher, with a note regretting market conditions.',
+          'The ambassador accepts the refusal with complete calm.\n\nThe gas contract is renewed on the forty-first day, eleven per cent higher, with a note regretting market conditions.',
         tone: 'mixed',
         effects: {
           stats: { legitimacy: +7, military: +6, economy: -4, treasury: -3 },
@@ -607,7 +607,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Saves $5.0B for now. He is holding the gazette in his hand.',
       outcome: {
         text:
-          'Hess folds the gazette carefully and puts it in his inside pocket.\n\n"One quarter," he says. He does not say what happens after one quarter, which is considerably more frightening than if he had.',
+          'Hess folds the gazette carefully and puts it in his inside pocket.\n\n"One quarter," he says. He does not say what happens after one quarter.',
         tone: 'mixed',
         effects: {
           stats: { treasury: +1, stability: -4 },
@@ -677,7 +677,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Free and technically accurate. Everyone can see what you are doing.',
       outcome: {
         text:
-          'The statement names a directorate that ceased to exist in 2023 and four officials who have retired.\n\nAll of it is true. It is also so transparently convenient that the press does not bother attacking it — they simply reprint it next to a photograph of the mine and let the two things sit together.',
+          'The statement names a directorate that ceased to exist in 2023 and four officials who have retired.\n\nAll of it is true. The press does not bother attacking it — they simply reprint it next to a photograph of the mine.',
         tone: 'bad',
         effects: {
           stats: { legitimacy: -9, support: -6 },
@@ -696,7 +696,7 @@ export const FOLLOWUPS: CardDef[] = [
       hint: 'Cost: $6.0B and four thousand jobs. Nobody will ever say you did nothing.',
       outcome: {
         text:
-          'Eleven shafts close by order within a week. Four thousand people are out of work and on full state pay, which is ruinous, and which you announce in the same breath because announcing one without the other would be worse than useless.\n\nHess supports it publicly and privately tells you it will cost you Gorsk for a generation. You are both right.',
+          'Eleven shafts close by order within a week. Four thousand people are out of work and on full state pay — a ruinous cost, announced in the same breath as the closures so nobody can say you hid it.\n\nHess supports it publicly and privately tells you it will cost you Gorsk for a generation. You are both right.',
         tone: 'mixed',
         effects: {
           stats: { treasury: -6, economy: -6, legitimacy: +12, support: -4, stability: +3 },

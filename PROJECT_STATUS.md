@@ -1,14 +1,57 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: Phase 1 declared complete by the owner. Phase 2 (roguelike
-> layer) is greenlit and has not been started yet — that is the next task.
+> Last updated: Phase 2's first slice (§4.1, run structure) is BUILT and
+> awaiting playtest. Do not start §4.2 (the Back Room shop) until the owner
+> has played this slice and signed off — see the block immediately below.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
-> **Phase 1 is done and owner-approved. Phase 2 is greenlit and unstarted.
-> If you are a new agent picking this up cold, this is everything you need
-> to know before writing code:**
+> **§4.1 (acts + confidence vote) is built, tested, and waiting on a
+> playtest. Nothing else in Phase 2 (shop/mandates/run deck/meta-progression)
+> has been started. If you are a new agent picking this up cold:**
+>
+> **What shipped in this slice:** a run is now **3 acts of 6 days (18 days
+> total)** instead of a flat 30. Each act ends with a **confidence vote** — a
+> real check of the player's Grip/Legitimacy composite (the same numbers
+> already on the masthead), not a day-counter formality. The threshold rises
+> each act (40 / 47 / 54, tuned against simulated play so it bites reckless
+> and mediocre runs measurably without ever touching careful/generous play).
+> Failing a vote ends the run immediately with a new ending
+> (`noConfidence`, `src/game/content/endings.ts`) — acts are real
+> checkpoints, not just a re-skinned day counter. Passing the final act's
+> vote is the existing survival ending. Concretely: `GameState.act` was
+> added (`types.ts`), `SAVE_VERSION` bumped 2→3 (`state.ts`), the vote logic
+> lives in `finishDay()` (`engine.ts`) reusing the existing
+> `checkEndings()`/`EndingDef` pattern rather than a parallel system, and the
+> masthead/briefing/night-review/intro screens were updated to show
+> Act N of 3 and to frame the vote (a same-day heads-up on act-end
+> mornings, the outcome in that night's "What came due today", and a
+> "Begin Act N →" button label right after a pass). All 13 existing tests
+> pass unchanged in intent — the balance probe now also reports how often
+> each policy loses the vote, confirming it fires (`~8%` of random play,
+> `~6%` of reckless play, `~2.5%` of careful play) without dominating the
+> other failure endings. `npm run build` and a real-browser pass
+> (`tools/verify.mjs` at 1366×700) are both clean, and a scripted playthrough
+> confirmed the Night Review vote line and act-transition button text render
+> correctly.
+>
+> **What was NOT touched in this slice, on purpose:** the Back Room shop
+> (§4.2), mandates (§4.3), the run deck (§4.4), and meta-progression (§4.5).
+> Per `CLAUDE.md`'s "PHASE 2" section and the owner's own build → report →
+> playtest → iterate loop, **stop here and get this slice played before
+> starting §4.2.**
+>
+> **One deliberate scope call worth flagging for playtest feedback:** the act
+> length (18 days total) and the failure-on-vote-loss behavior were both
+> confirmed with the owner directly before building (not just inferred from
+> `docs/DESIGN_V2.md` — see the design doc's §4.1 note). If playtesting the
+> shorter run or the immediate-loss framing feels wrong, that is exactly the
+> kind of thing this checkpoint is for — say so before §4.2 starts.
+>
+> **The rest of this "WHERE WE STOPPED" block (below) is the PRE-EXISTING
+> Phase 1 handover, kept for context on how the project got here — it is no
+> longer the current task, §4.1 above is:**
 >
 > The owner played the real Poster/Broadsheet build (3 resources, 5
 > factions, the jargon glossary) and said, verbatim: *"Ok everything seems
@@ -430,20 +473,20 @@ to be asked about before starting:
 
 ## 6. Recommended next task
 
-**This is no longer conditional — the owner has answered the question this
-section used to branch on. Do this, in order:**
+**§4.1 is now built (see "WHERE WE STOPPED" at the top) and waiting on a
+playtest. Do this, in order:**
 
-1. **Start `docs/DESIGN_V2.md` §4 — the roguelike layer.** Begin with §4.1,
-   the run structure: 3 acts of ~6 days each, ending in a confidence vote,
-   replacing the current flat 30-day run. Build this as its own shippable,
-   playtestable slice — do not also build the shop (§4.2), mandates (§4.3),
-   or run deck (§4.4) in the same pass.
-2. **Then STOP and report back for playtest**, the same way Milestone 1 and
-   the Poster/Broadsheet rebuild were reported: what was built, how to test
-   it, any known bugs/limitations, then wait. Do not chain straight into
-   §4.2 without a check-in — that pattern is what got Phase 1 right three
-   times in a row.
-3. **After that slice is approved, continue in order**: §4.2 (the Back Room
+1. ✅ **DONE.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3 acts of 6
+   days each (18 total), ending in a confidence vote checked against Grip/
+   Legitimacy, replacing the flat 30-day run. Shipped as its own slice; the
+   shop (§4.2), mandates (§4.3), and run deck (§4.4) were deliberately not
+   touched.
+2. ⬜ **STOP AND WAIT FOR PLAYTEST HERE.** Report back what was built (see
+   the top block), then wait for the owner to actually play it — the same
+   way Milestone 1 and the Poster/Broadsheet rebuild were reported. Do not
+   chain straight into §4.2 without a check-in — that pattern is what got
+   Phase 1 right three times in a row.
+3. **Once that playtest is positive, continue in order**: §4.2 (the Back Room
    shop) → §4.3 (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each
    its own shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author
    content as part of each slice, not separately** — §4.2 carries its own
@@ -556,12 +599,11 @@ tools/                        ← Playwright scripts for real-browser testing
    rebuild. The fix both times: put the critical action somewhere always
    visible (now: the top strap's `.strap-action`), not only at the bottom of
    scrollable content.
-10. **Bump `SAVE_VERSION` (`src/game/state.ts`, currently `2`) whenever
-    `GameState`'s shape changes.** Has not needed to happen since the
-    honorific/commitments fields were added. Phase 2 (acts, mandates, the
-    run deck, meta-progression) will very likely be the next time it does —
-    `save.ts` discards mismatched-version saves rather than crashing, so
-    this is safe as long as the bump actually happens.
+10. **Bump `SAVE_VERSION` (`src/game/state.ts`) whenever `GameState`'s shape
+    changes.** Bumped 2→3 for §4.1's `act` field — the next bump will likely
+    be for mandates/run-deck/meta-progression state. `save.ts` discards
+    mismatched-version saves rather than crashing, so this is safe as long
+    as the bump actually happens.
 11. **Keep all game logic, including everything Phase 2 adds, in
     `src/game/` with zero React or DOM dependency.** This is what keeps a
     future mobile/iOS port (`docs/DESIGN_V2.md` §10, not scheduled)

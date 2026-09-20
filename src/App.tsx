@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, StatKey } from './game/types';
-import { createGame } from './game/state';
+import { createGame, justAdvancedAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   advanceToNextDay, activeCard, STAGE_META,
@@ -163,15 +163,17 @@ export default function App() {
           </div>
         </div>
         <div className="mid">
-          <span className="lbl">Day {game.day} / {game.maxDays}</span>
+          <span className="lbl"><span>Act {game.act} of {NUM_ACTS} &middot; Day {game.day} / {game.maxDays}</span></span>
+        </div>
+        <div className="masthead-right">
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
             Brief me
           </button>
           <button className="btn btn-ghost" onClick={backToTitle} title="Your run is saved automatically">
             Menu
           </button>
+          <Ledger s={game} />
         </div>
-        <Ledger s={game} />
       </header>
 
       {/* ------------------------------------------------------------ strap */}
@@ -194,7 +196,7 @@ export default function App() {
         )}
         {game.phase === 'night' && (
           <button className="strap-action" onClick={doContinue}>
-            {game.day >= game.maxDays ? 'Face the vote →' : `Begin Day ${game.day + 1} →`}
+            {justAdvancedAct(game) ? `Begin Act ${game.act} →` : `Begin Day ${game.day + 1} →`}
           </button>
         )}
       </div>
@@ -202,7 +204,7 @@ export default function App() {
       {/* ----------------------------------------------------------- main */}
       <div className="main">
         <div className="stage-col">
-          {game.phase === 'briefing' && <BriefingScreen s={game} onBegin={doContinue} />}
+          {game.phase === 'briefing' && <BriefingScreen s={game} />}
 
           {(game.phase === 'stage' || game.phase === 'resolve') && (
             <>
@@ -214,7 +216,7 @@ export default function App() {
             </>
           )}
 
-          {game.phase === 'night' && <NightScreen s={game} onNext={doContinue} />}
+          {game.phase === 'night' && <NightScreen s={game} />}
           {game.phase === 'ended' && (
             <EndingScreen s={game} onRestart={restart} onTitle={backToTitle} />
           )}

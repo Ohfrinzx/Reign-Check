@@ -5,7 +5,7 @@ import type { GameState } from '../types';
 
 export function probe(n: number, policy: 'random' | 'first' | 'last') {
   const endings: Record<string, number> = {};
-  let totalDays = 0, alerts = 0, days30 = 0;
+  let totalDays = 0, alerts = 0, reachedMax = 0;
   for (let i = 0; i < n; i++) {
     const rng = makeRng(i + 99);
     let s: GameState = prepareDay(createGame({ seed: i * 7717 + 3 }));
@@ -24,7 +24,7 @@ export function probe(n: number, policy: 'random' | 'first' | 'last') {
     }
     endings[s.ending?.id ?? 'none'] = (endings[s.ending?.id ?? 'none'] ?? 0) + 1;
     totalDays += s.day; alerts += s.stat.alertsSurvived;
-    if (s.day >= 30) days30++;
+    if (s.day >= s.maxDays) reachedMax++;
   }
-  return { policy, avgDays: (totalDays / n).toFixed(1), avgAlerts: (alerts / n).toFixed(1), reached30: `${((days30 / n) * 100).toFixed(0)}%`, endings };
+  return { policy, avgDays: (totalDays / n).toFixed(1), avgAlerts: (alerts / n).toFixed(1), reachedMax: `${((reachedMax / n) * 100).toFixed(0)}%`, endings };
 }

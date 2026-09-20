@@ -420,6 +420,8 @@ export interface GameState {
 
   day: number;
   maxDays: number;
+  /** which of the 3 acts you are in — see ACT_LENGTH/NUM_ACTS in state.ts */
+  act: number;
   phase: Phase;
 
   /** stages planned for today */
@@ -487,7 +489,7 @@ export interface RunStats {
 export interface EndingDef {
   id: string;
   title: string;
-  kind: 'coup' | 'revolt' | 'collapse' | 'foreign' | 'elite' | 'assassination' | 'exit' | 'survival' | 'fracture';
+  kind: 'coup' | 'revolt' | 'collapse' | 'foreign' | 'elite' | 'assassination' | 'exit' | 'survival' | 'fracture' | 'noConfidence';
   /** checked at end of day; higher priority wins ties */
   priority: number;
   check?: (s: GameState) => boolean;
