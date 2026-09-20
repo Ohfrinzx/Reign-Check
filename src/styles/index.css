@@ -113,11 +113,15 @@ abbr.term{
 }
 .masthead .id .n{font-family:var(--head);font-size:23px;line-height:1;letter-spacing:.01em}
 .masthead .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.2em;color:#c9bfa8;margin-top:2px;text-transform:uppercase}
-.masthead .mid{position:relative;z-index:2;padding-left:24px;display:flex;align-items:center;gap:14px}
+.masthead .mid{position:relative;z-index:2;padding-left:24px;display:flex;align-items:center;justify-content:center}
 .masthead .mid .lbl{font-family:var(--sans);font-weight:800;font-size:10px;letter-spacing:.18em;text-transform:uppercase}
-.masthead .mid .btn{padding:6px 12px;font-size:9.5px}
-.masthead .mid .btn-ghost{color:#c9bfa8;border-color:transparent}
-.masthead .mid .btn-ghost:hover{color:var(--paper);border-color:var(--paper)}
+
+/* buttons live with the ledger, past the red stripe, so the header reads
+   balanced left-to-right instead of everything clustering by the nameplate */
+.masthead-right{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding-right:6px}
+.masthead-right .btn{padding:6px 12px;font-size:9.5px}
+.masthead-right .btn-ghost{color:#c9bfa8;border-color:transparent}
+.masthead-right .btn-ghost:hover{color:var(--paper);border-color:var(--paper)}
 
 /* resource ledger, lives in the masthead */
 .res{display:flex;position:relative;z-index:2}
@@ -226,6 +230,9 @@ abbr.term{
 .cmt:last-child{border-bottom:0}
 .cmt .n{color:var(--ink-soft)}
 .cmt .v{font-family:var(--mono);font-weight:700;color:var(--red);white-space:nowrap}
+.cmt .v.pos{color:var(--teal)}
+.cmt.budget-net{border-bottom:2px solid var(--ink);margin-bottom:4px;font-size:13px}
+.cmt.budget-net .n{color:var(--ink);font-weight:700}
 
 /* ============================================================== THE DOC */
 

@@ -1,10 +1,9 @@
 import type { GameState, StatKey } from '../../game/types';
 import { COUNTRY } from '../../game/content/country';
 import { STAT_ORDER, money } from '../../game/stats';
-import { computeResources } from '../../game/display';
 import { buildBriefing, dateLine } from '../../game/briefing';
-import { currentOpening, HONORIFICS, NUM_ACTS, isActEndDay, justAdvancedAct } from '../../game/state';
-import { usd } from '../../game/economy';
+import { currentOpening, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
+import { usd, usdFlow, computeBudget } from '../../game/economy';
 import { fill } from '../../game/text';
 
 const MAX_PER_SECTION = 4;
@@ -84,9 +83,9 @@ export function TitleScreen({
 
 /* ---------------------------------------------------------- BRIEFING */
 
-export function BriefingScreen({ s, onBegin }: { s: GameState; onBegin: () => void }) {
+export function BriefingScreen({ s }: { s: GameState }) {
   const b = buildBriefing(s);
-  const resources = computeResources(s);
+  const budget = computeBudget(s);
   const opening = currentOpening(s);
   const issues = b.items.filter((i) => i.kind === 'issue' || i.kind === 'demand');
   const warnings = b.items.filter((i) => i.kind === 'warning');
@@ -151,15 +150,24 @@ export function BriefingScreen({ s, onBegin }: { s: GameState; onBegin: () => vo
           </div>
 
           <div className="fp-rail">
-            <h2>The money</h2>
-            <div className="intro-ledger">
-              {resources.map((r) => (
-                <div key={r.key}>
-                  <div className="l">{r.label}</div>
-                  <div className="v">{r.display}</div>
-                </div>
-              ))}
+            <h2>The budget</h2>
+            <div className="cmt budget-net">
+              <span className="n">Net today</span>
+              <span className={`v ${budget.net >= 0 ? 'pos' : 'neg'}`}>{usdFlow(budget.net)}</span>
             </div>
+            {budget.lines.map((l, i) => (
+              <div className="cmt" key={i}>
+                <span className="n">{l.label}{l.note ? ` · ${l.note}` : ''}</span>
+                <span className={`v ${l.kind === 'revenue' ? 'pos' : 'neg'}`}>
+                  {l.kind === 'revenue' ? '+' : '-'}{usd(l.amount, 2)}/day
+                </span>
+              </div>
+            ))}
+            {budget.runwayDays !== null && (
+              <div className="more-note">
+                At this rate, the treasury runs out in {budget.runwayDays} day{budget.runwayDays === 1 ? '' : 's'}.
+              </div>
+            )}
 
             {pending.length > 0 && <h2>Coming up</h2>}
             {pending.slice(0, MAX_PER_SECTION).map((it, i) => (
@@ -187,18 +195,13 @@ export function BriefingScreen({ s, onBegin }: { s: GameState; onBegin: () => vo
           </div>
         </div>
       </div>
-
-      <div className="action-bar">
-        <span className="note">Everything here is also on your desk once the day begins.</span>
-        <button className="btn btn-primary" onClick={onBegin} style={{ marginLeft: 'auto' }}>Begin the day →</button>
-      </div>
     </div>
   );
 }
 
 /* ------------------------------------------------------------- NIGHT */
 
-export function NightScreen({ s, onNext }: { s: GameState; onNext: () => void }) {
+export function NightScreen({ s }: { s: GameState }) {
   const day = s.history[s.history.length - 1];
   const decisions = s.log.filter((l) => l.day === s.day && (l.kind === 'decision' || l.kind === 'alert'));
   const consequences = s.log.filter((l) => l.day === s.day && l.kind === 'consequence');
@@ -271,13 +274,6 @@ export function NightScreen({ s, onNext }: { s: GameState; onNext: () => void })
             </>
           )}
         </div>
-      </div>
-
-      <div className="action-bar">
-        <span className="note">Act {s.act} of {NUM_ACTS} &middot; Day {s.day} of {s.maxDays}</span>
-        <button className="btn btn-primary" onClick={onNext} style={{ marginLeft: 'auto' }}>
-          {justAdvancedAct(s) ? `Begin Act ${s.act} →` : `Begin Day ${s.day + 1} →`}
-        </button>
       </div>
     </div>
   );
