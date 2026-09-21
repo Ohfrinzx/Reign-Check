@@ -207,7 +207,12 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
   }
 
   if (e.deck) {
-    if (e.deck.add) s.runDeck.push(...e.deck.add);
+    if (e.deck.add) {
+      // A ban is permanent for the run and always wins. Keep that invariant in
+      // the saved data too: adding an already-banned id must not leave a dead
+      // copy in runDeck even though cardWeight() would still refuse to draw it.
+      s.runDeck.push(...e.deck.add.filter((id) => !s.bannedCards.includes(id)));
+    }
     if (e.deck.remove) {
       for (const id of e.deck.remove) {
         if (!s.bannedCards.includes(id)) s.bannedCards.push(id);

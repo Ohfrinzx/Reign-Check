@@ -63,7 +63,7 @@ off a slice to any other.
 awaiting owner playtest:** `GameState.runDeck`/`bannedCards`, a new
 `Effects.deck.add`/`remove`, 8 new Back Room policies that use it, plus
 this slice's content quota — 20 new standard cards (`content/cards3.ts`)
-and 6 new alerts. See the "§4.4, the run deck" section below for the full
+and 5 new alerts. See the "§4.4, the run deck" section below for the full
 detail. `SAVE_VERSION` is 8; prior saves reset. §4.5 remains unstarted and
 needs an explicit instruction after this slice is playtested.
 
@@ -213,7 +213,7 @@ already-repeatable card so the shop copy is honest about what it does.
 is authored as part of the slice it belongs to, not separately): **20 new
 standard cards** in a new file, `content/cards3.ts` (wired into
 `engine.ts`'s `ALL_CARDS`/`ALL_CARD_MAP`, same authoring rules as
-`cards.ts`/`cards2.ts`), and **6 new alerts** appended to `content/alerts.ts`
+`cards.ts`/`cards2.ts`), and **5 new alerts** appended to `content/alerts.ts`
 — filling in three drivers (`scandal`, `corruption`, `cult`) that had no
 alert at all before now. This is also the content-volume top-up the design
 doc flags as known limitation #1. Balance is unmeasured before now: the

@@ -3,6 +3,7 @@ import { createGame } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
+  ALL_CARD_MAP,
 } from '../engine';
 import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
 import {
@@ -396,6 +397,9 @@ describe('the run deck (§4.4 shop items)', () => {
     for (const def of deckItems) {
       const { add, remove } = def.effects!.deck!;
       expect(add?.length || remove?.length, `${def.id} declares deck effects but no ids`).toBeTruthy();
+      for (const id of [...(add ?? []), ...(remove ?? [])]) {
+        expect(ALL_CARD_MAP[id], `${def.id} targets unknown card ${id}`).toBeTruthy();
+      }
     }
   });
 

@@ -66,7 +66,7 @@ in progress:
   the player holds copies of draws more often (bounded by the existing
   3-day recency gate); a banned card never draws again. 8 new Back Room
   policies in `content/shop.ts` use it. Also folds in this slice's content
-  quota: 20 new standard cards (`content/cards3.ts`, new file) and 6 new
+  quota: 20 new standard cards (`content/cards3.ts`, new file) and 5 new
   alerts (appended to `content/alerts.ts`, filling in the previously-unused
   `scandal`/`corruption`/`cult` drivers). `SAVE_VERSION` is **8**;
   version-7 in-progress runs reset.

@@ -35,7 +35,7 @@ slice's content quota is authored as part of building it:**
   from the existing pool so the effect is honest — buy one and that
   situation really does come back more, or stops coming back at all.
 - **20 new standard cards** in a new `content/cards3.ts` (same authoring
-  rules as `cards.ts`/`cards2.ts`), and **6 new alerts** appended to
+  rules as `cards.ts`/`cards2.ts`), and **5 new alerts** appended to
   `content/alerts.ts` — this was also the content-volume top-up the design
   doc calls out (known limitation #1), and it filled in three drivers that
   had no alert at all before now: `scandal`, `corruption`, and `cult`
@@ -56,13 +56,25 @@ and shop items surfacing naturally in a real run.
 
 **Balance note, unmeasured before now:** the balance probe's `avgAlerts`
 moved from 8.5 to 10.9 and `reachedMax` from 40% to 52% under the random
-policy, from the 6 new alerts adding pressure to the pool. Flagging this
+policy, from the 5 new alerts adding pressure to the pool. Flagging this
 rather than tuning it blind — as with mandates, balance is a playtest
 question, not one passing tests resolves.
 
 **Next:** owner playtests this slice. Do not begin §4.5 (meta-progression)
 before feedback and an explicit instruction, per the same staged-slice
 discipline as every milestone so far.
+
+**Post-merge review (Codex, 2026-09-21):** the full existing suite passed,
+then adversarial review found one run-deck state invariant the original tests
+missed: applying `deck.add` after a permanent ban put an undrawable, dead copy
+back into `runDeck`. `applyEffects()` now ignores additions whose ids are
+already in `bannedCards`, with a regression covering remove-then-add order.
+The shop integrity suite now really verifies that every deck policy targets a
+known card (the test name previously claimed this but the assertion was
+missing), and a no-op `* 0` term was removed from the new casino card's
+weight. Documentation now reports the actual alert count: 5 new alerts, 14
+total, not 6 new. Verified after the fixes: 93 vitest tests, production build,
+and the full 1366×700 Playwright gate, all clean with zero page errors.
 
 ---
 
