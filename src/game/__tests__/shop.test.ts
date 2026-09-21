@@ -256,7 +256,7 @@ describe('the Back Room', () => {
 
   it('never offers the same item twice in a run', () => {
     let s = prepareDay(createGame({ seed: 5150 }));
-    const offered: string[] = [];
+    const bought: string[] = [];
     let guard = 0;
     while (s.phase !== 'ended' && guard++ < 3000) {
       if (s.phase === 'briefing') s = beginStages(s);
@@ -265,12 +265,19 @@ describe('the Back Room', () => {
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
       else if (s.phase === 'night') s = openShop(s);
       else if (s.phase === 'shop') {
+        // An affordable offer can still no-op if it's blocked by the
+        // advisor/deal cap — only count it as bought if shopBought actually
+        // grew, same check shop.probe.ts uses.
         const id = s.shopStock.find((x) => shopPrice(s, SHOP_MAP[x]) <= s.stats.treasury);
-        if (id) { offered.push(id); s = buyShopItem(s, id); }
+        if (id) {
+          const before = s.shopBought.length;
+          s = buyShopItem(s, id);
+          if (s.shopBought.length > before) bought.push(id);
+        }
         s = leaveShop(s);
       }
     }
-    expect(new Set(offered).size, 'an item was bought twice in one run').toBe(offered.length);
+    expect(new Set(bought).size, 'an item was bought twice in one run').toBe(bought.length);
   });
 
   it('refuses a purchase you cannot pay for', () => {

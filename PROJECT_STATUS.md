@@ -1,19 +1,62 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: §4.2 (the Back Room shop) chunk 1 is BUILT — the shop itself,
-> its dark fullscreen presentation, and the "Advisors & Deals" management
-> screen — and awaiting the owner's playtest. Do not start §4.2 chunk 2, §4.3
+> Last updated: §4.2 (the Back Room shop) is BUILT END TO END — the shop
+> itself, its dark fullscreen presentation, the "Advisors & Deals" screen,
+> advisor/deal caps with a held-panel in the shop, and now chunk 2's content
+> (17 → 47 items) — all awaiting the owner's playtest. Do not start §4.3
 > (mandates), §4.4 (the run deck), or §4.5 (meta-progression) until the owner
-> says this slice is done. See the block immediately below.
+> says §4.2 is done. See the block immediately below.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
+> **§4.2 CHUNK 2 IS BUILT: THE ITEM POOL WENT 17 → 47.** Owner: *"aim for 30
+> more."* 9 new advisors, 8 new policies, 8 new favours, 5 new deals — every
+> one grounded in the existing cast and world (`content/country.ts`): Varkov,
+> Sarran, Kostyn, Adamek, Vel, Loz, Hess, Grebs, Vask, Piek; the Grand
+> Convocation, the Central Bank, Ostrene/Aureth/Sereth/Drovna, the Pigeon
+> Federation, Dovra Day. Two of the new deals (`pigeon-endorsement`,
+> `drovna-understanding`) run on a day-to-day timer, alongside the existing
+> `three-judges` — 3 of 9 deals timed, "a few, not all," per the owner's
+> instruction. No engine changes were needed; every new item uses the
+> mechanisms chunk 1 already built (`fireCost`/`cutCost`, `durationDays`,
+> commitments, the daily/lossMult hooks).
+>
+> **One real bug caught while authoring, not before:** `regime.cult` doesn't
+> exist — "cult" is a `hidden` pressure, not a regime axis. `tsc` caught it
+> immediately (`dovra-broadcast`'s effects), fixed by moving it to `hidden`.
+>
+> **One test bug caught by the new content, not a game bug:** `'never offers
+> the same item twice in a run'` assumed every "affordable" purchase attempt
+> succeeds. With the new deal cap, `pigeon-endorsement` was correctly
+> refused (3/3 deal slots already held) but the test still recorded it as
+> "bought", then saw it offered and refused again later and flagged a false
+> duplicate. Fixed to check `shopBought` actually grew, the same pattern
+> `shop.probe.ts` already used correctly.
+>
+> **Measured after adding the content** (`shop.probe.ts`, 150 runs ×4 buying
+> styles): purchase frequency spread 0.01–0.9 across the pool, no item
+> dominating, `avgDays`/`reachedDay18`/ending distributions all in line with
+> the pre-chunk-2 baseline — no runaway outlier. The advisor/deal caps don't
+> get stress-tested much by the probe's simple buyers (they buy globally
+> cheapest/priciest regardless of kind, not "all advisors"), so this measures
+> general economy health, not cap pressure specifically — the caps were
+> already verified directly (engine tests + browser) when they were built.
+>
+> **Verified:** 59/59 vitest tests still pass (no new tests needed — the
+> existing generic content-integrity tests, e.g. "every item states a price/
+> upside/catch", automatically covered all 30 new items), `npm run build`
+> clean, and all three Playwright tools at 1366×700 with zero console
+> errors, including a screenshot confirming new content renders correctly in
+> both the nightly and act rooms.
+>
+> ---
+>
+> ### The block below is chunk 1 + its owner follow-ups, now superseded as the current task
+>
 > **§4.2 (the Back Room shop) CHUNK 1 IS BUILT AND AWAITING PLAYTEST.** The
 > owner greenlit it with one amendment to the spec: **the shop opens at the
-> end of EVERY day**, not only between acts. It was deliberately split into
-> two chunks; chunk 2 has NOT been started and should not be until the owner
-> has played chunk 1.
+> end of EVERY day**, not only between acts.
 >
 > **What chunk 1 is:** a two-size room. The **nightly room** offers 3 cheap-to-
 > mid items and sells you exactly one — taking something closes the room. The
@@ -78,13 +121,46 @@
 > `fireCost`/`fireEffects`/`endsCommitment` `content/shop.ts` gives that
 > advisor (every advisor has *some* real cost or consequence to letting them
 > go, same everything-has-a-downside rule as buying one — enforced by a test).
-> Deals just report themselves: most are "Ongoing" (permanent); a new
-> mechanism, `GameState.activeDeals`, lets a deal instead run on a
-> day-to-day timer (`durationDays`/`expireEffects` on `ShopItemDef`), ticked
-> in `dayUpkeep()` next to commitments/projects. Only one item uses it so far
-> — `three-judges`, 5 days, then a scandal bump as the arrangement becomes
-> public — proving the mechanism works; more timed deals is future content,
-> not a mechanics gap. `SAVE_VERSION` bumped 4→5 for `activeDeals`.
+> Deals just report themselves: most are "Ongoing" (permanent); a few carry
+> `durationDays`/`expireEffects` on `ShopItemDef` and count down on a
+> day-to-day timer, ticked in `dayUpkeep()` next to commitments/projects.
+> Only one item uses it so far — `three-judges`, 5 days, then a scandal bump
+> as the arrangement becomes public — proving the mechanism works; more
+> timed deals is future content, not a mechanics gap.
+>
+> **Second owner follow-up, same session: advisors and deals are CAPPED.**
+> *"I want there to be a set number of deals AND Advisors that can be held
+> at a time... to incentivize the player to choose wisely or even fire/cut
+> deals in order to buy a new one."* `ADVISOR_CAP`/`DEAL_CAP` in `shop.ts`,
+> both `3`, tracked separately. Past the cap, buying that kind is blocked
+> (offer stays visible, disabled, with a plain-text reason) until you free a
+> slot. This made EVERY deal — not just timed ones — occupy a slot:
+> `GameState.heldDeals` replaces `activeDeals` (a permanent deal gets
+> `daysLeft: undefined` and just sits there using a slot forever until
+> cut). New `cutDeal()` in `engine.ts` is the deal equivalent of
+> `fireAdvisor()` — pays `cutCost`, applies `cutEffects`, ends the
+> commitment if any, frees the slot immediately; cutting a timed deal early
+> skips its `expireEffects` (that only fires when the clock runs out on its
+> own). `GameState.endedDeals` records whether a finished deal ran its
+> course or was cut, so it never shows as "Ongoing" after the fact. Every
+> deal now has a real cost or consequence to being cut short, same rule as
+> firing, checked by a test. `SAVE_VERSION` bumped 5→6.
+>
+> **New UI, per the owner's explicit ask: a held-panel INSIDE the shop
+> itself**, right-hand sidebar, showing your advisor/deal slots live with
+> Fire/Cut buttons — freeing a slot to buy something new never means
+> leaving the shop. Reuses `Manage.tsx`'s row/control components (now
+> exported, plus a new `CutControl`) in a compact mode, so the shop's
+> sidebar and the main-game "Advisors & Deals" screen share one visual
+> language. The main-game screen also gained Cut buttons for deals (it only
+> had Fire for advisors before) — same capability, both places, for
+> consistency.
+>
+> **Measured, not assumed:** re-ran `shop.probe.ts` after adding the caps —
+> with only 5 advisors/4 deals in the pool, `ADVISOR_CAP`/`DEAL_CAP` (3
+> each) barely restricts a simulated buyer yet. Expected: the caps are
+> sized for the bigger pool chunk 2 is adding, not the current one.
+> Re-check after chunk 2's content lands.
 >
 > **Also fixed in passing:** `tools/verify.mjs`, `tools/to-ending.mjs` and
 > `tools/playthrough.mjs` had been stale since the Poster rebuild (they still
@@ -93,15 +169,19 @@
 > three now run clean, handle the shop step (including the fullscreen/
 > `.shop-foot` change above), and are back to being a usable merge gate.
 >
-> **Verified before merge:** 44/44 vitest tests pass (was 32, +12: firing
-> advisors, timed deal start/tick/expiry, content-integrity checks that every
-> advisor has a real fire cost/consequence and that duration is deal-only),
-> `npm run build` clean, and all three Playwright tools run at 1366×700 with
-> zero console/page errors — a full 18-day run visiting 17 shops, an
-> aggressive run to a non-survival ending, a save/reload resume across the
-> version bump, plus two targeted browser checks confirming the shop screen
-> has literally nothing else on it and that firing an advisor from "Advisors
-> & Deals" removes it live.
+> **Verified before merge:** 59/59 vitest tests pass (was 32 → 44 → 59; the
+> latest +15 cover cap enforcement for both kinds, cutting a permanent deal,
+> cutting a timed deal early — confirming `expireEffects` is skipped —
+> cap-then-cut-then-buy composition, and the content-integrity checks
+> above), `npm run build` clean, and all three Playwright tools run at
+> 1366×700 with zero console/page errors — a full 18-day run visiting 17
+> shops, an aggressive run to a non-survival ending, a save/reload resume
+> across the version bump, plus targeted browser checks confirming: the
+> shop screen has literally nothing else on it; firing an advisor from
+> "Advisors & Deals" removes it live; the held-panel fills to 3/3 and blocks
+> a 4th advisor with the right message; firing/cutting from the held-panel
+> frees the slot live; and the main-game "Advisors & Deals" screen shows the
+> same Cut control.
 >
 > ---
 >

@@ -54,12 +54,18 @@ why depth should live in cards/combinations, not more UI.
 amendment to the spec: the shop opens at the **end of every day**, not only
 between acts. The nightly room offers 3 items and sells you one; the act room
 (the night a confidence vote is passed) offers 5 including the expensive tier
-and sells you as much as you can pay for. 17 items in `src/game/content/shop.ts`,
-logic in `src/game/shop.ts`, one engine hook (`buyShopItem()` → `applyEffects()`),
-`SAVE_VERSION` bumped 3→4. Pricing and variety were measured with
-`src/game/__tests__/shop.probe.ts` — **run that probe before changing any shop
-rule.** Chunk 2 (grow the pool to ~35–40 items) is NOT started and should wait
-for the owner's playtest of chunk 1.
+and sells you as much as you can pay for. **47 items** (14 advisors, 12
+policies, 12 favours, 9 deals) in `src/game/content/shop.ts` — chunk 2 grew
+this from 17 by 30 (owner request), grounded in the existing cast/world from
+`content/country.ts` (Varkov, Sarran, Kostyn, Adamek, Vel, Loz, Hess, Grebs,
+Vask, Piek; the Grand Convocation, the Central Bank, Ostrene/Aureth/Sereth/
+Drovna, the Pigeon Federation, Dovra Day). 3 of the 9 deals run on a
+day-to-day timer (three-judges plus two new: `pigeon-endorsement`,
+`drovna-understanding`) — "a few, not all", per the owner. Logic in
+`src/game/shop.ts`, one engine hook (`buyShopItem()` → `applyEffects()`),
+`SAVE_VERSION` bumped 3→4→...→6 (see ground rule 10 for the full chain).
+Pricing and variety were measured with `src/game/__tests__/shop.probe.ts` —
+**run that probe before changing any shop rule.**
 
 **The Back Room is the one dark screen in the game** (owner request: it should
 feel like you are somewhere else). `.app.dark` in `src/styles/index.css` swaps
@@ -82,20 +88,32 @@ only way out; `tools/verify.mjs`, `to-ending.mjs` and `playthrough.mjs` were
 all updated for this and broke once each before being fixed — check
 `.shop-foot .btn-primary` first in any new tooling that walks the shop.
 
+**Advisors and deals are CAPPED — `ADVISOR_CAP`/`DEAL_CAP` in `shop.ts`, both
+`3`, tracked separately.** Owner request: past the cap, buying more means
+firing/cutting one first, so the shop can't just be swept clean. Every
+deal — permanent or timed — occupies a slot in `GameState.heldDeals` from
+purchase until it ends: a timed one (`durationDays`) counts down and fires
+`expireEffects` on its own via `tickHeldDeals()` in `engine.ts`'s
+`dayUpkeep()`; ANY deal can also be cut short on purpose via `cutDeal()`
+(the deal equivalent of `fireAdvisor()`), which skips `expireEffects` and
+instead applies that deal's own `cutCost`/`cutEffects` — same
+everything-has-a-downside rule as firing, tested in `shop.test.ts`.
+`GameState.endedDeals` records whether a finished deal ran its course or
+was cut, so it never shows as "Ongoing" after the fact.
+
 **"Advisors & Deals" — a screen opened from the masthead during the main
-game** (not the shop), showing what the Back Room has already sold you.
-Advisors can be fired here (`fireAdvisor()` in `engine.ts`) for whatever
-`fireCost`/`fireEffects`/`endsCommitment` `content/shop.ts` gives that
-advisor — every advisor has a real cost or consequence to letting them go,
-tested in `shop.test.ts`. Deals just report themselves: most are permanent
-("Ongoing"); a few carry `durationDays` and count down in
-`GameState.activeDeals`, ticked in `engine.ts`'s `dayUpkeep()` alongside
-commitments/projects, firing `expireEffects` once when the clock runs out
-(currently just `three-judges`, 5 days). `src/ui/screens/Manage.tsx` is the
-screen; `boughtDealDefs()`/`ownedAdvisorDefs()` in `shop.ts` are what feed it.
-Policies and favours are deliberately NOT in this screen — only what the
-owner asked for (deals and advisors). `SAVE_VERSION` bumped 4→5 for
-`activeDeals`.
+game** (not the shop), showing what the Back Room has already sold you, with
+its Fire/Cut buttons and live cap counts (e.g. "Advisors (2/3)").
+`src/ui/screens/Manage.tsx`; `boughtDealDefs()`/`ownedAdvisorDefs()` in
+`shop.ts` feed it. Policies and favours are deliberately NOT in this
+screen — only what the owner asked for (deals and advisors).
+
+**The Back Room's own held-panel — a second owner request, same session.**
+The shop screen itself now has a right-hand sidebar (`.held-panel` in
+`Shop.tsx`, reusing `Manage.tsx`'s `ManageRow`/`FireControl`/`CutControl`
+components) showing your advisor and deal slots live, so freeing one to buy
+something new never means leaving the shop. `SAVE_VERSION` bumped 5→6 for
+the `heldDeals`/`endedDeals` shape (`activeDeals` no longer exists).
 
 **Do this as its own vertical slice, the same way Milestone 1 and the
 Poster/Broadsheet rebuild were done — build the smallest testable piece,
@@ -175,12 +193,13 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `5`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `6`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 4→5 for
-    `activeDeals` (timed Back Room deals); mandates/run-deck/meta-progression
+    as long as the bump actually happens. Last bumped 5→6 for
+    `heldDeals`/`endedDeals` (every deal now occupies a capped, cuttable
+    slot; `activeDeals` no longer exists); mandates/run-deck/meta-progression
     will likely be the next time. A bump discards the owner's in-progress
     run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
@@ -241,9 +260,9 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 44 tests: integrity, 200 full runs, determinism, variety,
-                   #   glossary, and 31 covering the Back Room shop
-                   #   (stock/pricing, firing advisors, timed deals)
+npm test           # 59 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, and 46 covering the Back Room shop (stock/
+                   #   pricing, firing advisors, held/timed/cut deals, caps)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -278,7 +297,7 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
   content/                country, cards, cards2, followups, alerts, endings,
-                           shop (the 17 Back Room items — pure data)
+                           shop (the 47 Back Room items — pure data)
                            (all UNCHANGED by the display-layer cut — still the
                            full 10-stat/7-faction effects)
 src/ui/
