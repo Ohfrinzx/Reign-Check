@@ -2,7 +2,7 @@ import type { GameState, StatKey } from '../../game/types';
 import { COUNTRY } from '../../game/content/country';
 import { STAT_ORDER, money } from '../../game/stats';
 import { buildBriefing, dateLine } from '../../game/briefing';
-import { currentOpening, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
+import { ACT_LENGTH, currentOpening, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
 import { usd, usdFlow, computeBudget } from '../../game/economy';
 import { fill } from '../../game/text';
 
@@ -97,7 +97,7 @@ export function BriefingScreen({ s }: { s: GameState }) {
     <div className="screen">
       <div className="frontpage">
         <div className="fp-mast">
-          <div className="edition">ACT {s.act} OF {NUM_ACTS} &middot; DAY {s.day} OF {s.maxDays}<br />{dateLine(s.day)}<br />{COUNTRY.capital}</div>
+          <div className="edition">ACT {s.act} OF {NUM_ACTS} &middot; DAY {dayInAct(s)} OF {ACT_LENGTH}<br />{dateLine(s.day)}<br />{COUNTRY.capital}</div>
           <div className="title">The Velmorran<small>Office of the {COUNTRY.office}</small></div>
           <div className="weather">{b.weather}</div>
         </div>

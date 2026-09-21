@@ -153,6 +153,23 @@ existing `checkEndings()` pattern, and `SAVE_VERSION` was bumped 2→3
 touched — those are §4.2–§4.5 and remain separate, later slices, not to be
 started until §4.1 is playtested and approved.
 
+**Day counter now reads within-act, not absolute.** Owner: *"Instead of
+having it display <day>/18 change it to 6. I would rather track how many
+days are left in the act."* `dayInAct()` in `state.ts` is a pure derived
+read (`((s.day - 1) % ACT_LENGTH) + 1`, no new state field, no
+`SAVE_VERSION` bump) used by the masthead strap (`App.tsx`) and the
+front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
+(progress toward this act's confidence vote) instead of `Day X / 18`
+(progress through the whole 18-day run). `GameState.day` itself is
+unchanged and still counts 1–18 everywhere else (saves, endings, the vote
+check, `dateLine()`).
+
+**Next in sequence, once the owner signs off on §4.2:** §4.3 (mandates),
+then §4.4 (the run deck), then §4.5 (meta-progression), per the staged order
+in `docs/DESIGN_V2.md` §4/§6 — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED"
+block for the specifics. This is the plan, not a go-ahead: do not start §4.3
+until the owner explicitly says §4.2 is done.
+
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
 proposed vs. what actually shipped, the full Phase 2 spec, and the resolved

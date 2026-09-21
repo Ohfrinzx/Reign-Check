@@ -1,14 +1,60 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: §4.2 (the Back Room shop) is BUILT END TO END — the shop
-> itself, its dark fullscreen presentation, the "Advisors & Deals" screen,
-> advisor/deal caps with a held-panel in the shop, and now chunk 2's content
-> (17 → 47 items) — all awaiting the owner's playtest. Do not start §4.3
-> (mandates), §4.4 (the run deck), or §4.5 (meta-progression) until the owner
-> says §4.2 is done. See the block immediately below.
+> Last updated: a small display-only fix — the masthead/front-page day
+> counter now reads "Day N / 6" (progress within the current act) instead of
+> "Day N / 18" (progress through the whole run). §4.2 (the Back Room shop,
+> chunks 1 and 2, 47 items) is still BUILT END TO END and awaiting the
+> owner's playtest. Do not start §4.3 (mandates), §4.4 (the run deck), or
+> §4.5 (meta-progression) until the owner says §4.2 is done. See the block
+> immediately below for the day-counter fix and the "next steps" note; the
+> §4.2 chunk 2 report follows it, superseded as the current task.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
+>
+> **DISPLAY FIX: the day counter now tracks the current act, not the whole
+> run.** Owner: *"Instead of having it display <day>/18 change it to 6. I
+> would rather track how many days are left in the act."* Both places the
+> game shows a day fraction — the masthead's `Act N of 3 · Day X / Y` strap
+> (`App.tsx`) and the front-page briefing's `ACT N OF 3 · DAY X OF Y` edition
+> line (`Screens.tsx`) — now compute `X` as the day within the current act
+> (1–6, via a new `dayInAct()` in `state.ts`) and `Y` as `ACT_LENGTH` (6),
+> instead of the absolute run day (1–18) over `maxDays`. `GameState.day`
+> itself is unchanged — it still counts 1–18 across the whole run, and every
+> other place that reads it (save/load, endings, the confidence-vote day
+> check, `dateLine()`) is untouched. `dayInAct()` is a pure derived read with
+> no new state field, so **no `SAVE_VERSION` bump was needed** — old saves
+> keep working. Two onboarding lines in `Intro.tsx` that mention day counts
+> in prose (not as a `X / Y` fraction) were deliberately left as-is, per the
+> owner's explicit "do not begin any additional content changes besides the
+> stated change."
+>
+> **Verified:** a new vitest case (`dayInAct` in `sim.test.ts`) checks every
+> day 1–18 maps to the right 1–6 value, including both act boundaries (day 7
+> and day 13 reset to 1, days 6/12/18 read as 6) — 60/60 tests pass, `tsc
+> --noEmit`/`npm run build` clean, and a targeted Playwright run at 1366×700
+> drove through both act boundaries and recorded the masthead/edition text at
+> each transition: `ACT 1 OF 3 · DAY 6 / 6` on day 6, flipping to
+> `ACT 2 OF 3 · DAY 1 / 6` on day 7, and the same at the day 12→13 boundary
+> into Act 3 — zero console errors.
+>
+> **Next steps for Phase 2, per the owner's ask to "prepare for next steps
+> ... if any":** §4.1 (run structure) and §4.2 (the Back Room shop, both
+> chunks) are both built and awaiting playtest — nothing further should
+> start on either without owner feedback. Per `docs/DESIGN_V2.md` §4 and §6's
+> staged order, once §4.2 is signed off the next slice in sequence is
+> **§4.3, mandates** (the 4 already-specified mandates plus 2–4 more per the
+> content quota folded into that slice — see `docs/DESIGN_V2.md` §4.3 for the
+> exact table), followed by **§4.4, the run deck** (~20 more standard cards +
+> ~6 alerts) and **§4.5, meta-progression**, in that order. This is a
+> statement of what comes next per the existing plan, **not a go-ahead** —
+> the same build → report → playtest → iterate discipline applies: do not
+> start §4.3 until the owner explicitly says so, ideally after playtesting
+> §4.2's chunk 2 content and this day-counter fix together.
+>
+> ---
+>
+> ### The block below (§4.2 chunk 2) is the previous slice, now superseded as the current task
 >
 > **§4.2 CHUNK 2 IS BUILT: THE ITEM POOL WENT 17 → 47.** Owner: *"aim for 30
 > more."* 9 new advisors, 8 new policies, 8 new favours, 5 new deals — every

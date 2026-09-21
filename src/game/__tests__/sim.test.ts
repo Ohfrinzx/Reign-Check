@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createGame, OPENINGS } from '../state';
+import { createGame, OPENINGS, ACT_LENGTH, NUM_ACTS, dayInAct } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve,
   continueAfterAlert, activeCard, lookupCard, openShop, leaveShop,
@@ -173,5 +173,23 @@ describe('simulation', () => {
       }
       expect(s.flags.__alertSeen ?? (s.phase === 'ended' ? 1 : 0), `seed ${i}`).toBeTruthy();
     }
+  });
+});
+
+describe('dayInAct', () => {
+  it('counts 1..ACT_LENGTH within each act, resetting at every act boundary', () => {
+    // Owner preference: the masthead/front-page show progress toward THIS
+    // act's vote (e.g. "Day 3 / 6"), not the absolute run day ("Day 15 / 18").
+    const s = prepareDay(createGame({ seed: 1 }));
+    for (let day = 1; day <= ACT_LENGTH * NUM_ACTS; day++) {
+      const expected = ((day - 1) % ACT_LENGTH) + 1;
+      expect(dayInAct({ ...s, day }), `absolute day ${day}`).toBe(expected);
+    }
+    // Concretely: day 1 and day 7 (the first day of acts 1 and 2) both read as 1;
+    // day 6 and day 12 (the vote day for acts 1 and 2) both read as ACT_LENGTH.
+    expect(dayInAct({ ...s, day: 1 })).toBe(1);
+    expect(dayInAct({ ...s, day: 7 })).toBe(1);
+    expect(dayInAct({ ...s, day: ACT_LENGTH })).toBe(ACT_LENGTH);
+    expect(dayInAct({ ...s, day: ACT_LENGTH * 2 })).toBe(ACT_LENGTH);
   });
 });

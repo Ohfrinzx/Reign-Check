@@ -32,6 +32,17 @@ export function justAdvancedAct(s: GameState): boolean {
   return s.act > 1 && s.day === (s.act - 1) * ACT_LENGTH;
 }
 
+/**
+ * Where you are inside the CURRENT act, 1..ACT_LENGTH — not the absolute run
+ * day. Owner preference: the masthead/front-page should read "Day 3 / 6"
+ * (progress toward this act's confidence vote), not "Day 15 / 18" (progress
+ * toward the whole run), so the number in front of the player is the one
+ * that actually matters day to day.
+ */
+export function dayInAct(s: GameState): number {
+  return ((s.day - 1) % ACT_LENGTH) + 1;
+}
+
 /** Opening conditions vary run to run, so no two First Citizens inherit the same mess. */
 export interface OpeningScenario {
   id: string;

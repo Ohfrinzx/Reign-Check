@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, StatKey } from './game/types';
-import { createGame, NUM_ACTS } from './game/state';
+import { ACT_LENGTH, createGame, dayInAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
@@ -231,7 +231,7 @@ export default function App() {
           </div>
         </div>
         <div className="mid">
-          <span className="lbl"><span>Act {game.act} of {NUM_ACTS} &middot; Day {game.day} / {game.maxDays}</span></span>
+          <span className="lbl"><span>Act {game.act} of {NUM_ACTS} &middot; Day {dayInAct(game)} / {ACT_LENGTH}</span></span>
         </div>
         <div className="masthead-right">
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">

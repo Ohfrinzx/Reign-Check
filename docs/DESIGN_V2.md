@@ -229,6 +229,16 @@ balance pass is still Phase 3). Passing act 3's vote with nothing else
 having ended the run resolves to the existing `survival` ending via
 `checkEndings(s, true)`. `SAVE_VERSION` bumped 2→3.
 
+**Display follow-up:** the masthead and front-page briefing originally showed
+`Day X / 18` — progress through the whole run. Owner: *"Instead of having it
+display <day>/18 change it to 6. I would rather track how many days are left
+in the act."* `dayInAct()` (`state.ts`) derives the day within the current
+act (1..`ACT_LENGTH`) from `GameState.day`, a pure read with no new field, so
+no `SAVE_VERSION` bump was needed. Both display sites (`App.tsx`'s masthead
+strap, `Screens.tsx`'s edition line) now read `Day X / 6`, resetting to 1 at
+each act boundary; `GameState.day` itself, and everything else that reads it
+(the vote check above, saves, `dateLine()`), is untouched.
+
 ### 4.2 The Back Room — CHUNK 1 BUILT, awaiting playtest
 
 **Owner amendment to this section, made when the slice was greenlit:** the
