@@ -270,6 +270,36 @@ After the fixes, realistic (random-play) purchase frequency is **0.24–0.84 per
 item per run**, and a buy-everything player collapses in 57/120 runs while a
 careful one still survives — the catches bite exactly as intended.
 
+**The Back Room is dark, and it is the only dark screen in the game.** Owner
+request, after the first build: *"I really want it to feel as if you are some
+place else."* The working day stays light Poster stock; entering the shop
+swaps the whole viewport — page, strap, rail and card — to a dark version of
+the *same* system (same condensed headlines, same one red, same flat shapes).
+
+**This is not the dark desk skin that was rejected in §5.** That was a
+different visual language with different type, proposed as the default for
+the whole game, and the owner rejected it as "way too dark". Dark here is a
+special occasion used for contrast, which is why it works: it is the
+exception that makes the rest of the game read as daylight. **Do not take
+this as licence to darken anything else.**
+
+As built: `.app.dark` in `index.css` swaps the surface tokens and nothing
+else has to know. Getting there required tokenising the hardcoded
+`rgba(22,19,15,…)` hairlines, shadows and newsprint texture into
+`--hair`/`--hair-soft`/`--shadow`/`--dot`, and giving the masthead its own
+`--bar`/`--bar-text` so the player's nameplate and ledger stay dark in *both*
+themes — the one fixed point on screen. Three depths keep it from reading as
+one flat slab: the room (deepest), the surfaces standing in it, and the
+masthead bar (deeper still, for a clean top edge). The act room's header
+becomes a deep red slab rather than inverting to a cream one.
+
+**One non-obvious trap, recorded so it is not re-learned:** `color:var(--ink)`
+originally lived only on `body`, which resolves the token in the *light*
+scope; children then inherit that resolved value, so every piece of inherited
+text stayed dark-on-dark. `.app` now re-declares `color:var(--ink)` inside
+the themed scope. A browser contrast probe caught this — the screenshots
+alone would have shown "missing" headlines without saying why.
+
 **Known and deliberate: 17 items is a small pool for 17 nightly visits.** A
 maximally efficient buyer still sees ~12 of them. That is the pool-size
 ceiling, and it is what **chunk 2** is for — take the pool to the §4.2 quota

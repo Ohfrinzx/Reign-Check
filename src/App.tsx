@@ -179,7 +179,7 @@ export default function App() {
   const remaining = Math.max(0, game.todayDeck.length - game.stageIndex);
 
   return (
-    <div className="app">
+    <div className={`app ${game.phase === 'shop' ? 'dark' : ''}`}>
       {/* --------------------------------------------------------- masthead */}
       <header className="masthead">
         <div className="id">

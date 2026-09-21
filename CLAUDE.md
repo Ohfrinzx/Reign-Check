@@ -61,6 +61,15 @@ logic in `src/game/shop.ts`, one engine hook (`buyShopItem()` → `applyEffects(
 rule.** Chunk 2 (grow the pool to ~35–40 items) is NOT started and should wait
 for the owner's playtest of chunk 1.
 
+**The Back Room is the one dark screen in the game** (owner request: it should
+feel like you are somewhere else). `.app.dark` in `src/styles/index.css` swaps
+the surface tokens for the shop phase only; the masthead keeps its own
+`--bar`/`--bar-text` so the nameplate never changes. This is NOT a revival of
+the dark desk skin rejected in Phase 1 — **do not darken any other screen
+without asking.** If you touch theming, re-declare colours inside `.app`, not
+`body`: body resolves tokens in the light scope and children inherit the
+resolved value (see `docs/DESIGN_V2.md` §4.2).
+
 **Do this as its own vertical slice, the same way Milestone 1 and the
 Poster/Broadsheet rebuild were done — build the smallest testable piece,
 then STOP and report back for playtest before continuing.** This project has
