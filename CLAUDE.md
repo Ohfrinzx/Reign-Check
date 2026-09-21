@@ -5,6 +5,18 @@ browser-based, card-driven political leadership simulation set in the
 fictional Republic of Velmorra. This file is the handover. Read it, then
 `PROJECT_STATUS.md`, then `docs/DESIGN_V2.md`.
 
+**Also read `AGENTS.md`.** The owner runs more than one agent tool on this
+project (Claude Code and ChatGPT-based agents both), and `AGENTS.md` is the
+shared, model-agnostic knowledge base every agent works from — the ground
+rules, writing rules, content-authoring format, code map, and git/
+verification workflow all live there as the canonical copy. **The Ground
+Rules / Writing Rules / Content Authoring Format / Map of the Code / Git
+sections below are Claude Code's copy of that same content — if you change
+any of them, edit `AGENTS.md` first, then mirror the change here, so the two
+never disagree.** This file's project-status prose (this section and the
+next) stays Claude-Code-specific narrative; the short version of current
+status also lives in `AGENTS.md` §2.
+
 ## Where the project actually is
 
 **PHASE 1 (playable core + the Poster/Broadsheet rebuild) IS DONE AND
@@ -31,27 +43,24 @@ body, outcome text, option hints, flavor text, and threat cards. 13 vitest
 tests pass and this was verified end to end in a real browser at 1366×700,
 the viewport that has caught every real layout bug so far.
 
-## PHASE 2 IS GREENLIT — §4.1 IS BUILT, ONE PLAYTEST ROUND IN
+## PHASE 2 IS GREENLIT — §4.1 AND §4.2 ARE BUILT AND OWNER-APPROVED
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
-each, ending in a confidence vote) has been built AND has been through one
-full round of owner playtesting and fixes (header balance, duplicate UI
-removed, glossary moved off hover, a card-voice rewrite, and a day-1
-card-variety fix found by simulation) — see `PROJECT_STATUS.md`'s "WHERE WE
-STOPPED" block for the full list and how each was verified. **Do not start
-§4.2 (the Back Room shop), §4.3 (mandates), §4.4 (the run deck), or §4.5
-(meta-progression) until the owner says §4.1 itself is done** — same
-build → report → playtest → iterate discipline as every milestone before
-this one, and this slice is still mid-loop. If a fresh session opens with
-more feedback on §4.1, keep iterating on it the same way round 1 was
-handled (measure before guessing where the game's tests/tooling allow it)
-rather than treating the feedback as done and moving on. Read
-`docs/DESIGN_V2.md` section 4 in full before touching any of §4.2–§4.5 — it
+each, ending in a confidence vote) and §4.2 (the Back Room shop, both
+chunks, plus the day-in-act display fix) have all been built, playtested,
+and approved by the owner — verbatim: *"All up to date content has been
+playtested and is approved."* See `PROJECT_STATUS.md`'s "WHERE WE STOPPED"
+block for the full history and how each slice was verified. **Do not start
+§4.3 (mandates), §4.4 (the run deck), or §4.5 (meta-progression) without an
+explicit owner go-ahead** — approval of what's built so far is not
+automatically a green light for the next slice; same build → report →
+playtest → iterate discipline as every milestone before this one. Read
+`docs/DESIGN_V2.md` section 4 in full before touching any of §4.3–§4.5 — it
 has the exact mandate table, shop item categories, and the reasoning for
 why depth should live in cards/combinations, not more UI.
 
-**§4.2, the Back Room shop — CHUNK 1 BUILT, awaiting playtest.** Owner
+**§4.2, the Back Room shop — BOTH CHUNKS BUILT AND APPROVED.** Owner
 amendment to the spec: the shop opens at the **end of every day**, not only
 between acts. The nightly room offers 3 items and sells you one; the act room
 (the night a confidence vote is passed) offers 5 including the expensive tier
@@ -149,9 +158,7 @@ check of the Grip/Legitimacy composite, not just a day counter — see §4.1 in
 `docs/DESIGN_V2.md` for the as-built details). `GameState.act` was added
 (`types.ts`), the vote runs through `engine.ts`'s `finishDay()` reusing the
 existing `checkEndings()` pattern, and `SAVE_VERSION` was bumped 2→3
-(`state.ts`). The shop, mandates, and run deck were deliberately NOT
-touched — those are §4.2–§4.5 and remain separate, later slices, not to be
-started until §4.1 is playtested and approved.
+(`state.ts`). Owner-approved.
 
 **Day counter now reads within-act, not absolute.** Owner: *"Instead of
 having it display <day>/18 change it to 6. I would rather track how many
@@ -164,11 +171,14 @@ front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
 unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
-**Next in sequence, once the owner signs off on §4.2:** §4.3 (mandates),
-then §4.4 (the run deck), then §4.5 (meta-progression), per the staged order
-in `docs/DESIGN_V2.md` §4/§6 — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED"
-block for the specifics. This is the plan, not a go-ahead: do not start §4.3
-until the owner explicitly says §4.2 is done.
+**Everything above (§4.1, §4.2 both chunks, the day counter fix) is now
+playtested and owner-approved** — verbatim: *"All up to date content has
+been playtested and is approved."* **Next in sequence, once the owner gives
+an explicit go-ahead for it:** §4.3 (mandates), then §4.4 (the run deck),
+then §4.5 (meta-progression), per the staged order in `docs/DESIGN_V2.md`
+§4/§6 — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for the
+specifics. This is the plan, not a go-ahead: approval of the shop/acts
+slice is not itself permission to start §4.3 — wait for the owner to say so.
 
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
@@ -182,7 +192,8 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-13 vitest tests pass, including 200 full simulated runs. `src/game/display.ts`
+60 vitest tests pass (see the `npm test` line in Commands below for the
+current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
 
@@ -278,8 +289,8 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 59 tests: integrity, 200 full runs, determinism, variety,
-                   #   glossary, and 46 covering the Back Room shop (stock/
+npm test           # 60 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, dayInAct, and 46 covering the Back Room shop (stock/
                    #   pricing, firing advisors, held/timed/cut deals, caps)
 ```
 
@@ -345,6 +356,10 @@ docs/
                             code, but poster.css there mirrors the app's
                             actual token names
 tools/                     Playwright scripts for real-browser testing
+AGENTS.md                 shared, model-agnostic knowledge base for every
+                           agent on this project — canonical copy of the
+                           ground rules/writing rules/content format/map/git
+                           workflow; edit there first, mirror here
 ```
 
 ## What is deliberately NOT built

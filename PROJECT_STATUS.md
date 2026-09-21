@@ -1,16 +1,56 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
-> Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: a small display-only fix — the masthead/front-page day
-> counter now reads "Day N / 6" (progress within the current act) instead of
-> "Day N / 18" (progress through the whole run). §4.2 (the Back Room shop,
-> chunks 1 and 2, 47 items) is still BUILT END TO END and awaiting the
-> owner's playtest. Do not start §4.3 (mandates), §4.4 (the run deck), or
-> §4.5 (meta-progression) until the owner says §4.2 is done. See the block
-> immediately below for the day-counter fix and the "next steps" note; the
-> §4.2 chunk 2 report follows it, superseded as the current task.
+> Read `AGENTS.md` first (the shared, model-agnostic knowledge base for
+> every agent on this project — Claude, ChatGPT, or otherwise), then
+> `CLAUDE.md` (Claude Code's copy of the same handover), then this file,
+> then `docs/DESIGN_V2.md`.
+> Last updated: **the owner has playtested and approved everything built so
+> far** — §4.1 (acts + confidence vote), §4.2 (the Back Room shop, both
+> chunks, 47 items, dark fullscreen presentation, "Advisors & Deals",
+> advisor/deal caps with held-panel), and the day-in-act display fix
+> (`Day N / 6` instead of `Day N / 18`). Owner, verbatim: *"All up to date
+> content has been playtested and is approved."* Nothing is mid-loop or
+> awaiting feedback right now. §4.3 (mandates), §4.4 (the run deck), and
+> §4.5 (meta-progression) are still **NOT started and still need an explicit
+> owner go-ahead to begin** — approval of what's built so far is not by
+> itself that go-ahead. See the block immediately below.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
+>
+> **EVERYTHING BUILT SO FAR IS OWNER-APPROVED.** The owner's own words:
+> *"All up to date content has been playtested and is approved."* This
+> closes out §4.1, §4.2 (both chunks), and the day-in-act display fix as
+> playtested-and-signed-off, not just "built, awaiting playtest" — do not
+> reopen or re-verify any of that work speculatively; if a fresh session
+> hears new feedback on it, treat that as new information, not evidence the
+> earlier approval didn't happen.
+>
+> **This does NOT mean §4.3/§4.4/§4.5 are greenlit.** Per the project's
+> build → report → playtest → iterate discipline, approval of the shop/acts/
+> display slice is not automatically a go-ahead for the next slice — that
+> needs its own explicit owner instruction. If the owner's next message says
+> to start mandates (§4.3), begin there per `docs/DESIGN_V2.md` §4.3's table
+> and the content quota folded into it (the 4 already-specified mandates
+> plus 2–4 more). Until then, there is no in-progress Phase 2 slice.
+>
+> **New, same message: the owner is bringing ChatGPT-based agents onto this
+> project alongside Claude Code sessions, and wants every agent — regardless
+> of model — working from one consistent knowledge base.** `AGENTS.md` (repo
+> root, new) is that shared, model-agnostic file: project state, ground
+> rules, writing rules, content-authoring format, commands, the code map,
+> and the git/verification workflow, written so any coding agent can pick up
+> the project cold without Claude Code-specific assumptions. `CLAUDE.md`
+> still exists (Claude Code reads it automatically at session start) and now
+> opens by pointing to `AGENTS.md` as the canonical copy of those sections —
+> **if you edit ground rules, writing rules, the content format, the code
+> map, or the git workflow, edit `AGENTS.md` and mirror the change into
+> `CLAUDE.md`, in that order, so the two never drift.** `PROJECT_STATUS.md`
+> (this file) and `docs/DESIGN_V2.md` are unaffected — they stay the
+> narrative history/design record, not the ground-rules reference.
+>
+> ---
+>
+> ### The block below (the day-in-act display fix) is the previous slice, now superseded as the current task
 >
 > **DISPLAY FIX: the day counter now tracks the current act, not the whole
 > run.** Owner: *"Instead of having it display <day>/18 change it to 6. I
@@ -38,23 +78,9 @@
 > `ACT 2 OF 3 · DAY 1 / 6` on day 7, and the same at the day 12→13 boundary
 > into Act 3 — zero console errors.
 >
-> **Next steps for Phase 2, per the owner's ask to "prepare for next steps
-> ... if any":** §4.1 (run structure) and §4.2 (the Back Room shop, both
-> chunks) are both built and awaiting playtest — nothing further should
-> start on either without owner feedback. Per `docs/DESIGN_V2.md` §4 and §6's
-> staged order, once §4.2 is signed off the next slice in sequence is
-> **§4.3, mandates** (the 4 already-specified mandates plus 2–4 more per the
-> content quota folded into that slice — see `docs/DESIGN_V2.md` §4.3 for the
-> exact table), followed by **§4.4, the run deck** (~20 more standard cards +
-> ~6 alerts) and **§4.5, meta-progression**, in that order. This is a
-> statement of what comes next per the existing plan, **not a go-ahead** —
-> the same build → report → playtest → iterate discipline applies: do not
-> start §4.3 until the owner explicitly says so, ideally after playtesting
-> §4.2's chunk 2 content and this day-counter fix together.
->
 > ---
 >
-> ### The block below (§4.2 chunk 2) is the previous slice, now superseded as the current task
+> ### The block below (§4.2 chunk 2) is the slice before that, now superseded as the current task
 >
 > **§4.2 CHUNK 2 IS BUILT: THE ITEM POOL WENT 17 → 47.** Owner: *"aim for 30
 > more."* 9 new advisors, 8 new policies, 8 new favours, 5 new deals — every
@@ -410,8 +436,12 @@ Playwright scripts for real-browser playthroughs.
 **PLAYTEST ROUND 3 (the actual Poster/Broadsheet build): ✅ PASSED.** *"Ok
 everything seems to run and look good."* **PHASE 1: ✅ DECLARED COMPLETE BY
 THE OWNER.**
-**PHASE 2 — THE ROGUELIKE LAYER: 🟢 GREENLIT. NOT STARTED. This is the
-current task — see the "WHERE WE STOPPED" block above and `CLAUDE.md`.**
+**PHASE 2 — THE ROGUELIKE LAYER: 🟢 GREENLIT, IN PROGRESS.** §4.1 (acts +
+confidence vote) and §4.2 (the Back Room shop, both chunks, plus the
+day-in-act display fix) are **BUILT AND OWNER-APPROVED**. §4.3 (mandates),
+§4.4 (the run deck), and §4.5 (meta-progression) are **NOT started** and
+need their own explicit owner go-ahead — see the "WHERE WE STOPPED" block
+above, `AGENTS.md`, and `CLAUDE.md`.
 
 ### Playtest round 2 — what was reported, and what was done
 
@@ -738,31 +768,27 @@ to be asked about before starting:
 
 ## 6. Recommended next task
 
-**§4.1 is built and has had one playtest-and-fix round (see "WHERE WE
-STOPPED" at the top). Do this, in order:**
+**§4.1 and §4.2 (both chunks) are built and OWNER-APPROVED, per the "WHERE
+WE STOPPED" block at the top. Do this, in order:**
 
-1. ✅ **DONE.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3 acts of 6
-   days each (18 total), ending in a confidence vote checked against Grip/
-   Legitimacy, replacing the flat 30-day run. Shipped as its own slice; the
-   shop (§4.2), mandates (§4.3), and run deck (§4.4) were deliberately not
-   touched.
-2. ✅ **DONE — round 1 playtest fixes applied**, see "WHERE WE STOPPED":
-   header balance, duplicate UI removed, real budget panel, glossary moved
-   from hover to a plain-text footnote, card-voice rewrite, and a day-1
-   card-variety fix backed by simulation data.
-3. ⬜ **STOP AND WAIT FOR THE NEXT PLAYTEST HERE.** This round's fixes are
-   pushed but not yet confirmed by the owner as playing well. Do not chain
-   straight into §4.2 without that confirmation — handle any further
-   feedback on this slice the same way round 1 was handled (diagnose with
-   real data where the tooling allows it, fix, verify, commit) before
-   calling §4.1 done.
-4. **Once the owner says this slice is done, continue in order**: §4.2 (the Back Room
-   shop) → §4.3 (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each
-   its own shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author
-   content as part of each slice, not separately** — §4.2 carries its own
-   shop-item quota (~8 advisors/8 policies/8 favours), §4.3 carries a
-   mandate quota (2–4 more beyond the 4 already specified), and §4.4 is
-   where the long-standing "~20 more standard cards + ~6 alerts" content gap
+1. ✅ **DONE, APPROVED.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3
+   acts of 6 days each (18 total), ending in a confidence vote checked
+   against Grip/Legitimacy, replacing the flat 30-day run.
+2. ✅ **DONE, APPROVED.** §4.2, the Back Room shop — both chunks (17 → 47
+   items), dark fullscreen presentation, "Advisors & Deals", advisor/deal
+   caps with a held-panel, and the day-in-act display fix. All confirmed by
+   the owner: *"All up to date content has been playtested and is
+   approved."*
+3. ⬜ **STOP AND WAIT FOR THE NEXT EXPLICIT GO-AHEAD.** Owner approval of
+   what's built so far is not itself a go-ahead to start §4.3 — that needs
+   its own instruction. Do not begin §4.3/§4.4/§4.5 speculatively just
+   because the prior slice was approved.
+4. **Once the owner says to start the next slice, continue in order**: §4.3
+   (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each its own
+   shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author content
+   as part of each slice, not separately** — §4.3 carries a mandate quota
+   (2–4 more beyond the 4 already specified), and §4.4 is where the
+   long-standing "~20 more standard cards + ~6 alerts" content gap
    (limitation #1) gets closed, not a separate pass — see `docs/DESIGN_V2.md`
    §4 for the exact quotas and §4.6 for suggested data shapes.
 5. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
