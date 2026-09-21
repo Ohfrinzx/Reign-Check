@@ -861,6 +861,160 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     },
   },
 
+  /* --------------------------------------------------- the run deck (§4.4)
+   * These policies don't touch a stat directly — they change what the day's
+   * weighted draw favours for the rest of the run, through `effects.deck`.
+   * `add` puts a card id in GameState.runDeck (each copy raises that card's
+   * draw weight); `remove` bans a card id outright (GameState.bannedCards).
+   * Both target cards the global pool already draws unprompted — situations
+   * that recur on their own, not one-off/scheduled followups — so the effect
+   * is honest: buy this, and that specific situation really does come back
+   * more (or stops coming back at all). */
+  {
+    id: 'sarran-standing-order',
+    kind: 'policy',
+    rarity: 'common',
+    tier: 'small',
+    name: 'A Standing Order to Sarran',
+    seller: 'Sarran offers to keep bringing you what the Office finds, instead of waiting to be asked.',
+    upside: 'She keeps a file open on someone new more often. That situation comes back around more this run.',
+    downside: 'The Sable Office decides who is worth watching. You only get told after the fact.',
+    cost: 3.5,
+    effects: {
+      deck: { add: ['sarran-file'] },
+      factions: {
+        sable: {
+          influence: 3,
+        },
+      },
+    },
+  },
+  {
+    id: 'loz-standing-slot',
+    kind: 'policy',
+    rarity: 'common',
+    tier: 'small',
+    name: 'A Standing Slot on Channel Seven',
+    seller: 'Loz keeps the evening segment open for whoever pays for it first, and offers you first refusal.',
+    upside: 'The chance to buy the evening news comes up more often this run. Each time is still a real decision.',
+    downside: 'Everyone in the newsroom knows the slot is for sale. So, eventually, does everyone watching it.',
+    cost: 4.0,
+    effects: {
+      deck: { add: ['channel-seven'] },
+      hidden: {
+        leak: 2,
+      },
+    },
+  },
+  {
+    id: 'piek-standing-invite',
+    kind: 'policy',
+    rarity: 'uncommon',
+    tier: 'small',
+    name: 'Piek Keeps a Chair Open',
+    seller: 'Ostrene likes a government that negotiates often, Piek says, more than one that negotiates well.',
+    upside: 'The lithium price-lock offer comes back to the table more often this run, each visit a fresh choice.',
+    downside: 'Ostrene expects a yes eventually. Every refusal costs a little more goodwill than the last one did.',
+    cost: 4.5,
+    effects: {
+      deck: { add: ['ostrene-lithium'] },
+      characters: {
+        piek: {
+          trust: 4,
+        },
+      },
+    },
+  },
+  {
+    id: 'adamek-open-line',
+    kind: 'policy',
+    rarity: 'uncommon',
+    tier: 'small',
+    name: 'An Open Line to Adamek',
+    seller: 'Adamek says a man who never sees you never gets shown the good numbers.',
+    upside: 'He writes more cards. His offers turn up more often this run — each one still a real decision.',
+    downside: 'The Concord gets used to being able to reach you directly, on any day it chooses.',
+    cost: 5.0,
+    effects: {
+      deck: { add: ['adamek-card'] },
+      factions: {
+        concord: {
+          influence: 3,
+        },
+      },
+    },
+  },
+  {
+    id: 'automate-payroll',
+    kind: 'policy',
+    rarity: 'common',
+    tier: 'small',
+    name: 'Automate the Payroll Reconciliation',
+    seller: 'Brask says the shortfall keeps recurring because nobody owns the spreadsheet. He will own it.',
+    upside: 'Payroll stops coming back as a crisis. It gets handled, quietly, before it reaches your desk.',
+    downside: 'Brask\'s office now controls a number you used to see for yourself, and reports it when it chooses to.',
+    cost: 6.5,
+    effects: {
+      deck: { remove: ['payroll-crunch'] },
+      hidden: {
+        corruption: 2,
+      },
+    },
+  },
+  {
+    id: 'settle-with-gorsk',
+    kind: 'policy',
+    rarity: 'common',
+    tier: 'small',
+    name: 'A Standing Arrangement With Gorsk',
+    seller: 'Hess offers a real contract this time, not another ten-day strike notice shaped like an argument.',
+    upside: 'The strike notice out of Gorsk stops coming back. That grievance gets answered once, properly.',
+    downside: 'Every other union in the Combine asks, loudly, why Gorsk got a deal and they did not.',
+    cost: 5.5,
+    effects: {
+      deck: { remove: ['gorsk-strike-notice'] },
+      factions: {
+        combine: {
+          loyalty: 6,
+        },
+      },
+    },
+  },
+  {
+    id: 'quiet-word-doran',
+    kind: 'policy',
+    rarity: 'common',
+    tier: 'small',
+    name: 'A Quiet Word With Doran',
+    seller: 'She says she will stop bringing you the warning if you actually act on it once.',
+    upside: 'Doran\'s recurring warning stops landing on your desk. Whatever worried her, she is handling herself now.',
+    downside: 'You no longer hear about it until it has already happened.',
+    cost: 3.0,
+    effects: {
+      deck: { remove: ['doran-warning'] },
+      hidden: {
+        leak: 3,
+      },
+    },
+  },
+  {
+    id: 'close-free-zone-file',
+    kind: 'policy',
+    rarity: 'uncommon',
+    tier: 'small',
+    name: 'Close the Free Zone File',
+    seller: 'One of Concord\'s own auditors offers to sign off on the Free Zone books, permanently, for a fee.',
+    upside: 'Nobody asks you to explain the Free Zone again. The question is closed, not answered.',
+    downside: 'Whatever is actually happening in the Free Zone keeps happening, and nobody is watching it now.',
+    cost: 8.0,
+    effects: {
+      deck: { remove: ['ilvet-audit'] },
+      hidden: {
+        corruption: 5,
+      },
+    },
+  },
+
   /* --------------------------------------------------------------- favours */
   {
     id: 'quiet-word',

@@ -857,6 +857,322 @@ export const ALERTS: AlertDef[] = [
   ],
 },
 
+{
+  id: 'alert-ledger-leak',
+  title: 'A LEDGER HAS BEEN LEAKED',
+  driver: 'scandal',
+  severity: 3,
+  actor: 'brask',
+  base: 0,
+  minDay: 4,
+  weight: (s) => Math.max(0, s.hidden.scandal - 28) * 1.3 + s.hidden.corruption * 0.3,
+  body:
+    'A private ledger, allegedly kept in your own office, is circulating on three separate channels by 9am. Some of the numbers in it are real. Nobody outside the building can tell which.\n\nBrask has already read it. "About sixty percent accurate," he says, which is either reassuring or the worst possible answer, and he cannot tell you which either.',
+  flavor: 'About sixty percent accurate. Nobody can tell you which sixty.',
+  options: [
+    {
+      id: 'confirm-deny',
+      label: 'Publish a line-by-line rebuttal, tonight.',
+      hint: 'Slow, careful, and it only works if the sixty percent that is true is defensible.',
+      outcome: (s, rng) => {
+        const clean = 55 - s.hidden.corruption * 0.6 + rng.range(-10, 10);
+        return clean > 0
+          ? {
+              text: 'The rebuttal holds up under questioning, which is the best outcome a rebuttal can hope for. The story runs one more day and then runs out of road.',
+              tone: 'good',
+              effects: {
+                stats: { legitimacy: 4, information: 2 },
+                hidden: { scandal: -14 },
+                characters: { brask: { trust: 4 } },
+              },
+            }
+          : {
+              text: 'Two lines in the rebuttal are themselves wrong, and everyone finds the two lines by lunchtime. The correction becomes the story.',
+              tone: 'bad',
+              effects: {
+                stats: { legitimacy: -6 },
+                hidden: { scandal: 12, corruption: -2 },
+                characters: { brask: { trust: -4 } },
+              },
+            };
+      },
+    },
+    {
+      id: 'silence',
+      label: 'Say nothing. Let it burn out.',
+      hint: 'Free. Cheapest, and it leaves every number in the ledger unanswered.',
+      outcome: {
+        text: 'It does not burn out on its own. Three days later a second, more complete version starts circulating.',
+        tone: 'bad',
+        effects: {
+          hidden: { scandal: 10, leak: 4 },
+        },
+      },
+    },
+    {
+      id: 'find-source',
+      label: 'Have Sarran find who leaked it, quietly.',
+      hint: 'The problem does not go away, but you learn who inside the building did this.',
+      enabled: (s) => s.factions.sable.loyalty > 30,
+      lockedText: 'Sarran would need more reason to prioritise this over her own work.',
+      outcome: {
+        text: 'She finds the source within the week: a junior clerk in Brask\'s own office, selling access rather than conviction. The ledger keeps circulating regardless.',
+        tone: 'mixed',
+        effects: {
+          hidden: { scandal: 6, leak: -3 },
+          characters: { sarran: { loyalty: 4 }, brask: { trust: -3 } },
+          remember: [{ who: 'brask', text: 'A leak came from inside his own office.', weight: -2 }],
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'alert-corruption-dossier',
+  title: 'AURETH HAS A DOSSIER',
+  driver: 'corruption',
+  severity: 2,
+  actor: 'piek',
+  base: 0,
+  minDay: 5,
+  weight: (s) => Math.max(0, s.hidden.corruption - 35) * 1.1 + Math.max(0, s.hidden.foreign - 30) * 0.4,
+  body:
+    'The Aureth Union\'s ambassador does not ask for meetings, he schedules them. This one is scheduled for 8am, and he arrives with a folder he does not open: a compiled dossier on procurement contracts, three of them naming figures close to you by name.\n\n"We would prefer this stayed between institutions," Piek translates, unnecessarily. Everyone in the room understood the ambassador the first time.',
+  flavor: 'Compiled, cross-referenced, and not remotely subtle about what it is for.',
+  options: [
+    {
+      id: 'cooperate',
+      label: 'Open the contracts to their auditors.',
+      hint: 'Free. It costs you control of the story, and buys you the version where you chose to.',
+      outcome: {
+        text: 'The audit runs for six weeks and finds real problems, which is uncomfortable and also, eventually, over. The next loan tranche clears on schedule.',
+        tone: 'good',
+        effects: {
+          stats: { legitimacy: 3 },
+          hidden: { corruption: -12, foreign: -6 },
+          factions: { concord: { loyalty: -4 } },
+          characters: { piek: { trust: 4 } },
+        },
+      },
+    },
+    {
+      id: 'settle',
+      label: 'Settle it privately: those three contracts, quietly cancelled.',
+      hint: 'Costs $2.0B in penalty clauses. Smaller, faster, and it never becomes public.',
+      outcome: {
+        text: 'The contracts are unwound without a headline. The ambassador\'s folder goes back in his bag, unopened, which both of you understand is a courtesy and not a resolution.',
+        tone: 'mixed',
+        effects: {
+          stats: { treasury: -2 },
+          hidden: { corruption: -5, foreign: -2 },
+          factions: { concord: { loyalty: -6 } },
+        },
+      },
+    },
+    {
+      id: 'refuse',
+      label: 'Refuse to engage. It is an internal matter.',
+      hint: 'Free. The dossier does not go back in the bag.',
+      outcome: {
+        text: '"Then it will circulate through the usual channels," the ambassador says, and leaves precisely on schedule, as always.',
+        tone: 'bad',
+        effects: {
+          hidden: { foreign: 8, scandal: 5 },
+          characters: { piek: { trust: -3 } },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'alert-cult-portrait',
+  title: 'A THIRD-STOREY PORTRAIT HAS GONE UP UNAUTHORISED',
+  driver: 'cult',
+  severity: 2,
+  actor: 'doran',
+  base: 0,
+  minDay: 5,
+  weight: (s) => Math.max(0, s.hidden.cult - 35) * 1.2,
+  body:
+    'Someone in the Ministry of Information commissioned, without asking, a three-storey portrait of you for the side of the central post office. It went up overnight. Doran found out about it from a photograph, same as everyone else.\n\n"I did not order this," she says, in a tone that makes clear she is more worried about what it means that someone thought she might have.',
+  flavor: 'Nobody remembers approving it. Someone approved it.',
+  options: [
+    {
+      id: 'take-down',
+      label: 'Have it taken down immediately.',
+      hint: 'Costs $0.4B. A small, deliberate signal that this is not what the government looks like.',
+      outcome: {
+        text: 'It comes down within the day. The removal gets almost as much attention as the portrait did, but the message lands the way you meant it to.',
+        tone: 'good',
+        effects: {
+          stats: { treasury: -0.4, legitimacy: 3 },
+          hidden: { cult: -14 },
+          factions: { chorus: { loyalty: 3 } },
+        },
+      },
+    },
+    {
+      id: 'leave-quiet',
+      label: 'Leave it up, but quietly stop any more of these.',
+      hint: 'Free. Cheaper, and it reads as tacit approval either way.',
+      outcome: {
+        text: 'It stays up. Nobody commissions another one, officially, but two more appear in smaller towns within the month regardless.',
+        tone: 'bad',
+        effects: {
+          hidden: { cult: 8 },
+          factions: { chorus: { loyalty: -3 } },
+        },
+      },
+    },
+    {
+      id: 'embrace',
+      label: 'Say nothing critical. Let it become the new normal.',
+      hint: 'Free. This is how it stops being one portrait and starts being a habit.',
+      outcome: {
+        text: 'Silence reads as endorsement. By the following month the post office portrait has three siblings, and Doran has stopped asking who is ordering them.',
+        tone: 'bad',
+        effects: {
+          hidden: { cult: 16 },
+          regime: { personalism: 10 },
+          factions: { chorus: { loyalty: -6 } },
+          characters: { doran: { trust: -3 } },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'alert-currency-panic',
+  title: 'THE CURRENCY IS MOVING AND NOBODY IS DEFENDING IT',
+  driver: 'fiscal',
+  severity: 3,
+  actor: 'brask',
+  base: 0,
+  minDay: 6,
+  weight: (s) => Math.max(0, s.hidden.fiscal - 40) * 1.2 + Math.max(0, 25 - s.stats.treasury) * 0.6,
+  body:
+    'The currency has moved 6% since the markets opened and the Central Bank has not intervened. Brask is on the phone before you have finished reading his note: reserves are lower than the public figures say, and defending the peg today would spend most of what is left.\n\n"We can hold the line once," he says. "We cannot hold it twice."',
+  flavor: 'Reserves are lower than the public figures say. They always are.',
+  options: [
+    {
+      id: 'defend',
+      label: 'Spend the reserves. Defend the peg.',
+      hint: 'Costs $8.0B. It works today, and there is less left for the next time this happens.',
+      outcome: {
+        text: 'The intervention holds the line and the currency steadies by close of trading. Brask\'s green notebook now has a number in it that keeps him up at night.',
+        tone: 'mixed',
+        effects: {
+          stats: { treasury: -8, economy: 2 },
+          hidden: { fiscal: -6 },
+          characters: { brask: { trust: -2 } },
+        },
+      },
+    },
+    {
+      id: 'let-float',
+      label: 'Let it float. Stop defending an indefensible peg.',
+      hint: 'Free today. Prices rise on everything imported, starting with gas, by tomorrow.',
+      outcome: {
+        text: 'The currency finds its own level, about 14% lower, within the week. It is honest, and it is expensive for every household that imports anything at all.',
+        tone: 'bad',
+        effects: {
+          stats: { economy: -5, support: -4 },
+          hidden: { fiscal: 4 },
+          factions: { combine: { loyalty: -6 } },
+        },
+      },
+    },
+    {
+      id: 'controls',
+      label: 'Impose emergency capital controls instead.',
+      hint: 'Free today. It stops the bleeding and every foreign lender reads it as the beginning of the end.',
+      outcome: {
+        text: 'The controls hold the currency in place by force rather than by confidence, which works right up until someone asks what the difference is.',
+        tone: 'bad',
+        effects: {
+          hidden: { fiscal: -4, foreign: 8 },
+          factions: { concord: { loyalty: -10 } },
+          regime: { isolation: 8 },
+        },
+      },
+    },
+  ],
+},
+
+{
+  id: 'alert-hadem-blockade',
+  title: 'THE HADEM ROAD HAS BEEN BLOCKED',
+  driver: 'separatism',
+  severity: 3,
+  actor: 'kostyn',
+  base: 0,
+  minDay: 6,
+  weight: (s) => Math.max(0, s.hidden.separatism - 40) * 1.3,
+  body:
+    'Villagers, not soldiers, have put trucks across the one paved road into the Hadem hills, and they are not moving them until someone from the capital comes to hear them out in person. Drovna\'s radio station is already calling it "the first free hour in the Hadem hills in a generation."\n\nIt is not an uprising. It could become one by the weekend if it is treated like one.',
+  flavor: 'Villagers, not soldiers. That distinction will not last if you get it wrong.',
+  options: [
+    {
+      id: 'go',
+      label: 'Go yourself. Hear them out at the roadblock.',
+      hint: 'Free, and it means standing in a field answering questions with no script.',
+      outcome: (s, rng) =>
+        rng.chance(0.5 + (s.factions.provinces.loyalty - 50) * 0.006)
+          ? {
+              text: 'It goes better than Doran feared. You leave with a list of specific, answerable demands instead of a slogan, and the trucks move by evening.',
+              tone: 'good',
+              effects: {
+                stats: { legitimacy: 5, support: 3 },
+                hidden: { separatism: -16 },
+                factions: { provinces: { loyalty: 10 } },
+                characters: { kostyn: { loyalty: 5 } },
+              },
+            }
+          : {
+              text: 'It does not go well. One answer lands badly, the clip travels faster than the rest of the visit, and the trucks stay exactly where they are.',
+              tone: 'bad',
+              effects: {
+                stats: { legitimacy: -4 },
+                hidden: { separatism: 8 },
+                factions: { provinces: { loyalty: -4 } },
+              },
+            },
+    },
+    {
+      id: 'send-kostyn',
+      label: 'Send Kostyn to negotiate on your behalf.',
+      hint: 'Free. She knows the ground. She also gets the credit if it works.',
+      outcome: {
+        text: 'She has the trucks moved within a day, exactly as promised, and exactly as everyone expected her to manage it better than you would have.',
+        tone: 'mixed',
+        effects: {
+          hidden: { separatism: -10 },
+          factions: { provinces: { loyalty: 6 } },
+          characters: { kostyn: { loyalty: 8, influence: 6 } },
+        },
+      },
+    },
+    {
+      id: 'clear',
+      label: 'Send the police to clear the road by force.',
+      hint: 'Free today. This is exactly the story Drovna\'s radio station wants to tell.',
+      outcome: {
+        text: 'The road clears within the hour. The footage of it clearing does not, and by evening it is the only thing the Hadem hills are talking about.',
+        tone: 'bad',
+        effects: {
+          stats: { security: 2, legitimacy: -6 },
+          hidden: { separatism: 18, unrest: 6 },
+          factions: { provinces: { loyalty: -12, patience: -10 } },
+          news: ['POLICE CLEAR HADEM ROAD BLOCKADE; ONE INJURY REPORTED'],
+        },
+      },
+    },
+  ],
+},
+
 ];
 
 export const ALERT_MAP: Record<string, AlertDef> = Object.fromEntries(ALERTS.map((a) => [a.id, a]));

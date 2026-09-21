@@ -6,6 +6,7 @@ import { makeRng } from './rng';
 import { applyEffects, mergeDeltas } from './effects';
 import { CARDS, CARD_MAP } from './content/cards';
 import { CARDS2 } from './content/cards2';
+import { CARDS3 } from './content/cards3';
 import { FOLLOWUPS } from './content/followups';
 import { ALERTS, ALERT_MAP } from './content/alerts';
 import { FACTION_ORDER, FACTIONS, CHARACTER_MAP } from './content/country';
@@ -24,11 +25,12 @@ import {
 
 /* ------------------------------------------------------------- registries */
 
-const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...FOLLOWUPS, ...MANDATE_CARDS];
+const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS];
 export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...CARD_MAP,
   ...Object.fromEntries(MANDATE_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CARDS2.map((c) => [c.id, c])),
+  ...Object.fromEntries(CARDS3.map((c) => [c.id, c])),
   ...Object.fromEntries(FOLLOWUPS.map((c) => [c.id, c])),
 };
 
@@ -79,7 +81,11 @@ function buildAgenda(s: GameState, rng: Rng): StageKind[] {
   return agenda;
 }
 
+/** §4.4: each copy of a card id in the run deck adds this much weight. */
+const RUN_DECK_WEIGHT_BONUS = 6;
+
 function cardWeight(s: GameState, c: CardDef): number {
+  if (s.bannedCards.includes(c.id)) return 0;
   let w = c.weight ? c.weight(s) : (c.base ?? 5);
   if (w <= 0) return 0;
   if (c.minDay && s.day < c.minDay) return 0;
@@ -93,6 +99,10 @@ function cardWeight(s: GameState, c: CardDef): number {
     if (gap <= 6) w *= 0.18;
     else if (gap <= 10) w *= 0.55;
   }
+  // the run deck: a card the player bought copies of is a growing share of
+  // what they see, on top of whatever the recency throttle already did
+  const copies = s.runDeck.length ? s.runDeck.filter((id) => id === c.id).length : 0;
+  if (copies) w += copies * RUN_DECK_WEIGHT_BONUS;
   return Math.max(0, w);
 }
 
@@ -432,6 +442,7 @@ function syncRunStats(s: GameState) {
 /* -------------------------------------------------------- breaking alerts */
 
 function alertWeight(s: GameState, a: AlertDef): number {
+  if (s.bannedCards.includes(a.id)) return 0;
   if (a.minDay && s.day < a.minDay) return 0;
   if (a.once && s.seenOnce.includes(a.id)) return 0;
   if (a.requires && !a.requires(s)) return 0;

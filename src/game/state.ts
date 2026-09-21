@@ -14,8 +14,9 @@ import { applyEffects } from './effects';
  *  RunStats.dealsStruck. 4→5: GameState.activeDeals, for timed deals.
  *  5→6: activeDeals replaced by heldDeals (every deal now occupies a slot,
  *  not just timed ones) plus endedDeals, for the advisor/deal cap.
- *  6→7: mandateId; generated effect IDs now use a saved flags counter. */
-export const SAVE_VERSION = 7;
+ *  6→7: mandateId; generated effect IDs now use a saved flags counter.
+ *  7→8: runDeck/bannedCards, for the run deck (§4.4). */
+export const SAVE_VERSION = 8;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -178,6 +179,8 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     todayDeck: [],
     queued: [],
     seenOnce: [],
+    runDeck: [],
+    bannedCards: [],
 
     alertsToday: 0,
     lastAlertDay: 0,

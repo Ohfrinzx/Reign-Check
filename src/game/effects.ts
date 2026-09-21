@@ -206,6 +206,16 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
     }
   }
 
+  if (e.deck) {
+    if (e.deck.add) s.runDeck.push(...e.deck.add);
+    if (e.deck.remove) {
+      for (const id of e.deck.remove) {
+        if (!s.bannedCards.includes(id)) s.bannedCards.push(id);
+        s.runDeck = s.runDeck.filter((x) => x !== id);
+      }
+    }
+  }
+
   if (e.news) s.newsQueue.push(...e.news);
 
   if (e.ending && !s.ending) {

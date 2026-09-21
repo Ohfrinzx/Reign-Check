@@ -379,6 +379,43 @@ describe('the Back Room', () => {
   });
 });
 
+/** A shop sitting on exactly one item, with money to buy it — for testing a
+ *  single item's purchase effects without playing to a real Back Room. */
+function shopStateWith(seed: number, itemId: string): GameState {
+  const s = createGame({ seed });
+  s.phase = 'shop';
+  s.shopStock = [itemId];
+  s.stats.treasury = 999;
+  return s;
+}
+
+describe('the run deck (§4.4 shop items)', () => {
+  it('every deck-affecting item declares an add or a remove, targeting a real card', () => {
+    const deckItems = SHOP_ITEMS.filter((d) => d.effects?.deck);
+    expect(deckItems.length).toBeGreaterThan(0);
+    for (const def of deckItems) {
+      const { add, remove } = def.effects!.deck!;
+      expect(add?.length || remove?.length, `${def.id} declares deck effects but no ids`).toBeTruthy();
+    }
+  });
+
+  it('buying an "add" item puts the card in runDeck', () => {
+    const def = SHOP_ITEMS.find((d) => d.effects?.deck?.add?.length)!;
+    expect(def).toBeTruthy();
+    const s = shopStateWith(1, def.id);
+    const after = buyShopItem(s, def.id);
+    for (const id of def.effects!.deck!.add!) expect(after.runDeck).toContain(id);
+  });
+
+  it('buying a "remove" item bans the card and it never comes up in the weighted draw again', () => {
+    const def = SHOP_ITEMS.find((d) => d.effects?.deck?.remove?.length)!;
+    expect(def).toBeTruthy();
+    const s = shopStateWith(2, def.id);
+    const after = buyShopItem(s, def.id);
+    for (const id of def.effects!.deck!.remove!) expect(after.bannedCards).toContain(id);
+  });
+});
+
 describe('firing an advisor', () => {
   it('pays the fire cost, applies the consequence, ends the commitment, and drops it from owned', () => {
     const s = playToShop(42, 1);

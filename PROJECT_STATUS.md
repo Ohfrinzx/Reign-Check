@@ -1,5 +1,73 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
+## ▶ WHERE WE STOPPED — 2026-09-21 (later session)
+
+**§4.3 MANDATES IS PLAYTESTED AND APPROVED.** §4.4 (THE RUN DECK) IS BUILT,
+AWAITING OWNER PLAYTEST. The owner confirmed mandates had been playtested
+and approved, and gave the go-ahead to move to the next slice — §4.4 per the
+staged order in `docs/DESIGN_V2.md` §4/§6. This session built it on
+`claude/exciting-dijkstra-jtlmbh`, merged forward from
+`claude/confident-meitner-lc0bgc` first to pick up the mandates work (which
+had landed on a separate branch, `codex/mandates-and-review`, since another
+agent tool built it).
+
+**The mechanic:** `GameState.runDeck: string[]` and `GameState.bannedCards:
+string[]`, plus a new `Effects.deck?: { add?: string[]; remove?: string[] }`
+field, handled in `effects.ts`. `add` pushes a card id into `runDeck`; each
+copy held there raises that card's draw weight in `engine.ts`'s
+`cardWeight()` — "a growing share of what you see is what you built,"
+per the design doc. `remove` bans a card id into `bannedCards`, which
+`cardWeight()`/`alertWeight()` both check first and always return 0 for —
+banning always wins over held copies of the same id. Both only affect the
+ordinary weighted draw; a card reached by `schedule`/`queueCard` still
+arrives regardless, same as before. The recency gate (no repeat within 3
+days) still applies on top, which caps how often even a heavily-boosted
+card can show up — measured in `deck.test.ts`, this is a real, non-trivial
+lift, not an unlimited one, and that is the intended shape.
+
+**Content, folded into this slice per CLAUDE.md/AGENTS.md's rule that a
+slice's content quota is authored as part of building it:**
+- **8 new Back Room policies** in `content/shop.ts` that use `effects.deck`
+  — 4 "add" (`sarran-standing-order`, `loz-standing-slot`,
+  `piek-standing-invite`, `adamek-open-line`) and 4 "remove"
+  (`automate-payroll`, `settle-with-gorsk`, `quiet-word-doran`,
+  `close-free-zone-file`), each targeting a real, already-repeatable card
+  from the existing pool so the effect is honest — buy one and that
+  situation really does come back more, or stops coming back at all.
+- **20 new standard cards** in a new `content/cards3.ts` (same authoring
+  rules as `cards.ts`/`cards2.ts`), and **6 new alerts** appended to
+  `content/alerts.ts` — this was also the content-volume top-up the design
+  doc calls out (known limitation #1), and it filled in three drivers that
+  had no alert at all before now: `scandal`, `corruption`, and `cult`
+  (`alert-ledger-leak`, `alert-corruption-dossier`, `alert-cult-portrait`),
+  plus `alert-currency-panic` (fiscal) and `alert-hadem-blockade`
+  (separatism). `cards3.ts` is wired into `engine.ts`'s `ALL_CARDS`/
+  `ALL_CARD_MAP`, zero further engine changes needed (ground rule 5).
+
+**Save version 7→8: existing in-progress runs reset**, for `runDeck`/
+`bannedCards`. Same discard-not-crash behaviour as every prior bump.
+
+**Verification:** 93 tests pass (8 new: `deck.test.ts`'s 5 plus 3 more in
+`shop.test.ts` for the new items), up from 85; production build clean; the
+four Playwright tools (`verify.mjs`, `to-ending.mjs`, `playthrough.mjs`,
+`mandates.mjs`, including save-version-8 rejection) all pass at 1366×700
+with zero page errors — `playthrough.mjs` shows several of the new cards
+and shop items surfacing naturally in a real run.
+
+**Balance note, unmeasured before now:** the balance probe's `avgAlerts`
+moved from 8.5 to 10.9 and `reachedMax` from 40% to 52% under the random
+policy, from the 6 new alerts adding pressure to the pool. Flagging this
+rather than tuning it blind — as with mandates, balance is a playtest
+question, not one passing tests resolves.
+
+**Next:** owner playtests this slice. Do not begin §4.5 (meta-progression)
+before feedback and an explicit instruction, per the same staged-slice
+discipline as every milestone so far.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-21
 
 **§4.3 MANDATES IS BUILT, AWAITING OWNER PLAYTEST.** The owner asked to begin

@@ -56,13 +56,22 @@ in progress:
 - A small display fix (the masthead/front-page day counter reads `Day X / 6`,
   progress within the current act, instead of `Day X / 18`) — **BUILT AND
   OWNER-APPROVED.**
-- **§4.3 (mandates) — BUILT, awaiting owner playtest (2026-09-21).**
-  Six selectable/seeded origins, persistent rules, and a one-time Stairwell
-  event. `content/mandates.ts` replaces the old `OPENINGS` scenarios.
-  The owner confirmed that the mandate table's Money changes mean treasury.
-  `SAVE_VERSION` is **7**; version-6 in-progress runs reset.
-- **§4.4 (run deck) and §4.5 (meta-progression) — NOT started.** Wait for
-  mandate playtest and an explicit instruction before beginning another slice.
+- **§4.3 (mandates) — BUILT AND OWNER-APPROVED.** Six selectable/seeded
+  origins, persistent rules, and a one-time Stairwell event.
+  `content/mandates.ts` replaces the old `OPENINGS` scenarios. The owner
+  confirmed that the mandate table's Money changes mean treasury.
+- **§4.4 (the run deck) — BUILT, awaiting owner playtest (2026-09-21, later
+  session).** `GameState.runDeck`/`bannedCards` plus `Effects.deck.add`/
+  `remove`, read by `cardWeight()`/`alertWeight()` in `engine.ts`: a card
+  the player holds copies of draws more often (bounded by the existing
+  3-day recency gate); a banned card never draws again. 8 new Back Room
+  policies in `content/shop.ts` use it. Also folds in this slice's content
+  quota: 20 new standard cards (`content/cards3.ts`, new file) and 6 new
+  alerts (appended to `content/alerts.ts`, filling in the previously-unused
+  `scandal`/`corruption`/`cult` drivers). `SAVE_VERSION` is **8**;
+  version-7 in-progress runs reset.
+- **§4.5 (meta-progression) — NOT started.** Wait for run-deck playtest and
+  an explicit instruction before beginning another slice.
 
 For the exact, up-to-the-minute state (what shipped last, what's still
 mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s
@@ -181,9 +190,9 @@ npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
 npm test           # vitest: content integrity, 200 full simulated runs,
-                   #   determinism, variety, glossary, and the Back Room
-                   #   shop suite (stock/pricing, firing advisors,
-                   #   held/timed/cut deals, caps)
+                   #   determinism, variety, glossary, the Back Room shop
+                   #   suite (stock/pricing, firing advisors, held/timed/cut
+                   #   deals, caps), mandates, and the run deck (§4.4)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -205,8 +214,10 @@ src/game/                 no React, no DOM, fully testable
   rng.ts                  seeded RNG; its state lives in the save
   state.ts                createGame(), mandate selection, honorifics,
                            dayInAct()/isActEndDay()/justAdvancedAct()
-  effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point
-  engine.ts               day loop, deck draw, alert weighting, endings
+  effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point,
+                           including Effects.deck (§4.4 run deck add/remove)
+  engine.ts               day loop, deck draw, alert weighting, endings —
+                           cardWeight()/alertWeight() read runDeck/bannedCards
   briefing.ts             hidden state → plain-language warnings + threat cards
   display.ts              engine state → what the player actually sees
                            (3 resources, 5 factions) — read this before
@@ -221,8 +232,10 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
   content/mandates.ts      six origins, generic rule data, Stairwell card
-  content/                country, cards, cards2, followups, alerts, endings,
-                           shop (the Back Room items — pure data)
+  content/                country, cards, cards2, cards3 (§4.4's content
+                           top-up), followups, alerts, endings, shop (the
+                           Back Room items, including the run deck's
+                           add/remove policies — pure data)
                            (all UNCHANGED by the display-layer cut — still the
                            full 10-stat/7-faction effects)
 src/ui/
@@ -337,3 +350,27 @@ don't leave it to "whoever reads this next." Specifically:
   `PLAYWRIGHT_EXECUTABLE_PATH`; screenshots go to the OS temp directory's
   `reign-check-shots` folder (`REIGN_SHOTS` overrides it).
 - Review details and remaining playtest risks: `docs/REVIEW_2026_09_21.md`.
+
+## 13. Run deck slice notes (§4.4, 2026-09-21, later session)
+
+- `Effects.deck.remove` bans a card id into `GameState.bannedCards` — it does
+  NOT just strip that id back out of `runDeck`. Banning is permanent for the
+  run and always wins, even over held copies of the same id; there is no
+  "un-ban" mechanism, on purpose (nothing in the design calls for one).
+- Only target `deck.add`/`deck.remove` at cards the global pool already
+  draws unprompted — i.e. `base > 0` or a real `weight()`, not the
+  `base: 0, weight: () => 0` cards that exist only to be reached via
+  `schedule`/`queueCard` from another card's outcome (e.g. `mil-budget-due`,
+  `strike-begins`). Those never go through `cardWeight()`'s weighted draw at
+  all, so boosting or banning them would silently do nothing — a foot-gun
+  the shop items in this slice deliberately avoid.
+- The recency gate in `cardWeight()` (no repeat within 3 days) is NOT
+  bypassed by the run-deck weight bonus — it still gates how often any card,
+  boosted or not, can appear (roughly once per 4 days, ~5 times in an
+  18-day run). `deck.test.ts` measures the boost as "noticeably more often,
+  bounded by the ceiling," not "constantly" — that is the correct, intended
+  shape, not a bug to fix later.
+- `alertWeight()` also checks `bannedCards` (so a banned alert never fires),
+  but alerts get no `runDeck` copies-boost — the run deck's "add" side only
+  ever targets ordinary standard cards, matching the design doc's framing
+  ("situation cards" — the world's own alerts stay unpredictable).

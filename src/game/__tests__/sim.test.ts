@@ -7,6 +7,7 @@ import {
 import { buildBriefing } from '../briefing';
 import { CARDS } from '../content/cards';
 import { CARDS2 } from '../content/cards2';
+import { CARDS3 } from '../content/cards3';
 import { MANDATES, MANDATE_CARDS } from '../content/mandates';
 import { FOLLOWUPS } from '../content/followups';
 import { ALERTS } from '../content/alerts';
@@ -64,12 +65,12 @@ function playRun(seed: number, pick: (s: GameState, n: number) => number): GameS
 
 describe('content integrity', () => {
   it('has unique card ids', () => {
-    const ids = [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS].map((c) => c.id);
+    const ids = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS].map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('every option has a label and every card has options', () => {
-    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
+    for (const c of [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       expect(c.options.length, `${c.id} has no options`).toBeGreaterThanOrEqual(2);
       for (const o of c.options) {
         expect(o.label.length, `${c.id}/${o.id} empty label`).toBeGreaterThan(0);
@@ -83,7 +84,7 @@ describe('content integrity', () => {
     const missing = new Set<string>();
     const rng = makeRng(1);
     const probe = createGame({ seed: 1 });
-    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
+    for (const c of [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       for (const o of c.options) {
         const res = typeof o.outcome === 'function' ? o.outcome(probe, rng) : o.outcome;
         for (const sch of res.effects?.schedule ?? []) {
@@ -99,7 +100,7 @@ describe('content integrity', () => {
 
   it('every character referenced by a card exists', () => {
     const known = new Set(Object.keys(createGame({ seed: 2 }).characters));
-    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
+    for (const c of [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       if (c.actor) expect(known.has(c.actor), `${c.id} actor ${c.actor}`).toBe(true);
     }
   });

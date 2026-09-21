@@ -245,6 +245,17 @@ export interface Effects {
   buryScandal?: string;
   /** push a card into an upcoming day's deck */
   queueCard?: { cardId: string; inDays?: number }[];
+  /**
+   * The run deck (§4.4): `add` puts a card id into `GameState.runDeck`, where
+   * each copy raises that card's draw weight for the rest of the run — "a
+   * growing share of what you see is what you built." `remove` bans a card
+   * id from the weighted draw entirely (`GameState.bannedCards`) — permanent
+   * for the run, and it always wins over any copies the same id has in
+   * `runDeck`. Both only ever affect ordinary weighted draws (`ALL_CARDS` in
+   * engine.ts and, for `remove` only, `ALERTS`) — a card reached by
+   * `schedule`/`queueCard` still arrives regardless, same as today.
+   */
+  deck?: { add?: string[]; remove?: string[] };
   /** headlines for the nightly bulletin */
   news?: string[];
   /** fire a named ending immediately */
@@ -486,6 +497,15 @@ export interface GameState {
   /** explicitly queued cards by absolute day */
   queued: { cardId: string; day: number }[];
   seenOnce: string[];
+
+  /* --------------------------------------------------------- the run deck
+   * §4.4: shop items add to and remove from what the weighted draw favours.
+   * Plain string-id arrays, same pattern as the Back Room's owned/heldFavours
+   * (ground rules 1 and 5) — a new deck-affecting item needs no engine change. */
+  /** card ids added this run; each occurrence boosts that card's draw weight */
+  runDeck: string[];
+  /** card ids banned from the weighted draw for the rest of the run */
+  bannedCards: string[];
 
   current?: PendingCard;
   lastOutcome?: CardOutcome & { cardTitle: string; optionLabel: string; deltas: Partial<Stats> };

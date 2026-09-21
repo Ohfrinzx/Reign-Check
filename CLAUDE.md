@@ -41,7 +41,7 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 2 — §4.1/§4.2 APPROVED; §4.3 BUILT, AWAITING PLAYTEST
+## PHASE 2 — §4.1/§4.2/§4.3 APPROVED; §4.4 BUILT, AWAITING PLAYTEST
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
@@ -49,11 +49,23 @@ each, ending in a confidence vote) and §4.2 (the Back Room shop, both
 chunks, plus the day-in-act display fix) have all been built, playtested,
 and approved by the owner — verbatim: *"All up to date content has been
 playtested and is approved."* See `PROJECT_STATUS.md`'s "WHERE WE STOPPED"
-block for the full history. **As of 2026-09-21, §4.3 is built and awaiting
-owner playtest:** six selectable/seeded mandates, persistent rules, and the
-Stairwell recording event. The owner confirmed Money means treasury.
-`SAVE_VERSION` is 7; prior saves reset. §4.4 and §4.5 remain unstarted and
-need an explicit instruction after this slice is playtested.
+block for the full history.
+
+**§4.3 (mandates) is now playtested and owner-approved.** Six
+selectable/seeded mandates, persistent rules, and the Stairwell recording
+event; the owner confirmed Money means treasury. It was built by another
+agent tool on this project (on `codex/mandates-and-review`, merged into
+`claude/confident-meitner-lc0bgc`) — a reminder that `AGENTS.md` exists
+because more than one agent works this codebase, and any of them can hand
+off a slice to any other.
+
+**As of 2026-09-21 (later session), §4.4 (the run deck) is built and
+awaiting owner playtest:** `GameState.runDeck`/`bannedCards`, a new
+`Effects.deck.add`/`remove`, 8 new Back Room policies that use it, plus
+this slice's content quota — 20 new standard cards (`content/cards3.ts`)
+and 6 new alerts. See the "§4.4, the run deck" section below for the full
+detail. `SAVE_VERSION` is 8; prior saves reset. §4.5 remains unstarted and
+needs an explicit instruction after this slice is playtested.
 
 **§4.2, the Back Room shop — BOTH CHUNKS BUILT AND APPROVED.** Owner
 amendment to the spec: the shop opens at the **end of every day**, not only
@@ -166,10 +178,55 @@ front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
 unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
-**§4.1, §4.2, and the day counter fix remain owner-approved. §4.3 is now
-built, awaiting owner playtest.** Next, after feedback and an explicit
-instruction: §4.4 run deck, then §4.5 meta-progression. See the current
-`PROJECT_STATUS.md` handoff and `docs/REVIEW_2026_09_21.md`.
+**§4.1, §4.2, §4.3, and the day counter fix are all owner-approved. §4.4 is
+now built, awaiting owner playtest.** Next, after feedback and an explicit
+instruction: §4.5 meta-progression. See the current `PROJECT_STATUS.md`
+handoff and `docs/REVIEW_2026_09_21.md`.
+
+**§4.4, the run deck — BUILT, awaiting owner playtest.** `GameState.runDeck:
+string[]` and `GameState.bannedCards: string[]`, plus a new
+`Effects.deck?: { add?: string[]; remove?: string[] }` handled in
+`effects.ts`. `add` pushes a card id into `runDeck`; `engine.ts`'s
+`cardWeight()` gives each copy held there a flat weight bonus, so "a growing
+share of what you see is what you built" (the design doc's own framing) —
+bounded by the existing 3-day recency gate, which still caps how often any
+card can appear (about once every 4 days, ~5 times in an 18-day run): the
+boost is measured, in `deck.test.ts`, as a real and non-trivial lift, not an
+unlimited one, and that ceiling is the intended shape, not a bug. `remove`
+bans a card id into `bannedCards`, checked first by both `cardWeight()` and
+`alertWeight()` and always returning 0 — banning always wins, even over held
+copies of the same id, and there is no "un-ban." Both only affect the
+ordinary weighted draw: a card reached by `schedule`/`queueCard` still
+arrives regardless (ground rule 5 holds — the mechanic needed one engine
+change, adding `deck` handling; every item and card built on top of it needs
+none). Only target `deck.add`/`deck.remove` at cards the pool already draws
+unprompted, not the `base: 0, weight: () => 0` followup-only cards (e.g.
+`mil-budget-due`) — boosting or banning those would silently do nothing.
+
+**8 new Back Room policies in `content/shop.ts` use `effects.deck`** — 4
+"add" (`sarran-standing-order`, `loz-standing-slot`, `piek-standing-invite`,
+`adamek-open-line`) and 4 "remove" (`automate-payroll`, `settle-with-gorsk`,
+`quiet-word-doran`, `close-free-zone-file`), each targeting a real,
+already-repeatable card so the shop copy is honest about what it does.
+
+**This slice also folds in its content quota** (per the rule below: content
+is authored as part of the slice it belongs to, not separately): **20 new
+standard cards** in a new file, `content/cards3.ts` (wired into
+`engine.ts`'s `ALL_CARDS`/`ALL_CARD_MAP`, same authoring rules as
+`cards.ts`/`cards2.ts`), and **6 new alerts** appended to `content/alerts.ts`
+— filling in three drivers (`scandal`, `corruption`, `cult`) that had no
+alert at all before now. This is also the content-volume top-up the design
+doc flags as known limitation #1. Balance is unmeasured before now: the
+balance probe's `avgAlerts` moved 8.5→10.9 and `reachedMax` 40%→52% under
+the random policy from the new alerts adding pressure — flagged, not tuned
+blind; balance is a playtest question, same as it was for mandates.
+
+**Verification:** 93 vitest tests pass (up from 85 — `deck.test.ts`'s 5 new,
+plus 3 more in `shop.test.ts` for the new items), production build clean,
+and all four Playwright tools (`verify.mjs`, `to-ending.mjs`,
+`playthrough.mjs`, `mandates.mjs` — including save-version-8 rejection) pass
+at 1366×700 with zero page errors; `playthrough.mjs` shows several of the
+new cards and shop items surfacing naturally in a real run.
 
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
@@ -183,7 +240,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-85 vitest tests pass (see the `npm test` line in Commands below for the
+93 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -213,13 +270,13 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `7`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `8`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 6→7 for `mandateId`
-    and saved generated-ID bookkeeping. A bump discards the owner's
-    in-progress run — say so when you report.
+    as long as the bump actually happens. Last bumped 7→8 for
+    `runDeck`/`bannedCards` (§4.4, the run deck). A bump discards the
+    owner's in-progress run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see
@@ -278,9 +335,10 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 85 tests: integrity, 200 full runs, determinism, variety,
-                   #   glossary, dayInAct, and 46 covering the Back Room shop (stock/
-                   #   pricing, firing advisors, held/timed/cut deals, caps)
+npm test           # 93 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, dayInAct, mandates, the run deck (§4.4), and
+                   #   the Back Room shop (stock/pricing, firing advisors,
+                   #   held/timed/cut deals, caps)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -301,8 +359,10 @@ src/game/                 no React, no DOM, fully testable
   types.ts                the whole vocabulary — start here
   rng.ts                  seeded RNG; its state lives in the save
   state.ts                createGame(), mandate selection, honorifics
-  effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point
-  engine.ts               day loop, deck draw, alert weighting, endings
+  effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point,
+                           including Effects.deck (§4.4 run deck add/remove)
+  engine.ts               day loop, deck draw, alert weighting, endings —
+                           cardWeight()/alertWeight() read runDeck/bannedCards
   briefing.ts             hidden state → plain-language warnings + threat cards
   display.ts              engine state → what the player actually sees
                            (3 resources, 5 factions) — read this before
@@ -317,8 +377,10 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
   content/mandates.ts      six origins, generic rule data, Stairwell card
-  content/                country, cards, cards2, followups, alerts, endings,
-                           shop (the 47 Back Room items — pure data)
+  content/                country, cards, cards2, cards3 (§4.4's content
+                           top-up), followups, alerts, endings, shop (the
+                           Back Room items, including the run deck's
+                           add/remove policies — pure data)
                            (all UNCHANGED by the display-layer cut — still the
                            full 10-stat/7-faction effects)
 src/ui/
@@ -417,3 +479,33 @@ never merge broken or unverified work just to close out a session.
   `PLAYWRIGHT_EXECUTABLE_PATH`; screenshots go to the OS temp directory's
   `reign-check-shots` folder (`REIGN_SHOTS` overrides it).
 - Review details and remaining playtest risks: `docs/REVIEW_2026_09_21.md`.
+
+## Run deck slice notes (§4.4, 2026-09-21, later session)
+
+- `Effects.deck.remove` bans a card id into `GameState.bannedCards` — it does
+  NOT just strip that id back out of `runDeck`. Banning is permanent for the
+  run and always wins, even over held copies of the same id; there is no
+  "un-ban" mechanism, on purpose (nothing in the design calls for one).
+- Only target `deck.add`/`deck.remove` at cards the global pool already
+  draws unprompted — i.e. `base > 0` or a real `weight()`, not the
+  `base: 0, weight: () => 0` cards that exist only to be reached via
+  `schedule`/`queueCard` from another card's outcome (e.g. `mil-budget-due`,
+  `strike-begins`). Those never go through `cardWeight()`'s weighted draw at
+  all, so boosting or banning them would silently do nothing — a foot-gun
+  the shop items in this slice deliberately avoid.
+- The recency gate in `cardWeight()` (no repeat within 3 days) is NOT
+  bypassed by the run-deck weight bonus — it still gates how often any card,
+  boosted or not, can appear (roughly once per 4 days, ~5 times in an
+  18-day run). `deck.test.ts` measures the boost as "noticeably more often,
+  bounded by the ceiling," not "constantly" — that is the correct, intended
+  shape, not a bug to fix later.
+- `alertWeight()` also checks `bannedCards` (so a banned alert never fires),
+  but alerts get no `runDeck` copies-boost — the run deck's "add" side only
+  ever targets ordinary standard cards, matching the design doc's framing
+  ("situation cards" — the world's own alerts stay unpredictable).
+- This session also merged `claude/confident-meitner-lc0bgc` forward into
+  its own working branch first, to pick up the §4.3 mandates work another
+  agent tool had built on a separate branch (`codex/mandates-and-review`)
+  and already merged to default — a session picking up a fresh branch after
+  another agent's slice landed on default should do the same before
+  building the next one.
