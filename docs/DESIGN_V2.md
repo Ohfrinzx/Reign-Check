@@ -300,6 +300,46 @@ text stayed dark-on-dark. `.app` now re-declares `color:var(--ink)` inside
 the themed scope. A browser contrast probe caught this — the screenshots
 alone would have shown "missing" headlines without saying why.
 
+**Follow-up owner request, same session: the Back Room is also fullscreen.**
+"So literally the only thing on the screen is the shop" — masthead, strap and
+rail were only *dark* before this; now they do not render at all while
+`game.phase === 'shop'`. `App.tsx` has a second early return (after the title
+screen's) that renders a bare `<div className="app dark shop-full">` holding
+nothing but `<ShopScreen>`. This **supersedes** the masthead-tokens note just
+above for the shop specifically — there is no masthead on screen during the
+shop to keep dark or light, the whole question is moot there. The shop's own
+"Leave" button (`.shop-foot .btn-primary`) is now the *only* way out; there is
+no `.strap-action` while `phase === 'shop'`. All three Playwright tools broke
+on exactly this the first time this round ran them (they fell through to a
+`.strap-action` click that no longer existed) and needed the same one-line
+fix — check `.shop-foot .btn-primary` first in any future tooling that walks
+the shop.
+
+**Also added: "Advisors & Deals", a screen opened from the masthead during
+the main game** (not the shop) — owner request, so bought advisors and deals
+are reachable without reopening the shop, and so advisors can be let go
+mid-run. `src/ui/screens/Manage.tsx`. Two small additions to the data model,
+both following the "one hook, then it's data" principle from this section's
+opening:
+
+- **Firing an advisor** (`fireAdvisor()` in `engine.ts`) costs whatever
+  `ShopItemDef.fireCost` (money) and applies `fireEffects` (the non-monetary
+  consequence) that advisor's entry in `content/shop.ts` gives it, and cancels
+  the commitment `endsCommitment` names, if any. Every advisor must have a
+  real fire cost or consequence — the same everything-has-a-downside rule
+  that governs buying one in the first place — enforced by a test, not just a
+  convention. Policies and favours are not fireable; the owner asked for
+  "deals and advisors" specifically.
+- **Timed deals**: most deals are permanent, but a `durationDays` on a deal
+  starts a countdown recorded in the new `GameState.activeDeals` array
+  (`{ itemId, daysLeft }`), ticked in `dayUpkeep()` right next to how
+  commitments and projects already tick. When it reaches zero, the deal's
+  `expireEffects` fire once through `applyEffects()` and it is removed. Only
+  `three-judges` uses this so far (5 days, then a scandal bump as the
+  arrangement becomes public) — enough to prove the mechanism, not a claim
+  that more of the pool should be timed; that is content work, same as
+  chunk 2 below.
+
 **Known and deliberate: 17 items is a small pool for 17 nightly visits.** A
 maximally efficient buyer still sees ~12 of them. That is the pool-size
 ceiling, and it is what **chunk 2** is for — take the pool to the §4.2 quota

@@ -2,10 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { createGame } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, openShop, buyShopItem, useFavour, leaveShop,
+  activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor,
 } from '../engine';
 import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
-import { ACT_STOCK, NIGHTLY_STOCK, buyLimit, eligibleStock, roomIsClosed, shopPrice } from '../shop';
+import {
+  ACT_STOCK, NIGHTLY_STOCK, boughtDealDefs, buyLimit, canFireNow, eligibleStock,
+  fireCostOf, ownedAdvisorDefs, roomIsClosed, shopPrice,
+} from '../shop';
 import { makeRng } from '../rng';
 import { applyEffects } from '../effects';
 import type { GameState } from '../types';
@@ -76,6 +79,42 @@ describe('shop content integrity', () => {
       expect(d.daily, `${d.id} is a ${d.kind} but has a daily rule`).toBeUndefined();
       expect(d.lossMult, `${d.id} is a ${d.kind} but has a lossMult`).toBeUndefined();
     }
+  });
+
+  it('only advisors carry fire terms', () => {
+    for (const d of SHOP_ITEMS) {
+      if (d.kind === 'advisor') continue;
+      expect(d.fireCost, `${d.id} is a ${d.kind} but has a fireCost`).toBeUndefined();
+      expect(d.fireEffects, `${d.id} is a ${d.kind} but has fireEffects`).toBeUndefined();
+      expect(d.endsCommitment, `${d.id} is a ${d.kind} but has endsCommitment`).toBeUndefined();
+    }
+  });
+
+  it('every advisor has a real cost or consequence to being let go', () => {
+    // The same everything-has-a-downside rule that governs buying an advisor
+    // extends to firing one: zero cost AND zero consequence would make
+    // hiring risk-free to walk back, which defeats the point of the price.
+    for (const d of SHOP_ITEMS.filter((x) => x.kind === 'advisor')) {
+      expect(
+        (d.fireCost ?? 0) > 0 || !!d.fireEffects,
+        `${d.id} can be fired for free with no consequence`,
+      ).toBe(true);
+    }
+  });
+
+  it('only deals carry a duration', () => {
+    for (const d of SHOP_ITEMS) {
+      if (d.kind === 'deal') continue;
+      expect(d.durationDays, `${d.id} is a ${d.kind} but has durationDays`).toBeUndefined();
+      expect(d.expireEffects, `${d.id} is a ${d.kind} but has expireEffects`).toBeUndefined();
+    }
+  });
+
+  it('at least one deal is permanent and at least one runs on a timer', () => {
+    const timed = SHOP_ITEMS.filter((d) => d.kind === 'deal' && d.durationDays);
+    const permanent = SHOP_ITEMS.filter((d) => d.kind === 'deal' && !d.durationDays);
+    expect(timed.length, 'no timed deals — "some, not all" needs at least one').toBeGreaterThan(0);
+    expect(permanent.length, 'no permanent deals').toBeGreaterThan(0);
   });
 });
 
@@ -290,5 +329,120 @@ describe('the Back Room', () => {
     const a = playToShop(191919, 1);
     const b = playToShop(191919, 1);
     expect(a.shopStock).toEqual(b.shopStock);
+  });
+});
+
+describe('firing an advisor', () => {
+  it('pays the fire cost, applies the consequence, ends the commitment, and drops it from owned', () => {
+    const s = playToShop(42, 1);
+    // 'fixer' has a fireCost, an endsCommitment, and fireEffects — exercises all three.
+    const withFixer: GameState = {
+      ...s,
+      owned: ['fixer'],
+      commitments: [{ id: 'cmt-fixer', label: 'The fixer', perDay: 0.25 }],
+    };
+    const cost = fireCostOf(SHOP_MAP.fixer);
+    expect(cost).toBeGreaterThan(0);
+
+    const before = withFixer.stats.treasury;
+    const after = fireAdvisor(withFixer, 'fixer');
+
+    expect(after.owned).not.toContain('fixer');
+    expect(after.commitments.some((c) => c.id === 'cmt-fixer')).toBe(false);
+    expect(after.stats.treasury).toBeCloseTo(before - cost, 1);
+    // the figurative cost (fireEffects: hidden.leak +3) actually landed
+    expect(after.hidden.leak).toBeGreaterThan(withFixer.hidden.leak);
+    expect(after.log.some((l) => l.kind === 'purchase' && l.title.includes('Fixer'))).toBe(true);
+  });
+
+  it('refuses to fire someone you cannot afford to let go', () => {
+    const s = playToShop(42, 1);
+    const broke: GameState = { ...s, owned: ['fixer'], stats: { ...s.stats, treasury: 0 } };
+    expect(canFireNow(broke, SHOP_MAP.fixer)).toBe(false);
+    const after = fireAdvisor(broke, 'fixer');
+    expect(after.owned).toContain('fixer');
+    expect(after.stats.treasury).toBe(0);
+  });
+
+  it('does nothing for an item you do not own, or one that is not an advisor', () => {
+    const s = playToShop(42, 1);
+    const untouched = fireAdvisor(s, 'fixer'); // not owned
+    expect(untouched.owned).toEqual(s.owned);
+
+    const withPolicy: GameState = { ...s, owned: ['emergency-powers'] };
+    const stillOwned = fireAdvisor(withPolicy, 'emergency-powers'); // a policy, not an advisor
+    expect(stillOwned.owned).toContain('emergency-powers');
+  });
+
+  it('a free-to-fire advisor still costs nothing in money but still lands its consequence', () => {
+    const s = playToShop(42, 1);
+    const withLiaison: GameState = { ...s, owned: ['garrison-liaison'] };
+    expect(fireCostOf(SHOP_MAP['garrison-liaison'])).toBe(0);
+
+    const before = withLiaison.stats.treasury;
+    const after = fireAdvisor(withLiaison, 'garrison-liaison');
+    expect(after.stats.treasury).toBe(before);
+    expect(after.owned).not.toContain('garrison-liaison');
+    expect(after.factions.staff.loyalty).toBeLessThan(withLiaison.factions.staff.loyalty);
+  });
+
+  it('ownedAdvisorDefs only returns advisors, never policies or favours', () => {
+    const s = playToShop(42, 1);
+    const mixed: GameState = { ...s, owned: ['fixer', 'emergency-powers'], heldFavours: ['quiet-word'] };
+    const advisors = ownedAdvisorDefs(mixed);
+    expect(advisors.map((d) => d.id)).toEqual(['fixer']);
+  });
+});
+
+describe('timed deals', () => {
+  it('starts a clock when a durationDays deal is bought, and reports it as active', () => {
+    const s = playToShop(42, 1);
+    const seeded: GameState = { ...s, shopStock: ['three-judges'], shopBought: [], flags: { ...s.flags, judgesBought: 0 } };
+    const after = buyShopItem(seeded, 'three-judges');
+
+    expect(after.activeDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
+    const entry = boughtDealDefs(after).find((e) => e.def.id === 'three-judges');
+    expect(entry?.status).toBe('active');
+    expect(entry?.daysLeft).toBe(5);
+  });
+
+  it('does not start a clock for a permanent deal', () => {
+    const s = playToShop(42, 1);
+    const seeded: GameState = { ...s, shopStock: ['ilvet-levy'], shopBought: [], flags: { ...s.flags, ilvetLevy: 0 } };
+    const after = buyShopItem(seeded, 'ilvet-levy');
+    expect(after.activeDeals).toEqual([]);
+    const entry = boughtDealDefs(after).find((e) => e.def.id === 'ilvet-levy');
+    expect(entry?.status).toBe('ongoing');
+  });
+
+  it('expires after durationDays ticks and never negative-counts', () => {
+    // Buy the deal, then play forward real days (each one ticks dayUpkeep
+    // exactly once) until the clock the purchase started runs out.
+    let s = playToShop(42, 1);
+    s = { ...s, shopStock: ['three-judges'], shopBought: [], flags: { ...s.flags, judgesBought: 0 } };
+    s = buyShopItem(s, 'three-judges');
+    expect(s.activeDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
+    const scandalAtPurchase = s.hidden.scandal;
+
+    s = leaveShop(s); // advances to the next day, running dayUpkeep once (daysLeft -> 4)
+    // A day is many transitions (several cards, alerts, night, shop), so the
+    // guard here bounds total transitions across the whole walk, not days.
+    let guard = 0;
+    while (s.activeDeals.length > 0 && s.phase !== 'ended' && guard++ < 800) {
+      if (s.phase === 'briefing') s = beginStages(s);
+      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
+      else if (s.phase === 'resolve') s = continueAfterResolve(s);
+      else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+      else if (s.phase === 'night') s = openShop(s);
+      else if (s.phase === 'shop') s = leaveShop(s);
+      else break;
+    }
+    expect(guard).toBeLessThan(800);
+    expect(s.activeDeals).toEqual([]);
+    // expireEffects (hidden.scandal +6) landed exactly once
+    const entry = boughtDealDefs(s).find((e) => e.def.id === 'three-judges');
+    expect(entry?.status).toBe('expired');
+    expect(s.hidden.scandal).toBeGreaterThanOrEqual(scandalAtPurchase);
+    expect(s.log.some((l) => l.title.includes('Three Judges') && l.kind === 'consequence')).toBe(true);
   });
 });

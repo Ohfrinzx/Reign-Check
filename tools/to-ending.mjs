@@ -22,9 +22,12 @@ for (let i = 0; i < 400; i++) {
   // the Back Room: take the most aggressive thing on offer, then leave
   const buy = page.locator('.shop .offer .btn-primary:not([disabled])');
   if (await buy.count()) { await buy.last().click(); await page.waitForTimeout(110); continue; }
+  // Fullscreen shop has no strap — its own "Leave" button is the only way out.
+  const shopLeave = page.locator('.shop-foot .btn-primary');
+  if (await shopLeave.count()) { await shopLeave.click(); await page.waitForTimeout(110); continue; }
   const opts = page.locator('.stage-col .doc .opt:not([disabled])');
   if (await opts.count()) { await opts.last().click(); await page.waitForTimeout(90); continue; }
-  // briefing / night / shop all drive from the always-visible top strap
+  // briefing / night all drive from the always-visible top strap
   if (await page.locator('.strap-action').count()) { await page.locator('.strap-action').click(); await page.waitForTimeout(110); continue; }
   break;
 }

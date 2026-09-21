@@ -1,10 +1,11 @@
 # PROJECT STATUS — Dictator Sandbox
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
-> Last updated: Phase 2's first slice (§4.1, run structure) is BUILT and has
-> been through one full round of owner playtesting + fixes. Still iterating
-> on this slice — do not start §4.2 (the Back Room shop) until the owner
-> says this one is done. See the block immediately below.
+> Last updated: §4.2 (the Back Room shop) chunk 1 is BUILT — the shop itself,
+> its dark fullscreen presentation, and the "Advisors & Deals" management
+> screen — and awaiting the owner's playtest. Do not start §4.2 chunk 2, §4.3
+> (mandates), §4.4 (the run deck), or §4.5 (meta-progression) until the owner
+> says this slice is done. See the block immediately below.
 
 > ## ▶ WHERE WE STOPPED — READ THIS FIRST
 >
@@ -49,28 +50,58 @@
 >
 > **The Back Room is DARK — the only dark screen in the game.** Owner request
 > after the first build: *"I really want it to feel as if you are some place
-> else."* Entering the shop swaps the whole viewport (page, strap, rail, card)
-> to a dark version of the same Poster system. **This is NOT the dark desk
-> skin rejected in Phase 1** — that was different type proposed as the game's
-> default. Dark here is the exception that makes the rest read as daylight,
-> so do not darken anything else without asking. `.app.dark` in `index.css`
-> does it as a token swap; the masthead keeps its own `--bar` tokens so the
-> nameplate and ledger are the one thing that never changes. Verified with a
-> computed-style contrast probe in a real browser, not just screenshots — see
-> `docs/DESIGN_V2.md` §4.2 for the `color`-inheritance trap it caught.
+> else."* Entering the shop swaps the whole viewport to a dark version of the
+> same Poster system. **This is NOT the dark desk skin rejected in Phase 1**
+> — that was different type proposed as the game's default. Dark here is the
+> exception that makes the rest read as daylight, so do not darken anything
+> else without asking. `.app.dark` in `index.css` does it as a token swap.
+> Verified with a computed-style contrast probe in a real browser, not just
+> screenshots — see `docs/DESIGN_V2.md` §4.2 for the `color`-inheritance trap
+> it caught.
+>
+> **The Back Room is also FULLSCREEN — owner follow-up on the same request.**
+> "The only thing on the screen is the shop": entering it now removes the
+> masthead, strap and rail entirely, not just visually — `App.tsx` returns a
+> separate `<div className="app dark shop-full">` early for `game.phase ===
+> 'shop'`, with nothing in it but `<ShopScreen>`. (This also makes the earlier
+> note about the masthead's `--bar` tokens moot for the shop specifically —
+> the masthead simply isn't there anymore during it.) **The shop's own
+> "Leave" button (`.shop-foot .btn-primary`) is now the only way out** — there
+> is no `.strap-action` during the shop phase at all. All three Playwright
+> tools broke on this exact point on first run of this round (they'd fall
+> through to `.strap-action` and find nothing) and needed the same one-line
+> fix each; any new tool that drives the shop needs to know this.
+>
+> **New: "Advisors & Deals" — a screen opened from the masthead during the
+> main game**, showing everything the Back Room has sold you. Advisors can
+> be FIRED here — `fireAdvisor()` in `engine.ts`, costing whatever
+> `fireCost`/`fireEffects`/`endsCommitment` `content/shop.ts` gives that
+> advisor (every advisor has *some* real cost or consequence to letting them
+> go, same everything-has-a-downside rule as buying one — enforced by a test).
+> Deals just report themselves: most are "Ongoing" (permanent); a new
+> mechanism, `GameState.activeDeals`, lets a deal instead run on a
+> day-to-day timer (`durationDays`/`expireEffects` on `ShopItemDef`), ticked
+> in `dayUpkeep()` next to commitments/projects. Only one item uses it so far
+> — `three-judges`, 5 days, then a scandal bump as the arrangement becomes
+> public — proving the mechanism works; more timed deals is future content,
+> not a mechanics gap. `SAVE_VERSION` bumped 4→5 for `activeDeals`.
 >
 > **Also fixed in passing:** `tools/verify.mjs`, `tools/to-ending.mjs` and
 > `tools/playthrough.mjs` had been stale since the Poster rebuild (they still
 > looked for `Take Office`, `.card`, `.action-bar`, `.dossier`, `.daychip` and
 > the removed night-sheet button, so none of them could complete a run). All
-> three now run clean, handle the shop step, and are back to being a usable
-> merge gate.
+> three now run clean, handle the shop step (including the fullscreen/
+> `.shop-foot` change above), and are back to being a usable merge gate.
 >
-> **Verified before merge:** 32/32 vitest tests pass (was 13, +19 shop tests),
+> **Verified before merge:** 44/44 vitest tests pass (was 32, +12: firing
+> advisors, timed deal start/tick/expiry, content-integrity checks that every
+> advisor has a real fire cost/consequence and that duration is deal-only),
 > `npm run build` clean, and all three Playwright tools run at 1366×700 with
-> zero console/page errors — a full 18-day run visiting 17 shops and making 12
-> purchases, an aggressive run to a non-survival ending, and a save/reload
-> resume across the version bump.
+> zero console/page errors — a full 18-day run visiting 17 shops, an
+> aggressive run to a non-survival ending, a save/reload resume across the
+> version bump, plus two targeted browser checks confirming the shop screen
+> has literally nothing else on it and that firing an advisor from "Advisors
+> & Deals" removes it live.
 >
 > ---
 >

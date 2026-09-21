@@ -16,8 +16,8 @@ import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
 import type { ShopItemDef } from './content/shop';
 import {
-  buyLimit, dailyFromOwned, isActRoom, rememberOffers, rollStock, roomIsClosed,
-  shopOpensTonight, shopPrice,
+  buyLimit, canFireNow, dailyFromOwned, fireCostOf, isActRoom, rememberOffers,
+  rollStock, roomIsClosed, shopOpensTonight, shopPrice, startActiveDeal, tickActiveDeals,
 } from './shop';
 
 /* ------------------------------------------------------------- registries */
@@ -187,6 +187,19 @@ function dayUpkeep(s: GameState, rng: Rng) {
       s.commitments = s.commitments.filter((x) => x.id !== c.id);
       notes.push(`Commitment ended: ${c.label}.`);
     }
+  }
+
+  // --- timed Back Room deals run out on their own schedule too. Most deals
+  // are permanent; this only fires for the few with a durationDays clock.
+  for (const def of tickActiveDeals(s)) {
+    if (def.expireEffects) {
+      const delta = applyEffects(s, def.expireEffects, rng, `shop:expire:${def.id}`);
+      s.log.push({
+        day: s.day, kind: 'consequence', title: `${def.name}: the arrangement is over`,
+        text: def.downside ?? 'It has run its course.', tone: toneFromDelta(delta),
+      });
+    }
+    notes.push(`${def.name} ran out.`);
   }
 
   // --- advisors and policies you bought in the Back Room do their work.
@@ -578,6 +591,7 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
 
   if (def.kind === 'advisor' || def.kind === 'policy') s.owned.push(def.id);
   if (def.kind === 'favour') s.heldFavours.push(def.id);
+  startActiveDeal(s, def);
 
   s.shopBought.push(def.id);
   s.shopBuysTonight += 1;
@@ -633,6 +647,46 @@ export function useFavour(prev: GameState, itemId: string): GameState {
     optionLabel: def.use.label,
     deltas,
   };
+  return s;
+}
+
+/**
+ * Let an advisor go. Available on any day, not only inside the Back Room —
+ * see the "Advisors & Deals" screen App.tsx opens from the masthead. Costs
+ * whatever `fireCost` says (a literal bribe, sometimes zero) plus
+ * `fireEffects` (the figurative cost), and cancels the commitment their
+ * hiring created, if any. Policies and favours are not fireable — only
+ * advisors, per the design.
+ */
+export function fireAdvisor(prev: GameState, itemId: string): GameState {
+  const s = clone(prev);
+  if (!s.owned.includes(itemId)) return s;
+  const def = SHOP_MAP[itemId];
+  if (!def || def.kind !== 'advisor') return s;
+  if (!canFireNow(s, def)) return s;
+
+  const cost = fireCostOf(def);
+  if (cost > 0) {
+    withRng(s, (rng) => applyEffects(s, { stats: { treasury: -cost } }, rng, `fire:${def.id}`));
+  }
+  if (def.fireEffects) {
+    withRng(s, (rng) => applyEffects(s, def.fireEffects, rng, `fire:${def.id}`));
+  }
+
+  s.owned = s.owned.filter((id) => id !== itemId);
+  if (def.endsCommitment) {
+    s.commitments = s.commitments.filter((c) => c.id !== def.endsCommitment);
+  }
+
+  s.log.push({
+    day: s.day,
+    kind: 'purchase',
+    title: `Let go: ${def.name}`,
+    text: cost > 0
+      ? `Paid $${cost.toFixed(1)}B to see them out quietly.`
+      : 'They left without being paid to go.',
+    tone: 'mixed',
+  });
   return s;
 }
 
