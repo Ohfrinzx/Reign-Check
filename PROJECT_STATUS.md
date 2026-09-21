@@ -1,5 +1,33 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
+## ▶ WHERE WE STOPPED — 2026-09-21 (later session, Phase 2 approved complete)
+
+**PHASE 2 IS PLAYTESTED AND OWNER-APPROVED, IN FULL.** Owner, verbatim:
+*"Playtest good, ready for next slice. Won't be doing it now. Just update
+the current documentation for the next agent. Nothing more."* §4.5's both
+steps (the cross-run record, and real unlock conditions with the Unlocks
+screen) are approved alongside everything else — §4.1 through §4.5 are
+now every one of them built, playtested, and approved. This turn was
+documentation-only: no code changed, nothing was built. The owner has
+**not** given the go-ahead to start Phase 3 — only confirmed Phase 2 is
+done. Whoever picks this up next should wait for that explicit instruction
+before starting faction demands, character-driven events, crisis chains,
+or the balance pass (`docs/DESIGN_V2.md` §9), same staged-slice discipline
+as every step of Phase 2.
+
+**One concrete thing already on record for whenever Phase 3's balance pass
+starts:** the owner played enough to notice you can win by picking the
+same option repeatedly with little real risk — matches the balance
+probe's own measurement (`npm test` → `balance.test.ts`): the "always
+pick the first option" policy reaches day 18 in 100% of runs, only ever
+ending in `survival`/`noConfidence`. Minigames (Phase 5) would not fix
+this — it needs the Phase 3 balance pass specifically (known limitation
+#2 in §5 below).
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-21 (later session, meta-progression step 2 — ALL OF PHASE 2 NOW BUILT)
 
 **§4.5 (META-PROGRESSION), STEP 2 IS BUILT, AWAITING OWNER PLAYTEST — THIS
@@ -686,13 +714,13 @@ Playwright scripts for real-browser playthroughs.
 **PLAYTEST ROUND 3 (the actual Poster/Broadsheet build): ✅ PASSED.** *"Ok
 everything seems to run and look good."* **PHASE 1: ✅ DECLARED COMPLETE BY
 THE OWNER.**
-**PHASE 2 — THE ROGUELIKE LAYER: 🟡 FULLY BUILT, AWAITING FINAL PLAYTEST.**
+**PHASE 2 — THE ROGUELIKE LAYER: ✅ COMPLETE, PLAYTESTED, OWNER-APPROVED.**
 §4.1 (acts + confidence vote), §4.2 (the Back Room shop, both chunks), §4.3
-(mandates), and §4.4 (the run deck) are all **BUILT AND OWNER-APPROVED**.
-§4.5 (meta-progression) — both step 1 (the cross-run record) and step 2
-(real unlock conditions plus the Unlocks UI) — is **BUILT, awaiting owner
-playtest**. Once played and approved, all of Phase 2 is done — see the
-"WHERE WE STOPPED" block above, `AGENTS.md`, and `CLAUDE.md`.
+(mandates), §4.4 (the run deck), and §4.5 (meta-progression, both steps —
+the cross-run record and real unlock conditions with the Unlocks UI) are
+all **BUILT, PLAYTESTED, AND OWNER-APPROVED**. Nothing in Phase 2 remains.
+Phase 3 has not been given its own go-ahead yet — see the "WHERE WE
+STOPPED" block above, `AGENTS.md`, and `CLAUDE.md`.
 
 ### Playtest round 2 — what was reported, and what was done
 
@@ -957,17 +985,17 @@ of this file.
 
 ## 4. What is NOT built yet
 
-**Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains
-unbuilt.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3), the run
-deck (§4.4), and meta-progression (§4.5, both steps) are all built. §4.1–
-§4.4 are playtested and owner-approved; §4.5 is built and awaiting its
-playtest — see the "WHERE WE STOPPED" block at the top of this file. Once
-that playtest lands, Phase 2 is entirely done and the next open question is
-whether to start Phase 3 (below).
+**Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains unbuilt
+or unplaytested.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),
+the run deck (§4.4), and meta-progression (§4.5, both steps) are all built,
+playtested, and owner-approved — see the "WHERE WE STOPPED" block at the
+top of this file. Phase 2 is entirely done. The open question is whether
+to start Phase 3 (below) — genuinely open, since Phase 2 being done is not
+itself the go-ahead for it.
 
-Everything else below is Phase 3, 4, or 5 per `docs/DESIGN_V2.md` §9 — all
-genuinely deferred until Phase 2 ships and is playtested, and all still need
-to be asked about before starting:
+Everything below is Phase 3, 4, or 5 per `docs/DESIGN_V2.md` §9 — Phase 2
+being done and playtested clears the way for Phase 3 to start, but it
+still needs to be explicitly asked for, same as every other item below:
 
 **Phase 3 — content & systems depth (after Phase 2):**
 - **Faction demands as a live mechanic.** `FactionState.demand` and the
@@ -1023,10 +1051,11 @@ to be asked about before starting:
 
 ## 6. Recommended next task
 
-**§4.1, §4.2 (both chunks), §4.3, and §4.4 are all built and
-OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. §4.5 (both
-steps) is built, awaiting playtest — this is all of Phase 2 built. Do
-this, in order:**
+**All of Phase 2 (§4.1–§4.5, every step) is built, playtested, and
+OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Owner,
+verbatim: *"Playtest good, ready for next slice. Won't be doing it now."*
+That is not yet a go-ahead for Phase 3 — it confirms Phase 2 is done and
+asks for documentation only. Status of each piece:**
 
 1. ✅ **DONE, APPROVED.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3
    acts of 6 days each (18 total), ending in a confidence vote checked
@@ -1042,29 +1071,30 @@ this, in order:**
    `runDeck`/`bannedCards`, 8 new deck-affecting shop policies, 20 new
    standard cards, 5 new alerts. Owner-played and bug-checked by a
    ChatGPT-based agent.
-5. 🟡 **BUILT, AWAITING PLAYTEST.** §4.5 meta-progression, step 1
-   (2026-09-21, later session): `src/game/meta.ts`, the cross-run record,
-   the title screen's one-line summary.
-6. 🟡 **BUILT, AWAITING PLAYTEST.** §4.5 meta-progression, step 2 (same
-   session): real unlock conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS` in
-   `meta.ts`) actually gate two mandates and two rare shop items now, plus
-   a new Unlocks screen (`Progress.tsx`) reachable from the title screen
-   and from a tab inside "Advisors & Deals" — see the "WHERE WE STOPPED"
-   block at the top for the full detail. **This was the last piece of
-   Phase 2** — once it and step 1 are played and approved, Phase 2
-   (§4.1–§4.5) is entirely done.
+5. ✅ **DONE, APPROVED.** §4.5 meta-progression, step 1 (2026-09-21, later
+   session): `src/game/meta.ts`, the cross-run record, the title screen's
+   one-line summary.
+6. ✅ **DONE, APPROVED.** §4.5 meta-progression, step 2 (same session): real
+   unlock conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS` in `meta.ts`)
+   actually gate two mandates and two rare shop items now, plus a new
+   Unlocks screen (`Progress.tsx`) reachable from the title screen and from
+   a tab inside "Advisors & Deals" — see the "WHERE WE STOPPED" block at
+   the top for the full detail. **This was the last piece of Phase 2 — it
+   is now played and approved, so Phase 2 (§4.1–§4.5) is entirely done.**
 7. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
    is not needed unless a future note specifically asks for it again.
-8. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
+8. **Phase 2 (§4.1–§4.5) has shipped and been playtested — Phase 3 still
+   needs its own explicit go-ahead before starting**
    (`docs/DESIGN_V2.md` §9): faction demands as a live mechanic (Milestone
    2), character-driven events (Milestone 3), crisis chains (Milestone 4),
    then a balance pass on the difficulty asymmetry and coup-ending rarity
-   (limitations #2/#3) now that the shop economy and 18-day acts have
-   changed the curve. Do not start Phase 3 before Phase 2 is done — building
-   these against the old flat-day model would be work that has to be redone
-   against the act structure.
+   (limitations #2/#3) — now sharpened by the owner's own playtest note
+   above about spamming a single option to win — now that the shop economy
+   and 18-day acts have changed the curve. The owner explicitly said "won't
+   be doing it now" in this same turn; wait for a clear go-ahead rather than
+   treating Phase 2's completion as one.
 
 **Backlog — Phase 4/5 items, not scheduled, see `docs/DESIGN_V2.md` §9–10
 for the full reasoning:**

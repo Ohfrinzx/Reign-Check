@@ -41,7 +41,7 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 2 — §4.1–§4.4 APPROVED; §4.5 (BOTH STEPS) BUILT, AWAITING PLAYTEST — PHASE 2 FULLY BUILT
+## PHASE 2 — §4.1–§4.5 (ALL STEPS) OWNER-APPROVED — PHASE 2 COMPLETE
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
@@ -67,8 +67,11 @@ quota — 20 new standard cards (`content/cards3.ts`) and 5 new alerts. See
 the "§4.4, the run deck" section below for the full detail. `SAVE_VERSION`
 is 8; prior saves reset.
 
-**§4.5 (meta-progression) — BOTH STEPS BUILT, awaiting owner playtest (same
-later session) — this completes all of Phase 2.** Step 1: the owner asked
+**§4.5 (meta-progression) — BOTH STEPS PLAYTESTED AND OWNER-APPROVED (same
+later session) — this completes all of Phase 2.** Owner, verbatim:
+*"Playtest good, ready for next slice."* §4.1 through §4.5 are now every
+one of them built, playtested, and approved — Phase 2 is done. Step 1: the
+owner asked
 what meta-progression would be, then said to go ahead with the design
 doc's own suggested de-risking approach — ship the cross-run record first,
 nothing actually gated. New file `src/game/meta.ts` — `MetaProgress`/
@@ -207,10 +210,14 @@ front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
 unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
-**§4.1, §4.2, §4.3, §4.4, and the day counter fix are all owner-approved.
-§4.5 (both steps — the cross-run record, and now real unlock gating with
-its own UI) is built, awaiting playtest — this is all of Phase 2 built.**
-See the current `PROJECT_STATUS.md` handoff and `docs/REVIEW_2026_09_21.md`.
+**§4.1 through §4.5 (both meta-progression steps — the cross-run record and
+real unlock gating with its own UI) are all owner-approved. Phase 2 is
+entirely done.** Owner, verbatim: *"Playtest good, ready for next slice.
+Won't be doing it now."* That is confirmation the last slice is approved,
+not yet an instruction to start Phase 3 — its own explicit go-ahead is
+still needed before any Phase 3 work begins (see "What is deliberately NOT
+built" below). See the current `PROJECT_STATUS.md` handoff and
+`docs/REVIEW_2026_09_21.md`.
 
 **§4.4, the run deck — BUILT AND OWNER-APPROVED.** `GameState.runDeck:
 string[]` and `GameState.bannedCards: string[]`, plus a new
@@ -257,7 +264,7 @@ and all four Playwright tools (`verify.mjs`, `to-ending.mjs`,
 at 1366×700 with zero page errors; `playthrough.mjs` shows several of the
 new cards and shop items surfacing naturally in a real run.
 
-**§4.5, meta-progression, step 1 — BUILT AND AWAITING PLAYTEST.** New file
+**§4.5, meta-progression, step 1 — PLAYTESTED AND OWNER-APPROVED.** New file
 `src/game/meta.ts`: `MetaProgress { version; runs: RunRecord[] }`, its own
 localStorage key (`dictator-sandbox:legacy:v1`) and its own version
 (`META_VERSION`) — deliberately NOT `GameState`/`SAVE_VERSION`, so a save
@@ -288,7 +295,7 @@ title" is clicked (not "Try again", which skips the title screen), the
 exact text survives a full page reload, and the title screen still fits at
 1366×700 with zero page errors. Production build clean.
 
-**§4.5, meta-progression, step 2 — BUILT AND AWAITING PLAYTEST (same
+**§4.5, meta-progression, step 2 — PLAYTESTED AND OWNER-APPROVED (same
 session).** The owner asked what meta-progression would be; after the
 answer, asked where the unlock view should live: *"Add it to a separate
 sub-menu within the advisors/deals tab along with a button on the menu
@@ -562,12 +569,14 @@ AGENTS.md                 shared, model-agnostic knowledge base for every
 ## What is deliberately NOT built
 
 **The roguelike layer (acts/shop/mandates/run deck/meta-progression,
-`docs/DESIGN_V2.md` §4) IS greenlit — see "PHASE 2" above.** Build it in the
-staged order §4/§6 lay out, checking back in after each shippable slice,
-same as everything else in this project so far.
+`docs/DESIGN_V2.md` §4) is DONE — see "PHASE 2" above.** All five sub-steps
+(§4.1–§4.5) are built, playtested, and owner-approved. Phase 2 itself needs
+no further work unless a future playtest turns something up.
 
-Everything else is genuinely deferred and needs an explicit go-ahead before
-starting — full detail and ordering in `docs/DESIGN_V2.md` §9 (Phases 3–5):
+Everything below is genuinely deferred and needs an explicit go-ahead
+before starting — the owner's "ready for next slice, won't be doing it
+now" (2026-09-21) confirms Phase 2's approval, it is not that go-ahead for
+Phase 3. Full detail and ordering in `docs/DESIGN_V2.md` §9 (Phases 3–5):
 faction demands as a live mechanic, character-initiated events, crisis
 chains, and a balance pass (Phase 3, comes after Phase 2 is done and
 playtested); mobile/iOS (Phase 4, not scheduled — see §10 for the

@@ -44,8 +44,12 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 owner-approved.
 
 **Phase 2** (the roguelike layer: acts, the Back Room shop, mandates, a run
-deck, meta-progression — full spec in `docs/DESIGN_V2.md` §4) is greenlit and
-in progress:
+deck, meta-progression — full spec in `docs/DESIGN_V2.md` §4) is **COMPLETE
+— all five sub-steps built, playtested, and owner-approved** (2026-09-21).
+Owner, verbatim: *"Playtest good, ready for next slice. Won't be doing it
+now."* That is Phase 2's final approval, not yet a go-ahead to start
+Phase 3 — see §3's staged-slice discipline and the "not built yet" note
+below §4.5.
 
 - **§4.1, run structure** (3 acts of 6 days each, ending in a confidence
   vote) — **BUILT AND OWNER-APPROVED.**
@@ -71,7 +75,7 @@ in progress:
   alerts (appended to `content/alerts.ts`, filling in the previously-unused
   `scandal`/`corruption`/`cult` drivers). `SAVE_VERSION` is **8**;
   version-7 in-progress runs reset.
-- **§4.5 (meta-progression) — BOTH STEPS BUILT, awaiting owner playtest
+- **§4.5 (meta-progression) — BOTH STEPS PLAYTESTED AND OWNER-APPROVED
   (2026-09-21, later session) — this completes all of Phase 2.** Step 1
   shipped the cross-run record: `src/game/meta.ts` (new file) —
   `MetaProgress`/`RunRecord`, its own localStorage key
@@ -113,11 +117,13 @@ mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s
 is the first thing to check at the start of any session.
 
 **What is deliberately NOT built**, and needs an explicit owner go-ahead
-before starting (full detail in `docs/DESIGN_V2.md` §9): faction demands as
-a live mechanic, character-initiated events, crisis chains, and a balance
-pass (Phase 3, after Phase 2 is done and playtested); mobile/iOS (Phase 4,
-not scheduled — see §10 for the guardrails to keep it possible without doing
-the work now); mini-games, sound, and remaining ending types (Phase 5).
+before starting (full detail in `docs/DESIGN_V2.md` §9) — Phase 2 being
+done and approved is not itself that go-ahead: faction demands as a live
+mechanic, character-initiated events, crisis chains, and a balance pass
+(Phase 3 — now unblocked, since Phase 2 is done and playtested, but still
+not started); mobile/iOS (Phase 4, not scheduled — see §10 for the
+guardrails to keep it possible without doing the work now); mini-games,
+sound, and remaining ending types (Phase 5).
 
 ## 3. The standing development discipline
 

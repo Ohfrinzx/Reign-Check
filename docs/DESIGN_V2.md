@@ -1,14 +1,18 @@
 # Design V2 — simplification and the roguelike turn
 
-**Current status (2026-09-21, later session): Phase 1 and Phase 2
-§4.1–§4.4 are all OWNER-APPROVED. §4.5 (meta-progression) — BOTH steps,
-the cross-run record and real unlock conditions with their own UI — is
-BUILT, awaiting owner playtest. Once played, all of Phase 2 is done.**
-Each slice still required its own feedback before the next started while
-building — approval of step 1 was not itself the go-ahead for step 2; the
-owner gave that go-ahead explicitly, in the same session, after asking
-what meta-progression would be and specifying where its UI should live.
-See `PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
+**Current status (2026-09-21, later session): Phase 1 and ALL of Phase 2
+(§4.1–§4.5, every step) are OWNER-APPROVED. Owner, verbatim: "Playtest
+good, ready for next slice. Won't be doing it now. Just update the
+current documentation for the next agent. Nothing more." §4.5
+(meta-progression) — both the cross-run record and real unlock conditions
+with their own UI — is now played and approved alongside everything
+else. This confirms Phase 2 is done; it is NOT a go-ahead to start Phase
+3 — that needs its own explicit instruction.** Each slice still required
+its own feedback before the next started while building — approval of
+step 1 was not itself the go-ahead for step 2; the owner gave that
+go-ahead explicitly, in the same session, after asking what
+meta-progression would be and specifying where its UI should live. See
+`PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
 Historical implementation notes below describe earlier checkpoints.
 
 Decisions made by the owner, in order:
@@ -568,7 +572,7 @@ frequency in the balance probe (`avgAlerts` 8.5→10.9, `reachedMax`
 40%→52% under the random policy) — flagged, not tuned blind, same as
 mandates' balance was left for playtesting rather than guessed at.
 
-### 4.5 Meta-progression — BOTH STEPS BUILT AND AWAITING PLAYTEST (last piece of Phase 2)
+### 4.5 Meta-progression — BOTH STEPS PLAYTESTED AND OWNER-APPROVED (last piece of Phase 2 — Phase 2 now complete)
 
 Completed runs unlock mandates, advisors and cards for future runs. Small,
 persistent, stored in `localStorage` next to the save (a separate key —
@@ -892,11 +896,12 @@ Suggested order, each step shippable and playtestable on its own:
 5. ✅ **DONE, OWNER-APPROVED.** Mandates (§4.3), six origins.
 6. ✅ **DONE, OWNER-APPROVED.** Run deck (§4.4) — `runDeck`/`bannedCards`,
    8 deck-affecting shop policies, 20 new standard cards, 5 new alerts.
-7. 🟡 **BOTH STEPS BUILT, AWAITING PLAYTEST.** Meta-progression (§4.5) —
-   step 1 is the cross-run record (`meta.ts`, `TitleRecord`); step 2 is
-   real unlock conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS`) plus the
-   Unlocks screen (`Progress.tsx`). This was the last piece of Phase 2 —
-   once played, §4.1–§4.5 are entirely done.
+7. ✅ **DONE, OWNER-APPROVED.** Meta-progression (§4.5) — step 1 is the
+   cross-run record (`meta.ts`, `TitleRecord`); step 2 is real unlock
+   conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS`) plus the Unlocks screen
+   (`Progress.tsx`). This was the last piece of Phase 2 — it is now played
+   and approved, so §4.1–§4.5 are entirely done. Phase 3 still needs its
+   own explicit go-ahead before starting.
 
 Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
 — the owner has now played that build and confirmed it. Steps 4–7 are the
