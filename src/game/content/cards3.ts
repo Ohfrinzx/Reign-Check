@@ -840,7 +840,7 @@ export const CARDS3: CardDef[] = [
   stages: ['government', 'development'],
   base: 6,
   minDay: 5,
-  weight: (s) => 5 + Math.max(0, s.stats.treasury) * 0 + s.hidden.fiscal * 0.06,
+  weight: (s) => 5 + s.hidden.fiscal * 0.06,
   body:
     'Ilvet Instruments wants the Free Zone\'s first casino license. Adamek says it will draw the kind of tourist spending the port fees never touch. Grebs says it will draw the kind of scrutiny the Free Zone has spent thirty years avoiding.\n\nThey are both right.',
   flavor: 'Eleven square kilometres of banks, shell companies and casinos.',

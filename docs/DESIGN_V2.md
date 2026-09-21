@@ -561,7 +561,7 @@ Owner-played and bug-checked by a ChatGPT-based agent; approved. 93 tests
 pass (up from 85), production build clean, all four Playwright tools green
 at 1366×700 with zero page errors. `SAVE_VERSION` bumped 7→8 for
 `runDeck`/`bannedCards`; prior in-progress runs reset. One balance signal
-worth watching in further play: the 6 new alerts measurably raised alert
+worth watching in further play: the 5 new alerts measurably raised alert
 frequency in the balance probe (`avgAlerts` 8.5→10.9, `reachedMax`
 40%→52% under the random policy) — flagged, not tuned blind, same as
 mandates' balance was left for playtesting rather than guessed at.
@@ -790,7 +790,7 @@ Suggested order, each step shippable and playtestable on its own:
    Back Room chunks (§4.2), including management, caps and day-in-act display.
 5. ✅ **DONE, OWNER-APPROVED.** Mandates (§4.3), six origins.
 6. ✅ **DONE, OWNER-APPROVED.** Run deck (§4.4) — `runDeck`/`bannedCards`,
-   8 deck-affecting shop policies, 20 new standard cards, 6 new alerts.
+   8 deck-affecting shop policies, 20 new standard cards, 5 new alerts.
 7. ⬜ **NOT STARTED.** Meta-progression (§4.5), after owner feedback and
    its own explicit instruction — the only piece of Phase 2 left.
 

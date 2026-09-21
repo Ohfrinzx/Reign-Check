@@ -43,7 +43,7 @@ slice's content quota is authored as part of building it:**
   from the existing pool so the effect is honest — buy one and that
   situation really does come back more, or stops coming back at all.
 - **20 new standard cards** in a new `content/cards3.ts` (same authoring
-  rules as `cards.ts`/`cards2.ts`), and **6 new alerts** appended to
+  rules as `cards.ts`/`cards2.ts`), and **5 new alerts** appended to
   `content/alerts.ts` — this was also the content-volume top-up the design
   doc calls out (known limitation #1), and it filled in three drivers that
   had no alert at all before now: `scandal`, `corruption`, and `cult`
@@ -64,7 +64,7 @@ and shop items surfacing naturally in a real run.
 
 **Balance note, unmeasured before now:** the balance probe's `avgAlerts`
 moved from 8.5 to 10.9 and `reachedMax` from 40% to 52% under the random
-policy, from the 6 new alerts adding pressure to the pool. Flagging this
+policy, from the 5 new alerts adding pressure to the pool. Flagging this
 rather than tuning it blind — as with mandates, balance is a playtest
 question, not one passing tests resolves.
 
@@ -74,6 +74,18 @@ Wait for the owner's explicit go-ahead to start it — per
 everything unlocked by default first (de-risking the slice the same way the
 display-layer cut de-risked Phase 1), then layering in real unlock
 conditions as a follow-up once that base loop is playtested.
+
+**Post-merge review (Codex, 2026-09-21):** the full existing suite passed,
+then adversarial review found one run-deck state invariant the original tests
+missed: applying `deck.add` after a permanent ban put an undrawable, dead copy
+back into `runDeck`. `applyEffects()` now ignores additions whose ids are
+already in `bannedCards`, with a regression covering remove-then-add order.
+The shop integrity suite now really verifies that every deck policy targets a
+known card (the test name previously claimed this but the assertion was
+missing), and a no-op `* 0` term was removed from the new casino card's
+weight. Documentation now reports the actual alert count: 5 new alerts, 14
+total, not 6 new. Verified after the fixes: 93 vitest tests, production build,
+and the full 1366×700 Playwright gate, all clean with zero page errors.
 
 ---
 
@@ -880,7 +892,7 @@ to be asked about before starting:
 
 | # | Issue | Severity | Notes |
 |---|-------|----------|-------|
-| 1 | ~~**Content volume.**~~ | Addressed | Was: 25 draftable standard cards for a 30-day run at 3–5 cards/day meant a long run exhausted fresh material and started reusing cards once the recency window passed. **Fixed as part of Phase 2 §4.4** (the run deck, 2026-09-21): 20 more standard cards (`content/cards3.ts`) and 6 more alerts, plus the 18-day act structure independently reducing exposure. Whether it feels sufficiently varied in a full playtest is still worth watching, but the raw pool-size gap this row described is closed. |
+| 1 | ~~**Content volume.**~~ | Addressed | Was: 25 draftable standard cards for a 30-day run at 3–5 cards/day meant a long run exhausted fresh material and started reusing cards once the recency window passed. **Fixed as part of Phase 2 §4.4** (the run deck, 2026-09-21): 20 more standard cards (`content/cards3.ts`) and 5 more alerts, plus the 18-day act structure independently reducing exposure. Whether it feels sufficiently varied in a full playtest is still worth watching, but the raw pool-size gap this row described is closed. |
 | 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for a Phase 3 balance pass (`docs/DESIGN_V2.md` §9) rather than tuned now, since Phase 2's shop economy will change the curve anyway. |
 | 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it — part of the same Phase 3 balance pass. |
 | 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
@@ -911,7 +923,7 @@ order:**
    their rules.
 4. ✅ **DONE, APPROVED.** §4.4 the run deck (2026-09-21, later session).
    `runDeck`/`bannedCards`, 8 new deck-affecting shop policies, 20 new
-   standard cards, 6 new alerts. Owner-played and bug-checked by a
+   standard cards, 5 new alerts. Owner-played and bug-checked by a
    ChatGPT-based agent.
 5. **After an explicit owner instruction:** §4.5 meta-progression — the
    only unbuilt piece of Phase 2 left. Keep its content quota (if any)

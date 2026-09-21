@@ -50,6 +50,12 @@ describe('the run deck (§4.4)', () => {
     // banning is idempotent — buying a second ban on the same id never duplicates it
     applyEffects(s, { deck: { remove: ['sarran-file'] } }, rng, 'test');
     expect(s.bannedCards).toEqual(['sarran-file']);
+
+    // A permanent ban also wins when effects arrive in the opposite order.
+    // Do not retain dead copies that can never be drawn.
+    applyEffects(s, { deck: { add: ['sarran-file'] } }, rng, 'test');
+    expect(s.runDeck).toEqual([]);
+    expect(s.bannedCards).toEqual(['sarran-file']);
   });
 
   it('a card held in the run deck is drawn noticeably more often than the baseline', () => {
