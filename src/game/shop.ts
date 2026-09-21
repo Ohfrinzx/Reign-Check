@@ -2,6 +2,7 @@ import type { Effects, GameState, HeldDeal, Rng, StatKey } from './types';
 import type { ShopItemDef, ShopRarity } from './content/shop';
 import { SHOP_ITEMS, SHOP_MAP } from './content/shop';
 import { NUM_ACTS, justAdvancedAct } from './state';
+import { currentMandate } from './content/mandates';
 
 /**
  * How many advisors, and how many deals, you can hold at once. Past the cap,
@@ -82,7 +83,7 @@ export function shopOpensTonight(s: GameState): boolean {
 
 /** What this item actually costs tonight, after any owned price modifiers. */
 export function shopPrice(s: GameState, def: ShopItemDef): number {
-  let mult = 1;
+  let mult = currentMandate(s).priceMult ?? 1;
   for (const id of s.owned) {
     const owned = SHOP_MAP[id];
     if (owned?.priceMult !== undefined) mult *= owned.priceMult;
@@ -93,7 +94,8 @@ export function shopPrice(s: GameState, def: ShopItemDef): number {
 }
 
 export function canAfford(s: GameState, def: ShopItemDef): boolean {
-  return shopPrice(s, def) <= s.stats.treasury;
+  const price = shopPrice(s, def);
+  return price <= 0 || price <= s.stats.treasury;
 }
 
 /**
@@ -337,7 +339,7 @@ export function fireCostOf(def: ShopItemDef): number {
 }
 
 export function canFireNow(s: GameState, def: ShopItemDef): boolean {
-  return fireCostOf(def) <= s.stats.treasury;
+  return fireCostOf(def) === 0 || fireCostOf(def) <= s.stats.treasury;
 }
 
 /** What it costs, in money, to cut this deal short right now. */
@@ -346,7 +348,7 @@ export function cutCostOf(def: ShopItemDef): number {
 }
 
 export function canCutNow(s: GameState, def: ShopItemDef): boolean {
-  return cutCostOf(def) <= s.stats.treasury;
+  return cutCostOf(def) === 0 || cutCostOf(def) <= s.stats.treasury;
 }
 
 /* ------------------------------------------------------------- reporting */

@@ -5,10 +5,11 @@ import { STAT_KEYS } from './types';
 import { clampStat } from './stats';
 import { FACTION_ORDER } from './content/country';
 import { ownedStatMult } from './shop';
+import { currentMandate } from './content/mandates';
 
-let idCounter = 0;
 function nextId(prefix: string, s: GameState) {
-  idCounter = (idCounter + 1) % 100000;
+  const idCounter = (s.flags.__effectId ?? 0) + 1;
+  s.flags.__effectId = idCounter;
   return `${prefix}-${s.day}-${idCounter}-${(s.rngState >>> 8) % 997}`;
 }
 
@@ -41,7 +42,9 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
 
   if (e.hidden) {
     for (const k of Object.keys(e.hidden) as HiddenKey[]) {
-      bump(s.hidden as unknown as Record<string, number>, k, e.hidden[k]!);
+      const delta = e.hidden[k]!;
+      const mult = delta > 0 ? currentMandate(s).pressureGainMult?.[k] ?? 1 : 1;
+      bump(s.hidden as unknown as Record<string, number>, k, delta * mult);
     }
   }
 
@@ -61,7 +64,9 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
         if (!f) continue;
         for (const key of ['loyalty', 'power', 'influence', 'patience'] as const) {
           if (delta[key] === undefined) continue;
-          bump(f as unknown as Record<string, number>, key, delta[key]);
+          const mult = key === 'patience' && delta[key] < 0
+            ? currentMandate(s).patienceLossMult?.[t] ?? 1 : 1;
+          bump(f as unknown as Record<string, number>, key, delta[key] * mult);
         }
         // A faction gaining loyalty makes its rivals marginally colder.
         if (fid !== 'all' && delta.loyalty) {
@@ -137,6 +142,19 @@ export function applyEffects(s: GameState, e: Effects | undefined, rng: Rng, sou
       to: e.promise.to,
       dueDay: s.day + Math.max(1, e.promise.inDays),
     });
+  }
+
+  if (e.resolvePromise) {
+    const pr = s.promises.find((p) => p.id === e.resolvePromise!.id && !p.kept && !p.broken);
+    if (pr) {
+      pr[e.resolvePromise.status] = true;
+      if (pr.kept) s.stat.promisesKept += 1;
+      else s.stat.promisesBroken += 1;
+    }
+  }
+  if (e.deferPromise) {
+    const pr = s.promises.find((p) => p.id === e.deferPromise!.id && !p.kept && !p.broken);
+    if (pr) pr.dueDay = s.day + Math.max(1, e.deferPromise.inDays);
   }
 
   if (e.project) {

@@ -14,6 +14,7 @@ import { checkEndings } from './content/endings';
 import { computeBudget } from './economy';
 import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
+import { currentMandate, MANDATE_CARDS } from './content/mandates';
 import type { ShopItemDef } from './content/shop';
 import {
   buyLimit, canCutNow, canFireNow, capBlockReason, cutCostOf, dailyFromOwned, fireCostOf,
@@ -23,9 +24,10 @@ import {
 
 /* ------------------------------------------------------------- registries */
 
-const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...FOLLOWUPS];
+const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...FOLLOWUPS, ...MANDATE_CARDS];
 export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...CARD_MAP,
+  ...Object.fromEntries(MANDATE_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CARDS2.map((c) => [c.id, c])),
   ...Object.fromEntries(FOLLOWUPS.map((c) => [c.id, c])),
 };
@@ -67,7 +69,7 @@ function buildAgenda(s: GameState, rng: Rng): StageKind[] {
     (s.hidden.unrest + s.hidden.coup + s.hidden.scandal + s.hidden.fiscal) / 4;
   const min = pressure > 45 ? 4 : 3;
   const extra = rng.chance(0.45 + pressure / 220) ? 1 : 0;
-  const count = Math.min(5, min + extra);
+  const count = Math.min(5, min + extra) + (currentMandate(s).extraCards ?? 0);
 
   const pool = rng.shuffle([...STAGE_POOL]);
   const agenda: StageKind[] = [];
@@ -149,11 +151,13 @@ function dayUpkeep(s: GameState, rng: Rng) {
     }
   }
 
-  // --- projects tick
+  // --- projects tick. Active upkeep is already in computeBudget; only a
+  // project completing now needs its final charge carried into that budget.
+  let completedProjectUpkeep = 0;
   for (const p of [...s.projects]) {
     p.daysLeft -= 1;
-    if (p.upkeep) s.stats.treasury = clampStat('treasury', s.stats.treasury - p.upkeep);
     if (p.daysLeft <= 0) {
+      completedProjectUpkeep += p.upkeep ?? 0;
       applyEffects(s, p.onComplete, rng, 'project');
       s.stat.projectsBuilt.push(p.legacy ?? p.name);
       s.log.push({ day: s.day, kind: 'event', title: `Completed: ${p.name}`, text: p.detail, tone: 'good' });
@@ -213,7 +217,7 @@ function dayUpkeep(s: GameState, rng: Rng) {
 
   // --- the national accounts run whether you attend to them or not
   const budget = computeBudget(s);
-  s.stats.treasury = clampStat('treasury', s.stats.treasury + budget.net);
+  applyEffects(s, { stats: { treasury: budget.net - completedProjectUpkeep } }, rng, 'budget');
 
   // An empty account is not an abstraction here: one in six adults is on the payroll.
   if (s.stats.treasury < 0) {
@@ -261,10 +265,10 @@ function dayUpkeep(s: GameState, rng: Rng) {
   // --- factions lose patience when they are unhappy and unattended
   for (const id of FACTION_ORDER) {
     const f = s.factions[id];
-    if (f.loyalty < 40) f.patience = clamp(f.patience - 1.6);
+    if (f.loyalty < 40) applyEffects(s, { factions: { [id]: { patience: -1.6 } } }, rng, 'patience');
     else if (f.loyalty > 65) f.patience = clamp(f.patience + 0.5);
     // Generosity resets the baseline: what was a gift last week is an expectation now.
-    if (f.loyalty > 72) f.patience = clamp(f.patience - era * 1.4);
+    if (f.loyalty > 72) applyEffects(s, { factions: { [id]: { patience: -era * 1.4 } } }, rng, 'patience');
     // power follows loyalty and the general drift of the state
     if (id === 'staff' && s.hidden.coup > 50) f.power = clamp(f.power + 0.6);
     if (id === 'chorus' && s.hidden.unrest > 50) f.influence = clamp(f.influence + 0.8);
@@ -284,6 +288,9 @@ function dayUpkeep(s: GameState, rng: Rng) {
     if (c.plotting > 60 && c.id === 'sarran') s.hidden.leak = clamp(s.hidden.leak + 1.0);
   }
 
+  // Origin rules begin on the second morning, after the first day in office.
+  if (s.day > 1) applyEffects(s, currentMandate(s).daily, rng, 'mandate:daily');
+
   return notes;
 }
 
@@ -296,7 +303,8 @@ function sumScandalHeat(s: GameState) {
 }
 
 function drift(s: GameState, k: keyof GameState['hidden'], d: number) {
-  s.hidden[k] = clamp(s.hidden[k] + d);
+  const mult = d > 0 ? currentMandate(s).pressureGainMult?.[k] ?? 1 : 1;
+  s.hidden[k] = clamp(s.hidden[k] + d * mult);
 }
 
 function clamp(v: number) {
@@ -352,6 +360,7 @@ function diffStats(a: Stats, b: Stats): Partial<Stats> {
 /** Briefing → first card of the day. */
 export function beginStages(prev: GameState): GameState {
   const s = clone(prev);
+  if (s.phase !== 'briefing') return s;
   s.stageIndex = 0;
   openCurrent(s);
   return s;
@@ -359,7 +368,7 @@ export function beginStages(prev: GameState): GameState {
 
 function openCurrent(s: GameState) {
   const id = s.todayDeck[s.stageIndex];
-  if (!id) { s.current = undefined; s.phase = 'night'; return; }
+  if (!id) { finishDay(s); return; }
   // A card that an earlier decision queued may itself be an alert; it should
   // still arrive as a BREAKING ALERT rather than as a calm item on the agenda.
   const queuedAlert = !!ALERT_MAP[id];
@@ -374,7 +383,7 @@ function openCurrent(s: GameState) {
 /** Resolve a decision on the active card (normal or alert). */
 export function chooseOption(prev: GameState, optionId: string): GameState {
   const s = clone(prev);
-  if (!s.current) return s;
+  if (!['stage', 'alert'].includes(s.phase) || !s.current) return s;
   const def = lookupCard(s.current.cardId);
   if (!def) return s;
   const opt = def.options.find((o) => o.id === optionId);
@@ -461,6 +470,7 @@ function rollAlert(s: GameState, rng: Rng): AlertDef | undefined {
 /** Continue after a normal decision: maybe an interruption, otherwise the next stage. */
 export function continueAfterResolve(prev: GameState): GameState {
   const s = clone(prev);
+  if (s.phase !== 'resolve') return s;
   s.lastOutcome = undefined;
 
   const alert = withRng(s, (rng) => rollAlert(s, rng));
@@ -481,6 +491,7 @@ export function continueAfterResolve(prev: GameState): GameState {
 /** Continue after an alert: resume the interrupted agenda. */
 export function continueAfterAlert(prev: GameState): GameState {
   const s = clone(prev);
+  if (s.phase !== 'alertResolve') return s;
   s.lastOutcome = undefined;
   return nextStage(s);
 }
@@ -558,6 +569,7 @@ function moodLine(s: GameState): string {
 /** Night → the Back Room, or straight to tomorrow on the run's last night. */
 export function openShop(prev: GameState): GameState {
   const s = clone(prev);
+  if (s.phase !== 'night') return s;
   if (!shopOpensTonight(s)) return advanceToNextDay(s);
 
   s.shopBuysTonight = 0;
@@ -585,7 +597,7 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
   if (!def) return s;
 
   const price = shopPrice(s, def);
-  if (price > s.stats.treasury) return s;
+  if (price > 0 && price > s.stats.treasury) return s;
   // Advisors and deals are capped (ADVISOR_CAP/DEAL_CAP) — past the cap, the
   // offer is shown but not buyable until a slot is freed. The UI disables the
   // button for the same reason; this is the safety net.
@@ -631,6 +643,7 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
 /** Spend a favour you are holding. Available on any day, not only in the shop. */
 export function useFavour(prev: GameState, itemId: string): GameState {
   const s = clone(prev);
+  if (s.phase === 'ended' || s.phase === 'title') return s;
   const idx = s.heldFavours.indexOf(itemId);
   if (idx < 0) return s;
 
@@ -647,7 +660,7 @@ export function useFavour(prev: GameState, itemId: string): GameState {
     text: def.use.text,
     tone: 'good',
   });
-  s.lastOutcome = {
+  if (s.phase !== 'resolve' && s.phase !== 'alertResolve') s.lastOutcome = {
     text: def.use.text,
     tone: 'good',
     cardTitle: def.name,
@@ -667,6 +680,7 @@ export function useFavour(prev: GameState, itemId: string): GameState {
  */
 export function fireAdvisor(prev: GameState, itemId: string): GameState {
   const s = clone(prev);
+  if (s.phase === 'ended' || s.phase === 'title') return s;
   if (!s.owned.includes(itemId)) return s;
   const def = SHOP_MAP[itemId];
   if (!def || def.kind !== 'advisor') return s;
@@ -707,6 +721,7 @@ export function fireAdvisor(prev: GameState, itemId: string): GameState {
  */
 export function cutDeal(prev: GameState, itemId: string): GameState {
   const s = clone(prev);
+  if (s.phase === 'ended' || s.phase === 'title') return s;
   const idx = s.heldDeals.findIndex((d) => d.itemId === itemId);
   if (idx < 0) return s;
   const def = SHOP_MAP[itemId];
@@ -742,6 +757,7 @@ export function cutDeal(prev: GameState, itemId: string): GameState {
 /** Leave the Back Room without buying anything else. */
 export function leaveShop(prev: GameState): GameState {
   const s = clone(prev);
+  if (s.phase !== 'shop') return s;
   s.shopStock = [];
   s.lastOutcome = undefined;
   return advanceToNextDay(s);

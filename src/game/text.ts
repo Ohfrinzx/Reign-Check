@@ -7,7 +7,7 @@ import { HONORIFICS } from './state';
  * chose to be called. Keep the token list tiny and obvious.
  */
 export function fill(text: string, s: GameState): string {
-  const h = HONORIFICS.find((x) => x.id === s.honorific) ?? HONORIFICS[0];
+  const h = HONORIFICS.find((x) => x.id === s.honorific || x.word === s.honorific) ?? HONORIFICS[0];
   return text
     .replace(/\{sir\}/g, h.word)
     .replace(/\{Sir\}/g, h.label)

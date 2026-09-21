@@ -7,6 +7,7 @@ import {
 } from '../../game/shop';
 import { termsIn } from '../../game/glossary';
 import { fill } from '../../game/text';
+import { currentMandate } from '../../game/content/mandates';
 import { usd } from '../../game/economy';
 import { CutControl, FireControl, ManageRow } from './Manage';
 
@@ -18,8 +19,8 @@ import { CutControl, FireControl, ManageRow } from './Manage';
  *
  * Every offer states its price AND its catch in plain text on the card
  * itself. Nothing required to make the decision is behind a hover
- * (ground rule 11) or below the fold — the "leave" action lives in the top
- * strap, same as every other screen's primary action (ground rule 9).
+ * (ground rule 11) or below the fold — the "leave" action lives above the offers,
+ * inside the fullscreen shop (ground rule 9).
  */
 export function ShopScreen({
   s, onBuy, onLeave, onFire, onCut,
@@ -52,6 +53,7 @@ export function ShopScreen({
             <h1>{head.title}</h1>
             <div className="shop-sub">{fill(head.sub, s)}</div>
             <div className="shop-purse">
+              {currentMandate(s).priceMult && <span>Mandate discount included. </span>}
               In the account: <b>{usd(s.stats.treasury)}</b>
               <span className="limit">
                 {oneOnly
@@ -59,6 +61,13 @@ export function ShopScreen({
                   : ' · Tonight you may take as much as you can pay for.'}
               </span>
             </div>
+          </div>
+
+          <div className="shop-foot">
+            <button className="btn btn-primary" onClick={onLeave}>
+              Leave and begin Day {s.day + 1} →
+            </button>
+            <span className="note">Nothing here is compulsory. Or press Enter.</span>
           </div>
 
           {stock.length === 0 && s.shopBuysTonight === 0 && (
@@ -100,12 +109,7 @@ export function ShopScreen({
             </div>
           )}
 
-          <div className="shop-foot">
-            <button className="btn btn-primary" onClick={onLeave}>
-              Leave and begin Day {s.day + 1} →
-            </button>
-            <span className="note">Nothing here is compulsory. Or press Enter.</span>
-          </div>
+
         </div>
       </div>
 

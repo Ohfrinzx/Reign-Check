@@ -7,7 +7,7 @@ import {
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
-import { saveGame, loadGame, loadMeta, deleteSave } from './game/save';
+import { saveGame, loadGame, deleteSave } from './game/save';
 import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
 import { CardView, OutcomeView } from './ui/components/CardView';
@@ -23,6 +23,7 @@ export default function App() {
   const [game, setGame] = useState<GameState | null>(null);
   const [name, setName] = useState('');
   const [honorific, setHonorific] = useState('sir');
+  const [mandateId, setMandateId] = useState('random');
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
@@ -32,8 +33,8 @@ export default function App() {
 
   /* ---- detect an existing save on mount */
   useEffect(() => {
-    const meta = loadMeta();
-    if (meta && !meta.ended) {
+    const meta = loadGame();
+    if (meta && meta.phase !== 'ended') {
       setSavedDay(meta.day);
       setName(meta.leaderName);
     }
@@ -53,13 +54,13 @@ export default function App() {
 
   /* ---- lifecycle */
   const newGame = useCallback(() => {
-    const g = prepareDay(createGame({ leaderName: name, honorific }));
+    const g = prepareDay(createGame({ leaderName: name, honorific, mandateId }));
     setGame(g);
     setScreen('game');
     setShowIntro(true);
     setShowManage(false);
     setFlash({});
-  }, [name, honorific]);
+  }, [name, honorific, mandateId]);
 
   const continueGame = useCallback(() => {
     const g = loadGame();
@@ -73,8 +74,8 @@ export default function App() {
   const backToTitle = useCallback(() => {
     setScreen('title');
     setShowManage(false);
-    const meta = loadMeta();
-    setSavedDay(meta && !meta.ended ? meta.day : undefined);
+    const meta = loadGame();
+    setSavedDay(meta && meta.phase !== 'ended' ? meta.day : undefined);
   }, []);
 
   const restart = useCallback(() => {
@@ -152,7 +153,11 @@ export default function App() {
     if (screen !== 'game' || !game || showIntro || showManage) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      // Let native focused controls own Enter/Space; otherwise a Fire/Buy/Menu
+      // button can accidentally advance the day instead of activating.
+      if ((e.key === 'Enter' || e.key === ' ') &&
+          (e.target as HTMLElement)?.closest('button, a, [role=\"button\"]')) return;
 
       if (game.phase === 'shop' && /^[1-9]$/.test(e.key)) {
         const id = game.shopStock[Number(e.key) - 1];
@@ -188,6 +193,8 @@ export default function App() {
           setName={setName}
           honorific={honorific}
           setHonorific={setHonorific}
+          mandateId={mandateId}
+          setMandateId={setMandateId}
           onNew={newGame}
           onContinue={savedDay ? continueGame : undefined}
           savedDay={savedDay}

@@ -1,11 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { createGame, OPENINGS, ACT_LENGTH, NUM_ACTS, dayInAct } from '../state';
+import { createGame, ACT_LENGTH, NUM_ACTS, dayInAct } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve,
   continueAfterAlert, activeCard, lookupCard, openShop, leaveShop,
 } from '../engine';
 import { buildBriefing } from '../briefing';
 import { CARDS } from '../content/cards';
+import { CARDS2 } from '../content/cards2';
+import { MANDATES, MANDATE_CARDS } from '../content/mandates';
 import { FOLLOWUPS } from '../content/followups';
 import { ALERTS } from '../content/alerts';
 import { STAT_KEYS, HIDDEN_KEYS } from '../types';
@@ -62,12 +64,12 @@ function playRun(seed: number, pick: (s: GameState, n: number) => number): GameS
 
 describe('content integrity', () => {
   it('has unique card ids', () => {
-    const ids = [...CARDS, ...FOLLOWUPS, ...ALERTS].map((c) => c.id);
+    const ids = [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS].map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('every option has a label and every card has options', () => {
-    for (const c of [...CARDS, ...FOLLOWUPS, ...ALERTS]) {
+    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       expect(c.options.length, `${c.id} has no options`).toBeGreaterThanOrEqual(2);
       for (const o of c.options) {
         expect(o.label.length, `${c.id}/${o.id} empty label`).toBeGreaterThan(0);
@@ -81,7 +83,7 @@ describe('content integrity', () => {
     const missing = new Set<string>();
     const rng = makeRng(1);
     const probe = createGame({ seed: 1 });
-    for (const c of [...CARDS, ...FOLLOWUPS, ...ALERTS]) {
+    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       for (const o of c.options) {
         const res = typeof o.outcome === 'function' ? o.outcome(probe, rng) : o.outcome;
         for (const sch of res.effects?.schedule ?? []) {
@@ -97,7 +99,7 @@ describe('content integrity', () => {
 
   it('every character referenced by a card exists', () => {
     const known = new Set(Object.keys(createGame({ seed: 2 }).characters));
-    for (const c of [...CARDS, ...FOLLOWUPS, ...ALERTS]) {
+    for (const c of [...CARDS, ...CARDS2, ...FOLLOWUPS, ...ALERTS, ...MANDATE_CARDS]) {
       if (c.actor) expect(known.has(c.actor), `${c.id} actor ${c.actor}`).toBe(true);
     }
   });
@@ -108,7 +110,7 @@ describe('simulation', () => {
     const seen = new Set<string>();
     for (let i = 0; i < 60; i++) {
       const g = createGame({ seed: i * 7919 + 13 });
-      for (const o of OPENINGS) if (g.flags[`opening:${o.id}`]) seen.add(o.id);
+      for (const o of MANDATES) if (g.mandateId === o.id) seen.add(o.id);
     }
     expect(seen.size).toBeGreaterThan(2);
   });

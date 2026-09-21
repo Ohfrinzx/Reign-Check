@@ -5,14 +5,17 @@ import { STAT_KEYS, HIDDEN_KEYS, REGIME_KEYS } from './types';
 import { FACTION_ORDER, CHARACTERS } from './content/country';
 import { makeRng, randomSeed } from './rng';
 import { clampStat } from './stats';
+import { MANDATES, MANDATE_MAP } from './content/mandates';
+import { applyEffects } from './effects';
 
 /** Bump whenever GameState's shape changes — save.ts discards mismatched
  *  saves rather than crashing (ground rule 10). 3→4: the Back Room's
  *  shopStock/owned/heldFavours/shopBought/shopRecent fields and
  *  RunStats.dealsStruck. 4→5: GameState.activeDeals, for timed deals.
  *  5→6: activeDeals replaced by heldDeals (every deal now occupies a slot,
- *  not just timed ones) plus endedDeals, for the advisor/deal cap. */
-export const SAVE_VERSION = 6;
+ *  not just timed ones) plus endedDeals, for the advisor/deal cap.
+ *  6→7: mandateId; generated effect IDs now use a saved flags counter. */
+export const SAVE_VERSION = 7;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -43,88 +46,19 @@ export function dayInAct(s: GameState): number {
   return ((s.day - 1) % ACT_LENGTH) + 1;
 }
 
-/** Opening conditions vary run to run, so no two First Citizens inherit the same mess. */
-export interface OpeningScenario {
-  id: string;
-  name: string;
-  summary: string;
-  stats: Partial<Stats>;
-  hidden: Partial<Hidden>;
-  factionTweak: Partial<Record<FactionId, Partial<FactionState>>>;
-  openingNote: string;
-}
-
-export const OPENINGS: OpeningScenario[] = [
-  {
-    id: 'stairwell',
-    name: 'The Stairwell',
-    summary:
-      'Krast has been dead nine days and the Sable Office still has not said who was in the stairwell with him. You were sworn in at 4am by a judge who asked no questions and left quickly.',
-    stats: { power: 46, legitimacy: 34, security: 62, elite: 52, military: 48 },
-    hidden: { scandal: 18, fear: 22, coup: 14 },
-    factionTweak: { sable: { loyalty: 62, influence: 70 }, chorus: { loyalty: 28 } },
-    openingNote:
-      'Nobody in this building thinks you will last the month. Two of them have already drafted the statement.',
-  },
-  {
-    id: 'empty-vault',
-    name: 'The Hole in the Accounts',
-    summary:
-      'Krast left you the office, the residence, and a gap in the budget that the Finance Ministry has spent two years describing as "a timing difference".',
-    stats: { treasury: 24, economy: 41, legitimacy: 44, elite: 44 },
-    hidden: { fiscal: 34, corruption: 26 },
-    factionTweak: { concord: { loyalty: 44, power: 72 }, combine: { patience: 44 } },
-    openingNote:
-      'Brask has asked for eleven minutes of your time. He never asks for eleven minutes about good news.',
-  },
-  {
-    id: 'restive-south',
-    name: 'Trouble on the Border',
-    summary:
-      'Three weeks of Hadeni-language broadcasts from across the Drovnan border, two burned-out customs posts, and a regional governor who has stopped returning calls.',
-    stats: { stability: 38, security: 52, support: 48, military: 56 },
-    hidden: { separatism: 32, foreign: 24, unrest: 20 },
-    factionTweak: { provinces: { loyalty: 40, patience: 42 }, staff: { loyalty: 58 } },
-    openingNote:
-      'The army wants a decision about the border region. They want it this week.',
-  },
-  {
-    id: 'cold-winter',
-    name: 'A Cold Quarter',
-    summary:
-      'Gas came in 11% over budget, the Gorsk mines are running short shifts, and the unions have scheduled a meeting that everyone understands is a countdown.',
-    stats: { economy: 38, support: 42, stability: 44, treasury: 36 },
-    hidden: { unrest: 28, fiscal: 26 },
-    factionTweak: { combine: { loyalty: 38, power: 68 }, concord: { loyalty: 56 } },
-    openingNote:
-      'Hess has requested a meeting. He has never requested a meeting about nothing.',
-  },
-  {
-    id: 'clean-hands',
-    name: 'The Clean Hands Promise',
-    summary:
-      'You took the job promising "an honest audit of everything". It was a great line at 4am. It is now a policy commitment that thirty thousand officials are reading very carefully.',
-    stats: { legitimacy: 58, support: 58, elite: 38, security: 44 },
-    hidden: { scandal: 10, corruption: 34, fear: 10 },
-    factionTweak: { chorus: { loyalty: 58 }, grey: { patience: 45 }, concord: { loyalty: 40 } },
-    openingNote:
-      'Everyone is waiting to see whether you meant it. Including, if you are honest, you.',
-  },
-];
-
 const BASE_STATS: Stats = {
   power: 52, legitimacy: 45, support: 50, treasury: 42, economy: 48,
   elite: 50, military: 52, security: 55, stability: 55, information: 60,
 };
 
-const BASE_FACTION: Record<FactionId, Omit<FactionState, 'id'>> = {
-  staff:     { loyalty: 55, power: 78, influence: 60, patience: 70, grudges: [], favours: [], revealed: 0 },
-  sable:     { loyalty: 58, power: 66, influence: 74, patience: 65, grudges: [], favours: [], revealed: 0 },
-  concord:   { loyalty: 50, power: 70, influence: 62, patience: 60, grudges: [], favours: [], revealed: 0 },
-  combine:   { loyalty: 46, power: 62, influence: 48, patience: 62, grudges: [], favours: [], revealed: 0 },
-  grey:      { loyalty: 54, power: 52, influence: 70, patience: 72, grudges: [], favours: [], revealed: 0 },
-  provinces: { loyalty: 48, power: 58, influence: 54, patience: 58, grudges: [], favours: [], revealed: 0 },
-  chorus:    { loyalty: 40, power: 30, influence: 66, patience: 55, grudges: [], favours: [], revealed: 0 },
+const BASE_FACTION: Record<FactionId, Omit<FactionState, 'id' | 'loyalty'>> = {
+  staff:     { power: 78, influence: 60, patience: 70, grudges: [], favours: [], revealed: 0 },
+  sable:     { power: 66, influence: 74, patience: 65, grudges: [], favours: [], revealed: 0 },
+  concord:   { power: 70, influence: 62, patience: 60, grudges: [], favours: [], revealed: 0 },
+  combine:   { power: 62, influence: 48, patience: 62, grudges: [], favours: [], revealed: 0 },
+  grey:      { power: 52, influence: 70, patience: 72, grudges: [], favours: [], revealed: 0 },
+  provinces: { power: 58, influence: 54, patience: 58, grudges: [], favours: [], revealed: 0 },
+  chorus:    { power: 30, influence: 66, patience: 55, grudges: [], favours: [], revealed: 0 },
 };
 
 function emptyRunStats(): RunStats {
@@ -147,42 +81,42 @@ export interface NewGameOptions {
   honorific?: string;
   seed?: number;
   maxDays?: number;
-  openingId?: string;
+  mandateId?: string;
 }
 
 export function createGame(opts: NewGameOptions = {}): GameState {
   const seed = opts.seed ?? randomSeed();
   const rng = makeRng(seed);
 
-  const opening =
-    OPENINGS.find((o) => o.id === opts.openingId) ?? rng.pick(OPENINGS);
+  // Roll even for a chosen mandate, so equal seeds share baseline conditions.
+  const rolled = rng.pick(MANDATES);
+  const mandate = MANDATE_MAP[opts.mandateId ?? ''] ?? rolled;
 
   // ---- stats, with jitter so no two runs start identically
   const stats = {} as Stats;
   for (const k of STAT_KEYS) {
-    const base = opening.stats[k] ?? BASE_STATS[k];
+    const base = BASE_STATS[k];
     stats[k] = clampStat(k, base + rng.range(-4, 4));
   }
 
   const hidden = {} as Hidden;
   for (const k of HIDDEN_KEYS) {
-    hidden[k] = Math.max(0, Math.min(100, (opening.hidden[k] ?? 8) + rng.range(-3, 5)));
+    hidden[k] = Math.max(0, Math.min(100, 8 + rng.range(-3, 5)));
   }
 
   const regime = {} as Regime;
   for (const k of REGIME_KEYS) regime[k] = 0;
 
-  // ---- factions, with jitter and scenario tweaks
+  // ---- neutral faction support, with seeded variation; mandates apply below
   const factions = {} as Record<FactionId, FactionState>;
   for (const id of FACTION_ORDER) {
     const base = BASE_FACTION[id];
-    const tweak = opening.factionTweak[id] ?? {};
     factions[id] = {
       id,
-      loyalty: clamp(((tweak.loyalty ?? base.loyalty) + rng.range(-6, 6))),
-      power: clamp(((tweak.power ?? base.power) + rng.range(-5, 5))),
-      influence: clamp(((tweak.influence ?? base.influence) + rng.range(-5, 5))),
-      patience: clamp(((tweak.patience ?? base.patience) + rng.range(-5, 5))),
+      loyalty: clamp(50 + rng.range(-6, 6)),
+      power: clamp(base.power + rng.range(-5, 5)),
+      influence: clamp(base.influence + rng.range(-5, 5)),
+      patience: clamp(base.patience + rng.range(-5, 5)),
       grudges: [],
       favours: [],
       revealed: 0,
@@ -210,10 +144,11 @@ export function createGame(opts: NewGameOptions = {}): GameState {
   const state: GameState = {
     version: SAVE_VERSION,
     seed,
+    mandateId: mandate.id,
     rngState: rng.state(),
     leaderName: (opts.leaderName || '').trim() || 'Adrin Vo',
     leaderTitle: 'Executive Chair',
-    honorific: opts.honorific || 'sir',
+    honorific: HONORIFICS.find((h) => h.id === opts.honorific || h.word === opts.honorific)?.word ?? 'sir',
     startedAt: Date.now(),
 
     day: 1,
@@ -233,7 +168,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     factions,
     characters,
 
-    flags: { openingId: 0 },
+    flags: {},
     scheduled: [],
     promises: [],
     projects: [],
@@ -260,8 +195,8 @@ export function createGame(opts: NewGameOptions = {}): GameState {
       {
         day: 1,
         kind: 'system',
-        title: opening.name,
-        text: opening.summary,
+        title: mandate.name,
+        text: mandate.summary,
         tone: 'neutral',
       },
     ],
@@ -271,17 +206,13 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     stat: emptyRunStats(),
   };
 
-  state.flags[`opening:${opening.id}`] = 1;
-  state.newsQueue.push(opening.openingNote);
+  applyEffects(state, mandate.startEffects, rng, 'mandate:start');
+  state.rngState = rng.state();
+  state.statsAtDayStart = { ...state.stats };
 
   return state;
 }
 
 function clamp(v: number) {
   return Math.max(0, Math.min(100, Math.round(v * 10) / 10));
-}
-
-export function currentOpening(s: GameState): OpeningScenario {
-  const found = OPENINGS.find((o) => s.flags[`opening:${o.id}`]);
-  return found ?? OPENINGS[0];
 }

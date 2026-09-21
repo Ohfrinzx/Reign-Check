@@ -2,80 +2,90 @@ import type { GameState, StatKey } from '../../game/types';
 import { COUNTRY } from '../../game/content/country';
 import { STAT_ORDER, money } from '../../game/stats';
 import { buildBriefing, dateLine } from '../../game/briefing';
-import { ACT_LENGTH, currentOpening, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
+import { ACT_LENGTH, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
 import { usd, usdFlow, computeBudget } from '../../game/economy';
 import { fill } from '../../game/text';
+import { MANDATES, MANDATE_MAP, currentMandate } from '../../game/content/mandates';
 
 const MAX_PER_SECTION = 4;
 
 /* ------------------------------------------------------------- TITLE */
 
 export function TitleScreen({
-  name, setName, honorific, setHonorific, onNew, onContinue, savedDay, onDelete,
+  name, setName, honorific, setHonorific, mandateId, setMandateId,
+  onNew, onContinue, savedDay, onDelete,
 }: {
   name: string; setName: (v: string) => void;
   honorific: string; setHonorific: (v: string) => void;
+  mandateId: string; setMandateId: (v: string) => void;
   onNew: () => void; onContinue?: () => void; savedDay?: number; onDelete?: () => void;
 }) {
+  const selected = MANDATE_MAP[mandateId];
   return (
     <div className="screen title-screen">
       <div className="sheet">
-        <div className="title-mast">
-          <div className="mark">★</div>
-        </div>
-        <h1 className="title-main">REIGN<br />CHECK</h1>
-        <div className="title-sub">Office of the {COUNTRY.office} &middot; {COUNTRY.shortName}</div>
-        <p className="title-blurb">
-          The man who ran this country for nineteen years died in a stairwell nine days ago.
-          You were his deputy. It was a job nobody wanted and nobody watched, which is exactly
-          why you are still alive and now in charge.
-          <br /><br />
-          You have {COUNTRY.population} people, an army, a secret police, five power blocs that all
-          want something, and a treasury held together by optimism. Parliament holds a confidence
-          vote roughly every six days, three times in all. Nobody thinks you will survive the first one.
-        </p>
-
-        <div className="name-field">
-          <span className="kicker">Your name</span>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Adrin Vo"
-            maxLength={28}
-            spellCheck={false}
-            onKeyDown={(e) => { if (e.key === 'Enter') onNew(); }}
-          />
-        </div>
-
-        <div className="name-field">
-          <span className="kicker">They address you as</span>
-          <div className="seg">
-            {HONORIFICS.map((h) => (
-              <button
-                key={h.id}
-                className={`seg-btn ${honorific === h.id ? 'on' : ''}`}
-                onClick={() => setHonorific(h.id)}
-                type="button"
-              >
-                {h.label}
-              </button>
-            ))}
+        <div className="title-toolbar">
+          <span className="kicker">{COUNTRY.shortName} · A new administration</span>
+          <div className="title-actions">
+            {onContinue && <button className="btn" onClick={onContinue}>Continue — Day {savedDay}</button>}
+            {onDelete && <button className="btn btn-ghost" onClick={onDelete}>Delete save</button>}
+            <button className="btn btn-primary" onClick={onNew}>Take the job</button>
           </div>
         </div>
-
-        <div className="title-actions">
-          <button className="btn btn-primary" onClick={onNew}>Take the job</button>
-          {onContinue && (
-            <button className="btn" onClick={onContinue}>Continue — Day {savedDay}</button>
-          )}
-          {onDelete && <button className="btn btn-ghost" onClick={onDelete}>Delete save</button>}
+        <div className="title-columns">
+          <div className="title-identity">
+            <div className="title-mast"><div className="mark">★</div></div>
+            <h1 className="title-main">REIGN<br />CHECK</h1>
+            <div className="title-sub">Office of the {COUNTRY.office}</div>
+            <p className="title-blurb">
+              Krast is dead. Velmorra needs a new chair. How you got the job will shape every day you keep it.
+              <br /><br />
+              {COUNTRY.population} people. Five power blocs. Three confidence votes in eighteen days.
+              Everyone wants something. Your signature is now worth money.
+            </p>
+            <div className="name-field">
+              <label className="kicker" htmlFor="leader-name">Your name</label>
+              <input id="leader-name" value={name} onChange={(e) => setName(e.target.value)}
+                placeholder="Adrin Vo" maxLength={28} spellCheck={false}
+                onKeyDown={(e) => { if (e.key === 'Enter') onNew(); }} />
+            </div>
+            <div className="name-field">
+              <span className="kicker">They address you as</span>
+              <div className="seg">
+                {HONORIFICS.map((h) => (
+                  <button key={h.id} className={`seg-btn ${honorific === h.id ? 'on' : ''}`}
+                    aria-pressed={honorific === h.id} onClick={() => setHonorific(h.id)} type="button">{h.label}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <section className="mandate-picker" aria-labelledby="mandate-heading">
+            <div className="kicker">Your mandate</div>
+            <h2 id="mandate-heading">How did you take power?</h2>
+            <p className="mandate-intro">Choose your start. The rule stays with you for the whole run.</p>
+            <fieldset className="mandate-options">
+              <legend className="sr-only">Starting mandate</legend>
+              {MANDATES.map((m) => (
+                <label className={`mandate-option ${mandateId === m.id ? 'selected' : ''}`} key={m.id}>
+                  <input type="radio" name="mandate" value={m.id} checked={mandateId === m.id}
+                    onChange={() => setMandateId(m.id)} />
+                  <span><b>{m.name}</b><small>{m.startText}</small></span>
+                </label>
+              ))}
+              <label className={`mandate-option mandate-random ${mandateId === 'random' ? 'selected' : ''}`}>
+                <input type="radio" name="mandate" value="random" checked={mandateId === 'random'}
+                  onChange={() => setMandateId('random')} />
+                <span><b>Let fate decide</b><small>Roll one of the six mandates when the run begins.</small></span>
+              </label>
+            </fieldset>
+            <div className="mandate-detail" aria-live="polite">
+              <h3>{selected?.name ?? 'A job you did not apply for'}</h3>
+              <p>{selected?.summary ?? 'Any of the six starts can be yours. Your briefing will tell you what happened.'}</p>
+              <p className="mandate-rule"><b>The rule:</b> {selected?.ruleText ?? 'You inherit the rolled mandate’s starting conditions and its rule for the entire run.'}</p>
+            </div>
+          </section>
         </div>
-
-        <p className="title-foot">
-          {COUNTRY.name} is invented, and so are its factions, ministers, neighbours and pigeons.
-          Any resemblance to a real country is a coincidence the security service would like to
-          discuss with you.
-        </p>
+        <p className="title-foot">{COUNTRY.name} is invented, and so are its factions, ministers, neighbours and pigeons.</p>
       </div>
     </div>
   );
@@ -86,7 +96,7 @@ export function TitleScreen({
 export function BriefingScreen({ s }: { s: GameState }) {
   const b = buildBriefing(s);
   const budget = computeBudget(s);
-  const opening = currentOpening(s);
+  const opening = currentMandate(s);
   const issues = b.items.filter((i) => i.kind === 'issue' || i.kind === 'demand');
   const warnings = b.items.filter((i) => i.kind === 'warning');
   const opps = b.items.filter((i) => i.kind === 'opportunity');
@@ -150,6 +160,7 @@ export function BriefingScreen({ s }: { s: GameState }) {
           </div>
 
           <div className="fp-rail">
+            <div className="mandate-summary"><div className="kicker">Your mandate · {opening.name}</div><p>{opening.ruleText}</p></div>
             <h2>The budget</h2>
             <div className="cmt budget-net">
               <span className="n">Net today</span>
@@ -302,7 +313,7 @@ export function EndingScreen({ s, onRestart, onTitle }: { s: GameState; onRestar
       <div className="ending-sheet">
         <div className="ending-kind">{e.kind === 'survival' ? 'You made it' : 'It is over'}</div>
         <h1 className="ending-title">{e.title}</h1>
-        <div className="ending-regime">{e.regimeLabel} &middot; {e.day} days</div>
+        <div className="ending-regime">{e.regimeLabel} &middot; {e.day} days<br />{currentMandate(s).name}</div>
 
         <div className="ending-prose">
           {e.epitaph.split('\n\n').map((p, i) => <p key={i}>{p}</p>)}

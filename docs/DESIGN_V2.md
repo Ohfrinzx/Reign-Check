@@ -1,14 +1,11 @@
 # Design V2 — simplification and the roguelike turn
 
-**Status: PHASE 1 (layout, simplification, wording) IMPLEMENTED AND
-OWNER-APPROVED.** The owner played the real Poster/Broadsheet build and
-said: *"Ok everything seems to run and look good. So I believe Phase one
-playtests are complete."* **PHASE 2 — the roguelike layer (acts, shop,
-mandates, run deck, meta-progression) in section 4 — is GREENLIT.
-§4.1 (run structure: 3 acts of 6 days, confidence vote) IS NOW BUILT and
-awaiting playtest — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for
-what shipped. §4.2–§4.5 (shop, mandates, run deck, meta-progression) are
-NOT started; do not begin them until §4.1 is played and approved.
+**Current status (2026-09-21): Phase 1 and Phase 2 §4.1/§4.2 are
+OWNER-APPROVED. §4.3 (six mandates) is BUILT, awaiting owner playtest.
+§4.4 (run deck) and §4.5 (meta-progression) are NOT started.** Each slice
+still requires feedback and a new instruction before starting the next.
+See `PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
+Historical implementation notes below describe earlier checkpoints.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -35,11 +32,9 @@ Decisions made by the owner, in order:
    folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
    what to preserve and what to avoid, no mobile work scheduled).
 
-**What is NOT built yet**: the roguelike layer in section 4 (acts, the Back
-Room shop, mandates, a run deck, meta-progression). It is greenlit — start
-with §4.1 (run structure) as its own shippable slice; see `CLAUDE.md`. Read
-section 9 for what comes after Phase 2, and section 10 before writing any
-UI code, so mobile stays an open door rather than an afterthought.
+**What is NOT built yet:** the run deck (§4.4) and meta-progression (§4.5).
+Mandates are the current playtest slice. Read section 9 for later phases
+and section 10 for the mobile architecture guardrails.
 
 ---
 
@@ -207,7 +202,7 @@ start-of-run effect + register a run-long rule). Once each hook exists,
 individual mandates/advisors/policies/favours are just objects in an array,
 exactly like cards are today — see §4.6 for suggested shapes.
 
-### 4.1 Run structure — BUILT, awaiting playtest
+### 4.1 Run structure — BUILT AND OWNER-APPROVED
 
 A run becomes **3 acts of ~6 days** (18 days) instead of 30 flat days. Each
 act ends with a **confidence vote** — a real check against your current state
@@ -239,7 +234,7 @@ strap, `Screens.tsx`'s edition line) now read `Day X / 6`, resetting to 1 at
 each act boundary; `GameState.day` itself, and everything else that reads it
 (the vote check above, saves, `dateLine()`), is untouched.
 
-### 4.2 The Back Room — CHUNK 1 BUILT, awaiting playtest
+### 4.2 The Back Room — BOTH CHUNKS BUILT AND OWNER-APPROVED
 
 **Owner amendment to this section, made when the slice was greenlit:** the
 shop opens at the **end of every day**, not only between acts. The spec below
@@ -459,7 +454,7 @@ the same way standard cards have grown across `cards.ts`/`cards2.ts`.* This
 is real new game content, and the natural home for most of "I want to add
 more content."
 
-### 4.3 Mandate — how you took power
+### 4.3 Mandate — BUILT, awaiting playtest
 
 Chosen or rolled at the start of each run. Sets starting factions and adds one
 unique rule for the whole run.
@@ -474,6 +469,42 @@ unique rule for the whole run.
 This is where "unique runs" actually comes from — not from procedural noise,
 but from a rule that changes how the whole run plays. *Content target: the 4
 above plus 2–4 more for variety (6–8 total) before calling this slice done.*
+
+**As built, 2026-09-21:** all six are unlocked now. The original four plus
+**The Clean Hands Promise** (higher starting Legitimacy, colder Security;
+daily audits reduce corruption but uncover scandal material) and **The Pay
+Deal** (Workers +20, treasury −$10B; permanent $0.60B/day wage agreement,
+Workers gain support/patience daily). The owner explicitly confirmed that
+**Money in the table means treasury**, not business-faction loyalty.
+
+The selector replaces the old randomized origin scenarios, rather than
+stacking two conflicting origin stories. Baseline conditions retain seeded
+jitter; faction loyalty starts near 50 before mandate effects and existing
+faction-relationship spillover. The Accident has no starting modifiers.
+Legitimacy changes apply to all three components of the displayed aggregate;
+existing systemic coupling means the text deliberately says “about”.
+
+Definitions and the one queued Stairwell card live in `content/mandates.ts`.
+`GameState.mandateId` holds only an ID. Generic rule hooks cover start effects,
+daily effects, extra decisions, price multipliers, pressure growth and
+patience losses. All new world effects use `applyEffects()`. Adding another
+mandate using those hooks is content work. `SAVE_VERSION` is 7 (old runs reset).
+
+Daily mandate effects begin on day 2; the wage commitment is charged from day
+1. The Landslide loses roughly 2 displayed Legitimacy per morning; existing
+advisor protections can soften that. Handover increases positive Street
+pressure and negative Street patience changes by 50%, without amplifying
+relief; positive shop prices are multiplied by 0.75 and rounded to the
+existing $0.1B precision. Cash-paying deals retain their full payout.
+Stairwell queues its recording confrontation once on day 4, with a paid
+option and two no-cash alternatives. Accident adds one daily decision slot
+through the existing weighted draw, retaining eligibility and recency rules.
+The existing content-pool ceiling still applies; §4.4 expands that pool.
+
+The title screen keeps its primary action above the mandate choices. The
+selected rule is visible in the morning briefing and Brief me; the ending
+names the origin. No new hidden numbers are displayed. See the review report
+for regression fixes and measured changes; balance still needs playtesting.
 
 ### 4.4 Deck
 
@@ -710,12 +741,11 @@ Suggested order, each step shippable and playtestable on its own:
    there; it was not merged into a single persistent "desk" screen the way
    the original desk.html mockup showed (cards still get their own doc view
    once the day starts, per Broadsheet).
-4. ✅ **BUILT, awaiting playtest.** Acts and the confidence vote (§4.1),
-   shipped as its own slice; the Back Room shop (§4.2) is a separate later
-   slice, not to be started until acts are played and approved.
-5. ⬜ **NOT STARTED. GREENLIT**, after step 4. Mandates (§4.3).
-6. ⬜ **NOT STARTED. GREENLIT**, after step 5. Run deck (§4.4) +
-   meta-progression (§4.5).
+4. ✅ **DONE, OWNER-APPROVED.** Acts/confidence votes (§4.1) and both
+   Back Room chunks (§4.2), including management, caps and day-in-act display.
+5. ✅ **BUILT, AWAITING PLAYTEST.** Mandates (§4.3), six origins.
+6. ⬜ **NOT STARTED.** Run deck (§4.4), then meta-progression (§4.5), each
+   after owner feedback and its own explicit instruction.
 
 Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
 — the owner has now played that build and confirmed it. Steps 4–6 are the

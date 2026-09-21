@@ -37,13 +37,11 @@ costs), showing **3 resources and 5 factions** instead of the old 10 stats
 and 7 faction-bars-of-three, via a **display layer**
 (`src/game/display.ts`) over the full, untouched 10-stat/7-faction engine —
 every card effect, every test, and the balance probe are unchanged
-underneath. A glossary system (`src/game/glossary.ts` + `Prose.tsx`)
-auto-annotates jargon with plain-language hover/tap definitions across card
-body, outcome text, option hints, flavor text, and threat cards. 13 vitest
-tests pass and this was verified end to end in a real browser at 1366×700,
-the viewport that has caught every real layout bug so far.
+underneath. The current glossary uses plain-text Terms footnotes on cards
+and shop offers; `Prose.tsx` does not use hover annotations. Current test
+coverage and status are listed below and in the handoff.
 
-## PHASE 2 IS GREENLIT — §4.1 AND §4.2 ARE BUILT AND OWNER-APPROVED
+## PHASE 2 — §4.1/§4.2 APPROVED; §4.3 BUILT, AWAITING PLAYTEST
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
@@ -51,14 +49,11 @@ each, ending in a confidence vote) and §4.2 (the Back Room shop, both
 chunks, plus the day-in-act display fix) have all been built, playtested,
 and approved by the owner — verbatim: *"All up to date content has been
 playtested and is approved."* See `PROJECT_STATUS.md`'s "WHERE WE STOPPED"
-block for the full history and how each slice was verified. **Do not start
-§4.3 (mandates), §4.4 (the run deck), or §4.5 (meta-progression) without an
-explicit owner go-ahead** — approval of what's built so far is not
-automatically a green light for the next slice; same build → report →
-playtest → iterate discipline as every milestone before this one. Read
-`docs/DESIGN_V2.md` section 4 in full before touching any of §4.3–§4.5 — it
-has the exact mandate table, shop item categories, and the reasoning for
-why depth should live in cards/combinations, not more UI.
+block for the full history. **As of 2026-09-21, §4.3 is built and awaiting
+owner playtest:** six selectable/seeded mandates, persistent rules, and the
+Stairwell recording event. The owner confirmed Money means treasury.
+`SAVE_VERSION` is 7; prior saves reset. §4.4 and §4.5 remain unstarted and
+need an explicit instruction after this slice is playtested.
 
 **§4.2, the Back Room shop — BOTH CHUNKS BUILT AND APPROVED.** Owner
 amendment to the spec: the shop opens at the **end of every day**, not only
@@ -171,14 +166,10 @@ front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
 unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
-**Everything above (§4.1, §4.2 both chunks, the day counter fix) is now
-playtested and owner-approved** — verbatim: *"All up to date content has
-been playtested and is approved."* **Next in sequence, once the owner gives
-an explicit go-ahead for it:** §4.3 (mandates), then §4.4 (the run deck),
-then §4.5 (meta-progression), per the staged order in `docs/DESIGN_V2.md`
-§4/§6 — see `PROJECT_STATUS.md`'s "WHERE WE STOPPED" block for the
-specifics. This is the plan, not a go-ahead: approval of the shop/acts
-slice is not itself permission to start §4.3 — wait for the owner to say so.
+**§4.1, §4.2, and the day counter fix remain owner-approved. §4.3 is now
+built, awaiting owner playtest.** Next, after feedback and an explicit
+instruction: §4.4 run deck, then §4.5 meta-progression. See the current
+`PROJECT_STATUS.md` handoff and `docs/REVIEW_2026_09_21.md`.
 
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
@@ -192,7 +183,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-60 vitest tests pass (see the `npm test` line in Commands below for the
+85 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -222,22 +213,20 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `6`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `7`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 5→6 for
-    `heldDeals`/`endedDeals` (every deal now occupies a capped, cuttable
-    slot; `activeDeals` no longer exists); mandates/run-deck/meta-progression
-    will likely be the next time. A bump discards the owner's in-progress
-    run — say so when you report.
+    as long as the bump actually happens. Last bumped 6→7 for `mandateId`
+    and saved generated-ID bookkeeping. A bump discards the owner's
+    in-progress run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see
     `docs/DESIGN_V2.md` §10). Don't add a second hover-only mechanism for
     anything gameplay-critical (a price, a trade-off, a required condition)
-    either — the glossary's hover tooltip is allowed to stay as-is, but
-    nothing new should depend on hover alone to convey required information.
+    either — the glossary already uses plain-text Terms footnotes. Nothing
+    new should depend on hover alone to convey required information.
 
 ## Writing rules
 
@@ -257,7 +246,7 @@ know ("what does clearing the payroll mean?").
 8. **If a sentence needs an institutional/financial term a lay reader won't
    know, either say what it means in the same sentence (preferred), or add
    it to `GLOSSARY` in `src/game/glossary.ts`** — the first occurrence in any
-   card gets an automatic hover/tap definition. Don't assume the glossary
+   card gets a plain-text Terms definition. Don't assume the glossary
    covers something without checking; it's a backstop for terms that don't
    have a shorter plain-English substitute, not a license to leave jargon
    unexplained in the prose itself.
@@ -289,7 +278,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 60 tests: integrity, 200 full runs, determinism, variety,
+npm test           # 85 tests: integrity, 200 full runs, determinism, variety,
                    #   glossary, dayInAct, and 46 covering the Back Room shop (stock/
                    #   pricing, firing advisors, held/timed/cut deals, caps)
 ```
@@ -298,7 +287,9 @@ Browser verification (needs `npm run dev` running). **Test at 1366×700** —
 the viewport that has caught every real layout bug so far, twice:
 
 ```bash
-node tools/verify.mjs        # full pass: intro, scrolling, prices, ending, save
+npx playwright install chromium  # once per environment
+npm run test:browser        # starts Vite; all checks at 1366×700
+node tools/verify.mjs        # with a separately running Vite: full pass
 node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
 ```
@@ -309,7 +300,7 @@ node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
 src/game/                 no React, no DOM, fully testable
   types.ts                the whole vocabulary — start here
   rng.ts                  seeded RNG; its state lives in the save
-  state.ts                createGame(), opening scenarios, honorifics
+  state.ts                createGame(), mandate selection, honorifics
   effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point
   engine.ts               day loop, deck draw, alert weighting, endings
   briefing.ts             hidden state → plain-language warnings + threat cards
@@ -325,6 +316,7 @@ src/game/                 no React, no DOM, fully testable
                            display.ts is what narrows this for the player)
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
+  content/mandates.ts      six origins, generic rule data, Stairwell card
   content/                country, cards, cards2, followups, alerts, endings,
                            shop (the 47 Back Room items — pure data)
                            (all UNCHANGED by the display-layer cut — still the
@@ -410,3 +402,18 @@ asked:**
 
 If verification turns up a real failure, report that instead of merging —
 never merge broken or unverified work just to close out a session.
+
+## Mandate slice and review notes (2026-09-21)
+
+- `NewGameOptions.mandateId` chooses an origin; omitted/unknown rolls one
+  through the seeded RNG. Same seed shares baseline conditions across choices.
+- Mandate daily effects start on day 2; the Pay Deal's permanent $0.60B budget
+  commitment applies from day 1. All new effects use `applyEffects()`.
+- `Effects.resolvePromise` / `deferPromise` update named promises. Do not use
+  a report-counter flag as a substitute: that left paid promises open and
+  caused false lapse penalties. Content uses helicopter/hadem-road/lithium-wages IDs.
+- Generated effect IDs use `flags.__effectId`, not module-global state.
+- The browser scripts use installed Playwright Chromium, or an explicit
+  `PLAYWRIGHT_EXECUTABLE_PATH`; screenshots go to the OS temp directory's
+  `reign-check-shots` folder (`REIGN_SHOTS` overrides it).
+- Review details and remaining playtest risks: `docs/REVIEW_2026_09_21.md`.

@@ -1,5 +1,52 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
+## ▶ WHERE WE STOPPED — 2026-09-21
+
+**§4.3 MANDATES IS BUILT, AWAITING OWNER PLAYTEST.** The owner asked to begin
+next steps and review existing code. This session implemented only the next
+roadmap slice, plus concrete review fixes, on `codex/mandates-and-review`.
+When asked whether the mandate table's Money means cash or business loyalty,
+the owner selected **Treasury**.
+
+Six mandates: Stairwell, Landslide, Handover, Accident, Clean Hands Promise,
+and Pay Deal. Choose one or let the seeded RNG choose. The title screen shows
+starting changes and the selected rule; the briefing, Brief me, and ending
+retain the origin. The old randomized opening scenarios are replaced, not
+stacked under a contradictory origin. Faction loyalty starts near neutral,
+then the origin applies its changes with the existing relationship spillover.
+
+Generic data hooks in `content/mandates.ts`: start effects, daily effects,
+extra decisions, shop price multiplier, pressure-growth and patience-loss
+multipliers. Daily effects begin on day 2; the Pay Deal's budget line starts
+on day 1. The Stairwell schedules its one-time recording decision for day 4.
+The Handover discounts positive prices only; payouts remain unchanged.
+
+**Save version 6→7: existing in-progress runs reset.** The title no longer
+offers Continue based solely on stale metadata for an unreadable old save.
+
+Review fixes include deterministic effect IDs, duplicate-action protection,
+paid promises wrongly lapsing later, construction charged twice, cash-paying
+deals/zero-cash exits blocked while in debt, favour receipts replacing the
+current decision, and the shop exit requiring scrolling. Browser tools now
+use portable paths and fail on actual verification failures. Details and
+validation evidence: `docs/REVIEW_2026_09_21.md`.
+
+**Verification:** 85 tests pass (including 200 simulated runs and full-state
+replay across every mandate); production build clean. Real Chromium checks
+at 1366×700 cover all six starts, rules, save/reload, version-6 rejection,
+keyboard activation, discount/payout behavior, shops, endings, restart and
+act transition. `npm run test:browser` starts its own Vite server.
+
+**Next:** owner playtests this slice. Do not begin §4.4 (run deck) or §4.5
+(meta-progression) before feedback and an explicit instruction. Earlier acts
+and shop approval remains valid. Phase 3 balance and Phase 4 mobile remain
+deferred. The simulation still strongly rewards accommodating play; mandate
+balance is a playtest question, not a claim resolved by passing tests.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 > Read `AGENTS.md` first (the shared, model-agnostic knowledge base for
 > every agent on this project — Claude, ChatGPT, or otherwise), then
 > `CLAUDE.md` (Claude Code's copy of the same handover), then this file,
@@ -779,18 +826,10 @@ WE STOPPED" block at the top. Do this, in order:**
    caps with a held-panel, and the day-in-act display fix. All confirmed by
    the owner: *"All up to date content has been playtested and is
    approved."*
-3. ⬜ **STOP AND WAIT FOR THE NEXT EXPLICIT GO-AHEAD.** Owner approval of
-   what's built so far is not itself a go-ahead to start §4.3 — that needs
-   its own instruction. Do not begin §4.3/§4.4/§4.5 speculatively just
-   because the prior slice was approved.
-4. **Once the owner says to start the next slice, continue in order**: §4.3
-   (mandates) → §4.4 (run deck) → §4.5 (meta-progression), each its own
-   shippable slice per `docs/DESIGN_V2.md` §6's checklist. **Author content
-   as part of each slice, not separately** — §4.3 carries a mandate quota
-   (2–4 more beyond the 4 already specified), and §4.4 is where the
-   long-standing "~20 more standard cards + ~6 alerts" content gap
-   (limitation #1) gets closed, not a separate pass — see `docs/DESIGN_V2.md`
-   §4 for the exact quotas and §4.6 for suggested data shapes.
+3. ✅ **BUILT, AWAITING PLAYTEST.** §4.3 mandates (2026-09-21). Six
+   origins and their rules; see the current handoff above.
+4. **After owner feedback and an explicit instruction:** §4.4 run deck,
+   then §4.5 meta-progression. Keep content quotas inside each slice.
 5. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
@@ -981,9 +1020,12 @@ npm test           # vitest: content integrity, 200 full simulated runs,
                    # determinism, variety, glossary, and a balance probe
 ```
 
-Real-browser verification (requires `npm run dev` running):
+Real-browser verification (`npm run test:browser` starts its own server;
+individual scripts below require `npm run dev` running):
 
 ```bash
+npx playwright install chromium
+npm run test:browser
 node tools/verify.mjs        # full pass: intro, scrolling, prices, ending, save
 node tools/playthrough.mjs   # plays ~9 days, checks save/reload, screenshots
 node tools/to-ending.mjs     # drives to an ending, verifies restart

@@ -1,11 +1,12 @@
 // Drives the game to an ending by always taking the most aggressive option,
 // then screenshots the legacy report. Requires `npm run dev` on :5173.
-import { chromium } from 'playwright';
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+import assert from 'node:assert/strict';
+import { launchBrowser, shotPath } from './browser.mjs';
+const browser = await launchBrowser();
+const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
 const errs = [];
 page.on('pageerror', e => errs.push(String(e)));
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
+await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
 await page.evaluate(() => localStorage.clear());
 await page.reload({ waitUntil: 'networkidle' });
 await page.fill('.name-field input', 'Adrin Vo');
@@ -35,13 +36,17 @@ if (await page.locator('.ending-title').count()) {
   console.log('ENDING:', await page.locator('.ending-title').innerText());
   console.log('REGIME:', await page.locator('.ending-regime').innerText());
   console.log('VERDICT:', await page.locator('.ending-verdict').innerText());
-  await page.screenshot({ path: '/tmp/claude-0/shots/E-ending.png', fullPage: true });
+  await page.screenshot({ path: shotPath('E-ending.png'), fullPage: true });
   // restart works?
   await page.click('button:has-text("Try again")');
   await page.waitForTimeout(500);
-  console.log('RESTART OK:', await page.locator('.frontpage').count() > 0);
+  assert.ok(await page.locator('.frontpage').count(), 'Restart failed');
+  console.log('RESTART OK: true');
 } else {
-  console.log('NO ENDING REACHED');
+  await browser.close();
+  assert.equal(errs.length, 0, errs.join('\n'));
+  throw new Error('No ending reached');
 }
 console.log('PAGE ERRORS:', errs.length, errs.slice(0,3).join(' | '));
 await browser.close();
+assert.equal(errs.length, 0, errs.join('\n'));

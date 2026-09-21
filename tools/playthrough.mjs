@@ -1,13 +1,14 @@
-import { chromium } from 'playwright';
+import assert from 'node:assert/strict';
+import { launchBrowser, shotPath } from './browser.mjs';
 
 const errors = [];
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const browser = await launchBrowser();
+const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
 page.on('console', m => { if (m.type() === 'error') errors.push('CONSOLE: ' + m.text()); });
 page.on('pageerror', e => errors.push('PAGEERROR: ' + e.message));
 
-await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-await page.screenshot({ path: '/tmp/claude-0/shots/01-title.png' });
+await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+await page.screenshot({ path: shotPath('01-title.png') });
 
 // name + take office
 await page.fill('.name-field input', 'Adrin Vo');
@@ -16,7 +17,7 @@ await page.waitForTimeout(400);
 const introBtn0 = page.locator('.intro-foot .btn-primary');
 if (await introBtn0.count()) { await introBtn0.click(); await page.waitForTimeout(300); }
 await page.waitForSelector('.frontpage', { timeout: 5000 });
-await page.screenshot({ path: '/tmp/claude-0/shots/02-briefing-day1.png', fullPage: true });
+await page.screenshot({ path: shotPath('02-briefing-day1.png'), fullPage: true });
 
 const log = [];
 let shots = 2;
@@ -24,12 +25,12 @@ for (let step = 0; step < 90; step++) {
   // ending?
   if (await page.locator('.ending-title').count()) {
     log.push('ENDED: ' + await page.locator('.ending-title').innerText());
-    await page.screenshot({ path: '/tmp/claude-0/shots/99-ending.png', fullPage: true });
+    await page.screenshot({ path: shotPath('99-ending.png'), fullPage: true });
     break;
   }
   // breaking alert
   if (await page.locator('.alert-scrim .alert-card .opt').count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-ALERT.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-ALERT.png`), fullPage: true }); }
     log.push('ALERT: ' + (await page.locator('.alert-card .doc h1').innerText()));
     const opts = page.locator('.alert-scrim .alert-card .opt:not([disabled])');
     await opts.nth(0).click();
@@ -37,14 +38,14 @@ for (let step = 0; step < 90; step++) {
     continue;
   }
   if (await page.locator('.alert-scrim .outcome').count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-alert-outcome.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-alert-outcome.png`), fullPage: true }); }
     await page.locator('.alert-scrim .outcome .btn-primary').click();
     await page.waitForTimeout(160);
     continue;
   }
   // the Back Room
   if (await page.locator('.shop').count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-shop.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-shop.png`), fullPage: true }); }
     const names = await page.locator('.shop .offer h2').allInnerTexts();
     log.push('SHOP: ' + (names.join(' | ') || 'room closed'));
     const buy = page.locator('.shop .offer .btn-primary:not([disabled])');
@@ -56,7 +57,7 @@ for (let step = 0; step < 90; step++) {
   }
   // night review
   if (await page.locator('.night-sheet').count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-night.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-night.png`), fullPage: true }); }
     log.push('NIGHT: ' + (await page.locator('.night-head h2').innerText()));
     await page.locator('.strap-action').click();
     await page.waitForTimeout(220);
@@ -70,7 +71,7 @@ for (let step = 0; step < 90; step++) {
   }
   // outcome
   if (await page.locator('.stage-col .outcome').count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-outcome.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-outcome.png`), fullPage: true }); }
     await page.locator('.stage-col .outcome .btn-primary').click();
     await page.waitForTimeout(160);
     continue;
@@ -78,7 +79,7 @@ for (let step = 0; step < 90; step++) {
   // card
   const cardOpts = page.locator('.stage-col .doc .opt:not([disabled])');
   if (await cardOpts.count()) {
-    if (shots < 12) { shots++; await page.screenshot({ path: `/tmp/claude-0/shots/${String(shots).padStart(2,'0')}-card.png`, fullPage: true }); }
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-card.png`), fullPage: true }); }
     log.push('CARD: ' + (await page.locator('.stage-col .doc h1').innerText()));
     await cardOpts.nth(0).click();
     await page.waitForTimeout(160);
@@ -98,10 +99,14 @@ if (hasContinue) {
   await page.click('button:has-text("Continue — Day")');
   await page.waitForTimeout(500);
   log.push('RESUMED OK: ' + (await page.locator('.masthead .mid .lbl').count() ? 'yes' : 'no'));
-  await page.screenshot({ path: '/tmp/claude-0/shots/98-resumed.png', fullPage: true });
+  await page.screenshot({ path: shotPath('98-resumed.png'), fullPage: true });
 }
 
 console.log(log.join('\n'));
 console.log('\n--- ERRORS (' + errors.length + ') ---');
 console.log(errors.slice(0, 20).join('\n'));
 await browser.close();
+assert.equal(errors.length, 0, errors.join('\n'));
+assert.ok(saveRaw, 'No autosave');
+assert.ok(!log.some((l) => l.startsWith('STUCK')), 'Playthrough got stuck');
+if (JSON.parse(saveRaw).phase !== 'ended') assert.ok(hasContinue, 'Save could not resume');

@@ -232,6 +232,9 @@ export interface Effects {
   /** delayed consequences. `inDays` is relative to the day the effect resolves. */
   schedule?: ScheduleSpec[];
   promise?: PromiseSpec;
+  /** Close or explicitly extend the matching promise, not just its report count. */
+  resolvePromise?: { id: string; status: 'kept' | 'broken' };
+  deferPromise?: { id: string; inDays: number };
   project?: ProjectSpec;
   scandal?: ScandalSpec;
   /** recurring budget lines this choice creates */
@@ -448,6 +451,8 @@ export interface GameState {
   /** how people in the room address you: "sir", "ma'am", "chair" */
   honorific: string;
   startedAt: number;
+  /** Origin chosen or rolled at the start; rules live in content/mandates.ts. */
+  mandateId: string;
 
   day: number;
   maxDays: number;

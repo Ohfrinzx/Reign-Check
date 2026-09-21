@@ -7,12 +7,11 @@ of Velmorra** — lithium mines, a container port, an offshore banking zone,
 seven factions that all want something, and a national pigeon federation that
 can get more people into the street than either opposition party.
 
-The man who ran the country for nineteen years died in a stairwell nine days
-ago. You were his deputy. It was a job nobody wanted and nobody watched, which
-is exactly why you are still alive and now in charge.
+Krast is dead. You are the new **Executive Chair**. Choose one of six
+mandates — how you took power — or let fate decide. Each changes your
+starting position and gives you a rule for the whole run.
 
-You are the **Executive Chair**. Parliament votes on confirming you in thirty
-days. Nobody thinks you will get there.
+Survive **three acts of six days**, each ending in a confidence vote.
 
 ## Play
 
@@ -44,15 +43,15 @@ Then open http://localhost:5173.
 
 ## What it is
 
-Each **day** has three to five stages. Each stage deals you a **card**: a
+Each **day** has three to five stages (one more with The Accident). Each stage deals you a **card**: a
 minister with a request, a crisis, an offer, a number written on a card and
-slid across the desk. You pick an option. It changes your ten visible stats —
+slid across the desk. You pick an option. It changes your Money, Grip, Legitimacy and faction standing —
 and schedules something for a later day that you will have forgotten about by
 the time it arrives.
 
 The treasury is in dollars and it is also, in practice, your money. Options
 that cost money say so. Some decisions create a permanent budget line: a pay
-rise does not happen once, it happens every day. The **Treasury** panel shows
+rise does not happen once, it happens every day. The morning briefing’s **budget** shows
 exactly where the money goes and how long you have before the account is empty.
 
 At unpredictable moments a **BREAKING ALERT** takes over the screen. Alerts are
@@ -64,7 +63,25 @@ There are no government types to choose. The kind of government you ran is
 **named at the end**, from what you actually did.
 
 A **Brief me** button in the top bar explains who you are, who everyone else
-is, and all six ways to lose, at any point.
+is, and how you can lose, at any point.
+
+The **Back Room** opens each night: buy advisors, policies, favours and
+deals. Ordinary nights allow one purchase; after a confidence vote you can
+buy more. Every offer states its price and catch.
+
+## Verification
+
+```bash
+npm test
+npm run build
+npx playwright install chromium
+npm run test:browser
+```
+
+The browser suite starts Vite and tests at 1366×700. For a custom Chromium
+binary, set `PLAYWRIGHT_EXECUTABLE_PATH`. Screenshots go to the OS temporary
+directory under `reign-check-shots`; set `REIGN_SHOTS` to override it.
+Save version 7 replaces earlier in-progress runs.
 
 ## Notes
 
@@ -82,3 +99,4 @@ milestone, known limitations and the development handover.
 | `npm run dev` | Dev server on :5173 |
 | `npm run build` | Typecheck + production build to `dist/` |
 | `npm test` | Simulation tests: 200 full runs, content integrity, determinism |
+| `npm run test:browser` | Real-browser mandate, playthrough, ending and save checks |

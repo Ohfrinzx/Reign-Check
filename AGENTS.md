@@ -35,8 +35,8 @@ headlines, one red) in a **Broadsheet** layout (masthead + front-page
 briefing + card-as-lead-story + a right rail), showing **3 resources and 5
 factions** via a **display layer** (`src/game/display.ts`) over the full,
 untouched 10-stat/7-faction engine underneath. A glossary system
-(`src/game/glossary.ts` + `Prose.tsx`) auto-annotates jargon with
-plain-language definitions.
+(`src/game/glossary.ts` + `CardView.tsx`) supplies plain-text Terms footnotes;
+`Prose.tsx` renders prose without hover-only annotations.
 
 ## 2. Where the project actually is
 
@@ -56,10 +56,13 @@ in progress:
 - A small display fix (the masthead/front-page day counter reads `Day X / 6`,
   progress within the current act, instead of `Day X / 18`) — **BUILT AND
   OWNER-APPROVED.**
-- **§4.3 (mandates), §4.4 (the run deck), §4.5 (meta-progression) — NOT
-  started.** Approval of what's built so far is not itself a go-ahead for
-  the next slice. **Do not start any of §4.3–§4.5 without an explicit owner
-  instruction to do so.**
+- **§4.3 (mandates) — BUILT, awaiting owner playtest (2026-09-21).**
+  Six selectable/seeded origins, persistent rules, and a one-time Stairwell
+  event. `content/mandates.ts` replaces the old `OPENINGS` scenarios.
+  The owner confirmed that the mandate table's Money changes mean treasury.
+  `SAVE_VERSION` is **7**; version-6 in-progress runs reset.
+- **§4.4 (run deck) and §4.5 (meta-progression) — NOT started.** Wait for
+  mandate playtest and an explicit instruction before beginning another slice.
 
 For the exact, up-to-the-minute state (what shipped last, what's still
 mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s
@@ -124,7 +127,7 @@ part of building the slice, not before or after it.
     reason a future mobile/iOS port stays possible without a rewrite (see
     `docs/DESIGN_V2.md` §10). Don't add a second hover-only mechanism for
     anything gameplay-critical (a price, a trade-off, a required condition)
-    — the glossary's hover tooltip is allowed to stay as-is, but nothing new
+    — the glossary already uses plain-text Terms footnotes. Nothing new
     should depend on hover alone to convey required information.
 
 ## 5. Writing rules
@@ -145,7 +148,7 @@ know ("what does clearing the payroll mean?").
 8. **If a sentence needs an institutional/financial term a lay reader won't
    know, either say what it means in the same sentence (preferred), or add
    it to `GLOSSARY` in `src/game/glossary.ts`** — the first occurrence in any
-   card gets an automatic hover/tap definition. Don't assume the glossary
+   card gets a plain-text Terms definition. Don't assume the glossary
    covers something without checking; it's a backstop for terms that don't
    have a shorter plain-English substitute, not a license to leave jargon
    unexplained in the prose itself.
@@ -187,7 +190,9 @@ Browser verification (needs `npm run dev` running). **Test at 1366×700** —
 the viewport that has caught every real layout bug so far:
 
 ```bash
-node tools/verify.mjs        # full pass: intro, scrolling, prices, ending, save
+npx playwright install chromium  # once per environment
+npm run test:browser        # starts Vite; all checks at 1366×700
+node tools/verify.mjs        # with a separately running Vite: full pass
 node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
 ```
@@ -198,7 +203,7 @@ node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
 src/game/                 no React, no DOM, fully testable
   types.ts                the whole vocabulary — start here
   rng.ts                  seeded RNG; its state lives in the save
-  state.ts                createGame(), opening scenarios, honorifics,
+  state.ts                createGame(), mandate selection, honorifics,
                            dayInAct()/isActEndDay()/justAdvancedAct()
   effects.ts              THE CONSEQUENCE ENGINE — single mutation entry point
   engine.ts               day loop, deck draw, alert weighting, endings
@@ -215,6 +220,7 @@ src/game/                 no React, no DOM, fully testable
                            display.ts is what narrows this for the player)
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe
+  content/mandates.ts      six origins, generic rule data, Stairwell card
   content/                country, cards, cards2, followups, alerts, endings,
                            shop (the Back Room items — pure data)
                            (all UNCHANGED by the display-layer cut — still the
@@ -242,7 +248,8 @@ docs/
                             is still open — read this before UI work
   mockups/                  the design exploration that led here — reference,
                             not live code
-tools/                     Playwright scripts for real-browser testing
+tools/                     Playwright scripts; run-browser.mjs starts Vite
+                           and runs checks in one process tree
 ```
 
 ## 9. Special UI notes worth knowing before touching them
@@ -315,3 +322,18 @@ don't leave it to "whoever reads this next." Specifically:
   here, and where things currently stand in one paragraph"; the other two
   are the detailed narrative and design history. When in doubt, put the
   fact in `PROJECT_STATUS.md` and put a short pointer here.
+
+## 12. Mandate slice and review notes (2026-09-21)
+
+- `NewGameOptions.mandateId` chooses an origin; omitted/unknown rolls one
+  through the seeded RNG. Same seed shares baseline conditions across choices.
+- Mandate daily effects start on day 2; the Pay Deal's permanent $0.60B budget
+  commitment applies from day 1. All new effects use `applyEffects()`.
+- `Effects.resolvePromise` / `deferPromise` update named promises. Do not use
+  a report-counter flag as a substitute: that left paid promises open and
+  caused false lapse penalties. Content uses helicopter/hadem-road/lithium-wages IDs.
+- Generated effect IDs use `flags.__effectId`, not module-global state.
+- The browser scripts use installed Playwright Chromium, or an explicit
+  `PLAYWRIGHT_EXECUTABLE_PATH`; screenshots go to the OS temp directory's
+  `reign-check-shots` folder (`REIGN_SHOTS` overrides it).
+- Review details and remaining playtest risks: `docs/REVIEW_2026_09_21.md`.

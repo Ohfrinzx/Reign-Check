@@ -2,7 +2,8 @@ import { COUNTRY, CHARACTERS } from '../../game/content/country';
 import type { GameState } from '../../game/types';
 import { computeResources, DISPLAY_FACTIONS } from '../../game/display';
 import { FACTIONS } from '../../game/content/country';
-import { currentOpening, HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
+import { currentMandate } from '../../game/content/mandates';
+import { HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
 
 /**
  * Shown once before Day 1, and reachable any time from the "Brief me" button.
@@ -10,10 +11,10 @@ import { currentOpening, HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/sta
  * how does the money work, how do I lose, who are these people.
  */
 export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: () => void; returning?: boolean }) {
-  const opening = currentOpening(s);
+  const opening = currentMandate(s);
   const resources = computeResources(s);
   const keyPeople = CHARACTERS.filter((c) => ['varkov', 'sarran', 'brask', 'doran', 'adamek', 'hess'].includes(c.id));
-  const honorific = HONORIFICS.find((h) => h.id === s.honorific) ?? HONORIFICS[0];
+  const honorific = HONORIFICS.find((h) => h.id === s.honorific || h.word === s.honorific) ?? HONORIFICS[0];
 
   return (
     <div className="screen">
@@ -28,7 +29,8 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
         </div>
 
         <Section title="How you got here">
-          {COUNTRY.pitch.map((p, i) => <p key={i}>{p}</p>)}
+          <p><b>{opening.name}.</b> {opening.summary}</p>
+          <p><b>Your rule:</b> {opening.ruleText}</p>
         </Section>
 
         <Section title="What you are trying to do">
@@ -39,7 +41,7 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
             you have won.
           </p>
           <p>
-            Every day you will be handed three to five <b>cards</b>: a minister with a request, a crisis,
+            Every day you will be handed three to five <b>cards</b> (one more with The Accident): a minister with a request, a crisis,
             an offer, a bill. You pick an option. There is no undo, and most choices solve one problem
             by creating another one later.
           </p>
