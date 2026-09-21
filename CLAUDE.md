@@ -1,8 +1,9 @@
 # CLAUDE.md — read this first
 
-You are picking up **Dictator Sandbox**, a browser-based, card-driven political
-leadership simulation set in the fictional Republic of Velmorra. This file is
-the handover. Read it, then `PROJECT_STATUS.md`, then `docs/DESIGN_V2.md`.
+You are picking up **Reign Check** (development codename: Dictator Sandbox), a
+browser-based, card-driven political leadership simulation set in the
+fictional Republic of Velmorra. This file is the handover. Read it, then
+`PROJECT_STATUS.md`, then `docs/DESIGN_V2.md`.
 
 ## Where the project actually is
 

@@ -1,5 +1,6 @@
 /**
- * Core type vocabulary for the Dictator Sandbox simulation.
+ * Core type vocabulary for the Reign Check simulation (dev codename:
+ * Dictator Sandbox).
  *
  * Design rule: GameState is *pure serialisable data*. All behaviour lives in
  * content modules keyed by string id, so a save file is just JSON and content

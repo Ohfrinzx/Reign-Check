@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "A card-driven political leadership simulation set in the fictional Republic of Velmorra.",
+  "description": "Reign Check: a card-driven political leadership simulation set in the fictional Republic of Velmorra.",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

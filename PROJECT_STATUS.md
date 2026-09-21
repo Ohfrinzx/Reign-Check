@@ -1,4 +1,4 @@
-# PROJECT STATUS — Dictator Sandbox
+# PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 > Read `CLAUDE.md` first, then this file, then `docs/DESIGN_V2.md`.
 > Last updated: §4.2 (the Back Room shop) chunk 1 is BUILT — the shop itself,
@@ -252,8 +252,8 @@
 
 ## 1. Project overview
 
-**Dictator Sandbox** is a browser-based, card-driven political leadership
-simulation. The player is the **Executive Chair** of the fictional **Republic of
+**Reign Check** (dev codename: Dictator Sandbox) is a browser-based,
+card-driven political leadership simulation. The player is the **Executive Chair** of the fictional **Republic of
 Velmorra** and must stay in power for 30 days while managing seven factions,
 thirteen recurring characters, a real budget, and a schedule that is regularly
 interrupted by **Breaking Alerts**.
