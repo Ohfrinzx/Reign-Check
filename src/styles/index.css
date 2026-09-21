@@ -1,8 +1,15 @@
 /* =========================================================================
    DICTATOR SANDBOX — the Poster design system.
    Cream newsprint, condensed black display type, one red, flat shapes.
-   No dark surfaces anywhere. See docs/mockups/ for the design mockups this
-   was built from, and docs/DESIGN_V2.md for the reasoning.
+
+   The working day is light, always — the dark "desk" skin was reviewed and
+   rejected in Phase 1 and is not coming back. The ONE exception is the Back
+   Room (the shop), which runs the same system inverted via `.app.dark` at
+   the bottom of this file, so leaving the building's public rooms actually
+   looks like leaving them. Dark is a special occasion here, never a default.
+
+   See docs/mockups/ for the design mockups this was built from, and
+   docs/DESIGN_V2.md for the reasoning.
    ========================================================================= */
 
 :root{
@@ -29,6 +36,20 @@
   --mono:'Courier Prime', monospace;
 
   --radius: 2px;
+
+  /* Surfaces and lines that have to flip for the Back Room's dark theme.
+     They were hardcoded rgba(22,19,15,…) until the shop needed a dark mode;
+     as tokens, the whole dark theme is a token swap (see .app.dark). */
+  --hair:rgba(22,19,15,.20);
+  --hair-soft:rgba(22,19,15,.15);
+  --shadow:rgba(22,19,15,.15);
+  --dot:rgba(22,19,15,.05);
+
+  /* The masthead bar. Dark in the light theme AND in the dark one, so the
+     player's own nameplate and ledger are the one thing that never changes. */
+  --bar:#16130f;
+  --bar-text:#f2e9d5;
+  --bar-dim:#c9bfa8;
 }
 
 *{box-sizing:border-box}
@@ -42,7 +63,7 @@ body{
   line-height:1.5;
   -webkit-font-smoothing:antialiased;
   overflow:hidden;
-  background-image:radial-gradient(rgba(22,19,15,.05) 1px, transparent 1px);
+  background-image:radial-gradient(var(--dot) 1px, transparent 1px);
   background-size:4px 4px;
 }
 button{font-family:inherit;color:inherit}
@@ -56,7 +77,7 @@ button{font-family:inherit;color:inherit}
 
 .kicker{font-family:var(--black);font-size:10px;letter-spacing:.18em;text-transform:uppercase}
 .rule{border:0;border-top:3px solid var(--ink);margin:0}
-.rule-thin{border:0;border-top:1px solid rgba(22,19,15,.22);margin:0}
+.rule-thin{border:0;border-top:1px solid var(--hair);margin:0}
 .center{text-align:center}
 .mt{margin-top:18px}
 .row{display:flex;gap:10px;align-items:center}
@@ -93,12 +114,21 @@ abbr.term{
   height:100%;
   display:grid;
   grid-template-rows:auto auto minmax(0,1fr);
+  background:var(--paper);
+  /* `color` is re-declared here, not just on body: body resolves var(--ink)
+     in the light scope and children inherit that resolved value, so tokens
+     swapped by .app.dark would never reach inherited text. */
+  color:var(--ink);
+  background-image:radial-gradient(var(--dot) 1px, transparent 1px);
+  background-size:4px 4px;
+  transition:background-color .3s ease, color .3s ease;
 }
+.app .strap, .app .rail{transition:background-color .3s ease, border-color .3s ease}
 
 /* -------------------------------------------------------------- masthead */
 
 .masthead{
-  background:var(--ink);color:var(--paper);
+  background:var(--bar);color:var(--bar-text);
   display:grid;grid-template-columns:auto 1fr auto;align-items:stretch;
   position:relative;overflow:hidden;flex:none;
 }
@@ -108,7 +138,7 @@ abbr.term{
   font-family:var(--black);font-size:14px;flex:none;
 }
 .masthead .id .n{font-family:var(--head);font-size:23px;line-height:1;letter-spacing:.01em}
-.masthead .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.2em;color:#c9bfa8;margin-top:2px;text-transform:uppercase}
+.masthead .id .r{font-family:var(--sans);font-weight:700;font-size:9px;letter-spacing:.2em;color:var(--bar-dim);margin-top:2px;text-transform:uppercase}
 
 /* the red badge is sized to the label text itself (padding, not a fixed
    width guessed in advance) so it never straddles the text at the edges
@@ -125,8 +155,8 @@ abbr.term{
    balanced left-to-right instead of everything clustering by the nameplate */
 .masthead-right{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding-right:6px}
 .masthead-right .btn{padding:6px 12px;font-size:9.5px}
-.masthead-right .btn-ghost{color:#c9bfa8;border-color:transparent}
-.masthead-right .btn-ghost:hover{color:var(--paper);border-color:var(--paper)}
+.masthead-right .btn-ghost{color:var(--bar-dim);border-color:transparent}
+.masthead-right .btn-ghost:hover{color:var(--bar-text);border-color:var(--bar-text)}
 
 /* resource ledger, lives in the masthead */
 .res{display:flex;position:relative;z-index:2}
@@ -150,7 +180,7 @@ abbr.term{
 .bg-good{background:var(--teal)} .bg-ok{background:#4c6b2e} .bg-warn{background:var(--mustard)} .bg-bad{background:var(--red)}
 
 /* on light ground (used inside panels, not the dark masthead) */
-.res.light .r{border-left-color:rgba(22,19,15,.18)}
+.res.light .r{border-left-color:var(--hair)}
 .res.light .l{color:var(--ash)}
 .res.light .bar{background:var(--paper-3)}
 .res.light .v{color:var(--ink)}
@@ -231,7 +261,7 @@ abbr.term{
 
 /* -------------------------------------------------------------- commitments */
 
-.cmt{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed rgba(22,19,15,.2);font-size:12px}
+.cmt{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--hair);font-size:12px}
 .cmt:last-child{border-bottom:0}
 .cmt .n{color:var(--ink-soft)}
 .cmt .v{font-family:var(--mono);font-weight:700;color:var(--red);white-space:nowrap}
@@ -257,7 +287,7 @@ abbr.term{
 
 .doc{
   background:var(--paper);border:3px solid var(--ink);
-  box-shadow:8px 8px 0 rgba(22,19,15,.15);
+  box-shadow:8px 8px 0 var(--shadow);
   animation:rise .42s cubic-bezier(.2,.9,.25,1) both;position:relative;
 }
 @keyframes rise{from{opacity:0;transform:translateY(46px)}to{opacity:1;transform:none}}
@@ -289,7 +319,7 @@ abbr.term{
 .opts{padding:6px 20px 18px;display:grid;border-top:2px solid var(--ink)}
 .opt{
   display:flex;align-items:center;gap:13px;text-align:left;width:100%;cursor:pointer;background:transparent;
-  border:0;border-bottom:1px solid rgba(22,19,15,.2);padding:13px 4px;
+  border:0;border-bottom:1px solid var(--hair);padding:13px 4px;
   transition:background .12s, padding .12s, color .12s;
 }
 .opt:last-child{border-bottom:0}
@@ -311,7 +341,7 @@ abbr.term{
 /* plain-text glossary footnote — replaces the old hover-only <abbr>, so a
    term's definition is visible without a mouse (see Prose.tsx) */
 .card-glossary{
-  padding:8px 20px 14px;border-top:1px dashed rgba(22,19,15,.25);
+  padding:8px 20px 14px;border-top:1px dashed var(--hair);
   display:flex;flex-direction:column;gap:4px;
 }
 .card-glossary span{font-family:var(--body);font-style:italic;font-size:11.5px;color:var(--ink-soft);line-height:1.4}
@@ -351,7 +381,7 @@ abbr.term{
 
 .outcome{
   max-width:760px;margin:0 auto;background:var(--paper);border:3px solid var(--ink);
-  border-left-width:8px;box-shadow:8px 8px 0 rgba(22,19,15,.15);
+  border-left-width:8px;box-shadow:8px 8px 0 var(--shadow);
   animation:rise .38s cubic-bezier(.2,.9,.25,1) both;
 }
 .outcome.good{border-left-color:var(--teal)}
@@ -387,7 +417,7 @@ abbr.term{
 .tray .sh .st{padding:7px 10px;font-family:var(--sans);font-weight:800;font-size:8.5px;letter-spacing:.16em;color:var(--ash);text-transform:uppercase}
 .tray .sh .st b{display:block;font-family:var(--head);font-size:14px;letter-spacing:0;color:var(--ink);margin-top:2px;text-transform:none}
 
-.run{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(22,19,15,.16)}
+.run{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--hair-soft)}
 .run:last-child{border-bottom:0}
 .run .t{font-family:var(--mono);font-size:10.5px;width:40px;color:var(--ash);flex:none}
 .run .n{font-family:var(--sans);font-weight:600;font-size:12px}
@@ -469,7 +499,7 @@ abbr.term{
 .fp-lead h2:first-child{margin-top:0}
 .fp-rail{padding:16px 0 20px 22px}
 
-.headline-item{padding:9px 0;border-bottom:1px dashed rgba(22,19,15,.22)}
+.headline-item{padding:9px 0;border-bottom:1px dashed var(--hair)}
 .headline-item:last-child{border-bottom:0}
 .headline-item .h{font-family:var(--black);font-size:13.5px;text-transform:uppercase;line-height:1.2}
 .headline-item .h .sev{color:var(--red)}
@@ -594,7 +624,7 @@ abbr.term{
 
 .shop{
   background:var(--paper);border:3px solid var(--ink);
-  box-shadow:8px 8px 0 rgba(22,19,15,.15);
+  box-shadow:8px 8px 0 var(--shadow);
   animation:rise .42s cubic-bezier(.2,.9,.25,1) both;
 }
 .shop.big{border-color:var(--red);box-shadow:8px 8px 0 rgba(204,43,29,.18)}
@@ -619,7 +649,7 @@ abbr.term{
 
 .shop-grid{display:flex;flex-direction:column}
 
-.offer{padding:12px 24px 13px;border-bottom:1px solid rgba(22,19,15,.2);position:relative}
+.offer{padding:12px 24px 13px;border-bottom:1px solid var(--hair);position:relative}
 .offer:last-child{border-bottom:0}
 .offer.broke{opacity:.62}
 
@@ -702,5 +732,92 @@ abbr.term{
 .shop.big .shop-purse .limit{color:var(--mustard)}
 .shop-closed{
   padding:16px 24px;font-family:var(--body);font-style:italic;font-size:13.5px;
-  color:var(--ink-soft);line-height:1.5;border-bottom:1px solid rgba(22,19,15,.2);
+  color:var(--ink-soft);line-height:1.5;border-bottom:1px solid var(--hair);
 }
+
+/* =========================================================================
+   THE BACK ROOM — DARK.
+
+   The Poster skin is a light newsprint system and stays that way for the
+   whole working day. The shop is the one place the game goes dark, on
+   purpose: you have left the building's public rooms and gone somewhere
+   else, and the contrast is the point.
+
+   NOTE this is NOT the dark "desk" skin that was rejected in Phase 1
+   (docs/DESIGN_V2.md §5) — that was a different visual language with
+   different type. This is the SAME Poster system inverted: same condensed
+   headlines, same one red, same flat shapes, different surface. Dark stays
+   a special occasion here, never the default.
+
+   Implementation: `.app.dark` swaps the surface tokens and nothing else has
+   to know. Only the handful of rules below, where `--paper` meant "light
+   text sitting on a dark thing" rather than "the page", need a real
+   override.
+   ========================================================================= */
+
+.app.dark{
+  /* Three depths, so the screen does not read as one flat slab: the room
+     itself (the .app background below) is deepest, the surfaces sitting in
+     it — strap, rail, the shop card — are lifted, and the masthead bar goes
+     deeper still so the nameplate keeps a clean top edge. */
+  --paper:#1e1913;
+  --paper-2:#282118;
+  --paper-3:#362d23;
+  --ink:#f2e9d5;
+  --ink-soft:#b6ac96;
+  --ash:#8a8070;
+  --red:#e8452f;
+  --red-deep:#ff7057;
+  --teal:#5bb3c0;
+  --mustard:#e0ab3f;
+
+  --good:#5bb3c0;
+  --ok:#95c464;
+  --warn:#e0ab3f;
+  --bad:#e8452f;
+
+  --hair:rgba(242,233,213,.17);
+  --hair-soft:rgba(242,233,213,.11);
+  --shadow:rgba(0,0,0,.55);
+  --dot:rgba(242,233,213,.05);
+
+  /* the nameplate goes deeper than anything else so it still reads as a bar */
+  --bar:#080706;
+
+  /* the room itself — deeper than the surfaces standing in it */
+  background:#100d0a;
+}
+
+/* --- places where var(--paper) meant "text on a dark thing", not "page" --- */
+
+/* the red call-to-action in the strap keeps light text */
+.app.dark .strap-action{color:#fbf6ea}
+.app.dark .strap-action:hover{background:var(--ink);color:#15120e}
+
+/* rail threat cards: a deeper red so light text still sits on top of it */
+.app.dark .threat{background:#a32a1a;color:#f7f0e0}
+.app.dark .threat.low{background:#261f18;color:#e6dcc6}
+.app.dark .pip{border-color:#f7f0e0}
+
+/* the act room's header slab would invert to a big cream block; make it
+   a deep red instead, which suits the night you survived a vote */
+.app.dark .shop.big .shop-head{background:#4a120b;color:#f7f0e0;border-bottom-color:var(--red)}
+.app.dark .shop.big .shop-sub{color:#d8c4ad}
+.app.dark .shop.big .shop-purse{color:#d8c4ad}
+.app.dark .shop.big .shop-purse b{color:#fbf6ea}
+.app.dark .shop.big{border-color:var(--red);box-shadow:8px 8px 0 rgba(0,0,0,.6)}
+
+/* the cream chips and buttons that now sit on dark read as inverted accents,
+   which is correct — just make sure their text is the dark surface colour */
+.app.dark .offer-top .k{background:var(--ink);color:#15120e}
+.app.dark .btn-primary{background:var(--ink);color:#15120e;border-color:var(--ink)}
+.app.dark .btn-primary:hover:not(:disabled){background:var(--red);color:#fbf6ea;border-color:var(--red)}
+.app.dark .btn:hover:not(:disabled){background:var(--ink);color:#15120e}
+
+/* the rare item's wash was tuned for cream stock */
+.app.dark .offer.rare{background:linear-gradient(90deg, rgba(232,69,47,.10), transparent 62%)}
+
+/* the "what you get" body copy is the one place the doc's fixed ink shows */
+.app.dark .offer .line{color:var(--ink)}
+.app.dark .offer .line.down{color:#ff8a72}
+.app.dark .shop-receipt{background:var(--paper-2)}

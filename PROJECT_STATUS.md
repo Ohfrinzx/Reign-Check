@@ -47,6 +47,18 @@
 > feels samey, that is this, and the fix is content, not mechanics — run
 > `shop.probe.ts` before changing any rule.**
 >
+> **The Back Room is DARK — the only dark screen in the game.** Owner request
+> after the first build: *"I really want it to feel as if you are some place
+> else."* Entering the shop swaps the whole viewport (page, strap, rail, card)
+> to a dark version of the same Poster system. **This is NOT the dark desk
+> skin rejected in Phase 1** — that was different type proposed as the game's
+> default. Dark here is the exception that makes the rest read as daylight,
+> so do not darken anything else without asking. `.app.dark` in `index.css`
+> does it as a token swap; the masthead keeps its own `--bar` tokens so the
+> nameplate and ledger are the one thing that never changes. Verified with a
+> computed-style contrast probe in a real browser, not just screenshots — see
+> `docs/DESIGN_V2.md` §4.2 for the `color`-inheritance trap it caught.
+>
 > **Also fixed in passing:** `tools/verify.mjs`, `tools/to-ending.mjs` and
 > `tools/playthrough.mjs` had been stale since the Poster rebuild (they still
 > looked for `Take Office`, `.card`, `.action-bar`, `.dossier`, `.daychip` and
