@@ -60,8 +60,9 @@ in progress:
   origins, persistent rules, and a one-time Stairwell event.
   `content/mandates.ts` replaces the old `OPENINGS` scenarios. The owner
   confirmed that the mandate table's Money changes mean treasury.
-- **§4.4 (the run deck) — BUILT, awaiting owner playtest (2026-09-21, later
-  session).** `GameState.runDeck`/`bannedCards` plus `Effects.deck.add`/
+- **§4.4 (the run deck) — BUILT AND OWNER-APPROVED (2026-09-21, later
+  session).** Owner-playtested and bug-checked by a ChatGPT-based agent,
+  approved. `GameState.runDeck`/`bannedCards` plus `Effects.deck.add`/
   `remove`, read by `cardWeight()`/`alertWeight()` in `engine.ts`: a card
   the player holds copies of draws more often (bounded by the existing
   3-day recency gate); a banned card never draws again. 8 new Back Room
@@ -70,8 +71,9 @@ in progress:
   alerts (appended to `content/alerts.ts`, filling in the previously-unused
   `scandal`/`corruption`/`cult` drivers). `SAVE_VERSION` is **8**;
   version-7 in-progress runs reset.
-- **§4.5 (meta-progression) — NOT started.** Wait for run-deck playtest and
-  an explicit instruction before beginning another slice.
+- **§4.5 (meta-progression) — NOT started.** Wait for an explicit
+  instruction before beginning it — approval of §4.4 is not itself that
+  instruction, per the same staged-slice discipline as every prior step.
 
 For the exact, up-to-the-minute state (what shipped last, what's still
 mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s

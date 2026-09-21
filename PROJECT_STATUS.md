@@ -1,11 +1,19 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
-## ▶ WHERE WE STOPPED — 2026-09-21 (later session)
+## ▶ WHERE WE STOPPED — 2026-09-21 (later session, updated)
 
-**§4.3 MANDATES IS PLAYTESTED AND APPROVED.** §4.4 (THE RUN DECK) IS BUILT,
-AWAITING OWNER PLAYTEST. The owner confirmed mandates had been playtested
-and approved, and gave the go-ahead to move to the next slice — §4.4 per the
-staged order in `docs/DESIGN_V2.md` §4/§6. This session built it on
+**§4.4 (THE RUN DECK) IS NOW PLAYTESTED AND OWNER-APPROVED.** Owner-played
+and bug-checked by a ChatGPT-based agent — verbatim: *"Previous code was
+playtested by me a bug checked by chatgpt agents. All approved and ready to
+move onto the next slice."* §4.1, §4.2, §4.3, and §4.4 are now all built,
+playtested, and owner-approved. **§4.5 (meta-progression) is next per the
+staged order, but still needs its own explicit go-ahead** — the owner's
+"ready to move onto the next slice" is a statement of intent, not yet a
+start instruction for §4.5's specific scope, so this session held off
+starting it and produced this documentation-audit-plus-report instead, as
+asked.
+
+This session (the one that built §4.4) worked on
 `claude/exciting-dijkstra-jtlmbh`, merged forward from
 `claude/confident-meitner-lc0bgc` first to pick up the mandates work (which
 had landed on a separate branch, `codex/mandates-and-review`, since another
@@ -60,9 +68,12 @@ policy, from the 6 new alerts adding pressure to the pool. Flagging this
 rather than tuning it blind — as with mandates, balance is a playtest
 question, not one passing tests resolves.
 
-**Next:** owner playtests this slice. Do not begin §4.5 (meta-progression)
-before feedback and an explicit instruction, per the same staged-slice
-discipline as every milestone so far.
+**Next:** §4.5 (meta-progression) is the only unbuilt piece of Phase 2 left.
+Wait for the owner's explicit go-ahead to start it — per
+`docs/DESIGN_V2.md` §4.5's own suggestion, consider shipping it with
+everything unlocked by default first (de-risking the slice the same way the
+display-layer cut de-risked Phase 1), then layering in real unlock
+conditions as a follow-up once that base loop is playtested.
 
 ---
 
@@ -552,11 +563,11 @@ Playwright scripts for real-browser playthroughs.
 everything seems to run and look good."* **PHASE 1: ✅ DECLARED COMPLETE BY
 THE OWNER.**
 **PHASE 2 — THE ROGUELIKE LAYER: 🟢 GREENLIT, IN PROGRESS.** §4.1 (acts +
-confidence vote) and §4.2 (the Back Room shop, both chunks, plus the
-day-in-act display fix) are **BUILT AND OWNER-APPROVED**. §4.3 (mandates),
-§4.4 (the run deck), and §4.5 (meta-progression) are **NOT started** and
-need their own explicit owner go-ahead — see the "WHERE WE STOPPED" block
-above, `AGENTS.md`, and `CLAUDE.md`.
+confidence vote), §4.2 (the Back Room shop, both chunks), §4.3 (mandates),
+and §4.4 (the run deck) are all **BUILT AND OWNER-APPROVED**. Only §4.5
+(meta-progression) remains, and it is **NOT started** — it needs its own
+explicit owner go-ahead — see the "WHERE WE STOPPED" block above,
+`AGENTS.md`, and `CLAUDE.md`.
 
 ### Playtest round 2 — what was reported, and what was done
 
@@ -821,11 +832,12 @@ of this file.
 
 ## 4. What is NOT built yet
 
-**The roguelike layer — acts, the Back Room shop, mandates, a run deck,
-meta-progression (`docs/DESIGN_V2.md` §4) — is GREENLIT and is the current
-task.** It is listed here only as "not yet built", not as deferred; see the
-"WHERE WE STOPPED" block at the top of this file and `CLAUDE.md` for how to
-start it.
+**Of the roguelike layer (`docs/DESIGN_V2.md` §4), only meta-progression
+(§4.5) remains.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),
+and the run deck (§4.4) are all built, playtested, and owner-approved. §4.5
+is listed here only as "not yet built", not as deferred — it is GREENLIT as
+part of Phase 2, but still needs its own explicit go-ahead before starting;
+see the "WHERE WE STOPPED" block at the top of this file and `CLAUDE.md`.
 
 Everything else below is Phase 3, 4, or 5 per `docs/DESIGN_V2.md` §9 — all
 genuinely deferred until Phase 2 ships and is playtested, and all still need
@@ -868,11 +880,11 @@ to be asked about before starting:
 
 | # | Issue | Severity | Notes |
 |---|-------|----------|-------|
-| 1 | **Content volume.** 25 draftable standard cards for a 30-day run at 3–5 cards/day means a long run will exhaust fresh material and start reusing cards once the recency window passes. | Medium | The recency window and once-per-run flags keep repeats ≥4 days apart, and the engine shortens the day rather than repeating, but a 30-day run still feels thinner after ~day 18. **Slated to be fixed as part of Phase 2 §4.4** (run deck), which calls for ~20 more standard cards + ~6 alerts; the shorter 18-day act structure also independently reduces exposure to this gap. |
+| 1 | ~~**Content volume.**~~ | Addressed | Was: 25 draftable standard cards for a 30-day run at 3–5 cards/day meant a long run exhausted fresh material and started reusing cards once the recency window passed. **Fixed as part of Phase 2 §4.4** (the run deck, 2026-09-21): 20 more standard cards (`content/cards3.ts`) and 6 more alerts, plus the 18-day act structure independently reducing exposure. Whether it feels sufficiently varied in a full playtest is still worth watching, but the raw pool-size gap this row described is closed. |
 | 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for a Phase 3 balance pass (`docs/DESIGN_V2.md` §9) rather than tuned now, since Phase 2's shop economy will change the curve anyway. |
 | 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it — part of the same Phase 3 balance pass. |
 | 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
-| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. **Will very likely need to bump again for Phase 2** (ground rule 10). |
+| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. Bumped repeatedly through Phase 2 as predicted: 2→3 (acts), 3→4→...→6 (the shop's several slices), 6→7 (mandates), 7→8 (the run deck). Each bump discards in-progress runs, by design — `save.ts` fails safe. §4.5 (meta-progression) will very likely need another bump if it lands. |
 | 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet — this is the real remaining gap for a future Phase 4 (mobile/iOS, `docs/DESIGN_V2.md` §10), not scheduled. |
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
@@ -883,8 +895,9 @@ to be asked about before starting:
 
 ## 6. Recommended next task
 
-**§4.1 and §4.2 (both chunks) are built and OWNER-APPROVED, per the "WHERE
-WE STOPPED" block at the top. Do this, in order:**
+**§4.1, §4.2 (both chunks), §4.3, and §4.4 are all built and
+OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Do this, in
+order:**
 
 1. ✅ **DONE, APPROVED.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3
    acts of 6 days each (18 total), ending in a confidence vote checked
@@ -894,15 +907,22 @@ WE STOPPED" block at the top. Do this, in order:**
    caps with a held-panel, and the day-in-act display fix. All confirmed by
    the owner: *"All up to date content has been playtested and is
    approved."*
-3. ✅ **BUILT, AWAITING PLAYTEST.** §4.3 mandates (2026-09-21). Six
-   origins and their rules; see the current handoff above.
-4. **After owner feedback and an explicit instruction:** §4.4 run deck,
-   then §4.5 meta-progression. Keep content quotas inside each slice.
-5. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
+3. ✅ **DONE, APPROVED.** §4.3 mandates (2026-09-21). Six origins and
+   their rules.
+4. ✅ **DONE, APPROVED.** §4.4 the run deck (2026-09-21, later session).
+   `runDeck`/`bannedCards`, 8 new deck-affecting shop policies, 20 new
+   standard cards, 6 new alerts. Owner-played and bug-checked by a
+   ChatGPT-based agent.
+5. **After an explicit owner instruction:** §4.5 meta-progression — the
+   only unbuilt piece of Phase 2 left. Keep its content quota (if any)
+   inside the slice, same discipline as every step above. Consider the
+   design doc's own suggestion of shipping with everything unlocked by
+   default first, then layering in real unlock conditions as a follow-up.
+6. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
    is not needed unless a future note specifically asks for it again.
-6. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
+7. **Once Phase 2 (§4.1–§4.5) ships and is playtested, move to Phase 3**
    (`docs/DESIGN_V2.md` §9): faction demands as a live mechanic (Milestone
    2), character-driven events (Milestone 3), crisis chains (Milestone 4),
    then a balance pass on the difficulty asymmetry and coup-ending rarity

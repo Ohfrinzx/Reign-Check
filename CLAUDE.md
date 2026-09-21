@@ -41,7 +41,7 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 2 — §4.1/§4.2/§4.3 APPROVED; §4.4 BUILT, AWAITING PLAYTEST
+## PHASE 2 — §4.1/§4.2/§4.3/§4.4 APPROVED; §4.5 NOT STARTED
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
@@ -59,13 +59,15 @@ agent tool on this project (on `codex/mandates-and-review`, merged into
 because more than one agent works this codebase, and any of them can hand
 off a slice to any other.
 
-**As of 2026-09-21 (later session), §4.4 (the run deck) is built and
-awaiting owner playtest:** `GameState.runDeck`/`bannedCards`, a new
-`Effects.deck.add`/`remove`, 8 new Back Room policies that use it, plus
-this slice's content quota — 20 new standard cards (`content/cards3.ts`)
-and 6 new alerts. See the "§4.4, the run deck" section below for the full
-detail. `SAVE_VERSION` is 8; prior saves reset. §4.5 remains unstarted and
-needs an explicit instruction after this slice is playtested.
+**As of 2026-09-21 (later session), §4.4 (the run deck) is now playtested
+and owner-approved** — owner-played and bug-checked by a ChatGPT-based
+agent. `GameState.runDeck`/`bannedCards`, a new `Effects.deck.add`/
+`remove`, 8 new Back Room policies that use it, plus this slice's content
+quota — 20 new standard cards (`content/cards3.ts`) and 6 new alerts. See
+the "§4.4, the run deck" section below for the full detail. `SAVE_VERSION`
+is 8; prior saves reset. **§4.5 (meta-progression) remains unstarted and
+needs its own explicit instruction — approval of §4.4 is not itself that
+instruction**, per the same staged-slice discipline as every prior step.
 
 **§4.2, the Back Room shop — BOTH CHUNKS BUILT AND APPROVED.** Owner
 amendment to the spec: the shop opens at the **end of every day**, not only
@@ -178,12 +180,11 @@ front-page edition line (`Screens.tsx`) so both now show `Day X / 6`
 unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
-**§4.1, §4.2, §4.3, and the day counter fix are all owner-approved. §4.4 is
-now built, awaiting owner playtest.** Next, after feedback and an explicit
-instruction: §4.5 meta-progression. See the current `PROJECT_STATUS.md`
-handoff and `docs/REVIEW_2026_09_21.md`.
+**§4.1, §4.2, §4.3, §4.4, and the day counter fix are all owner-approved.**
+Next, waiting for an explicit instruction: §4.5 meta-progression. See the
+current `PROJECT_STATUS.md` handoff and `docs/REVIEW_2026_09_21.md`.
 
-**§4.4, the run deck — BUILT, awaiting owner playtest.** `GameState.runDeck:
+**§4.4, the run deck — BUILT AND OWNER-APPROVED.** `GameState.runDeck:
 string[]` and `GameState.bannedCards: string[]`, plus a new
 `Effects.deck?: { add?: string[]; remove?: string[] }` handled in
 `effects.ts`. `add` pushes a card id into `runDeck`; `engine.ts`'s

@@ -81,7 +81,7 @@ npm run test:browser
 The browser suite starts Vite and tests at 1366×700. For a custom Chromium
 binary, set `PLAYWRIGHT_EXECUTABLE_PATH`. Screenshots go to the OS temporary
 directory under `reign-check-shots`; set `REIGN_SHOTS` to override it.
-Save version 7 replaces earlier in-progress runs.
+Save version 8 replaces earlier in-progress runs.
 
 ## Notes
 

@@ -1,11 +1,12 @@
 # Design V2 — simplification and the roguelike turn
 
-**Current status (2026-09-21): Phase 1 and Phase 2 §4.1/§4.2 are
-OWNER-APPROVED. §4.3 (six mandates) is BUILT, awaiting owner playtest.
-§4.4 (run deck) and §4.5 (meta-progression) are NOT started.** Each slice
-still requires feedback and a new instruction before starting the next.
-See `PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
-Historical implementation notes below describe earlier checkpoints.
+**Current status (2026-09-21, later session): Phase 1 and Phase 2
+§4.1/§4.2/§4.3/§4.4 are all OWNER-APPROVED. Only §4.5 (meta-progression) is
+NOT started.** Each slice still requires its own feedback and a new
+instruction before starting the next — approval of §4.4 is not itself a
+green light for §4.5. See `PROJECT_STATUS.md`'s current handoff and
+`docs/REVIEW_2026_09_21.md`. Historical implementation notes below describe
+earlier checkpoints.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -32,9 +33,9 @@ Decisions made by the owner, in order:
    folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
    what to preserve and what to avoid, no mobile work scheduled).
 
-**What is NOT built yet:** the run deck (§4.4) and meta-progression (§4.5).
-Mandates are the current playtest slice. Read section 9 for later phases
-and section 10 for the mobile architecture guardrails.
+**What is NOT built yet:** meta-progression (§4.5) — the last piece of
+Phase 2. Read section 9 for later phases and section 10 for the mobile
+architecture guardrails.
 
 ---
 
@@ -432,8 +433,9 @@ they were built, earlier in this section.
 
 **Known and deliberate, still true at 47 items:** a maximally efficient
 buyer still won't see the whole pool in one 18-day run — that is the
-point, not a gap. "Burn a file" from the original spec below still needs
-§4.4's run deck to exist first.
+point, not a gap. "Burn a file" from the original spec below shipped as
+part of §4.4 (the run deck, below): 4 of that slice's 8 new policies use
+`effects.deck.remove` to permanently ban a specific recurring card.
 
 **The original spec, for reference:**
 
@@ -454,7 +456,7 @@ the same way standard cards have grown across `cards.ts`/`cards2.ts`.* This
 is real new game content, and the natural home for most of "I want to add
 more content."
 
-### 4.3 Mandate — BUILT, awaiting playtest
+### 4.3 Mandate — BUILT AND OWNER-APPROVED
 
 Chosen or rolled at the start of each run. Sets starting factions and adds one
 unique rule for the whole run.
@@ -506,7 +508,7 @@ selected rule is visible in the morning briefing and Brief me; the ending
 names the origin. No new hidden numbers are displayed. See the review report
 for regression fixes and measured changes; balance still needs playtesting.
 
-### 4.4 Deck
+### 4.4 Deck — BUILT AND OWNER-APPROVED
 
 Today, events are drawn from a global weighted pool. In V2 the player has a
 **run deck** that shops add to and remove from. Situation cards still get
@@ -520,6 +522,49 @@ to add/burn meaningfully defeats the point of this feature. Pure content
 work in `cards2.ts` or a new `cards3.ts`, zero engine changes (ground rule 5)
 — note the act structure also independently helps here, since a run is now
 18 days instead of 30.*
+
+**As built, 2026-09-21 (later session):** `GameState.runDeck: string[]` and
+`GameState.bannedCards: string[]`, plus a new `Effects.deck?: { add?:
+string[]; remove?: string[] }` handled in `effects.ts`. `add` pushes a card
+id into `runDeck`; `engine.ts`'s `cardWeight()` gives each copy held there a
+flat weight bonus (`RUN_DECK_WEIGHT_BONUS`) on top of whatever the card's
+own weight function already returns — "a growing share of what you see is
+what you built," per the paragraph above. `remove` bans a card id into
+`bannedCards`, checked first by both `cardWeight()` and the alert
+equivalent, `alertWeight()`, and always returning 0 for a banned id —
+banning wins even over held copies of the same id, and there is no
+"un-ban." Both mechanisms only affect the ordinary weighted draw: a card
+reached by `schedule`/`queueCard` from another card's own outcome still
+arrives regardless, same as before this slice.
+
+The existing 3-day recency gate in `cardWeight()` (no repeat within 3 days)
+is NOT bypassed by the weight bonus — it still caps how often any card,
+boosted or not, can appear (roughly once per 4 days, ~5 times in an 18-day
+run). Measured in `deck.test.ts`: holding 3 copies of a card produces a
+real, non-trivial lift in how often it is drawn across a run, not an
+unlimited one — that ceiling is the intended shape, matching this project's
+existing "no card repeats within 4 days" rule (`variety.test.ts`), not a
+bug to relax later.
+
+Shipped content: **8 new Back Room policies** in `content/shop.ts` using
+`effects.deck` — 4 "add" (`sarran-standing-order`, `loz-standing-slot`,
+`piek-standing-invite`, `adamek-open-line`) and 4 "remove"
+(`automate-payroll`, `settle-with-gorsk`, `quiet-word-doran`,
+`close-free-zone-file`), each targeting a real, already-repeatable card
+from the existing pool (never a `base: 0, weight: () => 0` followup-only
+card, which would silently do nothing). Plus the content quota above: **20
+new standard cards** in a new file, `content/cards3.ts`, and **6 new
+alerts** appended to `content/alerts.ts`, filling in three drivers that had
+no alert at all before this slice — `scandal`, `corruption`, and `cult`.
+
+Owner-played and bug-checked by a ChatGPT-based agent; approved. 93 tests
+pass (up from 85), production build clean, all four Playwright tools green
+at 1366×700 with zero page errors. `SAVE_VERSION` bumped 7→8 for
+`runDeck`/`bannedCards`; prior in-progress runs reset. One balance signal
+worth watching in further play: the 6 new alerts measurably raised alert
+frequency in the balance probe (`avgAlerts` 8.5→10.9, `reachedMax`
+40%→52% under the random policy) — flagged, not tuned blind, same as
+mandates' balance was left for playtesting rather than guessed at.
 
 ### 4.5 Meta-progression
 
@@ -743,12 +788,14 @@ Suggested order, each step shippable and playtestable on its own:
    once the day starts, per Broadsheet).
 4. ✅ **DONE, OWNER-APPROVED.** Acts/confidence votes (§4.1) and both
    Back Room chunks (§4.2), including management, caps and day-in-act display.
-5. ✅ **BUILT, AWAITING PLAYTEST.** Mandates (§4.3), six origins.
-6. ⬜ **NOT STARTED.** Run deck (§4.4), then meta-progression (§4.5), each
-   after owner feedback and its own explicit instruction.
+5. ✅ **DONE, OWNER-APPROVED.** Mandates (§4.3), six origins.
+6. ✅ **DONE, OWNER-APPROVED.** Run deck (§4.4) — `runDeck`/`bannedCards`,
+   8 deck-affecting shop policies, 20 new standard cards, 6 new alerts.
+7. ⬜ **NOT STARTED.** Meta-progression (§4.5), after owner feedback and
+   its own explicit instruction — the only piece of Phase 2 left.
 
 Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
-— the owner has now played that build and confirmed it. Steps 4–6 are the
+— the owner has now played that build and confirmed it. Steps 4–7 are the
 roguelike turn: the owner has greenlit the whole layer, but each step should
 still ship and get played on its own before the next one starts, the same
 pattern that got steps 1–3 right. See `CLAUDE.md`'s "PHASE 2" section.
