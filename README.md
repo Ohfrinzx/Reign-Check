@@ -1,4 +1,6 @@
-# DICTATOR SANDBOX
+# REIGN CHECK
+
+*(development codename: Dictator Sandbox)*
 
 A card-driven political leadership simulation set in the fictional **Republic
 of Velmorra** — lithium mines, a container port, an offshore banking zone,

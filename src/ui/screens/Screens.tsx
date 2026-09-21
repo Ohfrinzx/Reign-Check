@@ -23,7 +23,7 @@ export function TitleScreen({
         <div className="title-mast">
           <div className="mark">★</div>
         </div>
-        <h1 className="title-main">DICTATOR<br />SANDBOX</h1>
+        <h1 className="title-main">REIGN<br />CHECK</h1>
         <div className="title-sub">Office of the {COUNTRY.office} &middot; {COUNTRY.shortName}</div>
         <p className="title-blurb">
           The man who ran this country for nineteen years died in a stairwell nine days ago.
