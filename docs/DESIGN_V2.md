@@ -331,20 +331,103 @@ opening:
   convention. Policies and favours are not fireable; the owner asked for
   "deals and advisors" specifically.
 - **Timed deals**: most deals are permanent, but a `durationDays` on a deal
-  starts a countdown recorded in the new `GameState.activeDeals` array
-  (`{ itemId, daysLeft }`), ticked in `dayUpkeep()` right next to how
-  commitments and projects already tick. When it reaches zero, the deal's
-  `expireEffects` fire once through `applyEffects()` and it is removed. Only
-  `three-judges` uses this so far (5 days, then a scandal bump as the
-  arrangement becomes public) — enough to prove the mechanism, not a claim
-  that more of the pool should be timed; that is content work, same as
-  chunk 2 below.
+  starts a countdown, ticked in `dayUpkeep()` right next to how commitments
+  and projects already tick. When it reaches zero, the deal's `expireEffects`
+  fire once through `applyEffects()` and it is removed. Only `three-judges`
+  uses this so far (5 days, then a scandal bump as the arrangement becomes
+  public) — enough to prove the mechanism, not a claim that more of the pool
+  should be timed; that is content work, same as chunk 2 below.
 
-**Known and deliberate: 17 items is a small pool for 17 nightly visits.** A
-maximally efficient buyer still sees ~12 of them. That is the pool-size
-ceiling, and it is what **chunk 2** is for — take the pool to the §4.2 quota
-and beyond (nightly shops want more like 35–40 items, not the ~24 this section
-originally specified for a between-acts shop), plus "burn a file", which needs
+**Second follow-up owner request, same session: advisors and deals are
+capped, and the shop shows your slots live.** "This is to incentivize the
+player to choose wisely or even fire/cut deals in order to buy a new one."
+`ADVISOR_CAP`/`DEAL_CAP` in `shop.ts`, both `3`, tracked separately — filling
+up on one never blocks the other. Past the cap, the offer stays visible
+(same as being unable to afford it) but is disabled with a plain-text reason.
+
+This turned "timed deals" into something broader: **every deal, permanent or
+timed, now occupies a slot** (`GameState.heldDeals`, replacing the earlier
+`activeDeals` — `daysLeft: undefined` for a permanent one, so it never ticks
+but still counts against the cap) from the moment it's bought until it ends.
+A timed deal still ends on its own via `expireEffects`; ANY deal — permanent
+or timed, whether its clock has run out or not — can also be **cut short on
+purpose**, at a cost: `cutDeal()` in `engine.ts`, the deal equivalent of
+`fireAdvisor()`, paying `ShopItemDef.cutCost`/applying `cutEffects` and
+cancelling the commitment `endsCommitment` names. Cutting a timed deal early
+skips `expireEffects` entirely — that only fires when the clock runs out on
+its own, never as a side effect of cutting. Every deal now has a real cost
+or consequence to being cut short, the same rule enforced for firing an
+advisor, checked by a test. `GameState.endedDeals` records whether a deal
+that left `heldDeals` ran its course or was cut, so the "Advisors & Deals"
+screen never shows a finished deal as "Ongoing".
+
+**The Back Room got a second, matching UI piece for this**: a held-panel
+sidebar inside the shop screen itself (`.held-panel` in `Shop.tsx`) showing
+your advisor and deal slots live, with Fire/Cut buttons right there — the
+owner's explicit ask, so freeing a slot to buy something new never means
+leaving the shop to do it. It reuses `Manage.tsx`'s `ManageRow`/
+`FireControl`/new `CutControl` components (now exported) in a `compact`
+mode, so the two "what you're holding" surfaces (the shop's sidebar and the
+main game's "Advisors & Deals" screen) share one visual language rather than
+duplicating it. `SAVE_VERSION` bumped 5→6.
+
+**Measured, not assumed: the caps barely restrict a simulated buyer yet**
+(`shop.probe.ts`) — with only 5 advisors and 4 deals in the pool, hitting
+`ADVISOR_CAP`/`DEAL_CAP` (3 each) rarely happens in an 18-day run regardless
+of buying style. That is expected, not a tuning failure: the caps are sized
+for the bigger pool chunk 2 is about to add, not the current one. Re-run the
+probe after chunk 2's content lands to see whether the caps actually bite as
+intended once there is real choice to give up.
+
+**Chunk 2 — BUILT: 17 → 47 items.** Owner: *"aim for 30 more."* 9 new
+advisors, 8 new policies, 8 new favours, 5 new deals, all in
+`content/shop.ts`, grounded in the existing cast and world
+(`content/country.ts`) rather than inventing new characters or institutions:
+Varkov's adjutant, a clerk in the Grand Convocation, a friend at the Central
+Bank, the Salt Communion, Sarran's overnight logs, Mavro customs, the Pigeon
+Federation, Piek's deputy, a Gorsk engineer; currency controls, the Hadem
+development fund, peg defense, land reform (finally keeping the 1961
+promise), the Dovra Day broadcast, central bank capture, the Convocation
+rubber-stamp, cosmetic press freedom; favours from Vel, Adamek, Loz, Hess,
+Grebs, Vask, the Ostrene ambassador, an Ilvet ledger page; deals leasing the
+salt flats to Sereth, a loan from Aureth (with conditions, unlike Ostrene's),
+selling a Council seat to Adamek, a Pigeon Federation endorsement, and an
+understanding with Drovna. The last two are **timed** — 4 and 6 days — so
+3 of the 9 deals now run on a day-to-day clock (`three-judges` plus these
+two), matching the owner's "a few, not all."
+
+No engine changes were needed to add any of this — every item uses a
+mechanism chunk 1 already built (`fireCost`/`cutCost`, `durationDays`,
+`commitments`, the `daily`/`lossMult` hooks), which is exactly the "one hook,
+then it's data" principle this section opened with, holding up under real
+content volume.
+
+**Two real bugs, caught by the process, not before it shipped:**
+- `regime.cult` isn't a real key — "cult" is a `hidden` pressure, not a
+  regime axis. `tsc --noEmit` caught it immediately in `dovra-broadcast`'s
+  effects; fixed by moving it to `hidden.cult`.
+- The existing test `'never offers the same item twice in a run'` assumed
+  every affordable purchase attempt succeeds. The new deal cap correctly
+  refused `pigeon-endorsement` at 3/3 held deals, but the test still counted
+  the attempt as a purchase, then flagged a false "bought twice" when it was
+  legitimately re-offered and refused again. Not a game bug — a test that
+  hadn't been updated for a purchase that can now legitimately no-op. Fixed
+  to check `shopBought` actually grew, the same check `shop.probe.ts` already
+  used correctly.
+
+**Measured again after the content landed** (`shop.probe.ts`, 150 runs × 4
+buying styles): purchase frequency spread 0.01–0.9 across all 47 items, no
+item dominating, and `avgDays`/`reachedDay18`/ending distributions all
+in line with the pre-chunk-2 baseline. The advisor/deal caps aren't
+meaningfully stress-tested by the probe's simple buyers (cheapest/greedy/
+random by price, not "all advisors") — that measures general economy
+health, which is what this pass needed to check; the caps themselves were
+already verified directly (engine tests + real-browser interaction) when
+they were built, earlier in this section.
+
+**Known and deliberate, still true at 47 items:** a maximally efficient
+buyer still won't see the whole pool in one 18-day run — that is the
+point, not a gap. "Burn a file" from the original spec below still needs
 §4.4's run deck to exist first.
 
 **The original spec, for reference:**
