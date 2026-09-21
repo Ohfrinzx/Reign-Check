@@ -3,7 +3,7 @@ import type { GameState, StatKey } from './game/types';
 import { createGame, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor,
+  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
@@ -138,6 +138,15 @@ export default function App() {
     });
   }, [say]);
 
+  const doCutDeal = useCallback((itemId: string) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = cutDeal(g, itemId);
+      if (!next.heldDeals.some((d) => d.itemId === itemId)) say('Cut short.');
+      return next;
+    });
+  }, [say]);
+
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
     if (screen !== 'game' || !game || showIntro || showManage) return;
@@ -198,7 +207,7 @@ export default function App() {
   if (game.phase === 'shop') {
     return (
       <div className="app dark shop-full">
-        <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} />
+        <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} onFire={doFireAdvisor} onCut={doCutDeal} />
         {toast && <div className="toast">{toast}</div>}
       </div>
     );
@@ -317,7 +326,7 @@ export default function App() {
       )}
 
       {showManage && (
-        <ManageScreen s={game} onClose={() => setShowManage(false)} onFire={doFireAdvisor} />
+        <ManageScreen s={game} onClose={() => setShowManage(false)} onFire={doFireAdvisor} onCut={doCutDeal} />
       )}
 
       {toast && <div className="toast">{toast}</div>}

@@ -9,8 +9,10 @@ import { clampStat } from './stats';
 /** Bump whenever GameState's shape changes — save.ts discards mismatched
  *  saves rather than crashing (ground rule 10). 3→4: the Back Room's
  *  shopStock/owned/heldFavours/shopBought/shopRecent fields and
- *  RunStats.dealsStruck. 4→5: GameState.activeDeals, for timed deals. */
-export const SAVE_VERSION = 5;
+ *  RunStats.dealsStruck. 4→5: GameState.activeDeals, for timed deals.
+ *  5→6: activeDeals replaced by heldDeals (every deal now occupies a slot,
+ *  not just timed ones) plus endedDeals, for the advisor/deal cap. */
+export const SAVE_VERSION = 6;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -240,7 +242,8 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     shopBought: [],
     shopRecent: [],
     shopBuysTonight: 0,
-    activeDeals: [],
+    heldDeals: [],
+    endedDeals: [],
 
     log: [
       {

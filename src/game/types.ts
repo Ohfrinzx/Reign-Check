@@ -291,16 +291,32 @@ export interface CommitmentSpec {
 }
 
 /**
- * A Back Room deal that runs for a set number of days rather than resolving
- * once and being done. Most deals are permanent (a sold lease, a loan); a
- * `durationDays` deal instead lives here until it counts down to zero, at
- * which point `ShopItemDef.expireEffects` fires — see shop.ts's
- * tickActiveDeals(). `itemId` looks up the rest (name, upside, downside) in
- * content/shop.ts's SHOP_MAP, same pattern as `owned`/`heldFavours`.
+ * A deal you have taken and are currently holding — EVERY deal, permanent or
+ * timed, occupies a slot here from the moment it is bought (see
+ * `GameState.DEAL_CAP` in shop.ts) until it leaves one of two ways:
+ *   - a timed deal (`daysLeft` defined) counts down to zero on its own,
+ *     firing `ShopItemDef.expireEffects` once — shop.ts's tickHeldDeals()
+ *   - any deal can be cut short on purpose, at a cost — engine.ts's
+ *     cutDeal(), which reads `ShopItemDef.cutCost`/`cutEffects`
+ * A permanent deal (`daysLeft` undefined) never ticks; it just sits here,
+ * using up a slot, until you cut it. `itemId` looks up the rest (name,
+ * upside, downside) in content/shop.ts's SHOP_MAP, same pattern as
+ * `owned`/`heldFavours`.
  */
-export interface ActiveDeal {
+export interface HeldDeal {
   itemId: string;
-  daysLeft: number;
+  /** undefined = permanent, no clock running */
+  daysLeft?: number;
+}
+
+/**
+ * A deal that has left `heldDeals`, kept only so the "Advisors & Deals"
+ * screen can say HOW it ended — ran its course on its own vs. cut short on
+ * purpose — rather than showing every past deal as identically "Ongoing".
+ */
+export interface EndedDeal {
+  itemId: string;
+  reason: 'expired' | 'cut';
 }
 
 export interface ScandalSpec {
@@ -488,8 +504,10 @@ export interface GameState {
   shopRecent: string[];
   /** purchases made in tonight's room — the nightly room allows exactly one */
   shopBuysTonight: number;
-  /** timed deals still running — most deals are permanent and never appear here */
-  activeDeals: ActiveDeal[];
+  /** every deal you currently hold — permanent or still counting down; see HeldDeal */
+  heldDeals: HeldDeal[];
+  /** deals that have left heldDeals, and how — see EndedDeal */
+  endedDeals: EndedDeal[];
 
   log: LogEntry[];
   history: DaySummary[];

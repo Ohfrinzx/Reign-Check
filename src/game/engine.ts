@@ -16,8 +16,9 @@ import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
 import type { ShopItemDef } from './content/shop';
 import {
-  buyLimit, canFireNow, dailyFromOwned, fireCostOf, isActRoom, rememberOffers,
-  rollStock, roomIsClosed, shopOpensTonight, shopPrice, startActiveDeal, tickActiveDeals,
+  buyLimit, canCutNow, canFireNow, capBlockReason, cutCostOf, dailyFromOwned, fireCostOf,
+  isActRoom, rememberOffers, rollStock, roomIsClosed, shopOpensTonight, shopPrice,
+  startHeldDeal, tickHeldDeals,
 } from './shop';
 
 /* ------------------------------------------------------------- registries */
@@ -189,9 +190,10 @@ function dayUpkeep(s: GameState, rng: Rng) {
     }
   }
 
-  // --- timed Back Room deals run out on their own schedule too. Most deals
-  // are permanent; this only fires for the few with a durationDays clock.
-  for (const def of tickActiveDeals(s)) {
+  // --- timed Back Room deals run out on their own schedule too. Most held
+  // deals are permanent and never leave this way; this only fires for the
+  // few with a durationDays clock. (Frees a deal slot either way.)
+  for (const def of tickHeldDeals(s)) {
     if (def.expireEffects) {
       const delta = applyEffects(s, def.expireEffects, rng, `shop:expire:${def.id}`);
       s.log.push({
@@ -199,6 +201,7 @@ function dayUpkeep(s: GameState, rng: Rng) {
         text: def.downside ?? 'It has run its course.', tone: toneFromDelta(delta),
       });
     }
+    s.endedDeals.push({ itemId: def.id, reason: 'expired' });
     notes.push(`${def.name} ran out.`);
   }
 
@@ -583,6 +586,10 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
 
   const price = shopPrice(s, def);
   if (price > s.stats.treasury) return s;
+  // Advisors and deals are capped (ADVISOR_CAP/DEAL_CAP) — past the cap, the
+  // offer is shown but not buyable until a slot is freed. The UI disables the
+  // button for the same reason; this is the safety net.
+  if (capBlockReason(s, def)) return s;
 
   // The price, then what you bought — both through applyEffects, so the money
   // lands in RunStats and any owned modifier applies to both.
@@ -591,7 +598,7 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
 
   if (def.kind === 'advisor' || def.kind === 'policy') s.owned.push(def.id);
   if (def.kind === 'favour') s.heldFavours.push(def.id);
-  startActiveDeal(s, def);
+  startHeldDeal(s, def);
 
   s.shopBought.push(def.id);
   s.shopBuysTonight += 1;
@@ -685,6 +692,48 @@ export function fireAdvisor(prev: GameState, itemId: string): GameState {
     text: cost > 0
       ? `Paid $${cost.toFixed(1)}B to see them out quietly.`
       : 'They left without being paid to go.',
+    tone: 'mixed',
+  });
+  return s;
+}
+
+/**
+ * End a held deal early, on purpose — the deal equivalent of fireAdvisor().
+ * Frees a deal slot immediately, whether the deal was permanent or still
+ * counting down; a timed deal cut early never fires its `expireEffects`
+ * (that only fires when the clock runs out on its own — see tickHeldDeals()
+ * in dayUpkeep()). Costs whatever `cutCost`/`cutEffects` that deal's entry
+ * in content/shop.ts gives it, and cancels the commitment it created, if any.
+ */
+export function cutDeal(prev: GameState, itemId: string): GameState {
+  const s = clone(prev);
+  const idx = s.heldDeals.findIndex((d) => d.itemId === itemId);
+  if (idx < 0) return s;
+  const def = SHOP_MAP[itemId];
+  if (!def || def.kind !== 'deal') return s;
+  if (!canCutNow(s, def)) return s;
+
+  const cost = cutCostOf(def);
+  if (cost > 0) {
+    withRng(s, (rng) => applyEffects(s, { stats: { treasury: -cost } }, rng, `cut:${def.id}`));
+  }
+  if (def.cutEffects) {
+    withRng(s, (rng) => applyEffects(s, def.cutEffects, rng, `cut:${def.id}`));
+  }
+
+  s.heldDeals = s.heldDeals.filter((d) => d.itemId !== itemId);
+  if (def.endsCommitment) {
+    s.commitments = s.commitments.filter((c) => c.id !== def.endsCommitment);
+  }
+  s.endedDeals.push({ itemId: def.id, reason: 'cut' });
+
+  s.log.push({
+    day: s.day,
+    kind: 'purchase',
+    title: `Cut short: ${def.name}`,
+    text: cost > 0
+      ? `Paid $${cost.toFixed(1)}B to end it early.`
+      : 'Ended, no charge.',
     tone: 'mixed',
   });
   return s;
