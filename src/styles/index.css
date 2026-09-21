@@ -837,12 +837,31 @@ abbr.term{
   padding:40px 24px 60px;
 }
 
+/* the shop's own two-column layout: offers on the left, the held-panel
+   (owner request — your advisor/deal slots, fireable/cuttable right there)
+   on the right. .doc-wrap's own max-width still centers the offers column. */
+.shop-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  gap:24px;
+  align-items:start;
+  max-width:1160px;
+  margin:0 auto;
+}
+@media (max-width:1080px){
+  .shop-layout{grid-template-columns:1fr}
+  .held-panel{display:none}
+}
+
 /* a deal with a day-to-day timer says so right on the offer, same plain-text
    convention as a price — this is an overt mechanic, not a hidden variable */
 .offer-top .dur-tag{
   font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
   border:1.5px solid var(--teal);color:var(--teal);padding:2px 7px;
 }
+/* An item you can't touch because a slot is full reuses .offer.broke's dimmed
+   look (below) — same visual treatment as being short on cash, different
+   message underneath (see capBlockReason() in shop.ts). */
 
 /* =========================================================================
    ADVISORS & DEALS — opened from the masthead during the main game. Same
@@ -868,6 +887,32 @@ abbr.term{
 }
 .manage-timer.active{color:var(--mustard);border-color:var(--mustard)}
 .manage-timer.expired{color:var(--ash);border-style:dashed;text-decoration:line-through}
+.manage-timer.cut{color:var(--red);border-style:dashed;text-decoration:line-through}
 
 .manage-fire{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .manage-fire-cost{font-family:var(--mono);font-size:9.5px;color:var(--ash);white-space:nowrap}
+
+/* .manage-row.compact — used inside the Back Room's held-panel (below):
+   name + control only, no upside/downside prose, so it fits a 300px rail. */
+.manage-row.compact{padding:9px 0;align-items:center}
+.manage-row.compact .manage-name{font-size:12px;margin-bottom:0}
+.manage-row.compact .manage-right{min-width:0;flex-direction:row;align-items:center;gap:8px}
+.manage-row.compact .manage-fire{flex-direction:row;align-items:center;gap:6px}
+.manage-row.compact .manage-fire-cost{display:none}
+.manage-row.compact .manage-fire .btn{padding:5px 10px;font-size:9.5px}
+.manage-row.compact .manage-timer{font-size:9.5px;padding:2px 6px}
+
+/* =========================================================================
+   THE HELD-PANEL — the Back Room's own advisor/deal sidebar (owner request:
+   fire/cut right there, so freeing a slot to buy something new never means
+   leaving the shop). Same box chrome as the main game's .rail, since it
+   plays the same role; everything else here is already token-driven, so it
+   reads correctly in the shop's dark theme with no extra dark-mode rules.
+   ========================================================================= */
+
+.held-panel{
+  border-left:2px solid var(--ink);background:var(--paper);
+  padding:16px 16px 20px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.held-section h3{margin-bottom:9px}

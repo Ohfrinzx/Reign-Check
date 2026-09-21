@@ -1,7 +1,17 @@
-import type { Effects, GameState, Rng, StatKey } from './types';
+import type { Effects, GameState, HeldDeal, Rng, StatKey } from './types';
 import type { ShopItemDef, ShopRarity } from './content/shop';
 import { SHOP_ITEMS, SHOP_MAP } from './content/shop';
 import { NUM_ACTS, justAdvancedAct } from './state';
+
+/**
+ * How many advisors, and how many deals, you can hold at once. Past the cap,
+ * buying a new one means letting an old one go first — that trade-off, not
+ * more UI, is the point (owner request). Advisors and deals are capped
+ * separately: filling up on one never blocks the other. Policies and
+ * favours are NOT capped.
+ */
+export const ADVISOR_CAP = 3;
+export const DEAL_CAP = 3;
 
 /**
  * THE BACK ROOM — logic only. No React, no DOM (ground rule 11).
@@ -208,51 +218,60 @@ export function ownedStatMult(s: GameState, k: StatKey, d: number): number {
   return mult;
 }
 
-/* ---------------------------------------------------------- timed deals */
+/* ----------------------------------------------------------- held deals */
 
 /**
- * Start a deal's clock, if it has one. Called from buyShopItem() right after
- * a deal's own `effects` resolve. Most deals have no `durationDays` and this
- * is a no-op for them — see content/shop.ts's header comment.
+ * Start holding a deal. Called from buyShopItem() for EVERY deal purchase,
+ * timed or permanent — a permanent deal gets `daysLeft: undefined` and just
+ * sits in `heldDeals` (occupying a slot) until it is cut; a timed one counts
+ * down on its own too. This is what makes every deal, not just the timed
+ * ones, subject to DEAL_CAP and cuttable from the held-panel.
  */
-export function startActiveDeal(s: GameState, def: ShopItemDef): void {
-  if (def.kind !== 'deal' || !def.durationDays) return;
-  s.activeDeals.push({ itemId: def.id, daysLeft: def.durationDays });
+export function startHeldDeal(s: GameState, def: ShopItemDef): void {
+  if (def.kind !== 'deal') return;
+  s.heldDeals.push({ itemId: def.id, daysLeft: def.durationDays });
 }
 
 /**
- * Count down every active deal by a day and remove the ones that just ran
- * out, mutating `s.activeDeals` in place — the same shape as how commitments
- * tick in engine.ts's dayUpkeep(). Returns the defs that expired THIS tick,
- * so the caller can push each one's own `expireEffects` through
- * applyEffects() individually (this file never calls applyEffects itself,
- * to avoid a circular import with effects.ts, which already imports from
- * here for ownedStatMult()).
+ * Count down every TIMED held deal by a day (permanent ones, `daysLeft`
+ * undefined, are never touched here — they only ever leave via cutDeal()),
+ * removing any that just ran out. Mutates `s.heldDeals` in place, the same
+ * shape as how commitments tick in engine.ts's dayUpkeep(). Returns the defs
+ * that expired THIS tick, so the caller can push each one's own
+ * `expireEffects` through applyEffects() individually (this file never calls
+ * applyEffects itself, to avoid a circular import with effects.ts, which
+ * already imports from here for ownedStatMult()).
  */
-export function tickActiveDeals(s: GameState): ShopItemDef[] {
-  const remaining: typeof s.activeDeals = [];
+export function tickHeldDeals(s: GameState): ShopItemDef[] {
+  const remaining: HeldDeal[] = [];
   const expired: ShopItemDef[] = [];
-  for (const active of s.activeDeals) {
-    const daysLeft = active.daysLeft - 1;
-    if (daysLeft > 0) {
-      remaining.push({ itemId: active.itemId, daysLeft });
+  for (const held of s.heldDeals) {
+    if (held.daysLeft === undefined) {
+      remaining.push(held);
       continue;
     }
-    const def = SHOP_MAP[active.itemId];
+    const daysLeft = held.daysLeft - 1;
+    if (daysLeft > 0) {
+      remaining.push({ itemId: held.itemId, daysLeft });
+      continue;
+    }
+    const def = SHOP_MAP[held.itemId];
     if (def) expired.push(def);
   }
-  s.activeDeals = remaining;
+  s.heldDeals = remaining;
   return expired;
 }
 
-export type DealStatus = 'ongoing' | 'active' | 'expired';
+export type DealStatus = 'ongoing' | 'active' | 'expired' | 'cut';
 
 /**
- * Every deal ever bought this run, in one of three states:
- *   'ongoing'  — permanent, no clock (most deals: a sold lease, a loan)
- *   'active'   — a timed deal, still running; `daysLeft` is live
- *   'expired'  — a timed deal that ran its course (see tickActiveDeals())
- * Kept distinct so a run-out arrangement never reads as "Ongoing" in the UI.
+ * Every deal ever bought this run, in one of four states:
+ *   'ongoing'  — held, permanent, no clock (most deals: a sold lease, a loan)
+ *   'active'   — held, timed, still running; `daysLeft` is live
+ *   'expired'  — a timed deal that ran its own course (tickHeldDeals())
+ *   'cut'      — ended on purpose, before its time or with no time to run out
+ * Kept distinct so a finished deal never reads as "Ongoing", and so cutting
+ * one on purpose reads differently from one that simply ran out.
  */
 export interface DealEntry {
   def: ShopItemDef;
@@ -262,18 +281,55 @@ export interface DealEntry {
 }
 
 export function boughtDealDefs(s: GameState): DealEntry[] {
-  const activeById = new Map(s.activeDeals.map((a) => [a.itemId, a.daysLeft]));
+  const heldById = new Map(s.heldDeals.map((h) => [h.itemId, h.daysLeft]));
+  const endedById = new Map(s.endedDeals.map((e) => [e.itemId, e.reason]));
   return s.shopBought
     .map((id) => SHOP_MAP[id])
     .filter((d): d is ShopItemDef => !!d && d.kind === 'deal')
     .map((def): DealEntry => {
-      if (!def.durationDays) return { def, status: 'ongoing' };
-      const daysLeft = activeById.get(def.id);
-      return daysLeft !== undefined ? { def, status: 'active', daysLeft } : { def, status: 'expired' };
+      if (heldById.has(def.id)) {
+        const daysLeft = heldById.get(def.id);
+        return daysLeft !== undefined ? { def, status: 'active', daysLeft } : { def, status: 'ongoing' };
+      }
+      return { def, status: endedById.get(def.id) === 'cut' ? 'cut' : 'expired' };
     });
 }
 
-/* ------------------------------------------------------------- firing */
+/** Deals currently held (either status), for the cap display and the shop's held-panel. */
+export function heldDealEntries(s: GameState): DealEntry[] {
+  return boughtDealDefs(s).filter((e) => e.status === 'ongoing' || e.status === 'active');
+}
+
+/* --------------------------------------------------------------- slots */
+
+export function advisorSlotsUsed(s: GameState): number {
+  return ownedAdvisorDefs(s).length;
+}
+
+export function dealSlotsUsed(s: GameState): number {
+  return s.heldDeals.length;
+}
+
+export function canHoldMoreAdvisors(s: GameState): boolean {
+  return advisorSlotsUsed(s) < ADVISOR_CAP;
+}
+
+export function canHoldMoreDeals(s: GameState): boolean {
+  return dealSlotsUsed(s) < DEAL_CAP;
+}
+
+/** Plain-language reason a purchase is blocked by the cap, or undefined if it isn't. */
+export function capBlockReason(s: GameState, def: ShopItemDef): string | undefined {
+  if (def.kind === 'advisor' && !canHoldMoreAdvisors(s)) {
+    return `You already have ${ADVISOR_CAP} advisors. Fire one first.`;
+  }
+  if (def.kind === 'deal' && !canHoldMoreDeals(s)) {
+    return `You already have ${DEAL_CAP} deals running. Cut one first.`;
+  }
+  return undefined;
+}
+
+/* --------------------------------------------------------- firing / cutting */
 
 /** What it costs, in money, to fire this advisor right now. */
 export function fireCostOf(def: ShopItemDef): number {
@@ -282,6 +338,15 @@ export function fireCostOf(def: ShopItemDef): number {
 
 export function canFireNow(s: GameState, def: ShopItemDef): boolean {
   return fireCostOf(def) <= s.stats.treasury;
+}
+
+/** What it costs, in money, to cut this deal short right now. */
+export function cutCostOf(def: ShopItemDef): number {
+  return def.cutCost ?? 0;
+}
+
+export function canCutNow(s: GameState, def: ShopItemDef): boolean {
+  return cutCostOf(def) <= s.stats.treasury;
 }
 
 /* ------------------------------------------------------------- reporting */
