@@ -28,10 +28,15 @@ import type { Effects, GameState, Hidden, StatKey, Stats } from '../types';
  *   `lossMult` / `gainMult` / `priceMult` — read in effects.ts's applyCoupling()
  *                and shop.ts's shopPrice()
  *
- * Most deals are permanent; `durationDays`/`expireEffects` mark the few that
- * run on a day-to-day timer instead (see GameState.activeDeals). Advisors
- * carry `fireCost`/`fireEffects`/`endsCommitment` — what it costs, in money
- * and consequence, to let them go mid-run from the "Advisors & Deals" screen.
+ * ADVISORS and DEALS are both capped (shop.ts's ADVISOR_CAP/DEAL_CAP) — you
+ * can only hold so many of each at once, which is the whole point: past the
+ * cap, buying a new one means letting an old one go first. Advisors carry
+ * `fireCost`/`fireEffects`/`endsCommitment` (what it costs to let them go);
+ * every deal — permanent or timed — occupies a slot the same way and carries
+ * `cutCost`/`cutEffects`/`endsCommitment` (what it costs to end it early).
+ * `durationDays`/`expireEffects` mark the few deals that also run out on
+ * their own on a day-to-day timer (see GameState.HeldDeal/heldDeals) — that
+ * is separate from, and in addition to, being cuttable at any time.
  *
  * See src/game/shop.ts for the logic and CLAUDE.md for the writing rules.
  */
@@ -80,24 +85,36 @@ export interface ShopItemDef {
   };
   /**
    * Deals only. Most deals are permanent — this is the exception: the
-   * arrangement runs for this many days (tracked in `GameState.activeDeals`,
-   * see shop.ts's tickActiveDeals()), then `expireEffects` fires once and it
-   * is gone. Shown to the player as a plain "Lasts N days" line — this is an
-   * overt mechanic like the price, not a hidden variable (ground rule 6).
+   * arrangement also runs out on its own after this many days (tracked in
+   * `GameState.heldDeals`, see shop.ts's tickHeldDeals()), firing
+   * `expireEffects` once when it does. Shown to the player as a plain
+   * "Lasts N days" line — this is an overt mechanic like the price, not a
+   * hidden variable (ground rule 6). A timed deal can still be cut early
+   * too (see `cutCost` below) — the timer is how it ends on its own, not the
+   * only way it can end.
    */
   durationDays?: number;
   /** fires once, through applyEffects(), when a timed deal's daysLeft hits 0 */
   expireEffects?: Effects;
   /**
    * Advisors only. What it costs to let them go, mid-run, from the "Advisors
-   * & Deals" screen — every advisor must have a real answer here, "figurative
-   * or literal", per the same everything-has-a-downside rule that governs
-   * buying one in the first place.
+   * & Deals" screen (or the Back Room's own held-panel) — every advisor must
+   * have a real answer here, "figurative or literal", per the same
+   * everything-has-a-downside rule that governs buying one in the first
+   * place.
    */
   fireCost?: number;
   /** the non-monetary consequence of firing them, applied through applyEffects() */
   fireEffects?: Effects;
-  /** the commitment id (if any) their hiring created, cancelled when fired */
+  /**
+   * Deals only. Every deal occupies a slot (see DEAL_CAP) until it ends, and
+   * this is what it costs to end one on purpose rather than waiting it out —
+   * same shape and same rule as an advisor's fireCost/fireEffects.
+   */
+  cutCost?: number;
+  /** the non-monetary consequence of cutting a deal short, applied through applyEffects() */
+  cutEffects?: Effects;
+  /** the commitment id (if any) this item's purchase created, cancelled when fired (advisors) or cut (deals) */
   endsCommitment?: string;
 }
 
@@ -554,6 +571,15 @@ export const SHOP_ITEMS: ShopItemDef[] = [
         graft: 8,
       },
     },
+    endsCommitment: 'cmt-gorsk',
+    cutCost: 6.0,
+    cutEffects: {
+      factions: {
+        concord: {
+          loyalty: -6,
+        },
+      },
+    },
   },
   {
     id: 'ilvet-levy',
@@ -570,6 +596,16 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       flags: {
         ilvetLevy: 1,
       },
+      // The upside text promises "$0.30B a day from then on" — this is that
+      // revenue. (Negative perDay = money coming IN, same convention as
+      // second-books' reallocated-revenue commitment below.)
+      commitments: [
+        {
+          id: 'cmt-ilvet',
+          label: 'Ilvet Free Zone levy',
+          perDay: -0.3,
+        },
+      ],
       factions: {
         concord: {
           loyalty: -17,
@@ -587,6 +623,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
       regime: {
         technocracy: 6,
+      },
+    },
+    endsCommitment: 'cmt-ilvet',
+    cutCost: 3.0,
+    cutEffects: {
+      hidden: {
+        scandal: 4,
       },
     },
   },
@@ -633,6 +676,15 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
       news: ['The three judges everyone was talking about have been quietly reassigned to appellate courts upstate.'],
     },
+    // Ending it before the rotation does, on purpose, looks more deliberate
+    // than letting it lapse quietly — smaller cost than a permanent deal's,
+    // since the arrangement was already on its way out.
+    cutCost: 2.0,
+    cutEffects: {
+      hidden: {
+        scandal: 4,
+      },
+    },
   },
   {
     id: 'ostrene-loan',
@@ -664,6 +716,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
         isolation: -6,
       },
     },
+    endsCommitment: 'cmt-ostrene',
+    cutCost: 10.0,
+    cutEffects: {
+      hidden: {
+        scandal: 5,
+      },
+    },
   },
 ];
 
@@ -678,8 +737,8 @@ export const KIND_LABEL: Record<ShopKind, string> = {
 };
 
 export const KIND_NOTE: Record<ShopKind, string> = {
-  advisor: 'Stays with you for the rest of the run.',
+  advisor: 'Takes one of your advisor slots. Fire them any time to free it.',
   policy: 'Changes the rules for the rest of the run.',
   favour: 'Kept in your pocket. Spend it on any day you choose.',
-  deal: 'Happens once, tonight, and is done.',
+  deal: 'Takes one of your deal slots until you cut it, or it runs out.',
 };

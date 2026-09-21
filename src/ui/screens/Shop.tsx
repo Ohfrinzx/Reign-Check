@@ -1,13 +1,20 @@
 import type { GameState } from '../../game/types';
 import type { ShopItemDef } from '../../game/content/shop';
 import { KIND_LABEL, KIND_NOTE, SHOP_MAP } from '../../game/content/shop';
-import { buyLimit, canAfford, isActRoom, priceLine, roomIsClosed, shopHeading, shopPrice } from '../../game/shop';
+import {
+  ADVISOR_CAP, DEAL_CAP, buyLimit, canAfford, capBlockReason, heldDealEntries, isActRoom,
+  ownedAdvisorDefs, priceLine, roomIsClosed, shopHeading, shopPrice,
+} from '../../game/shop';
 import { termsIn } from '../../game/glossary';
 import { fill } from '../../game/text';
 import { usd } from '../../game/economy';
+import { CutControl, FireControl, ManageRow } from './Manage';
 
 /**
- * THE BACK ROOM — the shop, rendered as the day's last document.
+ * THE BACK ROOM — the shop, rendered as the day's last document, plus a
+ * held-panel sidebar (owner request) showing your advisor and deal slots
+ * right there, so choosing to fire/cut something to make room for a new
+ * purchase never means leaving the shop to do it.
  *
  * Every offer states its price AND its catch in plain text on the card
  * itself. Nothing required to make the decision is behind a hover
@@ -15,11 +22,13 @@ import { usd } from '../../game/economy';
  * strap, same as every other screen's primary action (ground rule 9).
  */
 export function ShopScreen({
-  s, onBuy, onLeave,
+  s, onBuy, onLeave, onFire, onCut,
 }: {
   s: GameState;
   onBuy: (id: string) => void;
   onLeave: () => void;
+  onFire: (id: string) => void;
+  onCut: (id: string) => void;
 }) {
   const stock = s.shopStock.map((id) => SHOP_MAP[id]).filter(Boolean);
   const big = isActRoom(s);
@@ -33,70 +42,74 @@ export function ShopScreen({
   );
 
   return (
-    <div className="doc-wrap">
-      <div className={`shop ${big ? 'big' : ''}`}>
-        <div className="shop-head">
-          <div className="kicker">
-            {big ? 'After the vote' : 'After hours'} &middot; Day {s.day}
+    <div className="shop-layout">
+      <div className="doc-wrap">
+        <div className={`shop ${big ? 'big' : ''}`}>
+          <div className="shop-head">
+            <div className="kicker">
+              {big ? 'After the vote' : 'After hours'} &middot; Day {s.day}
+            </div>
+            <h1>{head.title}</h1>
+            <div className="shop-sub">{fill(head.sub, s)}</div>
+            <div className="shop-purse">
+              In the account: <b>{usd(s.stats.treasury)}</b>
+              <span className="limit">
+                {oneOnly
+                  ? ' · One thing a night. Choose.'
+                  : ' · Tonight you may take as much as you can pay for.'}
+              </span>
+            </div>
           </div>
-          <h1>{head.title}</h1>
-          <div className="shop-sub">{fill(head.sub, s)}</div>
-          <div className="shop-purse">
-            In the account: <b>{usd(s.stats.treasury)}</b>
-            <span className="limit">
-              {oneOnly
-                ? ' · One thing a night. Choose.'
-                : ' · Tonight you may take as much as you can pay for.'}
-            </span>
-          </div>
-        </div>
 
-        {stock.length === 0 && s.shopBuysTonight === 0 && (
-          <div className="empty">
-            Nobody came tonight. Whatever you were going to be offered, you were
-            not offered it.
-          </div>
-        )}
-        {stock.length === 0 && s.shopBuysTonight > 0 && oneOnly && (
-          <div className="shop-closed">
-            The room is done with you. The other two offers go back in the bag
-            and you will not see them again tonight.
-          </div>
-        )}
+          {stock.length === 0 && s.shopBuysTonight === 0 && (
+            <div className="empty">
+              Nobody came tonight. Whatever you were going to be offered, you were
+              not offered it.
+            </div>
+          )}
+          {stock.length === 0 && s.shopBuysTonight > 0 && oneOnly && (
+            <div className="shop-closed">
+              The room is done with you. The other two offers go back in the bag
+              and you will not see them again tonight.
+            </div>
+          )}
 
-        <div className="shop-grid">
-          {stock.map((def, i) => (
-            <Offer key={def.id} s={s} def={def} index={i} onBuy={onBuy} closed={closed} />
-          ))}
-        </div>
-
-        {boughtTonight.length > 0 && (
-          <div className="shop-receipt">
-            <div className="kicker">Tonight you took</div>
-            {boughtTonight.map((l, i) => (
-              <div className="line" key={i}>
-                <span className="n">{l.title}</span>
-                <span className="v">{l.text}</span>
-              </div>
+          <div className="shop-grid">
+            {stock.map((def, i) => (
+              <Offer key={def.id} s={s} def={def} index={i} onBuy={onBuy} closed={closed} />
             ))}
           </div>
-        )}
 
-        {glossaryTerms.length > 0 && (
-          <div className="card-glossary">
-            {glossaryTerms.map((t) => (
-              <span key={t.term}><b>{t.term}</b>: {t.def}</span>
-            ))}
+          {boughtTonight.length > 0 && (
+            <div className="shop-receipt">
+              <div className="kicker">Tonight you took</div>
+              {boughtTonight.map((l, i) => (
+                <div className="line" key={i}>
+                  <span className="n">{l.title}</span>
+                  <span className="v">{l.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {glossaryTerms.length > 0 && (
+            <div className="card-glossary">
+              {glossaryTerms.map((t) => (
+                <span key={t.term}><b>{t.term}</b>: {t.def}</span>
+              ))}
+            </div>
+          )}
+
+          <div className="shop-foot">
+            <button className="btn btn-primary" onClick={onLeave}>
+              Leave and begin Day {s.day + 1} →
+            </button>
+            <span className="note">Nothing here is compulsory. Or press Enter.</span>
           </div>
-        )}
-
-        <div className="shop-foot">
-          <button className="btn btn-primary" onClick={onLeave}>
-            Leave and begin Day {s.day + 1} →
-          </button>
-          <span className="note">Nothing here is compulsory. Or press Enter.</span>
         </div>
       </div>
+
+      <HeldPanel s={s} onFire={onFire} onCut={onCut} />
     </div>
   );
 }
@@ -111,8 +124,9 @@ function Offer({
   closed: boolean;
 }) {
   const price = shopPrice(s, def);
-  const affordable = canAfford(s, def) && !closed;
+  const capReason = capBlockReason(s, def);
   const short = Math.max(0, price - s.stats.treasury);
+  const affordable = canAfford(s, def) && !closed && !capReason;
 
   return (
     <div className={`offer ${def.rarity} ${affordable ? '' : 'broke'}`}>
@@ -155,10 +169,61 @@ function Offer({
           {price < 0 ? 'Take it' : 'Buy'}
         </button>
       </div>
-      {!affordable && (
+      {!affordable && capReason && (
+        <div className="locked">✕ {capReason}</div>
+      )}
+      {!affordable && !capReason && !closed && (
         <div className="locked">✕ You are {usd(short)} short.</div>
       )}
     </div>
+  );
+}
+
+/**
+ * The held-panel — your advisor and deal slots, live, right next to the
+ * shop's offers. Fire an advisor or cut a deal here to free a slot without
+ * leaving the room; the offer you were eyeing re-enables the moment you do.
+ * Rows are compact (name + status/timer + button) — the full upside/downside
+ * text is one click away in "Advisors & Deals" from the main game.
+ */
+function HeldPanel({
+  s, onFire, onCut,
+}: {
+  s: GameState;
+  onFire: (id: string) => void;
+  onCut: (id: string) => void;
+}) {
+  const advisors = ownedAdvisorDefs(s);
+  const deals = heldDealEntries(s);
+  // We are already confined to the shop phase here, so there is no "mid-card"
+  // state to guard against the way Pocket/ManageScreen do for the main game.
+  const canAct = true;
+
+  return (
+    <aside className="held-panel">
+      <div className="panel held-section">
+        <h3>Advisors <span>{advisors.length}/{ADVISOR_CAP}</span></h3>
+        {advisors.length === 0 && <div className="empty">None hired yet.</div>}
+        {advisors.map((def) => (
+          <ManageRow key={def.id} def={def} s={s} compact>
+            <FireControl def={def} s={s} canAct={canAct} onFire={onFire} />
+          </ManageRow>
+        ))}
+      </div>
+
+      <div className="panel held-section">
+        <h3>Deals <span>{deals.length}/{DEAL_CAP}</span></h3>
+        {deals.length === 0 && <div className="empty">None arranged yet.</div>}
+        {deals.map(({ def, status, daysLeft }) => (
+          <ManageRow key={def.id} def={def} s={s} compact>
+            <span className={`manage-timer ${status}`}>
+              {status === 'active' ? `${daysLeft}d left` : 'Ongoing'}
+            </span>
+            <CutControl def={def} s={s} canAct={canAct} onCut={onCut} />
+          </ManageRow>
+        ))}
+      </div>
+    </aside>
   );
 }
 

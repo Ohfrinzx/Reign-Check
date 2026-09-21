@@ -2,12 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { createGame } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor,
+  activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
 } from '../engine';
 import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
 import {
-  ACT_STOCK, NIGHTLY_STOCK, boughtDealDefs, buyLimit, canFireNow, eligibleStock,
-  fireCostOf, ownedAdvisorDefs, roomIsClosed, shopPrice,
+  ACT_STOCK, ADVISOR_CAP, DEAL_CAP, NIGHTLY_STOCK, boughtDealDefs, buyLimit, canCutNow,
+  canFireNow, canHoldMoreAdvisors, canHoldMoreDeals, capBlockReason, cutCostOf, eligibleStock,
+  fireCostOf, heldDealEntries, ownedAdvisorDefs, roomIsClosed, shopPrice,
 } from '../shop';
 import { makeRng } from '../rng';
 import { applyEffects } from '../effects';
@@ -86,6 +87,20 @@ describe('shop content integrity', () => {
       if (d.kind === 'advisor') continue;
       expect(d.fireCost, `${d.id} is a ${d.kind} but has a fireCost`).toBeUndefined();
       expect(d.fireEffects, `${d.id} is a ${d.kind} but has fireEffects`).toBeUndefined();
+    }
+  });
+
+  it('only deals carry cut terms', () => {
+    for (const d of SHOP_ITEMS) {
+      if (d.kind === 'deal') continue;
+      expect(d.cutCost, `${d.id} is a ${d.kind} but has a cutCost`).toBeUndefined();
+      expect(d.cutEffects, `${d.id} is a ${d.kind} but has cutEffects`).toBeUndefined();
+    }
+  });
+
+  it('endsCommitment is only used by advisors and deals', () => {
+    for (const d of SHOP_ITEMS) {
+      if (d.kind === 'advisor' || d.kind === 'deal') continue;
       expect(d.endsCommitment, `${d.id} is a ${d.kind} but has endsCommitment`).toBeUndefined();
     }
   });
@@ -99,6 +114,29 @@ describe('shop content integrity', () => {
         (d.fireCost ?? 0) > 0 || !!d.fireEffects,
         `${d.id} can be fired for free with no consequence`,
       ).toBe(true);
+    }
+  });
+
+  it('every deal has a real cost or consequence to being cut short', () => {
+    // Every deal now occupies a slot until it ends; the same
+    // everything-has-a-downside rule that governs firing an advisor extends
+    // to cutting a deal short, or the cap would be a free-swap mechanic.
+    for (const d of SHOP_ITEMS.filter((x) => x.kind === 'deal')) {
+      expect(
+        (d.cutCost ?? 0) > 0 || !!d.cutEffects,
+        `${d.id} can be cut for free with no consequence`,
+      ).toBe(true);
+    }
+  });
+
+  it('every deal that creates a commitment can also end it (fired or cut)', () => {
+    // Otherwise firing/cutting frees a slot but leaves the bill running.
+    for (const d of SHOP_ITEMS) {
+      if (d.kind !== 'advisor' && d.kind !== 'deal') continue;
+      const commitmentIds = (d.effects?.commitments ?? []).map((c) => c.id).filter(Boolean);
+      if (!commitmentIds.length) continue;
+      expect(d.endsCommitment, `${d.id} creates a commitment but has no endsCommitment`).toBeTruthy();
+      expect(commitmentIds, `${d.id}'s endsCommitment doesn't match a commitment it creates`).toContain(d.endsCommitment);
     }
   });
 
@@ -177,6 +215,8 @@ describe('the Back Room', () => {
     if (def.kind === 'deal') {
       expect(after.owned).not.toContain(def.id);
       expect(after.heldFavours).not.toContain(def.id);
+      // every deal, permanent or timed, now occupies a held-deal slot
+      expect(after.heldDeals.some((h) => h.itemId === def.id)).toBe(true);
     }
   });
 
@@ -394,25 +434,38 @@ describe('firing an advisor', () => {
   });
 });
 
-describe('timed deals', () => {
+describe('held deals', () => {
   it('starts a clock when a durationDays deal is bought, and reports it as active', () => {
     const s = playToShop(42, 1);
     const seeded: GameState = { ...s, shopStock: ['three-judges'], shopBought: [], flags: { ...s.flags, judgesBought: 0 } };
     const after = buyShopItem(seeded, 'three-judges');
 
-    expect(after.activeDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
+    expect(after.heldDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
     const entry = boughtDealDefs(after).find((e) => e.def.id === 'three-judges');
     expect(entry?.status).toBe('active');
     expect(entry?.daysLeft).toBe(5);
   });
 
-  it('does not start a clock for a permanent deal', () => {
+  it('holds a permanent deal with no clock, still occupying a slot', () => {
     const s = playToShop(42, 1);
     const seeded: GameState = { ...s, shopStock: ['ilvet-levy'], shopBought: [], flags: { ...s.flags, ilvetLevy: 0 } };
     const after = buyShopItem(seeded, 'ilvet-levy');
-    expect(after.activeDeals).toEqual([]);
+    expect(after.heldDeals).toEqual([{ itemId: 'ilvet-levy', daysLeft: undefined }]);
     const entry = boughtDealDefs(after).find((e) => e.def.id === 'ilvet-levy');
     expect(entry?.status).toBe('ongoing');
+    // ...and it never ticks away on its own, however many days pass
+    let cur = after;
+    for (let i = 0; i < 10; i++) cur = leaveShop(cur);
+    expect(cur.heldDeals.some((h) => h.itemId === 'ilvet-levy')).toBe(true);
+  });
+
+  it('ilvet-levy actually creates the recurring revenue its upside text promises', () => {
+    // Regression: this deal's text said "$0.30B a day from then on" but the
+    // effects never created a commitment for it.
+    const s = playToShop(42, 1);
+    const seeded: GameState = { ...s, shopStock: ['ilvet-levy'], shopBought: [], flags: { ...s.flags, ilvetLevy: 0 } };
+    const after = buyShopItem(seeded, 'ilvet-levy');
+    expect(after.commitments.some((c) => c.id === 'cmt-ilvet' && c.perDay < 0)).toBe(true);
   });
 
   it('expires after durationDays ticks and never negative-counts', () => {
@@ -421,14 +474,14 @@ describe('timed deals', () => {
     let s = playToShop(42, 1);
     s = { ...s, shopStock: ['three-judges'], shopBought: [], flags: { ...s.flags, judgesBought: 0 } };
     s = buyShopItem(s, 'three-judges');
-    expect(s.activeDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
+    expect(s.heldDeals).toEqual([{ itemId: 'three-judges', daysLeft: 5 }]);
     const scandalAtPurchase = s.hidden.scandal;
 
     s = leaveShop(s); // advances to the next day, running dayUpkeep once (daysLeft -> 4)
     // A day is many transitions (several cards, alerts, night, shop), so the
     // guard here bounds total transitions across the whole walk, not days.
     let guard = 0;
-    while (s.activeDeals.length > 0 && s.phase !== 'ended' && guard++ < 800) {
+    while (s.heldDeals.length > 0 && s.phase !== 'ended' && guard++ < 800) {
       if (s.phase === 'briefing') s = beginStages(s);
       else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
@@ -438,11 +491,184 @@ describe('timed deals', () => {
       else break;
     }
     expect(guard).toBeLessThan(800);
-    expect(s.activeDeals).toEqual([]);
+    expect(s.heldDeals).toEqual([]);
     // expireEffects (hidden.scandal +6) landed exactly once
     const entry = boughtDealDefs(s).find((e) => e.def.id === 'three-judges');
     expect(entry?.status).toBe('expired');
     expect(s.hidden.scandal).toBeGreaterThanOrEqual(scandalAtPurchase);
     expect(s.log.some((l) => l.title.includes('Three Judges') && l.kind === 'consequence')).toBe(true);
+    expect(s.endedDeals).toContainEqual({ itemId: 'three-judges', reason: 'expired' });
+  });
+});
+
+describe('advisor and deal caps', () => {
+  it('blocks a 4th advisor once ADVISOR_CAP is reached', () => {
+    const s = playToShop(42, 1);
+    expect(ADVISOR_CAP).toBe(3);
+    const atCap: GameState = { ...s, owned: ['fixer', 'channel-seven-man', 'garrison-liaison'] };
+    expect(canHoldMoreAdvisors(atCap)).toBe(false);
+    expect(capBlockReason(atCap, SHOP_MAP['second-books'])).toMatch(/advisors/i);
+
+    const seeded: GameState = { ...atCap, shopStock: ['second-books'], shopBought: [] };
+    const after = buyShopItem(seeded, 'second-books');
+    expect(after.owned).not.toContain('second-books');
+    expect(after.stats.treasury).toBe(seeded.stats.treasury);
+  });
+
+  it('blocks a 4th deal once DEAL_CAP is reached, even mixing permanent and timed', () => {
+    const s = playToShop(42, 1);
+    expect(DEAL_CAP).toBe(3);
+    const atCap: GameState = {
+      ...s,
+      shopBought: ['gorsk-lease', 'ilvet-levy', 'three-judges'],
+      heldDeals: [
+        { itemId: 'gorsk-lease', daysLeft: undefined },
+        { itemId: 'ilvet-levy', daysLeft: undefined },
+        { itemId: 'three-judges', daysLeft: 3 },
+      ],
+      flags: { ...s.flags, gorskLeaseSold: 1, ilvetLevy: 1, judgesBought: 1, ostreneLoan: 0 },
+    };
+    expect(canHoldMoreDeals(atCap)).toBe(false);
+    expect(capBlockReason(atCap, SHOP_MAP['ostrene-loan'])).toMatch(/deals/i);
+
+    const seeded: GameState = { ...atCap, shopStock: ['ostrene-loan'] };
+    const after = buyShopItem(seeded, 'ostrene-loan');
+    expect(after.heldDeals.some((h) => h.itemId === 'ostrene-loan')).toBe(false);
+    expect(after.stats.treasury).toBe(seeded.stats.treasury);
+  });
+
+  it('does not block a purchase under the cap, or one of a different kind', () => {
+    const s = playToShop(42, 1);
+    const twoAdvisors: GameState = { ...s, owned: ['fixer', 'channel-seven-man'] };
+    expect(canHoldMoreAdvisors(twoAdvisors)).toBe(true);
+    expect(capBlockReason(twoAdvisors, SHOP_MAP['garrison-liaison'])).toBeUndefined();
+    // an advisor cap never blocks buying a favour or a policy
+    expect(capBlockReason(twoAdvisors, SHOP_MAP['quiet-word'])).toBeUndefined();
+    expect(capBlockReason(twoAdvisors, SHOP_MAP['night-courts'])).toBeUndefined();
+  });
+
+  it('cutting a deal frees a slot so a new one can be bought the same visit', () => {
+    let s = playToShop(42, 1);
+    s = {
+      ...s,
+      shopBought: ['gorsk-lease', 'ilvet-levy', 'three-judges'],
+      heldDeals: [
+        { itemId: 'gorsk-lease', daysLeft: undefined },
+        { itemId: 'ilvet-levy', daysLeft: undefined },
+        { itemId: 'three-judges', daysLeft: 3 },
+      ],
+      flags: { ...s.flags, gorskLeaseSold: 1, ilvetLevy: 1, judgesBought: 1 },
+    };
+    expect(canHoldMoreDeals(s)).toBe(false);
+
+    s = cutDeal(s, 'ilvet-levy');
+    expect(s.heldDeals.some((h) => h.itemId === 'ilvet-levy')).toBe(false);
+    expect(canHoldMoreDeals(s)).toBe(true);
+
+    s = { ...s, shopStock: ['ostrene-loan'] };
+    const after = buyShopItem(s, 'ostrene-loan');
+    expect(after.heldDeals.some((h) => h.itemId === 'ostrene-loan')).toBe(true);
+  });
+
+  it('firing an advisor frees a slot so a new one can be bought', () => {
+    let s = playToShop(42, 1);
+    s = { ...s, owned: ['fixer', 'channel-seven-man', 'garrison-liaison'] };
+    expect(canHoldMoreAdvisors(s)).toBe(false);
+
+    s = fireAdvisor(s, 'channel-seven-man');
+    expect(s.owned).not.toContain('channel-seven-man');
+    expect(canHoldMoreAdvisors(s)).toBe(true);
+
+    s = { ...s, shopStock: ['second-books'] };
+    const after = buyShopItem(s, 'second-books');
+    expect(after.owned).toContain('second-books');
+  });
+});
+
+describe('cutting a deal', () => {
+  it('pays the cut cost, applies the consequence, ends the commitment, and frees the slot', () => {
+    const s = playToShop(42, 1);
+    // gorsk-lease has a cutCost, an endsCommitment, and cutEffects — exercises all three.
+    const withLease: GameState = {
+      ...s,
+      shopBought: ['gorsk-lease'],
+      heldDeals: [{ itemId: 'gorsk-lease', daysLeft: undefined }],
+      commitments: [{ id: 'cmt-gorsk', label: 'Gorsk revenue, sold', perDay: 0.35 }],
+      flags: { ...s.flags, gorskLeaseSold: 1 },
+    };
+    const cost = cutCostOf(SHOP_MAP['gorsk-lease']);
+    expect(cost).toBeGreaterThan(0);
+
+    const before = withLease.stats.treasury;
+    const after = cutDeal(withLease, 'gorsk-lease');
+
+    expect(after.heldDeals.some((h) => h.itemId === 'gorsk-lease')).toBe(false);
+    expect(after.commitments.some((c) => c.id === 'cmt-gorsk')).toBe(false);
+    expect(after.stats.treasury).toBeCloseTo(before - cost, 1);
+    // the figurative cost (cutEffects: concord loyalty -6) landed
+    expect(after.factions.concord.loyalty).toBeLessThan(withLease.factions.concord.loyalty);
+    expect(after.endedDeals).toContainEqual({ itemId: 'gorsk-lease', reason: 'cut' });
+    expect(after.log.some((l) => l.kind === 'purchase' && l.title.includes('Gorsk'))).toBe(true);
+    // boughtDealDefs must now report it as 'cut', not 'ongoing' or 'expired'
+    const entry = boughtDealDefs(after).find((e) => e.def.id === 'gorsk-lease');
+    expect(entry?.status).toBe('cut');
+  });
+
+  it('cutting a timed deal early skips its expireEffects entirely', () => {
+    const s = playToShop(42, 1);
+    const withJudges: GameState = {
+      ...s,
+      shopBought: ['three-judges'],
+      heldDeals: [{ itemId: 'three-judges', daysLeft: 3 }],
+      flags: { ...s.flags, judgesBought: 1 },
+    };
+    const scandalBefore = withJudges.hidden.scandal;
+    const after = cutDeal(withJudges, 'three-judges');
+
+    expect(after.heldDeals).toEqual([]);
+    const entry = boughtDealDefs(after).find((e) => e.def.id === 'three-judges');
+    expect(entry?.status).toBe('cut');
+    // only the (smaller) cutEffects scandal bump applies, not expireEffects too
+    const cutScandal = after.hidden.scandal - scandalBefore;
+    expect(cutScandal).toBeCloseTo(4, 1);
+  });
+
+  it('refuses to cut a deal you cannot afford to end, and does nothing for a deal you do not hold', () => {
+    const s = playToShop(42, 1);
+    const broke: GameState = {
+      ...s,
+      shopBought: ['ostrene-loan'],
+      heldDeals: [{ itemId: 'ostrene-loan', daysLeft: undefined }],
+      stats: { ...s.stats, treasury: 0 },
+      flags: { ...s.flags, ostreneLoan: 1 },
+    };
+    expect(canCutNow(broke, SHOP_MAP['ostrene-loan'])).toBe(false);
+    const after = cutDeal(broke, 'ostrene-loan');
+    expect(after.heldDeals.some((h) => h.itemId === 'ostrene-loan')).toBe(true);
+    expect(after.stats.treasury).toBe(0);
+
+    const untouched = cutDeal(s, 'gorsk-lease'); // never held
+    expect(untouched.heldDeals).toEqual(s.heldDeals);
+  });
+
+  it('does nothing for an item that is not a deal', () => {
+    const s = playToShop(42, 1);
+    const withPolicy: GameState = { ...s, owned: ['emergency-powers'] };
+    const stillOwned = cutDeal(withPolicy, 'emergency-powers');
+    expect(stillOwned.owned).toContain('emergency-powers');
+  });
+
+  it('heldDealEntries only returns deals still held, never expired or cut ones', () => {
+    const s = playToShop(42, 1);
+    const mixed: GameState = {
+      ...s,
+      shopBought: ['gorsk-lease', 'ilvet-levy', 'three-judges'],
+      heldDeals: [{ itemId: 'gorsk-lease', daysLeft: undefined }],
+      endedDeals: [
+        { itemId: 'ilvet-levy', reason: 'cut' },
+        { itemId: 'three-judges', reason: 'expired' },
+      ],
+    };
+    expect(heldDealEntries(mixed).map((e) => e.def.id)).toEqual(['gorsk-lease']);
   });
 });
