@@ -69,6 +69,10 @@ The **Back Room** opens each night: buy advisors, policies, favours and
 deals. Ordinary nights allow one purchase; after a confidence vote you can
 buy more. Every offer states its price and catch.
 
+Every run you finish is kept: the title screen shows how many
+administrations you've run and how they ended. Nothing is unlocked or
+restricted by this yet — it's a record, not a gate.
+
 ## Verification
 
 ```bash

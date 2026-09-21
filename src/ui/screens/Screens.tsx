@@ -6,6 +6,7 @@ import { ACT_LENGTH, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../g
 import { usd, usdFlow, computeBudget } from '../../game/economy';
 import { fill } from '../../game/text';
 import { MANDATES, MANDATE_MAP, currentMandate } from '../../game/content/mandates';
+import type { MetaProgress } from '../../game/meta';
 
 const MAX_PER_SECTION = 4;
 
@@ -13,14 +14,16 @@ const MAX_PER_SECTION = 4;
 
 export function TitleScreen({
   name, setName, honorific, setHonorific, mandateId, setMandateId,
-  onNew, onContinue, savedDay, onDelete,
+  onNew, onContinue, savedDay, onDelete, legacy,
 }: {
   name: string; setName: (v: string) => void;
   honorific: string; setHonorific: (v: string) => void;
   mandateId: string; setMandateId: (v: string) => void;
   onNew: () => void; onContinue?: () => void; savedDay?: number; onDelete?: () => void;
+  legacy?: MetaProgress;
 }) {
   const selected = MANDATE_MAP[mandateId];
+  const runs = legacy?.runs ?? [];
   return (
     <div className="screen title-screen">
       <div className="sheet">
@@ -43,6 +46,7 @@ export function TitleScreen({
               {COUNTRY.population} people. Five power blocs. Three confidence votes in eighteen days.
               Everyone wants something. Your signature is now worth money.
             </p>
+            {runs.length > 0 && <TitleRecord runs={runs} />}
             <div className="name-field">
               <label className="kicker" htmlFor="leader-name">Your name</label>
               <input id="leader-name" value={name} onChange={(e) => setName(e.target.value)}
@@ -88,6 +92,23 @@ export function TitleScreen({
         <p className="title-foot">{COUNTRY.name} is invented, and so are its factions, ministers, neighbours and pigeons.</p>
       </div>
     </div>
+  );
+}
+
+/** A plain-language line of record across past runs — §4.5's first slice.
+ *  Nothing here gates anything yet; it is the "you've been here before"
+ *  payoff on its own. Only rendered once at least one run exists. */
+function TitleRecord({ runs }: { runs: MetaProgress['runs'] }) {
+  const survived = runs.filter((r) => r.endingKind === 'survival').length;
+  const fell = runs.length - survived;
+  const last = runs[runs.length - 1];
+  return (
+    <p className="mandate-intro title-record">
+      {runs.length} administration{runs.length === 1 ? '' : 's'} so far
+      {survived > 0 && <> — {survived} survived</>}
+      {fell > 0 && <>{survived > 0 ? ', ' : ' — '}{fell} fell</>}
+      {last && <>, most recently as <b>{last.regimeLabel}</b> ({last.endingTitle.toLowerCase()})</>}.
+    </p>
   );
 }
 

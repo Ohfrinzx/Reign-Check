@@ -8,6 +8,7 @@ import {
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
 import { saveGame, loadGame, deleteSave } from './game/save';
+import { loadMetaProgress, recordRun, saveMetaProgress, type MetaProgress } from './game/meta';
 import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
 import { CardView, OutcomeView } from './ui/components/CardView';
@@ -30,6 +31,8 @@ export default function App() {
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
   const toastTimer = useRef<number | undefined>(undefined);
+  const [legacy, setLegacy] = useState<MetaProgress>(() => ({ version: 1, runs: [] }));
+  const recordedEndingRef = useRef<GameState['ending'] | undefined>(undefined);
 
   /* ---- detect an existing save on mount */
   useEffect(() => {
@@ -40,10 +43,30 @@ export default function App() {
     }
   }, []);
 
+  /* ---- load the cross-run record on mount (§4.5, separate from any save) */
+  useEffect(() => {
+    setLegacy(loadMetaProgress());
+  }, []);
+
   /* ---- autosave whenever the game state settles */
   useEffect(() => {
     if (!game) return;
     saveGame(game);
+  }, [game]);
+
+  /* ---- record a finished run into the cross-run legacy, exactly once per
+   *  ending. The ref guard stops a duplicate append if this effect re-runs
+   *  (React StrictMode, or any re-render while `game` stays the same ended
+   *  object) — comparing by reference is enough since a new ending is
+   *  always a new object. */
+  useEffect(() => {
+    if (!game?.ending || recordedEndingRef.current === game.ending) return;
+    recordedEndingRef.current = game.ending;
+    setLegacy((prev) => {
+      const next = recordRun(prev, game);
+      saveMetaProgress(next);
+      return next;
+    });
   }, [game]);
 
   const say = useCallback((msg: string) => {
@@ -199,6 +222,7 @@ export default function App() {
           onContinue={savedDay ? continueGame : undefined}
           savedDay={savedDay}
           onDelete={savedDay ? () => { deleteSave(); setSavedDay(undefined); } : undefined}
+          legacy={legacy}
         />
         {toast && <div className="toast">{toast}</div>}
       </>

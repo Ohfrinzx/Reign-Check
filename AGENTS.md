@@ -71,9 +71,22 @@ in progress:
   alerts (appended to `content/alerts.ts`, filling in the previously-unused
   `scandal`/`corruption`/`cult` drivers). `SAVE_VERSION` is **8**;
   version-7 in-progress runs reset.
-- **§4.5 (meta-progression) — NOT started.** Wait for an explicit
-  instruction before beginning it — approval of §4.4 is not itself that
-  instruction, per the same staged-slice discipline as every prior step.
+- **§4.5 (meta-progression), step 1 — BUILT, awaiting owner playtest
+  (2026-09-21, later session).** Per the design doc's own suggested
+  de-risking: nothing is gated yet. `src/game/meta.ts` (new file) is a
+  cross-run record — `MetaProgress`/`RunRecord`, its own localStorage key
+  (`dictator-sandbox:legacy:v1`) and its own version (`META_VERSION`,
+  currently 1), deliberately separate from `GameState`/`SAVE_VERSION` so
+  deleting a save or restarting a run never touches it. Every finished run
+  is appended (capped at 50); `App.tsx` records one on the `useEffect`
+  watching `game.ending`, guarded by a ref so it never double-records. The
+  title screen shows a one-line record ("N administrations so far — …",
+  `TitleRecord` in `Screens.tsx`) once at least one run exists.
+  `isMandateUnlocked()`/`isShopItemUnlocked()` exist as the hook step 2
+  will use, but both currently just `return true` — no mandate or shop
+  item is actually restricted by this yet. Step 2 (real unlock conditions)
+  is a follow-up slice, not started, needing its own go-ahead once step 1
+  is played.
 
 For the exact, up-to-the-minute state (what shipped last, what's still
 mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s
@@ -194,7 +207,8 @@ npm run build      # typecheck + production build
 npm test           # vitest: content integrity, 200 full simulated runs,
                    #   determinism, variety, glossary, the Back Room shop
                    #   suite (stock/pricing, firing advisors, held/timed/cut
-                   #   deals, caps), mandates, and the run deck (§4.4)
+                   #   deals, caps), mandates, the run deck (§4.4), and the
+                   #   meta-progression record (§4.5 step 1)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -206,6 +220,7 @@ npm run test:browser        # starts Vite; all checks at 1366×700
 node tools/verify.mjs        # with a separately running Vite: full pass
 node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
+node tools/legacy.mjs        # §4.5: ending → title, checks the record line
 ```
 
 ## 8. Map of the code
@@ -232,7 +247,13 @@ src/game/                 no React, no DOM, fully testable
   stats.ts                stat metadata, bands, tooltips (still full 10 stats;
                            display.ts is what narrows this for the player)
   text.ts                 {sir}/{leader} token replacement
-  save.ts                 localStorage, version-guarded, fails safe
+  save.ts                 localStorage, version-guarded, fails safe — THIS
+                           run's save; separate from meta.ts's cross-run one
+  meta.ts                 §4.5 META-PROGRESSION — cross-run record, own
+                           localStorage key/version, deliberately outside
+                           GameState/SAVE_VERSION. Step 1 only: records runs,
+                           nothing is gated (isMandateUnlocked()/
+                           isShopItemUnlocked() both stub `true` for now)
   content/mandates.ts      six origins, generic rule data, Stairwell card
   content/                country, cards, cards2, cards3 (§4.4's content
                            top-up), followups, alerts, endings, shop (the
@@ -248,7 +269,9 @@ src/ui/
     CardView.tsx             the doc — card-as-lead-story + decision box
     Prose.tsx               renders card text, applies the glossary
   screens/
-    Screens.tsx             Title, Briefing (front page), Night, Ending
+    Screens.tsx             Title (incl. TitleRecord — §4.5's cross-run
+                            line, shown once a run exists), Briefing (front
+                            page), Night, Ending
     Shop.tsx                 The Back Room (fullscreen, dark) + the rail's
                             compact "Back Room" panel (favours, quick-glance)
     Manage.tsx               "Advisors & Deals" — the fuller management
@@ -376,3 +399,38 @@ don't leave it to "whoever reads this next." Specifically:
   but alerts get no `runDeck` copies-boost — the run deck's "add" side only
   ever targets ordinary standard cards, matching the design doc's framing
   ("situation cards" — the world's own alerts stay unpredictable).
+
+## 14. Meta-progression slice notes (§4.5 step 1, 2026-09-21, later session)
+
+- `meta.ts` is deliberately its own localStorage key
+  (`dictator-sandbox:legacy:v1`) and its own version constant
+  (`META_VERSION`), not folded into `save.ts`'s key or `SAVE_VERSION`. This
+  is load-bearing: `deleteSave()`/restart must never wipe cross-run history,
+  and a `GameState` shape change (which bumps `SAVE_VERSION`) must never
+  discard it either. If `MetaProgress`'s shape changes later, bump
+  `META_VERSION`, not `SAVE_VERSION` — they are independent counters.
+- `recordRun()` is a pure function (`(meta, state) => meta`) — it does not
+  write to `localStorage` itself. The caller (`App.tsx`) decides when to
+  persist, same separation `applyEffects()`/`save.ts` already have in the
+  main save path. Call `saveMetaProgress()` yourself after `recordRun()`.
+- The React-side recording effect in `App.tsx` guards against double-
+  recording by comparing `game.ending` **by reference**, not by id — a new
+  ending object is always a distinct reference (states are cloned, never
+  mutated in place, ground rule 3), so this is safe without deep-equality
+  checks and works even if two different runs happen to reach the same
+  ending id.
+- Step 1 ships `isMandateUnlocked()`/`isShopItemUnlocked()` in `meta.ts` as
+  the hook a follow-up slice will use, but BOTH unconditionally return
+  `true` right now — nothing calls them from the title screen's mandate
+  picker or the shop's stock roll yet. Wiring them in and giving them real
+  conditions (e.g. "played N runs", "survived to Act 3 once") is step 2,
+  not built, and per the same staged-slice discipline needs its own
+  go-ahead after step 1 is played — do not silently add gating logic as
+  a "small addition" to this file later without that.
+- The record only reads from `MetaProgress`, never gates anything — so
+  `content/mandates.ts` and `content/shop.ts` needed zero changes for this
+  slice (ground rule 5 holds, same as every other slice so far).
+- `tools/legacy.mjs` is the dedicated browser check: confirms no record line
+  before any run exists, drives one run to an ending, checks the line
+  appears after "Back to title" (not "Try again", which skips the title
+  screen entirely), and confirms it survives a real page reload.

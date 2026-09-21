@@ -1,12 +1,13 @@
 # Design V2 — simplification and the roguelike turn
 
 **Current status (2026-09-21, later session): Phase 1 and Phase 2
-§4.1/§4.2/§4.3/§4.4 are all OWNER-APPROVED. Only §4.5 (meta-progression) is
-NOT started.** Each slice still requires its own feedback and a new
-instruction before starting the next — approval of §4.4 is not itself a
-green light for §4.5. See `PROJECT_STATUS.md`'s current handoff and
-`docs/REVIEW_2026_09_21.md`. Historical implementation notes below describe
-earlier checkpoints.
+§4.1/§4.2/§4.3/§4.4 are all OWNER-APPROVED. §4.5 (meta-progression) step 1
+— the cross-run record, nothing gated — is BUILT, awaiting owner playtest;
+step 2 (real unlock conditions) is NOT started.** Each slice still requires
+its own feedback and a new instruction before starting the next — approval
+of one step is not itself a green light for the next. See
+`PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
+Historical implementation notes below describe earlier checkpoints.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -33,8 +34,9 @@ Decisions made by the owner, in order:
    folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
    what to preserve and what to avoid, no mobile work scheduled).
 
-**What is NOT built yet:** meta-progression (§4.5) — the last piece of
-Phase 2. Read section 9 for later phases and section 10 for the mobile
+**What is NOT built yet:** meta-progression's step 2 (real unlock
+conditions) — the last piece of Phase 2. Step 1 (the cross-run record) is
+built. Read section 9 for later phases and section 10 for the mobile
 architecture guardrails.
 
 ---
@@ -566,7 +568,7 @@ frequency in the balance probe (`avgAlerts` 8.5→10.9, `reachedMax`
 40%→52% under the random policy) — flagged, not tuned blind, same as
 mandates' balance was left for playtesting rather than guessed at.
 
-### 4.5 Meta-progression
+### 4.5 Meta-progression — step 1 BUILT AND AWAITING PLAYTEST, step 2 NOT STARTED
 
 Completed runs unlock mandates, advisors and cards for future runs. Small,
 persistent, stored in `localStorage` next to the save (a separate key —
@@ -584,6 +586,36 @@ of Phase 2 (4.1–4.4) from also having to get a meta-progression system right
 on the first attempt. *Content: whatever of §4.3/§4.2's pool ends up
 held back for unlocks — no new authoring beyond what 4.2/4.3 already
 produced.*
+
+**As built, step 1, 2026-09-21 (later session):** the owner asked what this
+slice would be, then said to go ahead with the suggestion above. New file
+`src/game/meta.ts`: `MetaProgress { version; runs: RunRecord[] }`, its own
+localStorage key (`dictator-sandbox:legacy:v1`) and its own version
+constant (`META_VERSION`) — deliberately separate from `GameState`/
+`SAVE_VERSION`, exactly as this section specified. `recordRun(meta, s)` is
+a pure function appending a `RunRecord` (day, act, mandate id, ending id/
+kind/title, regime label, leader name, timestamp), capped at the last 50
+runs; it does not persist itself, so the caller decides when to
+(`App.tsx`, in a `useEffect` watching `game.ending`, guarded against
+double-recording by comparing the ending object by reference — safe
+because states clone rather than mutate, ground rule 3). The title screen
+renders a one-line summary once at least one run exists (`TitleRecord` in
+`Screens.tsx`).
+
+**Nothing is gated — literally the suggestion above, taken as-is rather
+than as a target to build past on the first attempt.**
+`isMandateUnlocked()`/`isShopItemUnlocked()` exist in `meta.ts` as the hook
+a step-2 slice will use, but both unconditionally `return true`; nothing
+calls them from the mandate picker or the shop's stock roll yet. No new
+content was needed (ground rule 5 holds) — the record only reads
+`GameState`, it doesn't change what `content/mandates.ts`/`content/shop.ts`
+offer. 7 new tests, 100 total; a new browser check, `tools/legacy.mjs`; all
+green at 1366×700 with zero page errors.
+
+**Step 2 — real unlock conditions on top of the step-1 hooks — is not
+started**, and per this project's staged-slice discipline needs its own
+explicit go-ahead once step 1 has been played, same as every other step in
+this section.
 
 ### 4.6 Suggested data shapes (a starting sketch, not gospel)
 
@@ -791,8 +823,11 @@ Suggested order, each step shippable and playtestable on its own:
 5. ✅ **DONE, OWNER-APPROVED.** Mandates (§4.3), six origins.
 6. ✅ **DONE, OWNER-APPROVED.** Run deck (§4.4) — `runDeck`/`bannedCards`,
    8 deck-affecting shop policies, 20 new standard cards, 5 new alerts.
-7. ⬜ **NOT STARTED.** Meta-progression (§4.5), after owner feedback and
-   its own explicit instruction — the only piece of Phase 2 left.
+7. 🟡 **STEP 1 BUILT, AWAITING PLAYTEST; STEP 2 NOT STARTED.**
+   Meta-progression (§4.5) — step 1 is the cross-run record (`meta.ts`,
+   `TitleRecord`), nothing gated. Step 2 (real unlock conditions) is the
+   only piece of Phase 2 left, and needs its own explicit instruction after
+   step 1 is played.
 
 Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
 — the owner has now played that build and confirmed it. Steps 4–7 are the
