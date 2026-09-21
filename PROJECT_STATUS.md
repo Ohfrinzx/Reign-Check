@@ -1,5 +1,68 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
+## ▶ WHERE WE STOPPED — 2026-09-21 (later session, meta-progression step 2 — ALL OF PHASE 2 NOW BUILT)
+
+**§4.5 (META-PROGRESSION), STEP 2 IS BUILT, AWAITING OWNER PLAYTEST — THIS
+COMPLETES ALL OF PHASE 2 (§4.1 THROUGH §4.5).** The owner asked what
+meta-progression would be; after the answer, asked whether minigames would
+fix a separately-raised balance concern (no — that's Phase 3's balance
+pass, not this), then specified where the unlock view should live: *"Add
+it to a separate sub-menu within the advisors/deals tab along with a
+button on the menu screen. That way users are able to see their progress
+and can aim for specific goals to unlock certain cards."* Built the same
+session as step 1, on `claude/exciting-dijkstra-jtlmbh`.
+
+**What step 2 adds on top of step 1's record:** real unlock conditions,
+now actually gating content, plus the UI to see them. `meta.ts` gains
+`computeUnlockStats(meta)` (runsCompleted/survived/bestAct) and two plain
+data tables — `MANDATE_UNLOCKS` (`clean-hands`: finish 2 runs; `pay-deal`:
+reach Act 2 — the two mandates added after the original four) and
+`SHOP_UNLOCKS` (`one-good-story`: survive once; `archivist`: finish 3
+runs — the Back Room's only two `rarity: 'rare'` items). Everything not
+listed in either table stays unlocked from run one, same as before this
+slice. `isMandateUnlocked()`/`isShopItemUnlocked()` now evaluate these for
+real, replacing step 1's `true`-always stubs.
+
+`GameState.unlockedShopItemIds` (new field) is a snapshot taken once at
+`createGame()` — deliberately not re-evaluated mid-run, so unlocking
+something by playing doesn't retroactively change the run you're already
+in. `state.ts`'s mandate roll/explicit-pick both respect a new
+`NewGameOptions.unlockedMandateIds`, with a fallback that never locks out
+every mandate. `shop.ts`'s stock roll and `engine.ts`'s `buyShopItem()`
+(as an independent safety net, same pattern as the advisor/deal cap check)
+both enforce the shop side. `SAVE_VERSION` bumped 8→9.
+
+New `src/ui/screens/Progress.tsx` (`ProgressPanel` shared content +
+`ProgressScreen` standalone overlay) is reused in exactly the two places
+the owner asked for: a "Roster"/"Unlocks" tab pair inside `Manage.tsx`'s
+"Advisors & Deals" screen, and a new "Unlocks" button on the title
+screen's toolbar. The title screen's own mandate picker now filters down
+to what's actually unlocked, rather than always listing all six.
+
+**Verification:** 7 more new tests (107 total, up from 100) covering the
+real unlock conditions, the mandate-roll/pick gating and its fallback, the
+shop's default-everything-unlocked snapshot, a locked item never appearing
+in stock, and `buyShopItem()`'s independent refusal. `tools/mandates.mjs`
+extended significantly: confirms only 5 mandate options (4 unlocked +
+random) on a cleared-storage fresh run, seeds a 3-run history that
+satisfies every unlock rule at once, confirms all 7 options appear and the
+previously-locked `clean-hands` mandate actually starts (not just renders),
+and checks both Unlocks access points — the title button and the in-game
+tab — agree on what's unlocked. Production build clean; all five
+Playwright tools green at 1366×700 with zero page errors.
+
+**Next:** owner playtests both steps of §4.5. Once played and approved,
+**Phase 2 (docs/DESIGN_V2.md §4, §4.1–§4.5) is entirely done** — the next
+phase is Phase 3 (content/systems depth: faction demands, character-driven
+events, crisis chains, then the balance pass the owner already flagged a
+concrete symptom for — see the "spam through and win" note in this
+session's chat history) — but Phase 3 still needs its own explicit
+go-ahead, same discipline as every step so far.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-21 (later session, meta-progression step 1)
 
 **§4.5 (META-PROGRESSION), STEP 1 IS BUILT, AWAITING OWNER PLAYTEST.** The
@@ -623,13 +686,13 @@ Playwright scripts for real-browser playthroughs.
 **PLAYTEST ROUND 3 (the actual Poster/Broadsheet build): ✅ PASSED.** *"Ok
 everything seems to run and look good."* **PHASE 1: ✅ DECLARED COMPLETE BY
 THE OWNER.**
-**PHASE 2 — THE ROGUELIKE LAYER: 🟢 GREENLIT, IN PROGRESS.** §4.1 (acts +
-confidence vote), §4.2 (the Back Room shop, both chunks), §4.3 (mandates),
-and §4.4 (the run deck) are all **BUILT AND OWNER-APPROVED**. §4.5
-(meta-progression) step 1 — the cross-run record, nothing gated — is
-**BUILT, awaiting owner playtest**; step 2 (real unlock conditions) is
-**NOT started** and needs its own explicit go-ahead — see the "WHERE WE
-STOPPED" block above, `AGENTS.md`, and `CLAUDE.md`.
+**PHASE 2 — THE ROGUELIKE LAYER: 🟡 FULLY BUILT, AWAITING FINAL PLAYTEST.**
+§4.1 (acts + confidence vote), §4.2 (the Back Room shop, both chunks), §4.3
+(mandates), and §4.4 (the run deck) are all **BUILT AND OWNER-APPROVED**.
+§4.5 (meta-progression) — both step 1 (the cross-run record) and step 2
+(real unlock conditions plus the Unlocks UI) — is **BUILT, awaiting owner
+playtest**. Once played and approved, all of Phase 2 is done — see the
+"WHERE WE STOPPED" block above, `AGENTS.md`, and `CLAUDE.md`.
 
 ### Playtest round 2 — what was reported, and what was done
 
@@ -894,14 +957,13 @@ of this file.
 
 ## 4. What is NOT built yet
 
-**Of the roguelike layer (`docs/DESIGN_V2.md` §4), only meta-progression's
-step 2 remains.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),
-and the run deck (§4.4) are all built, playtested, and owner-approved. §4.5
-step 1 (the cross-run record, nothing gated) is built and awaiting
-playtest. Step 2 — real unlock conditions on top of it — is listed here
-only as "not yet built", not as deferred: it is GREENLIT as part of Phase
-2, but still needs its own explicit go-ahead before starting; see the
-"WHERE WE STOPPED" block at the top of this file and `CLAUDE.md`.
+**Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains
+unbuilt.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3), the run
+deck (§4.4), and meta-progression (§4.5, both steps) are all built. §4.1–
+§4.4 are playtested and owner-approved; §4.5 is built and awaiting its
+playtest — see the "WHERE WE STOPPED" block at the top of this file. Once
+that playtest lands, Phase 2 is entirely done and the next open question is
+whether to start Phase 3 (below).
 
 Everything else below is Phase 3, 4, or 5 per `docs/DESIGN_V2.md` §9 — all
 genuinely deferred until Phase 2 ships and is playtested, and all still need
@@ -933,9 +995,11 @@ to be asked about before starting:
 - **Mini-games** (Milestone 5). `MinigameKey` and `CardDef.minigame` exist in
   the type system as the hook; no minigame components are implemented.
 - **Assassination, election-defeat and constitutional-removal endings.**
-- **Run history / legacy across runs** (Milestone 7) — note this overlaps
-  with Phase 2's meta-progression (§4.5); worth building together rather than
-  twice.
+- ~~**Run history / legacy across runs**~~ (Milestone 7) — **delivered as
+  part of §4.5's meta-progression** (the title screen's record line, the
+  Unlocks screen's "your record" summary), not built twice. Further
+  enrichment (e.g. a fuller run-by-run history view) would still be a
+  Phase 5 nice-to-have if wanted later.
 - **Sound.**
 
 ---
@@ -960,8 +1024,9 @@ to be asked about before starting:
 ## 6. Recommended next task
 
 **§4.1, §4.2 (both chunks), §4.3, and §4.4 are all built and
-OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. §4.5 step 1 is
-built, awaiting playtest. Do this, in order:**
+OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. §4.5 (both
+steps) is built, awaiting playtest — this is all of Phase 2 built. Do
+this, in order:**
 
 1. ✅ **DONE, APPROVED.** `docs/DESIGN_V2.md` §4.1 — the run structure: 3
    acts of 6 days each (18 total), ending in a confidence vote checked
@@ -979,13 +1044,15 @@ built, awaiting playtest. Do this, in order:**
    ChatGPT-based agent.
 5. 🟡 **BUILT, AWAITING PLAYTEST.** §4.5 meta-progression, step 1
    (2026-09-21, later session): `src/game/meta.ts`, the cross-run record,
-   the title screen's one-line summary. Nothing is gated — see the "WHERE
-   WE STOPPED" block at the top for the full detail.
-6. **After an explicit owner instruction, once step 1 is played:** §4.5
-   step 2 — real unlock conditions (e.g. "played N runs" gates a mandate,
-   "survived an act" gates a shop item) on top of the hooks step 1 already
-   put in `meta.ts`'s `isMandateUnlocked()`/`isShopItemUnlocked()`. This is
-   the only piece of Phase 2 left once it ships.
+   the title screen's one-line summary.
+6. 🟡 **BUILT, AWAITING PLAYTEST.** §4.5 meta-progression, step 2 (same
+   session): real unlock conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS` in
+   `meta.ts`) actually gate two mandates and two rare shop items now, plus
+   a new Unlocks screen (`Progress.tsx`) reachable from the title screen
+   and from a tab inside "Advisors & Deals" — see the "WHERE WE STOPPED"
+   block at the top for the full detail. **This was the last piece of
+   Phase 2** — once it and step 1 are played and approved, Phase 2
+   (§4.1–§4.5) is entirely done.
 7. **Do not start the deeper data-model rewrite** (`docs/DESIGN_V2.md` §3's
    original proposal, migrating from 10 stats/7 factions to a native 3/5
    model) — this was implicitly resolved by the same playtest approval and
@@ -1007,7 +1074,8 @@ for the full reasoning:**
   later without a rewrite.
 - **Mini-games (Phase 5, Milestone 5).** Start with Budget Allocation and
   Cabinet Negotiation; the `minigame` hook already exists on `CardDef`.
-- **Sound, remaining ending types, run history/legacy (Phase 5).**
+- **Sound, remaining ending types (Phase 5).** Run history/legacy was
+  delivered as part of §4.5, not deferred — see §4 above.
 
 ---
 

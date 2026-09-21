@@ -6,6 +6,7 @@ import { FACTION_ORDER, CHARACTERS } from './content/country';
 import { makeRng, randomSeed } from './rng';
 import { clampStat } from './stats';
 import { MANDATES, MANDATE_MAP } from './content/mandates';
+import { SHOP_ITEMS } from './content/shop';
 import { applyEffects } from './effects';
 
 /** Bump whenever GameState's shape changes — save.ts discards mismatched
@@ -15,8 +16,10 @@ import { applyEffects } from './effects';
  *  5→6: activeDeals replaced by heldDeals (every deal now occupies a slot,
  *  not just timed ones) plus endedDeals, for the advisor/deal cap.
  *  6→7: mandateId; generated effect IDs now use a saved flags counter.
- *  7→8: runDeck/bannedCards, for the run deck (§4.4). */
-export const SAVE_VERSION = 8;
+ *  7→8: runDeck/bannedCards, for the run deck (§4.4).
+ *  8→9: unlockedShopItemIds, for meta-progression's real unlock conditions
+ *  (§4.5 step 2). */
+export const SAVE_VERSION = 9;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -83,6 +86,16 @@ export interface NewGameOptions {
   seed?: number;
   maxDays?: number;
   mandateId?: string;
+  /**
+   * §4.5 step 2: mandate ids meta-progression currently allows, from
+   * `meta.ts`'s `isMandateUnlocked()`. Omitted — including every call in
+   * this codebase's own tests, and any save/menu path that never passed
+   * meta history — means "no restriction", i.e. every mandate is eligible,
+   * exactly as before this option existed.
+   */
+  unlockedMandateIds?: string[];
+  /** Same idea, for the shop — see GameState.unlockedShopItemIds in types.ts. */
+  unlockedShopItemIds?: string[];
 }
 
 export function createGame(opts: NewGameOptions = {}): GameState {
@@ -90,8 +103,16 @@ export function createGame(opts: NewGameOptions = {}): GameState {
   const rng = makeRng(seed);
 
   // Roll even for a chosen mandate, so equal seeds share baseline conditions.
-  const rolled = rng.pick(MANDATES);
-  const mandate = MANDATE_MAP[opts.mandateId ?? ''] ?? rolled;
+  // A locked mandate is never rolled or honoured, even if opts.mandateId asks
+  // for one directly (the title screen's picker shouldn't offer a locked one
+  // in the first place, but this is the real guard, not that UI).
+  const eligible = opts.unlockedMandateIds
+    ? MANDATES.filter((m) => opts.unlockedMandateIds!.includes(m.id))
+    : MANDATES;
+  const pool = eligible.length ? eligible : MANDATES; // never lock out every mandate
+  const rolled = rng.pick(pool);
+  const requested = opts.mandateId ? MANDATE_MAP[opts.mandateId] : undefined;
+  const mandate = requested && pool.includes(requested) ? requested : rolled;
 
   // ---- stats, with jitter so no two runs start identically
   const stats = {} as Stats;
@@ -181,6 +202,7 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     seenOnce: [],
     runDeck: [],
     bannedCards: [],
+    unlockedShopItemIds: opts.unlockedShopItemIds ?? SHOP_ITEMS.map((i) => i.id),
 
     alertsToday: 0,
     lastAlertDay: 0,

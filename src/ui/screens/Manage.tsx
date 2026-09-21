@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { GameState } from '../../game/types';
 import type { ShopItemDef } from '../../game/content/shop';
 import {
@@ -6,6 +7,8 @@ import {
 } from '../../game/shop';
 import { usd } from '../../game/economy';
 import { fill } from '../../game/text';
+import type { MetaProgress } from '../../game/meta';
+import { ProgressPanel } from './Progress';
 
 /**
  * ADVISORS & DEALS — a dedicated screen for what the Back Room has already
@@ -30,13 +33,19 @@ import { fill } from '../../game/text';
  * non-shop phase.
  */
 export function ManageScreen({
-  s, onClose, onFire, onCut,
+  s, legacy, onClose, onFire, onCut, initialTab,
 }: {
   s: GameState;
+  legacy: MetaProgress;
   onClose: () => void;
   onFire: (itemId: string) => void;
   onCut: (itemId: string) => void;
+  /** the masthead's "Unlocks" button opens straight to that tab; the
+   *  "Advisors & Deals" button opens to the roster, same as before this
+   *  screen had tabs at all. */
+  initialTab?: 'roster' | 'unlocks';
 }) {
+  const [tab, setTab] = useState<'roster' | 'unlocks'>(initialTab ?? 'roster');
   const advisors = ownedAdvisorDefs(s);
   const deals = boughtDealDefs(s);
   // Firing/cutting changes state through applyEffects, same as buying —
@@ -52,41 +61,53 @@ export function ManageScreen({
             <div className="kicker">The Back Room's ledger</div>
             <h1>Advisors &amp; Deals</h1>
             <p className="intro-lead">
-              Everyone on retainer, and everything arranged this run, in one place.
+              Everyone on retainer, everything arranged this run, and what future runs unlock.
             </p>
+            <div className="seg" role="tablist" aria-label="Advisors and deals views">
+              <button className={`seg-btn ${tab === 'roster' ? 'on' : ''}`} aria-pressed={tab === 'roster'}
+                onClick={() => setTab('roster')} type="button">Roster</button>
+              <button className={`seg-btn ${tab === 'unlocks' ? 'on' : ''}`} aria-pressed={tab === 'unlocks'}
+                onClick={() => setTab('unlocks')} type="button">Unlocks</button>
+            </div>
           </div>
 
-          <div className="intro-section">
-            <h2>Advisors ({advisors.length}/{ADVISOR_CAP})</h2>
-            {advisors.length === 0 && (
-              <p className="intro-note">Nobody on retainer yet. The Back Room sells these too.</p>
-            )}
-            {advisors.map((def) => (
-              <ManageRow key={def.id} def={def} s={s}>
-                <FireControl def={def} s={s} canAct={canAct} onFire={onFire} />
-              </ManageRow>
-            ))}
-          </div>
-
-          <div className="intro-section">
-            <h2>Deals ({deals.filter((d) => d.status === 'ongoing' || d.status === 'active').length}/{DEAL_CAP})</h2>
-            {deals.length === 0 && (
-              <p className="intro-note">No arrangements made yet.</p>
-            )}
-            {deals.map(({ def, status, daysLeft }) => (
-              <ManageRow key={def.id} def={def} s={s}>
-                <span className={`manage-timer ${status}`}>
-                  {status === 'ongoing' && 'Ongoing'}
-                  {status === 'active' && `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`}
-                  {status === 'expired' && 'Ran its course'}
-                  {status === 'cut' && 'Cut short'}
-                </span>
-                {(status === 'ongoing' || status === 'active') && (
-                  <CutControl def={def} s={s} canAct={canAct} onCut={onCut} />
+          {tab === 'roster' ? (
+            <>
+              <div className="intro-section">
+                <h2>Advisors ({advisors.length}/{ADVISOR_CAP})</h2>
+                {advisors.length === 0 && (
+                  <p className="intro-note">Nobody on retainer yet. The Back Room sells these too.</p>
                 )}
-              </ManageRow>
-            ))}
-          </div>
+                {advisors.map((def) => (
+                  <ManageRow key={def.id} def={def} s={s}>
+                    <FireControl def={def} s={s} canAct={canAct} onFire={onFire} />
+                  </ManageRow>
+                ))}
+              </div>
+
+              <div className="intro-section">
+                <h2>Deals ({deals.filter((d) => d.status === 'ongoing' || d.status === 'active').length}/{DEAL_CAP})</h2>
+                {deals.length === 0 && (
+                  <p className="intro-note">No arrangements made yet.</p>
+                )}
+                {deals.map(({ def, status, daysLeft }) => (
+                  <ManageRow key={def.id} def={def} s={s}>
+                    <span className={`manage-timer ${status}`}>
+                      {status === 'ongoing' && 'Ongoing'}
+                      {status === 'active' && `${daysLeft} day${daysLeft === 1 ? '' : 's'} left`}
+                      {status === 'expired' && 'Ran its course'}
+                      {status === 'cut' && 'Cut short'}
+                    </span>
+                    {(status === 'ongoing' || status === 'active') && (
+                      <CutControl def={def} s={s} canAct={canAct} onCut={onCut} />
+                    )}
+                  </ManageRow>
+                ))}
+              </div>
+            </>
+          ) : (
+            <ProgressPanel legacy={legacy} />
+          )}
 
           <div className="intro-foot">
             <button className="btn btn-primary" onClick={onClose}>Close</button>

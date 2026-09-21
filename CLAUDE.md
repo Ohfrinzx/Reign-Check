@@ -41,7 +41,7 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 2 — §4.1/§4.2/§4.3/§4.4 APPROVED; §4.5 STEP 1 BUILT, AWAITING PLAYTEST
+## PHASE 2 — §4.1–§4.4 APPROVED; §4.5 (BOTH STEPS) BUILT, AWAITING PLAYTEST — PHASE 2 FULLY BUILT
 
 **The owner has approved starting the roguelike layer, fully specified in
 `docs/DESIGN_V2.md` section 4.** §4.1 (run structure — 3 acts of 6 days
@@ -67,24 +67,34 @@ quota — 20 new standard cards (`content/cards3.ts`) and 5 new alerts. See
 the "§4.4, the run deck" section below for the full detail. `SAVE_VERSION`
 is 8; prior saves reset.
 
-**§4.5 (meta-progression), step 1 — BUILT, awaiting owner playtest (same
-later session).** The owner asked what meta-progression would be, then
-said to go ahead with the design doc's own suggested de-risking approach:
-ship the cross-run record first, with nothing actually gated. New file
-`src/game/meta.ts` — `MetaProgress`/`RunRecord`, own localStorage key
-(`dictator-sandbox:legacy:v1`) and own version (`META_VERSION`),
-deliberately separate from `GameState`/`SAVE_VERSION` so deleting a save or
-restarting a run never touches it. Every finished run gets recorded
-(capped at 50); `App.tsx` does the recording in a `useEffect` on
-`game.ending`, guarded by reference so it can't double-fire. The title
-screen shows a one-line record — "N administrations so far — X survived, Y
-fell, most recently as …" — once at least one run exists (`TitleRecord` in
-`Screens.tsx`). `isMandateUnlocked()`/`isShopItemUnlocked()` exist as the
-hook a step-2 slice will use, but both just `return true` for now — nothing
-is actually restricted. No `SAVE_VERSION` bump (this is the whole point of
-keeping it separate). 7 new tests (`meta.test.ts`), a new browser check
-(`tools/legacy.mjs`), 100 tests total, all passing; build clean; five
-Playwright tools green at 1366×700 with zero page errors.
+**§4.5 (meta-progression) — BOTH STEPS BUILT, awaiting owner playtest (same
+later session) — this completes all of Phase 2.** Step 1: the owner asked
+what meta-progression would be, then said to go ahead with the design
+doc's own suggested de-risking approach — ship the cross-run record first,
+nothing actually gated. New file `src/game/meta.ts` — `MetaProgress`/
+`RunRecord`, own localStorage key (`dictator-sandbox:legacy:v1`) and own
+version (`META_VERSION`), deliberately separate from `GameState`/
+`SAVE_VERSION` so deleting a save or restarting a run never touches it.
+Every finished run gets recorded (capped at 50); `App.tsx` does the
+recording in a `useEffect` on `game.ending`, guarded by reference so it
+can't double-fire. The title screen shows a one-line record once at least
+one run exists (`TitleRecord` in `Screens.tsx`).
+
+**Step 2, same session, built right after:** the owner asked where the
+unlock view should live — a sub-menu inside "Advisors & Deals" plus a
+button on the title screen ("the menu screen"), so players can see their
+progress and aim at specific goals. `meta.ts` gained real conditions:
+`MANDATE_UNLOCKS` (`clean-hands`: finish 2 runs; `pay-deal`: reach Act 2)
+and `SHOP_UNLOCKS` (`one-good-story`: survive once; `archivist`: finish 3
+runs — the shop's only two `rarity: 'rare'` items). `GameState.
+unlockedShopItemIds` (new field) is a snapshot taken once at
+`createGame()`, never re-evaluated mid-run — see the "§4.5 step 2" section
+below for the full detail on why. `SAVE_VERSION` is 9; prior saves reset.
+New `src/ui/screens/Progress.tsx` is reused in both places the owner
+asked for: a "Roster"/"Unlocks" tab pair in `Manage.tsx`, and a new
+"Unlocks" button on the title toolbar — which now also filters its own
+mandate picker to what's actually unlocked. 7 new tests (100→107); build
+clean; five Playwright tools green at 1366×700 with zero page errors.
 
 **§4.2, the Back Room shop — BOTH CHUNKS BUILT AND APPROVED.** Owner
 amendment to the spec: the shop opens at the **end of every day**, not only
@@ -198,9 +208,9 @@ unchanged and still counts 1–18 everywhere else (saves, endings, the vote
 check, `dateLine()`).
 
 **§4.1, §4.2, §4.3, §4.4, and the day counter fix are all owner-approved.
-§4.5 step 1 (the cross-run record, nothing gated) is built, awaiting
-playtest.** See the current `PROJECT_STATUS.md` handoff and
-`docs/REVIEW_2026_09_21.md`.
+§4.5 (both steps — the cross-run record, and now real unlock gating with
+its own UI) is built, awaiting playtest — this is all of Phase 2 built.**
+See the current `PROJECT_STATUS.md` handoff and `docs/REVIEW_2026_09_21.md`.
 
 **§4.4, the run deck — BUILT AND OWNER-APPROVED.** `GameState.runDeck:
 string[]` and `GameState.bannedCards: string[]`, plus a new
@@ -264,23 +274,83 @@ survived, 2 fell, most recently as A Security State (parliament withdrew
 its confidence)."*) only once `runs.length > 0`, so a first-time player
 sees nothing new.
 
-**Nothing is gated by this yet — that is the point of doing it in two
-steps.** `isMandateUnlocked()`/`isShopItemUnlocked()` exist in `meta.ts` as
-the hook a follow-up slice will use, but both currently just `return true`
-unconditionally; nothing calls them from the mandate picker or the shop's
-stock roll. Real unlock conditions are step 2, not started, and need their
-own explicit go-ahead once step 1 has been played — same discipline as
-every other slice. No new content was needed (ground rule 5 holds).
+**Step 1 shipped with nothing gated — `isMandateUnlocked()`/
+`isShopItemUnlocked()` existed in `meta.ts` only as stubs that always
+returned `true`.** That was deliberate, per the design doc's own
+suggestion, and held only until step 2 (below), built in the same session.
 
-**Verification:** 7 new tests (`meta.test.ts` — pure `recordRun()` logic,
-a fake-localStorage round trip since vitest's default environment has none,
-version-mismatch/corrupt-data fail-safe, the 50-run cap, and confirming
-both unlock stubs still return `true`), 100 total (up from 93). New browser
-check `tools/legacy.mjs`: no record line before any run exists, the line
-appears after a real run ends and "Back to title" is clicked (not "Try
-again", which skips the title screen), the exact text survives a full page
-reload, and the title screen still fits at 1366×700 with zero page errors.
-Production build clean.
+**Verification (step 1):** 7 new tests (`meta.test.ts` — pure `recordRun()`
+logic, a fake-localStorage round trip since vitest's default environment
+has none, version-mismatch/corrupt-data fail-safe, the 50-run cap), 100
+total (up from 93). New browser check `tools/legacy.mjs`: no record line
+before any run exists, the line appears after a real run ends and "Back to
+title" is clicked (not "Try again", which skips the title screen), the
+exact text survives a full page reload, and the title screen still fits at
+1366×700 with zero page errors. Production build clean.
+
+**§4.5, meta-progression, step 2 — BUILT AND AWAITING PLAYTEST (same
+session).** The owner asked what meta-progression would be; after the
+answer, asked where the unlock view should live: *"Add it to a separate
+sub-menu within the advisors/deals tab along with a button on the menu
+screen. That way users are able to see their progress and can aim for
+specific goals to unlock certain cards."*
+
+`meta.ts` gains `computeUnlockStats(meta)` (runsCompleted/survived/
+bestAct, derived from `MetaProgress.runs`) and two plain-data rule tables:
+`MANDATE_UNLOCKS` (`clean-hands`: finish 2 runs; `pay-deal`: reach Act 2 —
+the two mandates added after the original four, per §4.3's "As built"
+note) and `SHOP_UNLOCKS` (`one-good-story`: survive one full run;
+`archivist`: finish 3 runs — the Back Room's only two `rarity: 'rare'`
+items, already special by the writing rules' own "no downside" carve-out).
+`isMandateUnlocked()`/`isShopItemUnlocked()` now evaluate these for real.
+`meta.ts` still imports nothing from `content/` — it stays a generic small
+rules engine keyed by plain string ids; callers cross-reference those ids
+against `content/mandates.ts`/`content/shop.ts` themselves.
+
+**`GameState.unlockedShopItemIds: string[]`** (new field, `types.ts`) is a
+**snapshot**, computed once in `state.ts`'s `createGame()` from
+`isShopItemUnlocked()` and never re-evaluated mid-run — unlocking
+something by reaching Act 2 in the run you're currently playing applies to
+your NEXT run's shop, not retroactively to this one's. `shop.ts`'s
+`eligible()` checks it when rolling stock; `engine.ts`'s `buyShopItem()`
+ALSO independently checks it before completing a purchase, the same
+"safety net, not the primary gate" pattern `capBlockReason()` already
+uses. `state.ts`'s mandate roll and any explicit `mandateId` pick both
+respect a new `NewGameOptions.unlockedMandateIds`, with a fallback to the
+full pool if a filter would otherwise lock out every mandate — it can't
+happen with today's two-rule table (the four base mandates are never
+gated), but the guard exists so a future rule can't brick new-game
+creation. `SAVE_VERSION` is 9; version-8 saves reset.
+
+**New `src/ui/screens/Progress.tsx`** — `ProgressPanel` (the shared list:
+"Your record", then Mandates, then Rare offers, each row showing Unlocked
+or Locked plus the plain-language condition when locked) and
+`ProgressScreen` (a standalone overlay, same visual language as
+`ManageScreen`/`IntroScreen`, needing only `MetaProgress` — no live
+`GameState` — so it works from the title screen before a run exists).
+Reused in exactly the two places the owner asked for: a "Roster"/"Unlocks"
+tab pair inside `Manage.tsx`'s "Advisors & Deals" screen (the existing
+`.seg`/`.seg-btn` segmented control, already used for the honorific
+picker), and a new "Unlocks" button on the title screen's toolbar. The
+title screen's own mandate picker now filters `MANDATES` to
+`isMandateUnlocked()` — a locked mandate isn't shown greyed-out, it simply
+isn't in the list; the Progress screen is the one place "what's locked and
+why" lives, per the owner's explicit placement.
+
+**Verification (step 2):** 7 more new tests (107 total) — `meta.test.ts`
+gains real unlock-condition coverage (`computeUnlockStats`, both rule
+tables), `mandates.test.ts` covers the mandate-roll/pick gating and its
+never-lock-out-everything fallback, `shop.test.ts` covers the default
+"everything unlocked" snapshot, a locked item never appearing in
+`eligibleStock`/`rollStock`, and `buyShopItem()`'s independent safety-net
+check. `tools/mandates.mjs` extended: confirms 5 radios (4 unlocked
+mandates + "let fate decide") on a cleared-storage fresh run with
+`clean-hands`/`pay-deal` entirely absent, seeds a 3-run history that
+satisfies every rule in the two tables at once, reloads and confirms all 7
+radios appear, actually selects and starts the previously-locked
+`clean-hands` mandate (not just that its radio renders), and checks both
+Unlocks access points agree nothing is locked. Production build clean;
+five Playwright tools green at 1366×700 with zero page errors.
 
 **Read `docs/DESIGN_V2.md` in full before touching UI, the display layer, or
 starting Phase 2.** It has the measured evidence for Phase 1, what was
@@ -294,7 +364,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-100 vitest tests pass (see the `npm test` line in Commands below for the
+107 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -324,13 +394,14 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `8`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `9`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 7→8 for
-    `runDeck`/`bannedCards` (§4.4, the run deck). A bump discards the
-    owner's in-progress run — say so when you report.
+    as long as the bump actually happens. Last bumped 8→9 for
+    `unlockedShopItemIds` (§4.5 step 2, meta-progression's real unlock
+    gating). A bump discards the owner's in-progress run — say so when you
+    report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see
@@ -389,11 +460,11 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 100 tests: integrity, 200 full runs, determinism, variety,
-                   #   glossary, dayInAct, mandates, the run deck (§4.4), the
-                   #   meta-progression record (§4.5 step 1), and the Back
-                   #   Room shop (stock/pricing, firing advisors, held/
-                   #   timed/cut deals, caps)
+npm test           # 107 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, dayInAct, mandates, the run deck (§4.4),
+                   #   meta-progression (§4.5, record + real unlock gating),
+                   #   and the Back Room shop (stock/pricing, firing
+                   #   advisors, held/timed/cut deals, caps)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -405,7 +476,8 @@ npm run test:browser        # starts Vite; all checks at 1366×700
 node tools/verify.mjs        # with a separately running Vite: full pass
 node tools/to-ending.mjs     # drives to an ending, verifies restart
 node tools/playthrough.mjs   # ~9 days, save/reload, screenshots
-node tools/legacy.mjs        # §4.5: ending → title, checks the record line
+node tools/legacy.mjs        # §4.5 step 1: ending → title, record line
+                             # tools/mandates.mjs also covers step 2's gating
 ```
 
 ## Map of the code
@@ -435,9 +507,10 @@ src/game/                 no React, no DOM, fully testable
                            run's save; separate from meta.ts's cross-run one
   meta.ts                 §4.5 META-PROGRESSION — cross-run record, own
                            localStorage key/version, deliberately outside
-                           GameState/SAVE_VERSION. Step 1 only: records runs,
-                           nothing is gated (isMandateUnlocked()/
-                           isShopItemUnlocked() both stub `true` for now)
+                           GameState/SAVE_VERSION. Records runs AND real
+                           unlock rules (MANDATE_UNLOCKS/SHOP_UNLOCKS, plain
+                           data — a new locked mandate/item is a one-line
+                           addition here, nowhere else)
   content/mandates.ts      six origins, generic rule data, Stairwell card
   content/                country, cards, cards2, cards3 (§4.4's content
                            top-up), followups, alerts, endings, shop (the
@@ -454,14 +527,20 @@ src/ui/
     Prose.tsx               renders card text, applies the glossary
   screens/
     Screens.tsx             Title (incl. TitleRecord — §4.5's cross-run
-                            line, shown once a run exists), Briefing (front
+                            line; mandate picker filtered to unlocked ids;
+                            "Unlocks" toolbar button), Briefing (front
                             page), Night, Ending
+    Progress.tsx             §4.5 step 2 — ProgressPanel (locked/unlocked
+                            mandates + rare items, shared) and ProgressScreen
+                            (standalone overlay, opened from the title
+                            screen). Reused as a tab inside Manage.tsx too
     Shop.tsx                 The Back Room (fullscreen, dark — see the
                             masthead's "PHASE 2" section above) + the rail's
                             compact "Back Room" panel (favours, quick-glance)
     Manage.tsx               "Advisors & Deals" — the fuller management
                             screen opened from the masthead: fire advisors,
-                            see timed deals count down
+                            see timed deals count down. Now tabbed: Roster /
+                            Unlocks (ProgressPanel, §4.5 step 2)
     Intro.tsx                the "Brief me" explainer overlay
 src/styles/index.css      the whole Poster design system
 public/fonts/              self-hosted type (Anton, Archivo Black, Libre
@@ -593,17 +672,71 @@ never merge broken or unverified work just to close out a session.
   mutated in place, ground rule 3), so this is safe without deep-equality
   checks and works even if two different runs happen to reach the same
   ending id.
-- Step 1 ships `isMandateUnlocked()`/`isShopItemUnlocked()` in `meta.ts` as
-  the hook a follow-up slice will use, but BOTH unconditionally return
-  `true` right now — nothing calls them from the title screen's mandate
-  picker or the shop's stock roll yet. Wiring them in and giving them real
-  conditions (e.g. "played N runs", "survived to Act 3 once") is step 2,
-  not built, and per the same staged-slice discipline needs its own
-  go-ahead after step 1 is played.
-- The record only reads from `MetaProgress`, never gates anything — so
-  `content/mandates.ts` and `content/shop.ts` needed zero changes for this
-  slice (ground rule 5 holds, same as every other slice so far).
-- `tools/legacy.mjs` is the dedicated browser check: confirms no record line
-  before any run exists, drives one run to an ending, checks the line
-  appears after "Back to title" (not "Try again", which skips the title
-  screen entirely), and confirms it survives a real page reload.
+- Step 1 shipped `isMandateUnlocked()`/`isShopItemUnlocked()` in `meta.ts`
+  as stubs that always returned `true`. Step 2 (same session, see the
+  section below) gave them real conditions — this bullet is history now,
+  not current behaviour.
+- `tools/legacy.mjs` is the dedicated browser check for step 1: confirms no
+  record line before any run exists, drives one run to an ending, checks
+  the line appears after "Back to title" (not "Try again", which skips the
+  title screen entirely), and confirms it survives a real page reload.
+
+## Meta-progression step 2 notes (§4.5, same session as above)
+
+- `GameState.unlockedShopItemIds` is a **snapshot**, computed once in
+  `createGame()` from `meta.ts`'s `isShopItemUnlocked()`, not re-evaluated
+  mid-run. This is deliberate (see `meta.ts`'s file header and
+  `types.ts`'s field comment): unlocking something by reaching Act 2 in
+  the run you're currently playing should apply to your NEXT run's shop,
+  not retroactively change what THIS run's Back Room offers. The mandate
+  check works the same way — `state.ts`'s `createGame()` only ever
+  evaluates it once, at the moment a new game is created.
+- `meta.ts` still imports nothing from `content/` — `MANDATE_UNLOCKS`/
+  `SHOP_UNLOCKS` key by plain string id, and it's the *caller* (`App.tsx`,
+  `Screens.tsx`, `Progress.tsx`) that cross-references those ids against
+  `content/mandates.ts`/`content/shop.ts`. Keep it that way: `meta.ts` is a
+  generic small rules engine, not something that needs to know the shape
+  of a mandate or a shop item.
+- `shop.ts`'s `eligible()` gates the **stock roll** (what can be offered);
+  `engine.ts`'s `buyShopItem()` ALSO independently checks
+  `unlockedShopItemIds` before letting a purchase through, even though
+  `shopStock` should already only ever contain eligible ids. This mirrors
+  the existing `capBlockReason()` pattern exactly — "the safety net", not
+  the primary gate — and a test in `shop.test.ts` forces a locked item
+  into `shopStock` directly (bypassing the normal roll) specifically to
+  prove that safety net actually fires, not just that the roll filters
+  correctly.
+- `state.ts`'s `createGame()` never lets an unlock list lock out every
+  mandate: if `opts.unlockedMandateIds` somehow filters `MANDATES` down to
+  nothing, it falls back to the full list rather than crashing or rolling
+  from an empty pool. This can't happen with the current two-rule
+  `MANDATE_UNLOCKS` table (the four base mandates are never gated), but
+  the guard exists so a future rule can't accidentally brick new-game
+  creation.
+- The title screen's mandate picker (`Screens.tsx`) filters `MANDATES` to
+  `isMandateUnlocked()` before rendering radios — a locked mandate is not
+  shown greyed-out, it simply isn't in the list. The Progress screen is
+  where "what's locked and why" actually lives, per the owner's explicit
+  placement request; don't reintroduce locked-but-visible entries in the
+  picker itself without asking, since that was a deliberate choice, not
+  an oversight.
+- Two access points render the exact same `ProgressPanel` component
+  (`Progress.tsx`): the title screen's "Unlocks" button (works without a
+  live `GameState` — it only needs `MetaProgress`) and a "Roster"/"Unlocks"
+  tab pair inside `Manage.tsx`'s "Advisors & Deals" screen (mid-run only,
+  since that screen needs a live `GameState` for the roster half). Keep
+  both reading the same component if you touch this — don't let a future
+  edit update one copy and not the other.
+- `tools/mandates.mjs` is the dedicated browser check for step 2: clears
+  storage and confirms exactly 5 radios (4 unlocked mandates + "let fate
+  decide") on a fresh run with `clean-hands`/`pay-deal` absent, seeds a
+  3-run history that satisfies every unlock rule at once (2+ runs, an
+  Act-2+ run, a survival, 3+ runs), reloads and confirms all 7 radios
+  appear, actually selects and starts the previously-locked `clean-hands`
+  mandate (not just that its radio renders), and checks both Unlocks
+  access points — the title button and the in-game tab — agree nothing is
+  locked. `page.waitForTimeout(300)` after opening it before any
+  screenshot: the scrim's `.2s` fade-in animation is caught mid-transition
+  otherwise, which looks like broken/overlapping layout in a screenshot
+  even though the actual DOM and computed styles are already correct at
+  that point — don't mistake that for a real bug if it happens again.

@@ -43,6 +43,23 @@ describe('mandates', () => {
     expect(rolled.size).toBe(6);
   });
 
+  it('opts.unlockedMandateIds restricts both the roll and an explicit pick (§4.5 step 2)', () => {
+    const allowed = ['stairwell', 'landslide'];
+    for (let seed = 0; seed < 40; seed++) {
+      expect(allowed).toContain(createGame({ seed, unlockedMandateIds: allowed }).mandateId);
+    }
+    // an explicit pick outside the allowed set falls back to a roll from the
+    // allowed set, never the locked id itself
+    const denied = createGame({ seed: 3, mandateId: 'pay-deal', unlockedMandateIds: allowed });
+    expect(allowed).toContain(denied.mandateId);
+    expect(denied.mandateId).not.toBe('pay-deal');
+    // an explicit pick inside the allowed set is honoured as usual
+    expect(createGame({ seed: 3, mandateId: 'landslide', unlockedMandateIds: allowed }).mandateId).toBe('landslide');
+    // an allow-list matching nothing never locks out every mandate — falls back to the full pool
+    const nothingAllowed = createGame({ seed: 5, unlockedMandateIds: ['not-a-real-id'] });
+    expect(MANDATES.map((m) => m.id)).toContain(nothingAllowed.mandateId);
+  });
+
   it('sets the specified starting money, factions, and displayed legitimacy', () => {
     const baseline = createGame({ seed: 41, mandateId: 'accident' });
     const start = (mandateId: string) => createGame({ seed: 41, mandateId });

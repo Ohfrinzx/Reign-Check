@@ -8,7 +8,12 @@ import {
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
 import { saveGame, loadGame, deleteSave } from './game/save';
-import { loadMetaProgress, recordRun, saveMetaProgress, type MetaProgress } from './game/meta';
+import {
+  isMandateUnlocked, isShopItemUnlocked, loadMetaProgress, recordRun, saveMetaProgress,
+  type MetaProgress,
+} from './game/meta';
+import { MANDATES } from './game/content/mandates';
+import { SHOP_ITEMS } from './game/content/shop';
 import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
 import { CardView, OutcomeView } from './ui/components/CardView';
@@ -16,6 +21,7 @@ import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/scr
 import { ShopScreen } from './ui/screens/Shop';
 import { IntroScreen } from './ui/screens/Intro';
 import { ManageScreen } from './ui/screens/Manage';
+import { ProgressScreen } from './ui/screens/Progress';
 
 type Screen = 'title' | 'game';
 
@@ -27,6 +33,7 @@ export default function App() {
   const [mandateId, setMandateId] = useState('random');
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -77,13 +84,20 @@ export default function App() {
 
   /* ---- lifecycle */
   const newGame = useCallback(() => {
-    const g = prepareDay(createGame({ leaderName: name, honorific, mandateId }));
+    // §4.5 step 2: a snapshot of what's currently unlocked, taken once here —
+    // see GameState.unlockedShopItemIds (types.ts) and meta.ts's header for
+    // why this never changes mid-run.
+    const unlockedMandateIds = MANDATES.filter((m) => isMandateUnlocked(m.id, legacy)).map((m) => m.id);
+    const unlockedShopItemIds = SHOP_ITEMS.filter((d) => isShopItemUnlocked(d.id, legacy)).map((d) => d.id);
+    const g = prepareDay(createGame({
+      leaderName: name, honorific, mandateId, unlockedMandateIds, unlockedShopItemIds,
+    }));
     setGame(g);
     setScreen('game');
     setShowIntro(true);
     setShowManage(false);
     setFlash({});
-  }, [name, honorific, mandateId]);
+  }, [name, honorific, mandateId, legacy]);
 
   const continueGame = useCallback(() => {
     const g = loadGame();
@@ -223,7 +237,9 @@ export default function App() {
           savedDay={savedDay}
           onDelete={savedDay ? () => { deleteSave(); setSavedDay(undefined); } : undefined}
           legacy={legacy}
+          onProgress={() => setShowProgress(true)}
         />
+        {showProgress && <ProgressScreen legacy={legacy} onClose={() => setShowProgress(false)} />}
         {toast && <div className="toast">{toast}</div>}
       </>
     );
@@ -357,7 +373,7 @@ export default function App() {
       )}
 
       {showManage && (
-        <ManageScreen s={game} onClose={() => setShowManage(false)} onFire={doFireAdvisor} onCut={doCutDeal} />
+        <ManageScreen s={game} legacy={legacy} onClose={() => setShowManage(false)} onFire={doFireAdvisor} onCut={doCutDeal} />
       )}
 
       {toast && <div className="toast">{toast}</div>}

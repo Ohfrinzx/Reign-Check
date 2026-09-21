@@ -6,7 +6,7 @@ import { ACT_LENGTH, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../g
 import { usd, usdFlow, computeBudget } from '../../game/economy';
 import { fill } from '../../game/text';
 import { MANDATES, MANDATE_MAP, currentMandate } from '../../game/content/mandates';
-import type { MetaProgress } from '../../game/meta';
+import { isMandateUnlocked, type MetaProgress } from '../../game/meta';
 
 const MAX_PER_SECTION = 4;
 
@@ -14,22 +14,28 @@ const MAX_PER_SECTION = 4;
 
 export function TitleScreen({
   name, setName, honorific, setHonorific, mandateId, setMandateId,
-  onNew, onContinue, savedDay, onDelete, legacy,
+  onNew, onContinue, savedDay, onDelete, legacy, onProgress,
 }: {
   name: string; setName: (v: string) => void;
   honorific: string; setHonorific: (v: string) => void;
   mandateId: string; setMandateId: (v: string) => void;
   onNew: () => void; onContinue?: () => void; savedDay?: number; onDelete?: () => void;
   legacy?: MetaProgress;
+  onProgress?: () => void;
 }) {
   const selected = MANDATE_MAP[mandateId];
   const runs = legacy?.runs ?? [];
+  // §4.5 step 2: the picker only ever offers what's actually unlocked — an
+  // empty MetaProgress (or no legacy prop at all, e.g. in a test) reads as
+  // "nothing gated", same fallback isMandateUnlocked() itself uses.
+  const availableMandates = MANDATES.filter((m) => isMandateUnlocked(m.id, legacy ?? { version: 1, runs: [] }));
   return (
     <div className="screen title-screen">
       <div className="sheet">
         <div className="title-toolbar">
           <span className="kicker">{COUNTRY.shortName} · A new administration</span>
           <div className="title-actions">
+            {onProgress && <button className="btn btn-ghost" onClick={onProgress}>Unlocks</button>}
             {onContinue && <button className="btn" onClick={onContinue}>Continue — Day {savedDay}</button>}
             {onDelete && <button className="btn btn-ghost" onClick={onDelete}>Delete save</button>}
             <button className="btn btn-primary" onClick={onNew}>Take the job</button>
@@ -69,7 +75,7 @@ export function TitleScreen({
             <p className="mandate-intro">Choose your start. The rule stays with you for the whole run.</p>
             <fieldset className="mandate-options">
               <legend className="sr-only">Starting mandate</legend>
-              {MANDATES.map((m) => (
+              {availableMandates.map((m) => (
                 <label className={`mandate-option ${mandateId === m.id ? 'selected' : ''}`} key={m.id}>
                   <input type="radio" name="mandate" value={m.id} checked={mandateId === m.id}
                     onChange={() => setMandateId(m.id)} />
@@ -79,7 +85,7 @@ export function TitleScreen({
               <label className={`mandate-option mandate-random ${mandateId === 'random' ? 'selected' : ''}`}>
                 <input type="radio" name="mandate" value="random" checked={mandateId === 'random'}
                   onChange={() => setMandateId('random')} />
-                <span><b>Let fate decide</b><small>Roll one of the six mandates when the run begins.</small></span>
+                <span><b>Let fate decide</b><small>Roll one of the {availableMandates.length} mandates unlocked so far.</small></span>
               </label>
             </fieldset>
             <div className="mandate-detail" aria-live="polite">

@@ -113,6 +113,10 @@ function eligible(s: GameState, def: ShopItemDef, big: boolean): boolean {
   if (s.heldFavours.includes(def.id)) return false;
   if (s.shopBought.includes(def.id)) return false;
   if (s.shopRecent.includes(def.id)) return false;
+  // §4.5 step 2: a snapshot taken once at createGame() — see
+  // GameState.unlockedShopItemIds in types.ts for why this never changes
+  // mid-run even if meta-progression would unlock more by the end of it.
+  if (!s.unlockedShopItemIds.includes(def.id)) return false;
   return true;
 }
 

@@ -70,8 +70,11 @@ deals. Ordinary nights allow one purchase; after a confidence vote you can
 buy more. Every offer states its price and catch.
 
 Every run you finish is kept: the title screen shows how many
-administrations you've run and how they ended. Nothing is unlocked or
-restricted by this yet — it's a record, not a gate.
+administrations you've run and how they ended. Two mandates and two rare
+Back Room offers unlock by playing — finish enough runs, or reach far
+enough into one, and they join the pool for good. An **Unlocks** screen
+(from the title screen, or a tab inside Advisors & Deals) shows exactly
+what's still locked and what it takes.
 
 ## Verification
 
@@ -85,7 +88,7 @@ npm run test:browser
 The browser suite starts Vite and tests at 1366×700. For a custom Chromium
 binary, set `PLAYWRIGHT_EXECUTABLE_PATH`. Screenshots go to the OS temporary
 directory under `reign-check-shots`; set `REIGN_SHOTS` to override it.
-Save version 8 replaces earlier in-progress runs.
+Save version 9 replaces earlier in-progress runs.
 
 ## Notes
 

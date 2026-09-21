@@ -9,7 +9,7 @@ import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
 import {
   ACT_STOCK, ADVISOR_CAP, DEAL_CAP, NIGHTLY_STOCK, boughtDealDefs, buyLimit, canCutNow,
   canFireNow, canHoldMoreAdvisors, canHoldMoreDeals, capBlockReason, cutCostOf, eligibleStock,
-  fireCostOf, heldDealEntries, ownedAdvisorDefs, roomIsClosed, shopPrice,
+  fireCostOf, heldDealEntries, ownedAdvisorDefs, rollStock, roomIsClosed, shopPrice,
 } from '../shop';
 import { makeRng } from '../rng';
 import { applyEffects } from '../effects';
@@ -417,6 +417,30 @@ describe('the run deck (§4.4 shop items)', () => {
     const s = shopStateWith(2, def.id);
     const after = buyShopItem(s, def.id);
     for (const id of def.effects!.deck!.remove!) expect(after.bannedCards).toContain(id);
+  });
+});
+
+describe('meta-progression unlocks (§4.5 step 2)', () => {
+  it('defaults to every item unlocked when createGame() is called without unlock history', () => {
+    const s = createGame({ seed: 1 });
+    expect(s.unlockedShopItemIds.sort()).toEqual(SHOP_ITEMS.map((i) => i.id).sort());
+  });
+
+  it('a locked item never appears in eligibleStock or a rolled stock, even in the act room', () => {
+    const s = createGame({ seed: 1, unlockedShopItemIds: SHOP_ITEMS.filter((i) => i.id !== 'archivist').map((i) => i.id) });
+    expect(eligibleStock(s, true).some((d) => d.id === 'archivist')).toBe(false);
+    for (let seed = 0; seed < 30; seed++) {
+      const rolled = rollStock({ ...s, rngState: seed }, makeRng(seed), true);
+      expect(rolled).not.toContain('archivist');
+    }
+  });
+
+  it('buyShopItem() refuses a locked item even if it were somehow offered', () => {
+    const s = shopStateWith(1, 'archivist');
+    const locked = { ...s, unlockedShopItemIds: s.unlockedShopItemIds.filter((id) => id !== 'archivist') };
+    const after = buyShopItem(locked, 'archivist');
+    expect(after.owned).not.toContain('archivist');
+    expect(after.stats.treasury).toBe(locked.stats.treasury);
   });
 });
 

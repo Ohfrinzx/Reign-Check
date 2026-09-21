@@ -606,6 +606,11 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
 
   const def: ShopItemDef | undefined = SHOP_MAP[itemId];
   if (!def) return s;
+  // §4.5 step 2: a locked item should never be in shopStock to begin with
+  // (rollStock()/eligibleStock() already filter on unlockedShopItemIds) —
+  // this is the same kind of safety net capBlockReason() is below, not the
+  // primary gate.
+  if (!s.unlockedShopItemIds.includes(def.id)) return s;
 
   const price = shopPrice(s, def);
   if (price > 0 && price > s.stats.treasury) return s;

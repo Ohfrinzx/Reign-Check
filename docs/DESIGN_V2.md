@@ -1,12 +1,14 @@
 # Design V2 — simplification and the roguelike turn
 
 **Current status (2026-09-21, later session): Phase 1 and Phase 2
-§4.1/§4.2/§4.3/§4.4 are all OWNER-APPROVED. §4.5 (meta-progression) step 1
-— the cross-run record, nothing gated — is BUILT, awaiting owner playtest;
-step 2 (real unlock conditions) is NOT started.** Each slice still requires
-its own feedback and a new instruction before starting the next — approval
-of one step is not itself a green light for the next. See
-`PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
+§4.1–§4.4 are all OWNER-APPROVED. §4.5 (meta-progression) — BOTH steps,
+the cross-run record and real unlock conditions with their own UI — is
+BUILT, awaiting owner playtest. Once played, all of Phase 2 is done.**
+Each slice still required its own feedback before the next started while
+building — approval of step 1 was not itself the go-ahead for step 2; the
+owner gave that go-ahead explicitly, in the same session, after asking
+what meta-progression would be and specifying where its UI should live.
+See `PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
 Historical implementation notes below describe earlier checkpoints.
 
 Decisions made by the owner, in order:
@@ -34,10 +36,8 @@ Decisions made by the owner, in order:
    folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
    what to preserve and what to avoid, no mobile work scheduled).
 
-**What is NOT built yet:** meta-progression's step 2 (real unlock
-conditions) — the last piece of Phase 2. Step 1 (the cross-run record) is
-built. Read section 9 for later phases and section 10 for the mobile
-architecture guardrails.
+**What is NOT built yet:** nothing in Phase 2. Read section 9 for later
+phases and section 10 for the mobile architecture guardrails.
 
 ---
 
@@ -568,7 +568,7 @@ frequency in the balance probe (`avgAlerts` 8.5→10.9, `reachedMax`
 40%→52% under the random policy) — flagged, not tuned blind, same as
 mandates' balance was left for playtesting rather than guessed at.
 
-### 4.5 Meta-progression — step 1 BUILT AND AWAITING PLAYTEST, step 2 NOT STARTED
+### 4.5 Meta-progression — BOTH STEPS BUILT AND AWAITING PLAYTEST (last piece of Phase 2)
 
 Completed runs unlock mandates, advisors and cards for future runs. Small,
 persistent, stored in `localStorage` next to the save (a separate key —
@@ -612,10 +612,79 @@ content was needed (ground rule 5 holds) — the record only reads
 offer. 7 new tests, 100 total; a new browser check, `tools/legacy.mjs`; all
 green at 1366×700 with zero page errors.
 
-**Step 2 — real unlock conditions on top of the step-1 hooks — is not
-started**, and per this project's staged-slice discipline needs its own
-explicit go-ahead once step 1 has been played, same as every other step in
-this section.
+**As built, step 2, same session — the owner's go-ahead:** the owner asked
+what meta-progression would be (answered as above), then asked whether
+minigames would fix a separately-flagged balance concern (no — that's
+Phase 3's balance pass), then specified exactly where the unlock view
+should live: *"Add it to a separate sub-menu within the advisors/deals tab
+along with a button on the menu screen. That way users are able to see
+their progress and can aim for specific goals to unlock certain cards."*
+That's the explicit go-ahead this section's own "step 1 vs step 2" split
+was waiting for.
+
+`meta.ts` gains `computeUnlockStats(meta)` (runsCompleted/survived/
+bestAct, pure, derived from `MetaProgress.runs`) and two plain-data rule
+tables — the actual "locked-by-default content and real unlock
+conditions" this section originally called for:
+
+- `MANDATE_UNLOCKS`: `clean-hands` (finish 2 runs, any ending), `pay-deal`
+  (reach Act 2 in any run) — the two mandates added after the original
+  four (§4.3's "As built" note). The four base mandates are never gated.
+- `SHOP_UNLOCKS`: `one-good-story` (survive one full run), `archivist`
+  (finish 3 runs, any ending) — the Back Room's only two `rarity: 'rare'`
+  items (content/shop.ts), already special by the writing rules' own
+  "no downside" carve-out for that rarity.
+
+`isMandateUnlocked()`/`isShopItemUnlocked()` now evaluate these for real.
+`meta.ts` still imports nothing from `content/` — it stays a generic small
+rules engine keyed by plain string ids; callers (`App.tsx`, `Screens.tsx`,
+the new `Progress.tsx`) cross-reference those ids against
+`content/mandates.ts`/`content/shop.ts` themselves.
+
+**`GameState.unlockedShopItemIds: string[]`** (new field, `types.ts`) is a
+**snapshot**, computed once in `state.ts`'s `createGame()` and never
+re-evaluated mid-run: unlocking something by reaching Act 2 in the run
+you're currently playing applies to your NEXT run's shop, not
+retroactively to this one. `shop.ts`'s `eligible()` checks it when rolling
+stock; `engine.ts`'s `buyShopItem()` ALSO independently checks it before
+completing a purchase — the same "safety net, not the primary gate"
+pattern `capBlockReason()` already established for the advisor/deal caps.
+`state.ts`'s mandate roll and any explicit `mandateId` pick both respect a
+new `NewGameOptions.unlockedMandateIds`, with a fallback to the full pool
+if a filter would otherwise lock out every mandate (can't happen with
+today's two-rule table, but the guard exists so a future rule can't brick
+new-game creation). `SAVE_VERSION` bumped 8→9.
+
+**New `src/ui/screens/Progress.tsx`** — `ProgressPanel` (the shared list:
+"Your record", then Mandates, then Rare offers, each row showing Unlocked
+or Locked plus the plain-language condition when locked) and
+`ProgressScreen` (a standalone overlay, same visual language as
+`ManageScreen`/`IntroScreen`, needing only `MetaProgress` — no live
+`GameState` — so it works from the title screen before a run exists).
+Reused in exactly the two places the owner's quote above specifies: a
+"Roster"/"Unlocks" tab pair inside `Manage.tsx`'s "Advisors & Deals"
+screen (reusing the `.seg`/`.seg-btn` segmented control already used for
+the honorific picker), and a new "Unlocks" button on the title screen's
+toolbar. The title screen's own mandate picker now filters `MANDATES` to
+`isMandateUnlocked()` — a locked mandate isn't shown greyed-out, it simply
+isn't in the list; the Progress screen is the one place "what's locked and
+why" lives, matching the owner's explicit placement rather than
+duplicating that information in the picker too.
+
+**Verification:** 7 more new tests (107 total, up from 100) — real
+unlock-condition coverage in `meta.test.ts`, the mandate-roll/pick gating
+and its never-lock-out-everything fallback in `mandates.test.ts`, and the
+shop's default-unlocked snapshot plus a locked item's absence from
+`eligibleStock`/`rollStock` plus `buyShopItem()`'s independent refusal in
+`shop.test.ts`. `tools/mandates.mjs` extended significantly: confirms only
+5 mandate options (4 unlocked + "let fate decide") on a cleared-storage
+fresh run with `clean-hands`/`pay-deal` entirely absent, seeds a 3-run
+history satisfying every rule in both tables at once, reloads and confirms
+all 7 options appear, actually selects and starts the previously-locked
+`clean-hands` mandate (not just that its radio renders), and checks both
+Unlocks access points — the title button and the in-game tab — agree
+nothing is locked. Production build clean; all five Playwright tools green
+at 1366×700 with zero page errors.
 
 ### 4.6 Suggested data shapes (a starting sketch, not gospel)
 
@@ -823,11 +892,11 @@ Suggested order, each step shippable and playtestable on its own:
 5. ✅ **DONE, OWNER-APPROVED.** Mandates (§4.3), six origins.
 6. ✅ **DONE, OWNER-APPROVED.** Run deck (§4.4) — `runDeck`/`bannedCards`,
    8 deck-affecting shop policies, 20 new standard cards, 5 new alerts.
-7. 🟡 **STEP 1 BUILT, AWAITING PLAYTEST; STEP 2 NOT STARTED.**
-   Meta-progression (§4.5) — step 1 is the cross-run record (`meta.ts`,
-   `TitleRecord`), nothing gated. Step 2 (real unlock conditions) is the
-   only piece of Phase 2 left, and needs its own explicit instruction after
-   step 1 is played.
+7. 🟡 **BOTH STEPS BUILT, AWAITING PLAYTEST.** Meta-progression (§4.5) —
+   step 1 is the cross-run record (`meta.ts`, `TitleRecord`); step 2 is
+   real unlock conditions (`MANDATE_UNLOCKS`/`SHOP_UNLOCKS`) plus the
+   Unlocks screen (`Progress.tsx`). This was the last piece of Phase 2 —
+   once played, §4.1–§4.5 are entirely done.
 
 Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
 — the owner has now played that build and confirmed it. Steps 4–7 are the

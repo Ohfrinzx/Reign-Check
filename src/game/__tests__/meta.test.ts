@@ -3,6 +3,7 @@ import { createGame } from '../state';
 import { checkEndings } from '../content/endings';
 import {
   loadMetaProgress, saveMetaProgress, recordRun, isMandateUnlocked, isShopItemUnlocked,
+  computeUnlockStats, MANDATE_UNLOCKS, SHOP_UNLOCKS,
   META_VERSION, type MetaProgress,
 } from '../meta';
 import type { GameState } from '../types';
@@ -96,10 +97,70 @@ describe('meta-progression (§4.5, step 1: record only, nothing gated)', () => {
     expect(loadMetaProgress().runs).toEqual([]);
   });
 
-  it('nothing is gated yet — every mandate/shop item reads as unlocked regardless of history', () => {
+  it('anything not named in MANDATE_UNLOCKS/SHOP_UNLOCKS is unlocked from run one', () => {
     const empty: MetaProgress = { version: META_VERSION, runs: [] };
-    expect(isMandateUnlocked('the-stairwell', empty)).toBe(true);
+    expect(isMandateUnlocked('stairwell', empty)).toBe(true);
+    expect(isMandateUnlocked('landslide', empty)).toBe(true);
+    expect(isMandateUnlocked('handover', empty)).toBe(true);
+    expect(isMandateUnlocked('accident', empty)).toBe(true);
     expect(isShopItemUnlocked('fixer', empty)).toBe(true);
     expect(isMandateUnlocked('anything-at-all', empty)).toBe(true);
+  });
+
+  it('computeUnlockStats reads runsCompleted/survived/bestAct off history', () => {
+    let meta: MetaProgress = { version: META_VERSION, runs: [] };
+    expect(computeUnlockStats(meta)).toEqual({ runsCompleted: 0, survived: 0, bestAct: 0 });
+
+    const lost = endedState();
+    lost.ending = { ...lost.ending!, kind: 'coup' };
+    lost.act = 2;
+    meta = recordRun(meta, lost);
+
+    const won = endedState(); // checkEndings(s, true) forces the survival ending
+    won.act = 3;
+    meta = recordRun(meta, won);
+
+    expect(computeUnlockStats(meta)).toEqual({ runsCompleted: 2, survived: 1, bestAct: 3 });
+  });
+
+  it('clean-hands unlocks after 2 completed runs, pay-deal after reaching Act 2', () => {
+    expect(MANDATE_UNLOCKS.map((r) => r.id).sort()).toEqual(['clean-hands', 'pay-deal']);
+
+    let meta: MetaProgress = { version: META_VERSION, runs: [] };
+    expect(isMandateUnlocked('clean-hands', meta)).toBe(false);
+    expect(isMandateUnlocked('pay-deal', meta)).toBe(false);
+
+    const actOne = endedState();
+    actOne.act = 1;
+    meta = recordRun(meta, actOne);
+    expect(isMandateUnlocked('clean-hands', meta)).toBe(false); // only 1 run so far
+    expect(isMandateUnlocked('pay-deal', meta)).toBe(false); // never past Act 1
+
+    const actTwo = endedState();
+    actTwo.act = 2;
+    meta = recordRun(meta, actTwo);
+    expect(isMandateUnlocked('clean-hands', meta)).toBe(true); // now 2 runs
+    expect(isMandateUnlocked('pay-deal', meta)).toBe(true); // reached Act 2
+  });
+
+  it('one-good-story unlocks on a single survival; archivist needs 3 finished runs', () => {
+    expect(SHOP_UNLOCKS.map((r) => r.id).sort()).toEqual(['archivist', 'one-good-story']);
+
+    let meta: MetaProgress = { version: META_VERSION, runs: [] };
+    expect(isShopItemUnlocked('one-good-story', meta)).toBe(false);
+    expect(isShopItemUnlocked('archivist', meta)).toBe(false);
+
+    const lost = endedState();
+    lost.ending = { ...lost.ending!, kind: 'coup' };
+    meta = recordRun(meta, lost);
+    expect(isShopItemUnlocked('one-good-story', meta)).toBe(false); // finished, but didn't survive
+    expect(isShopItemUnlocked('archivist', meta)).toBe(false); // only 1 run
+
+    const won = endedState();
+    meta = recordRun(meta, won);
+    expect(isShopItemUnlocked('one-good-story', meta)).toBe(true); // has a survival now
+
+    meta = recordRun(meta, endedState());
+    expect(isShopItemUnlocked('archivist', meta)).toBe(true); // 3 finished runs
   });
 });

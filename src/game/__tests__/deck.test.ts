@@ -29,7 +29,10 @@ function playAndCount(s: GameState, days: number, cardId: string): number {
 
 describe('the run deck (§4.4)', () => {
   it('bumps SAVE_VERSION for runDeck/bannedCards', () => {
-    expect(SAVE_VERSION).toBe(8);
+    // >= 8, not === 8: later slices (e.g. §4.5 step 2) bump it further for
+    // their own fields, and this test only cares that runDeck/bannedCards
+    // exist and that a save's version tracks the current one.
+    expect(SAVE_VERSION).toBeGreaterThanOrEqual(8);
     const s = createGame({ seed: 1 });
     expect(s.runDeck).toEqual([]);
     expect(s.bannedCards).toEqual([]);

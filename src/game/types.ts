@@ -507,6 +507,17 @@ export interface GameState {
   /** card ids banned from the weighted draw for the rest of the run */
   bannedCards: string[];
 
+  /**
+   * §4.5 step 2 (meta-progression): shop item ids eligible for tonight's
+   * stock, evaluated once at `createGame()` time from `meta.ts`'s
+   * `isShopItemUnlocked()` against cross-run history — a snapshot, not
+   * re-checked mid-run (see meta.ts's header for why). Defaults to every
+   * item's id when no unlock history is supplied (`state.ts`), so existing
+   * saves/tests that never pass meta stay exactly as unrestricted as before
+   * this field existed.
+   */
+  unlockedShopItemIds: string[];
+
   current?: PendingCard;
   lastOutcome?: CardOutcome & { cardTitle: string; optionLabel: string; deltas: Partial<Stats> };
 
