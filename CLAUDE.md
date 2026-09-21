@@ -63,12 +63,39 @@ for the owner's playtest of chunk 1.
 
 **The Back Room is the one dark screen in the game** (owner request: it should
 feel like you are somewhere else). `.app.dark` in `src/styles/index.css` swaps
-the surface tokens for the shop phase only; the masthead keeps its own
-`--bar`/`--bar-text` so the nameplate never changes. This is NOT a revival of
-the dark desk skin rejected in Phase 1 — **do not darken any other screen
-without asking.** If you touch theming, re-declare colours inside `.app`, not
-`body`: body resolves tokens in the light scope and children inherit the
-resolved value (see `docs/DESIGN_V2.md` §4.2).
+the surface tokens for the shop phase only. This is NOT a revival of the dark
+desk skin rejected in Phase 1 — **do not darken any other screen without
+asking.** If you touch theming, re-declare colours inside `.app`, not `body`:
+body resolves tokens in the light scope and children inherit the resolved
+value (see `docs/DESIGN_V2.md` §4.2).
+
+**The Back Room is also FULLSCREEN** (owner follow-up: the shop should be the
+only thing on screen). `App.tsx` has an early `return` for
+`game.phase === 'shop'` that renders `<div className="app dark shop-full">`
+with only `<ShopScreen>` inside — no masthead, no strap, no rail at all, not
+just visually hidden. The masthead's old `--bar`/`--bar-text` tokens (kept
+constant across light/dark) are dead weight now that the masthead doesn't
+render during the shop, but harmless to leave for the rest of the game.
+**If any tooling drives the shop by clicking `.strap-action`, it will find
+nothing** — the shop's own "Leave" button (`.shop-foot .btn-primary`) is the
+only way out; `tools/verify.mjs`, `to-ending.mjs` and `playthrough.mjs` were
+all updated for this and broke once each before being fixed — check
+`.shop-foot .btn-primary` first in any new tooling that walks the shop.
+
+**"Advisors & Deals" — a screen opened from the masthead during the main
+game** (not the shop), showing what the Back Room has already sold you.
+Advisors can be fired here (`fireAdvisor()` in `engine.ts`) for whatever
+`fireCost`/`fireEffects`/`endsCommitment` `content/shop.ts` gives that
+advisor — every advisor has a real cost or consequence to letting them go,
+tested in `shop.test.ts`. Deals just report themselves: most are permanent
+("Ongoing"); a few carry `durationDays` and count down in
+`GameState.activeDeals`, ticked in `engine.ts`'s `dayUpkeep()` alongside
+commitments/projects, firing `expireEffects` once when the clock runs out
+(currently just `three-judges`, 5 days). `src/ui/screens/Manage.tsx` is the
+screen; `boughtDealDefs()`/`ownedAdvisorDefs()` in `shop.ts` are what feed it.
+Policies and favours are deliberately NOT in this screen — only what the
+owner asked for (deals and advisors). `SAVE_VERSION` bumped 4→5 for
+`activeDeals`.
 
 **Do this as its own vertical slice, the same way Milestone 1 and the
 Poster/Broadsheet rebuild were done — build the smallest testable piece,
@@ -148,13 +175,14 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `4`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `5`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 3→4 for §4.2's shop
-    fields; mandates/run-deck/meta-progression will likely be the next time.
-    A bump discards the owner's in-progress run — say so when you report.
+    as long as the bump actually happens. Last bumped 4→5 for
+    `activeDeals` (timed Back Room deals); mandates/run-deck/meta-progression
+    will likely be the next time. A bump discards the owner's in-progress
+    run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see
@@ -213,8 +241,9 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 32 tests: integrity, 200 full runs, determinism, variety,
-                   #   glossary, and 19 covering the Back Room shop
+npm test           # 44 tests: integrity, 200 full runs, determinism, variety,
+                   #   glossary, and 31 covering the Back Room shop
+                   #   (stock/pricing, firing advisors, timed deals)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -240,7 +269,8 @@ src/game/                 no React, no DOM, fully testable
                            (3 resources, 5 factions) — read this before
                            touching anything stat- or faction-related in the UI
   shop.ts                 THE BACK ROOM — stock rolling, prices, owned-item
-                           rules. No React. Content lives in content/shop.ts
+                           rules, timed-deal ticking, firing advisors. No
+                           React. Content lives in content/shop.ts
   glossary.ts             jargon term → plain definition, auto-applied to prose
   economy.ts              national accounts, budget lines, $ formatting
   stats.ts                stat metadata, bands, tooltips (still full 10 stats;
@@ -260,7 +290,12 @@ src/ui/
     Prose.tsx               renders card text, applies the glossary
   screens/
     Screens.tsx             Title, Briefing (front page), Night, Ending
-    Shop.tsx                 The Back Room + the rail's record of what you own
+    Shop.tsx                 The Back Room (fullscreen, dark — see the
+                            masthead's "PHASE 2" section above) + the rail's
+                            compact "Back Room" panel (favours, quick-glance)
+    Manage.tsx               "Advisors & Deals" — the fuller management
+                            screen opened from the masthead: fire advisors,
+                            see timed deals count down
     Intro.tsx                the "Brief me" explainer overlay
 src/styles/index.css      the whole Poster design system
 public/fonts/              self-hosted type (Anton, Archivo Black, Libre

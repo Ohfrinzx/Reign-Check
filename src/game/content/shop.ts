@@ -28,6 +28,11 @@ import type { Effects, GameState, Hidden, StatKey, Stats } from '../types';
  *   `lossMult` / `gainMult` / `priceMult` — read in effects.ts's applyCoupling()
  *                and shop.ts's shopPrice()
  *
+ * Most deals are permanent; `durationDays`/`expireEffects` mark the few that
+ * run on a day-to-day timer instead (see GameState.activeDeals). Advisors
+ * carry `fireCost`/`fireEffects`/`endsCommitment` — what it costs, in money
+ * and consequence, to let them go mid-run from the "Advisors & Deals" screen.
+ *
  * See src/game/shop.ts for the logic and CLAUDE.md for the writing rules.
  */
 
@@ -73,6 +78,27 @@ export interface ShopItemDef {
     text: string;
     effects?: Effects;
   };
+  /**
+   * Deals only. Most deals are permanent — this is the exception: the
+   * arrangement runs for this many days (tracked in `GameState.activeDeals`,
+   * see shop.ts's tickActiveDeals()), then `expireEffects` fires once and it
+   * is gone. Shown to the player as a plain "Lasts N days" line — this is an
+   * overt mechanic like the price, not a hidden variable (ground rule 6).
+   */
+  durationDays?: number;
+  /** fires once, through applyEffects(), when a timed deal's daysLeft hits 0 */
+  expireEffects?: Effects;
+  /**
+   * Advisors only. What it costs to let them go, mid-run, from the "Advisors
+   * & Deals" screen — every advisor must have a real answer here, "figurative
+   * or literal", per the same everything-has-a-downside rule that governs
+   * buying one in the first place.
+   */
+  fireCost?: number;
+  /** the non-monetary consequence of firing them, applied through applyEffects() */
+  fireEffects?: Effects;
+  /** the commitment id (if any) their hiring created, cancelled when fired */
+  endsCommitment?: string;
 }
 
 export const SHOP_ITEMS: ShopItemDef[] = [
@@ -102,6 +128,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
         patronage: 8,
       },
     },
+    fireCost: 2.0,
+    endsCommitment: 'cmt-fixer',
+    fireEffects: {
+      hidden: {
+        leak: 3,
+      },
+    },
   },
   {
     id: 'channel-seven-man',
@@ -124,6 +157,11 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     effects: {
       regime: {
         graft: 6,
+      },
+    },
+    fireEffects: {
+      hidden: {
+        scandal: 5,
       },
     },
   },
@@ -151,6 +189,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
       regime: {
         militarism: 8,
+      },
+    },
+    fireEffects: {
+      factions: {
+        staff: {
+          loyalty: -6,
+        },
       },
     },
   },
@@ -185,6 +230,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
         scandal: 0.5,
       },
     },
+    fireCost: 4.0,
+    endsCommitment: 'cmt-second-books',
+    fireEffects: {
+      hidden: {
+        scandal: 4,
+      },
+    },
   },
   {
     id: 'archivist',
@@ -202,6 +254,11 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     },
     lossMult: {
       information: 0.55,
+    },
+    fireEffects: {
+      hidden: {
+        leak: 2,
+      },
     },
   },
 
@@ -540,9 +597,10 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     tier: 'small',
     name: 'Three Judges',
     seller: 'Not the whole bench. Three of them, on the cases that matter.',
-    upside: 'Rulings go your way. The government looks lawful and the police get room to work.',
-    downside: 'Three judges know they were bought, and so do the clerks who arranged it.',
+    upside: 'Rulings go your way for about a week. The government looks lawful and the police get room to work.',
+    downside: 'Three judges know they were bought, and so do the clerks who arranged it. In five days the rotation changes them out.',
     cost: 8.0,
+    durationDays: 5,
     requires: (s) => !s.flags.judgesBought,
     effects: {
       flags: {
@@ -566,6 +624,14 @@ export const SHOP_ITEMS: ShopItemDef[] = [
         graft: 10,
         repression: 6,
       },
+    },
+    // The rotation moves them to other courts and the arrangement is over —
+    // whatever it bought you does not reverse, but the story catches up.
+    expireEffects: {
+      hidden: {
+        scandal: 6,
+      },
+      news: ['The three judges everyone was talking about have been quietly reassigned to appellate courts upstate.'],
     },
   },
   {

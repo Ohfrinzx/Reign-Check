@@ -120,6 +120,7 @@ function Offer({
         <span className="k">{KIND_LABEL[def.kind]}</span>
         {def.rarity === 'rare' && <span className="rare-tag">Rare · no catch</span>}
         {def.rarity === 'uncommon' && <span className="unc-tag">Uncommon</span>}
+        {def.durationDays && <span className="dur-tag">Lasts {def.durationDays} days</span>}
         <span className="num">{index + 1}</span>
       </div>
       <h2>{def.name}</h2>

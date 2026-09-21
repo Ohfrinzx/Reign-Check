@@ -47,6 +47,10 @@ for (let i = 0; i < 220; i++) {
     shopBuys++;
     if (shopBuys === 1) await page.screenshot({ path: '/tmp/claude-0/shots/P-shop.png' });
     await page.locator('.shop .offer .btn-primary:not([disabled])').first().click();
+  } else if (await page.locator('.shop-foot .btn-primary').count()) {
+    // The shop is fullscreen and has no strap — its own "Leave" button is
+    // the only way out, same button the masthead/strap used to duplicate.
+    await page.locator('.shop-foot .btn-primary').click();
   } else if (await page.locator('.strap-action').count()) {
     const t = await page.locator('.strap-action').innerText();
     if (/begin the day/i.test(t)) days++;

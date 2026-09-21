@@ -155,6 +155,11 @@ export function ownedDefs(s: GameState): ShopItemDef[] {
   return s.owned.map((id) => SHOP_MAP[id]).filter(Boolean);
 }
 
+/** Advisors only, out of `owned` — the only kind that can be fired. */
+export function ownedAdvisorDefs(s: GameState): ShopItemDef[] {
+  return ownedDefs(s).filter((d) => d.kind === 'advisor');
+}
+
 export function heldFavourDefs(s: GameState): ShopItemDef[] {
   return s.heldFavours.map((id) => SHOP_MAP[id]).filter(Boolean);
 }
@@ -201,6 +206,82 @@ export function ownedStatMult(s: GameState, k: StatKey, d: number): number {
     if (d > 0 && def.gainMult?.[k] !== undefined) mult *= def.gainMult[k]!;
   }
   return mult;
+}
+
+/* ---------------------------------------------------------- timed deals */
+
+/**
+ * Start a deal's clock, if it has one. Called from buyShopItem() right after
+ * a deal's own `effects` resolve. Most deals have no `durationDays` and this
+ * is a no-op for them — see content/shop.ts's header comment.
+ */
+export function startActiveDeal(s: GameState, def: ShopItemDef): void {
+  if (def.kind !== 'deal' || !def.durationDays) return;
+  s.activeDeals.push({ itemId: def.id, daysLeft: def.durationDays });
+}
+
+/**
+ * Count down every active deal by a day and remove the ones that just ran
+ * out, mutating `s.activeDeals` in place — the same shape as how commitments
+ * tick in engine.ts's dayUpkeep(). Returns the defs that expired THIS tick,
+ * so the caller can push each one's own `expireEffects` through
+ * applyEffects() individually (this file never calls applyEffects itself,
+ * to avoid a circular import with effects.ts, which already imports from
+ * here for ownedStatMult()).
+ */
+export function tickActiveDeals(s: GameState): ShopItemDef[] {
+  const remaining: typeof s.activeDeals = [];
+  const expired: ShopItemDef[] = [];
+  for (const active of s.activeDeals) {
+    const daysLeft = active.daysLeft - 1;
+    if (daysLeft > 0) {
+      remaining.push({ itemId: active.itemId, daysLeft });
+      continue;
+    }
+    const def = SHOP_MAP[active.itemId];
+    if (def) expired.push(def);
+  }
+  s.activeDeals = remaining;
+  return expired;
+}
+
+export type DealStatus = 'ongoing' | 'active' | 'expired';
+
+/**
+ * Every deal ever bought this run, in one of three states:
+ *   'ongoing'  — permanent, no clock (most deals: a sold lease, a loan)
+ *   'active'   — a timed deal, still running; `daysLeft` is live
+ *   'expired'  — a timed deal that ran its course (see tickActiveDeals())
+ * Kept distinct so a run-out arrangement never reads as "Ongoing" in the UI.
+ */
+export interface DealEntry {
+  def: ShopItemDef;
+  status: DealStatus;
+  /** only meaningful when status === 'active' */
+  daysLeft?: number;
+}
+
+export function boughtDealDefs(s: GameState): DealEntry[] {
+  const activeById = new Map(s.activeDeals.map((a) => [a.itemId, a.daysLeft]));
+  return s.shopBought
+    .map((id) => SHOP_MAP[id])
+    .filter((d): d is ShopItemDef => !!d && d.kind === 'deal')
+    .map((def): DealEntry => {
+      if (!def.durationDays) return { def, status: 'ongoing' };
+      const daysLeft = activeById.get(def.id);
+      return daysLeft !== undefined ? { def, status: 'active', daysLeft } : { def, status: 'expired' };
+    });
+}
+
+/* ------------------------------------------------------------- firing */
+
+/** What it costs, in money, to fire this advisor right now. */
+export function fireCostOf(def: ShopItemDef): number {
+  return def.fireCost ?? 0;
+}
+
+export function canFireNow(s: GameState, def: ShopItemDef): boolean {
+  return fireCostOf(def) <= s.stats.treasury;
 }
 
 /* ------------------------------------------------------------- reporting */

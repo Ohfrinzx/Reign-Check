@@ -49,7 +49,8 @@ for (let step = 0; step < 90; step++) {
     log.push('SHOP: ' + (names.join(' | ') || 'room closed'));
     const buy = page.locator('.shop .offer .btn-primary:not([disabled])');
     if (await buy.count()) { await buy.first().click(); await page.waitForTimeout(200); continue; }
-    await page.locator('.strap-action').click();
+    // Fullscreen shop has no strap — its own "Leave" button is the only way out.
+    await page.locator('.shop-foot .btn-primary').click();
     await page.waitForTimeout(200);
     continue;
   }

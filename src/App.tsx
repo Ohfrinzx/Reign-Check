@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GameState, StatKey } from './game/types';
-import { createGame, justAdvancedAct, NUM_ACTS } from './game/state';
+import { createGame, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop,
+  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
@@ -14,6 +14,7 @@ import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
 import { ShopScreen } from './ui/screens/Shop';
 import { IntroScreen } from './ui/screens/Intro';
+import { ManageScreen } from './ui/screens/Manage';
 
 type Screen = 'title' | 'game';
 
@@ -23,6 +24,7 @@ export default function App() {
   const [name, setName] = useState('');
   const [honorific, setHonorific] = useState('sir');
   const [showIntro, setShowIntro] = useState(false);
+  const [showManage, setShowManage] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -55,6 +57,7 @@ export default function App() {
     setGame(g);
     setScreen('game');
     setShowIntro(true);
+    setShowManage(false);
     setFlash({});
   }, [name, honorific]);
 
@@ -64,10 +67,12 @@ export default function App() {
     setGame(g);
     setScreen('game');
     setShowIntro(false);
+    setShowManage(false);
   }, [say]);
 
   const backToTitle = useCallback(() => {
     setScreen('title');
+    setShowManage(false);
     const meta = loadMeta();
     setSavedDay(meta && !meta.ended ? meta.day : undefined);
   }, []);
@@ -121,9 +126,21 @@ export default function App() {
     });
   }, [say]);
 
+  const doFireAdvisor = useCallback((itemId: string) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = fireAdvisor(g, itemId);
+      // fireAdvisor no-ops (returns the id still in `owned`) when the money
+      // or phase gate fails — the button is disabled in those cases too, so
+      // this is a safety net, not the primary check.
+      if (!next.owned.includes(itemId)) say('Let them go.');
+      return next;
+    });
+  }, [say]);
+
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game || showIntro) return;
+    if (screen !== 'game' || !game || showIntro || showManage) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA') return;
@@ -150,7 +167,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, doBuy, showIntro]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -172,6 +189,21 @@ export default function App() {
     );
   }
 
+  // The Back Room takes over the whole screen — no masthead, no strap, no
+  // rail. Owner request: leaving the building's public rooms should look
+  // like leaving them, not like a panel opening on top of them. The shop's
+  // own "Leave" button (in ShopScreen) is the only way out; see
+  // ground rule 9 — it needs no scrolling to reach, same as .strap-action
+  // elsewhere, it just lives inside the shop card instead of a strap here.
+  if (game.phase === 'shop') {
+    return (
+      <div className="app dark shop-full">
+        <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} />
+        {toast && <div className="toast">{toast}</div>}
+      </div>
+    );
+  }
+
   const brief = buildBriefing(game);
   const card = activeCard(game);
   const inAlert = game.phase === 'alert' || game.phase === 'alertResolve';
@@ -179,7 +211,7 @@ export default function App() {
   const remaining = Math.max(0, game.todayDeck.length - game.stageIndex);
 
   return (
-    <div className={`app ${game.phase === 'shop' ? 'dark' : ''}`}>
+    <div className="app">
       {/* --------------------------------------------------------- masthead */}
       <header className="masthead">
         <div className="id">
@@ -195,6 +227,9 @@ export default function App() {
         <div className="masthead-right">
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
             Brief me
+          </button>
+          <button className="btn btn-ghost" onClick={() => setShowManage(true)} title="Everyone you've hired, everything you've arranged">
+            Advisors &amp; Deals
           </button>
           <button className="btn btn-ghost" onClick={backToTitle} title="Your run is saved automatically">
             Menu
@@ -224,11 +259,6 @@ export default function App() {
         {game.phase === 'night' && (
           <button className="strap-action" onClick={doContinue}>To the Back Room →</button>
         )}
-        {game.phase === 'shop' && (
-          <button className="strap-action" onClick={doContinue}>
-            {justAdvancedAct(game) ? `Begin Act ${game.act} →` : `Begin Day ${game.day + 1} →`}
-          </button>
-        )}
       </div>
 
       {/* ----------------------------------------------------------- main */}
@@ -247,9 +277,6 @@ export default function App() {
           )}
 
           {game.phase === 'night' && <NightScreen s={game} />}
-          {game.phase === 'shop' && (
-            <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} />
-          )}
           {game.phase === 'ended' && (
             <EndingScreen s={game} onRestart={restart} onTitle={backToTitle} />
           )}
@@ -287,6 +314,10 @@ export default function App() {
             <IntroScreen s={game} onBegin={() => setShowIntro(false)} returning={game.day > 1 || game.phase !== 'briefing'} />
           </div>
         </div>
+      )}
+
+      {showManage && (
+        <ManageScreen s={game} onClose={() => setShowManage(false)} onFire={doFireAdvisor} />
       )}
 
       {toast && <div className="toast">{toast}</div>}

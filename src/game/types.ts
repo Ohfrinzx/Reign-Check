@@ -290,6 +290,19 @@ export interface CommitmentSpec {
   days?: number;
 }
 
+/**
+ * A Back Room deal that runs for a set number of days rather than resolving
+ * once and being done. Most deals are permanent (a sold lease, a loan); a
+ * `durationDays` deal instead lives here until it counts down to zero, at
+ * which point `ShopItemDef.expireEffects` fires — see shop.ts's
+ * tickActiveDeals(). `itemId` looks up the rest (name, upside, downside) in
+ * content/shop.ts's SHOP_MAP, same pattern as `owned`/`heldFavours`.
+ */
+export interface ActiveDeal {
+  itemId: string;
+  daysLeft: number;
+}
+
 export interface ScandalSpec {
   id?: string;
   name: string;
@@ -475,6 +488,8 @@ export interface GameState {
   shopRecent: string[];
   /** purchases made in tonight's room — the nightly room allows exactly one */
   shopBuysTonight: number;
+  /** timed deals still running — most deals are permanent and never appear here */
+  activeDeals: ActiveDeal[];
 
   log: LogEntry[];
   history: DaySummary[];
