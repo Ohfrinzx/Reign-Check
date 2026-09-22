@@ -24,6 +24,12 @@ for (let i = 0; i < 400; i++) {
     await page.waitForTimeout(110);
     continue;
   }
+  // Phase 3 faction demands: a pop-up covers the day until it is closed.
+  if (await page.locator('.demand-pop').count()) {
+    await page.locator('.demand-pop .dm-foot .btn').first().click();
+    await page.waitForTimeout(90);
+    continue;
+  }
   const alertOpts = page.locator('.alert-scrim .alert-card .opt:not([disabled])');
   if (await alertOpts.count()) { await alertOpts.last().click(); await page.waitForTimeout(90); continue; }
   if (await page.locator('.alert-scrim .outcome').count()) { await page.locator('.alert-scrim .outcome .btn-primary').click(); await page.waitForTimeout(90); continue; }

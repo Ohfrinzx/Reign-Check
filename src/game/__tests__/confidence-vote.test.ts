@@ -22,7 +22,7 @@ function voteDay(act: 1 | 2 | 3, value: number): GameState {
 
 describe('confidence-vote reveal', () => {
   it('bumps the save version and stores a serialisable, exact result snapshot', () => {
-    expect(SAVE_VERSION).toBe(10);
+    expect(SAVE_VERSION).toBe(11);
     const s = beginStages(voteDay(1, 40));
     expect(s.phase).toBe('vote');
     expect(s.confidenceVote).toEqual({

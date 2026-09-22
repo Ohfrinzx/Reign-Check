@@ -24,6 +24,12 @@ import { IntroScreen } from './ui/screens/Intro';
 import { ManageScreen } from './ui/screens/Manage';
 import { ProgressScreen } from './ui/screens/Progress';
 import { ConfidenceVoteScreen } from './ui/screens/Vote';
+import { DemandPopup, DemandsScreen } from './ui/components/Demands';
+import type { DemandActions } from './ui/components/Demands';
+import {
+  bribeDemand, canActOnDemands, dismissDemandNotice, factionLabel, liveDemands, meetDemand,
+} from './game/demands';
+import type { FactionId } from './game/types';
 
 type Screen = 'title' | 'game';
 
@@ -36,6 +42,7 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  const [showDemands, setShowDemands] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -98,6 +105,7 @@ export default function App() {
     setScreen('game');
     setShowIntro(true);
     setShowManage(false);
+    setShowDemands(false);
     setFlash({});
   }, [name, honorific, mandateId, legacy]);
 
@@ -191,9 +199,44 @@ export default function App() {
     });
   }, [say]);
 
+  /* ---- faction demands (Phase 3 step 1). Results are read back from the
+   *  new state, since a bribe can be refused. */
+  const doMeetDemand = useCallback((f: FactionId) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = meetDemand(g, f);
+      if (!next.factions[f].demand && g.factions[f].demand) say(`Demand met. The ${factionLabel(f)} is satisfied, for now.`);
+      return next;
+    });
+  }, [say]);
+
+  const doBribeDemand = useCallback((f: FactionId) => {
+    setGame((g) => {
+      if (!g) return g;
+      const before = g.factions[f].demand;
+      const next = bribeDemand(g, f);
+      const after = next.factions[f].demand;
+      if (before && after && after.dueDay > before.dueDay) say(`They took it. The ${factionLabel(f)} will wait until day ${after.dueDay}.`);
+      else if (after?.bribeRefused && !before?.bribeRefused) say(`The ${factionLabel(f)} refused the money. The deadline stands.`);
+      return next;
+    });
+  }, [say]);
+
+  const doDismissNotice = useCallback(() => {
+    setGame((g) => g ? dismissDemandNotice(g) : g);
+  }, []);
+
+  const demandActions: DemandActions = { onMeet: doMeetDemand, onBribe: doBribeDemand };
+
+  // The oldest unseen demand notice pops up whenever demands can be acted on
+  // and nothing else is covering the screen.
+  const notice = game?.demandNotices[0];
+  const popupOpen = !!(game && notice && screen === 'game' && canActOnDemands(game) &&
+    !showIntro && !showManage && !showDemands);
+
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game || showIntro || showManage) return;
+    if (screen !== 'game' || !game || showIntro || showManage || showDemands || popupOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -224,7 +267,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, showDemands, popupOpen]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -300,6 +343,9 @@ export default function App() {
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
             Brief me
           </button>
+          <button className={`btn btn-ghost ${liveDemands(game).length ? 'has-demands' : ''}`} onClick={() => setShowDemands(true)} title="What the factions are demanding from you">
+            Demands{liveDemands(game).length > 0 && <span className="mh-count">{liveDemands(game).length}</span>}
+          </button>
           <button className="btn btn-ghost" onClick={() => setShowManage(true)} title="Everyone you've hired, everything you've arranged">
             Advisors &amp; Deals
           </button>
@@ -354,7 +400,7 @@ export default function App() {
           )}
         </div>
 
-        <Rail s={game} onUseFavour={doUseFavour} />
+        <Rail s={game} onUseFavour={doUseFavour} demandActions={demandActions} />
       </div>
 
       {/* --------------------------------------------------- breaking alert */}
@@ -386,6 +432,14 @@ export default function App() {
             <IntroScreen s={game} onBegin={() => setShowIntro(false)} returning={game.day > 1 || game.phase !== 'briefing'} />
           </div>
         </div>
+      )}
+
+      {popupOpen && notice && (
+        <DemandPopup s={game} notice={notice} actions={demandActions} onDismiss={doDismissNotice} />
+      )}
+
+      {showDemands && (
+        <DemandsScreen s={game} actions={demandActions} onClose={() => setShowDemands(false)} />
       )}
 
       {showManage && (

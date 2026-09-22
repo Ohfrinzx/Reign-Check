@@ -1156,6 +1156,11 @@ Everything here is genuinely deferred (needs an explicit go-ahead per
    §4). Issue dated, formal demands when patience drops, escalating murmur →
    formal → ultimatum, spawn a card when one expires. `FactionState.demand`
    and the `FactionDemand` type already exist as the hook.
+   **BUILT 2026-09-22, AWAITING PLAYTEST — see "Phase 3 step 1, as built"
+   below.** The owner changed the presentation from "spawn a card" to
+   pop-ups plus an expandable side panel, with Meet and a not-always-
+   accepted bribe, and asked that an unmet ultimatum can end in a coup or
+   another removal attempt, depending on standing and conditions.
 2. **Character-driven events** (Milestone 3). Spawn a card when a
    character's `plotting` crosses a threshold. The data is already tracked;
    this is new spawn logic plus new cards.
@@ -1180,6 +1185,42 @@ result/margin and presentation now exist, but no balance value was changed.
 Use the exact recorded margins during Phase 3's later balance pass; if that
 pass changes the formula or thresholds, the reveal will display the shared
 calculation automatically. This does not start or reorder Phase 3 steps 1–3.
+
+### Phase 3 step 1, as built — faction demands (2026-09-22)
+
+**Owner spec:** demands are pop-ups, stored in a menu or on the side where
+the player can expand them to see the faction, the details, an option to
+meet the demand (if applicable), or a bribe for an extension that is not
+always accepted; unmet demands can lead to a coup or other removal
+attempts, depending on standing with the faction and other conditions.
+
+**Rules** (`src/game/demands.ts`; words in `content/demands.ts`):
+
+| Step | Rule |
+|---|---|
+| Issue | A visible faction with patience < 35, no live demand, off cooldown, from day 2. Least patient first; one per morning; at most 2 live. |
+| Stages | Request → formal demand → ultimatum, 2 days each. Each escalation: that faction −4 support, −6 patience. A request drops if patience reaches 50. |
+| Meet | Price × 1 / 1.25 / 1.5 by stage, plus the demand's side effects; +8 support, patience reset to at least 65; 4-day cooldown. |
+| Bribe | ≈35% of the meet price, +50% per earlier bribe. Chance 10–90% from support, patience, stage and earlier bribes, shown only in words. Taken: pay, +2 days. Refused: free, −3 support, no retry until it escalates. |
+| Ultimatum runs out | Attempt chance = ((55 − support)/55) × power × 1.3 (max 90%; zero when support ≥ 55). Success chance = 0.3 + (power − defence)/120 (10–75%). Success → that faction's ending. Failure → heavy hits, the faction loses 15 power. No attempt → a heavy but survivable punishment. 5-day cooldown. |
+
+**Defence per faction** (what the pop-up lists as "What protects you"):
+Army — Security's support, the security services, legitimacy. Security —
+the Army's support, power, information. Money — the elite, the economy,
+legitimacy. Workers — public support, stability, the Street's support.
+Street — the security services, Security's support, public support.
+
+**Endings:** Army → `coup`, Money → `elite`, Street → `revolution` (all
+existing); Security → `sable-removal` and Workers → `general-strike` (new,
+never picked by `checkEndings()` on their own).
+
+**Presentation:** a light pop-up (not the dark Back Room look) for each new
+demand, escalation, or lapse; a "Demands" rail panel with rows that expand
+in place; a "Demands" masthead button opening the same list, because the
+rail is hidden below 1080px. Nothing depends on hover.
+
+**Measured balance (not tuned):** always-first-option play 100% → 90%
+survival; random and always-last barely moved. Tuning belongs to step 4.
 
 ### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
 

@@ -40,6 +40,25 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
+**2026-09-22 (later) — PHASE 3 STEP 1, FACTION DEMANDS: BUILT, AWAITING
+OWNER PLAYTEST.** The owner gave the go-ahead for Phase 3 and specified the
+design: demands arrive as **pop-ups**, are **stored in a side panel** the
+player can expand (which faction, the details, a **Meet** option where
+applicable, and a **bribe for an extension that is not always accepted**),
+and an unmet demand **can lead to a coup or another attempt at removal,
+depending on standing with that faction and other conditions.** Rules in
+`src/game/demands.ts`, words in `src/game/content/demands.ts` (10 demands,
+2 per visible faction, plus one "move" per faction), UI in
+`src/ui/components/Demands.tsx` (pop-up, rail "Demands" panel, masthead
+"Demands" button that opens the same list — the rail is hidden below
+1080px). Two new endings (`sable-removal`, `general-strike`); Army, Money
+and Street moves reuse `coup`, `elite` and `revolution`. `SAVE_VERSION` is
+**11**, so in-progress runs reset; meta history is unaffected. 123 tests,
+production build, and the full browser suite (including new
+`tools/demands.mjs`) pass. Balance was measured, not tuned: see §16.
+Phase 3 steps 2–4 (character events, crisis chains, balance pass) are not
+started and each needs its own go-ahead.
+
 **2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
 The reveal now runs before the Back Room, preserving the existing vote
@@ -131,11 +150,10 @@ mid-loop, what the owner's own words were), read `PROJECT_STATUS.md`'s
 is the first thing to check at the start of any session.
 
 **What is deliberately NOT built**, and needs an explicit owner go-ahead
-before starting (full detail in `docs/DESIGN_V2.md` §9) — Phase 2 being
-done and approved is not itself that go-ahead: faction demands as a live
-mechanic, character-initiated events, crisis chains, and a balance pass
-(Phase 3 — now unblocked, since Phase 2 is done and playtested, but still
-not started); mobile/iOS (Phase 4, not scheduled — see §10 for the
+before starting (full detail in `docs/DESIGN_V2.md` §9): the rest of
+Phase 3 — character-initiated events, crisis chains, and a balance pass
+(faction demands, step 1, is built and awaiting playtest; each later step
+still gets its own go-ahead); mobile/iOS (Phase 4, not scheduled — see §10 for the
 guardrails to keep it possible without doing the work now); mini-games,
 sound, and remaining ending types (Phase 5).
 
@@ -152,6 +170,27 @@ explicit go-ahead.
 pass.** Each of §4.2–§4.4 in `docs/DESIGN_V2.md` carries its own content
 quota (item counts, mandate counts, card counts). Author that content as
 part of building the slice, not before or after it.
+
+## 3a. Required hand-off report — every agent, every time
+
+**Owner request (2026-09-22): every agent must end its output, whenever it
+has changed anything, with a plain report the owner can act on without
+reading the diff.** Not optional, and not only when asked. The report has
+two parts:
+
+1. **What changed** — what was added, changed, or adjusted, in plain words,
+   grouped by what the player will notice (new screens, new rules, new
+   content, changed numbers) before internal/tooling changes. Include
+   anything that resets the owner's in-progress run (`SAVE_VERSION` bumps),
+   any balance numbers that moved, and anything you found but did not fix.
+2. **What to look for in playtesting** — a short, concrete checklist: where
+   to go in the game, what should happen, and what would count as a bug or
+   a balance problem. Name the exact buttons/screens. If something is hard
+   to reach in normal play, say how to reach it.
+
+Also say what you verified (tests, build, browser checks) and whether you
+merged into the default branch (§10). Documentation-only turns still need
+part 1 (what changed in the docs); part 2 can say "nothing to playtest".
 
 ## 4. Ground rules that must not be broken
 
@@ -246,8 +285,10 @@ npm run build      # typecheck + production build
 npm test           # vitest: content integrity, 200 full simulated runs,
                    #   determinism, variety, glossary, the Back Room shop
                    #   suite (stock/pricing, firing advisors, held/timed/cut
-                   #   deals, caps), mandates, the run deck (§4.4), and
-                   #   meta-progression (§4.5, record + real unlock gating)
+                   #   deals, caps), mandates, the run deck (§4.4),
+                   #   meta-progression (§4.5, record + real unlock gating),
+                   #   the confidence-vote reveal, and faction demands
+                   #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -263,7 +304,15 @@ node tools/legacy.mjs        # §4.5 step 1: ending → title, checks the record
                              # tools/mandates.mjs also covers step 2's gating
                              # (seeds unlock history, checks both Unlocks
                              # access points and the filtered mandate picker)
+node tools/demands.mjs       # Phase 3 step 1: demand pop-up, rail panel,
+                             # meet, bribe, lapse pop-up, masthead access <1080px
 ```
+
+**Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
+not match the Playwright version in `package.json`, so `npx playwright
+install` is not an option there. Run the browser checks with
+`PLAYWRIGHT_EXECUTABLE_PATH=/opt/pw-browsers/chromium npm run test:browser`.
+`npm install` is also needed first in a fresh container.
 
 ## 8. Map of the code
 
@@ -291,6 +340,10 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe — THIS
                            run's save; separate from meta.ts's cross-run one
+  demands.ts              PHASE 3 FACTION DEMANDS — issuing, escalation,
+                           meet/bribe, what a faction does when an ultimatum
+                           runs out (tickDemands() runs in dayUpkeep()).
+                           Words live in content/demands.ts
   meta.ts                 §4.5 META-PROGRESSION — cross-run record, own
                            localStorage key/version, deliberately outside
                            GameState/SAVE_VERSION. Records runs AND real
@@ -298,6 +351,9 @@ src/game/                 no React, no DOM, fully testable
                            data — a new locked mandate/item is a one-line
                            addition here, nowhere else)
   content/mandates.ts      six origins, generic rule data, Stairwell card
+  content/demands.ts       Phase 3: DEMANDS (10, 2 per visible faction) and
+                           FACTION_MOVES (per-faction removal attempt,
+                           failure and punishment text/effects)
   content/                country, cards, cards2, cards3 (§4.4's content
                            top-up), followups, alerts, endings, shop (the
                            Back Room items, including the run deck's
@@ -307,8 +363,11 @@ src/game/                 no React, no DOM, fully testable
 src/ui/
   components/
     Ledger.tsx             the masthead's 3-resource ledger
-    Rail.tsx                Files / On your desk / Diary / Standing costs —
-                            NOT tabbed, everything always visible
+    Rail.tsx                Files / Demands / On your desk / Diary /
+                            Standing costs — NOT tabbed, everything visible
+    Demands.tsx             Phase 3: demand pop-up (DemandPopup), the rail
+                            panel (DemandsPanel, rows expand in place) and
+                            the masthead overlay (DemandsScreen)
     CardView.tsx             the doc — card-as-lead-story + decision box
     Prose.tsx               renders card text, applies the glossary
   screens/
@@ -356,6 +415,11 @@ tools/                     Playwright scripts; run-browser.mjs starts Vite
   only way out** — there is no `.strap-action` during the shop phase. Any
   tooling that drives the shop needs to check `.shop-foot .btn-primary`
   first, not `.strap-action`.
+- **Demand pop-ups cover the day until closed** (`.demand-scrim`). Any
+  tooling that walks through days must close `.demand-pop` first (its
+  `.dm-foot .btn`) — `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` and
+  `legacy.mjs` all do. While a pop-up is open, keyboard shortcuts (1–9,
+  Enter) are disabled so they cannot act on the card underneath.
 - **Advisors and deals are capped** (`ADVISOR_CAP`/`DEAL_CAP` in `shop.ts`).
   Past the cap, buying more of that kind is blocked until a slot is freed by
   firing an advisor or cutting a deal — every deal (permanent or timed)
@@ -537,3 +601,57 @@ don't leave it to "whoever reads this next." Specifically:
   otherwise, which looks like broken/overlapping layout in a screenshot
   even though the actual DOM and computed styles are already correct at
   that point — don't mistake that for a real bug if it happens again.
+
+## 16. Faction demands slice notes (Phase 3 step 1, 2026-09-22)
+
+- **Lifecycle** (`demands.ts` header has the full version): a visible
+  faction with patience below `ISSUE_BELOW` (35) and no live demand issues
+  a *request* (murmur) during the morning upkeep. Each stage lasts
+  `STAGE_DAYS` (2) days; past the due day it escalates request → formal
+  demand → ultimatum, costing that faction's support and patience each
+  time. A request drops quietly if patience recovers to `DROP_AT` (50).
+  At most `MAX_LIVE` (2) demands are live; one new one per morning.
+- **Meet** pays the stage price (`meetCost` × 1 / 1.25 / 1.5) through
+  `applyEffects()` plus the demand's own side effects (every demand has a
+  downside for someone else). **Bribe** costs about a third of the meet
+  price, more each time; `bribeChance()` rises with the faction's loyalty
+  and patience and falls with stage and repeat bribes (10%–90%). Accepted:
+  pay, +2 days. Refused: no money taken, a small support/patience hit, and
+  no second try until the demand escalates. The player only ever sees odds
+  as words (`bribeOddsWord()`), never a number (ground rule 6).
+- **When an ultimatum runs out** (`resolveLapse()`): `moveOdds()` gives
+  the chance the faction tries to remove you (only if its loyalty is
+  below 55, scaled by its power) and the chance that works (its power vs.
+  `FACTION_MOVES[f].defence(s)` — e.g. Army vs. Security's support,
+  your security services and legitimacy). Success ends the run with that
+  faction's ending via `forcedEnding()`; failure applies `failedEffects`;
+  no attempt applies `punishEffects`. The player sees `protectedBy` and a
+  plain danger sentence (`dangerWord()`) on any ultimatum.
+- **Endings:** `sable-removal` and `general-strike` are new, in
+  `DEMAND_ENDINGS` (no `check`, never auto-picked). Army/Money/Street reuse
+  `coup`/`elite`/`revolution`. `prepareDay()` sets phase `ended` if the
+  upkeep ended the run.
+- **State:** `FactionDemand` now stores only ids/numbers (`id`,
+  `issuedDay`, `dueDay`, `severity`, `bribes`, `bribeRefused`) — the words
+  live in content. `GameState.demandNotices` is the pop-up queue;
+  `dismissDemandNotice()` removes the first. Notices for a demand that
+  changes or ends are cleared automatically, so a pop-up is never stale.
+  Cooldowns/used-demand bookkeeping live in `flags` (`demandCooldown:<id>`,
+  `demandUsed:<id>`). `SAVE_VERSION` 10→11.
+- **Only the five visible factions make demands** (`DEMAND_FACTIONS` =
+  `DISPLAY_FACTIONS`), so nothing arrives from a group the player cannot
+  track (ground rule 8). The briefing replaces its vague "patience running
+  out" line with the real demand for those factions.
+- **Adding a demand is content only:** append to `DEMANDS` in
+  `content/demands.ts` — no engine change (ground rule 5). `canMeet`/
+  `lockedText` exist for a demand that needs more than money.
+- **Balance, measured, not tuned** (`balance.test.ts`, 120 runs each; the
+  bots never meet or bribe): *first-option* play went from 100% survival
+  to 90% (5 `sable-removal`, 6 `elite`, 1 `hollow`); *random* and
+  *last-option* play barely moved. This partly addresses the known "same
+  option every time wins" problem, but the real fix is still Phase 3's
+  balance pass (step 4).
+- **Pre-existing, not fixed here:** `Effects.ending` sets
+  `__forceEnding`/`__ending:<id>` flags that nothing reads, so a card
+  cannot currently force an ending that way (no content uses it). The
+  demand system does not rely on it — it calls `forcedEnding()` directly.

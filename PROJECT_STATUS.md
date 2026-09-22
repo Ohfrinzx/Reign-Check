@@ -1,6 +1,82 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
+## ▶ WHERE WE STOPPED — 2026-09-22, later (PHASE 3 STEP 1: FACTION DEMANDS — BUILT, AWAITING PLAYTEST)
+
+**Phase 3 has started, one slice at a time. Step 1, faction demands, is
+built and verified; it now needs the owner's playtest before step 2.**
+Before starting, the branch was checked: the approved vote-reveal build
+passed 113/113 tests, the build and the full browser suite, so nothing was
+outstanding from Phase 2 or the reveal.
+
+**The owner's spec, verbatim:** *"Demands should be pop-ups, being stored in
+a menu or on the side where the user can expand, see which factions the
+demand came from, the details of said demand, and an option to meet the
+demand (if applicable), or bribe for extension of the demand (doesn't
+always accept, If demands aren't met. It sometimes can lead to say a
+military coup, or other means/attempts at removal. But it should depend on
+the standing status with the faction and other conditions."* The agent
+also chose (and reported) that the pop-up can be closed and dealt with
+later from the panel.
+
+**What was built:**
+- **Rules** — `src/game/demands.ts` (no React). A visible faction whose
+  patience falls below 35 issues a *request*; unmet, it becomes a *formal
+  demand*, then an *ultimatum*, 2 days per stage, each escalation costing
+  that faction's support. A request drops if patience recovers. At most 2
+  live demands; one new one per morning.
+- **Meet** — pays a price that rises with the stage (×1 / ×1.25 / ×1.5),
+  plus side effects on someone else. **Bribe** — about a third of the price
+  for 2 more days; the chance they accept depends on the faction's support
+  and patience, the stage, and earlier bribes, shown only in words
+  ("They will probably take it" / "might" / "will probably refuse"). A
+  refused bribe costs nothing but offends them, and cannot be retried until
+  the demand escalates.
+- **Ultimatum runs out** — the faction either punishes you (heavy,
+  survivable) or tries to remove you. Whether it tries depends on its
+  support and power; whether it works depends on its power against what
+  protects you (e.g. the Army against Security's support, your security
+  services and your legitimacy). Success ends the run: Army → coup, Money →
+  "a decision taken over lunch", Street → revolution, plus two new endings,
+  Security → "The Sable Office opened your file" and Workers → "The country
+  stopped working". Every ultimatum shows "What protects you: …" and a
+  plain danger sentence.
+- **Content** — `src/game/content/demands.ts`: 10 demands (2 each for
+  Army, Security, Money, Workers, Street) with real numbers and named
+  characters, and one move (attempt / failure / punishment) per faction.
+- **UI** — `src/ui/components/Demands.tsx`: the pop-up (with Meet, Bribe,
+  "Deal with it later"; or "Understood" for what a faction did), a
+  **Demands** panel on the right rail whose rows expand in place, and a
+  **Demands** button (with a count) in the masthead that opens the same
+  list — the rail is hidden below 1080px. The front page lists live demands
+  under Known issues instead of the old vague "patience running out" line.
+- **Save** — `SAVE_VERSION` 10→11 (`FactionDemand` now stores ids/numbers
+  only; new `demandNotices` queue). **In-progress runs reset**; the
+  cross-run record is untouched.
+
+**Verification:** 123/123 tests (10 new in `demands.test.ts`), production
+build clean, and the full browser suite at 1366×700 with zero page errors,
+including new `tools/demands.mjs` (pop-up, rail, meet, bribe
+taken-or-refused, lapse pop-up, masthead access at 1000px). The older
+browser scripts now close demand pop-ups as they walk through days;
+`verify.mjs` met 2 demands in its real run.
+
+**Balance, measured, not tuned** (120 runs per bot; the bots never meet or
+bribe): *always-first-option* play went from 100% survival to 90% (5
+Security removals, 6 Money removals, 1 other). Random and last-option play
+barely changed. This helps with the known "one option every time wins"
+problem but is not the fix — that is step 4, the balance pass.
+
+**Found, not fixed (outside this slice):** `Effects.ending` sets flags that
+nothing reads, so content can't force an ending through it (no content
+uses it today). Separately, the regime name can read oddly (e.g. "Earnest a
+Security State") when a modifier comes before "a". Both are recorded here
+for a later slice.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-22 (confidence-vote reveal approved)
 
 **The confidence-vote reveal is built, playtested, and owner-approved.**
@@ -1083,7 +1159,7 @@ still needs to be explicitly asked for, same as every other item below:
 | 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
 | 4b | Save format changes discard old in-progress runs rather than migrate them. | Low | Correct pre-release behaviour; `save.ts` is version-guarded and fails safe. Current `SAVE_VERSION` is 10: Phase 2 advanced it through 9, and the serialisable confidence-vote phase/result advanced it 9→10. The separate meta-progression history is unaffected. |
 | 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet — this is the real remaining gap for a future Phase 4 (mobile/iOS, `docs/DESIGN_V2.md` §10), not scheduled. |
-| 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
+| 6 | `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. (`FactionState.demand` is now live — Phase 3 step 1.) | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |
 | 8 | The 2 provinces/civil-service factions (`grey`, `provinces`) have no display bar — by design (see `docs/DESIGN_V2.md` §3.2) — but a player who never happens to draw Grebs's or Kostyn's cards has no way to check their standing at all. | Low | They still fully drive effects underneath; this is a pure visibility gap, not a simulation gap. |
 | 9 | ~~The display-layer cut has not been owner-playtested~~ | Resolved | The owner played it and said "everything seems to run and look good," raising no density/tracking complaint. Treat the cut as sufficient; do not start the deeper data-model rewrite speculatively. If it resurfaces during Phase 2 playtesting, treat that as new information. |
@@ -1091,6 +1167,11 @@ still needs to be explicitly asked for, same as every other item below:
 ---
 
 ## 6. Recommended next task
+
+**Current (2026-09-22, later): get the owner's playtest of Phase 3 step 1
+(faction demands).** Fix whatever it turns up. Only after the owner
+approves it, and gives the go-ahead, start step 2 (character-initiated
+events, `docs/DESIGN_V2.md` §9). The history below is kept for context.
 
 **All of Phase 2 (§4.1–§4.5, every step) is built, playtested, and
 OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Owner,

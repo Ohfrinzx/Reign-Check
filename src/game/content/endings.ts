@@ -125,6 +125,32 @@ export const ENDINGS: EndingDef[] = [
   },
 ];
 
+/**
+ * Endings reached only when a faction's ultimatum runs out and its move
+ * against you succeeds (demands.ts → FACTION_MOVES in content/demands.ts).
+ * They have no `check`, so checkEndings() never picks them on its own.
+ * The Army, Money and Street moves reuse 'coup', 'elite' and 'revolution'
+ * from the list above; these two cover Security and Workers.
+ */
+export const DEMAND_ENDINGS: EndingDef[] = [
+  {
+    id: 'sable-removal',
+    title: 'THE SABLE OFFICE OPENED YOUR FILE',
+    kind: 'elite',
+    priority: 0,
+    epitaph: (s) =>
+      `There was no tank and no crowd. There was a folder, delivered to four ministers at the same time, and a phone call to the army asking it to stay in its barracks. It did.\n\nBy the evening the Council of the Republic had accepted your resignation. You had not written one. Somebody at the Sable Office had, and it was very well drafted.\n\n${s.day} days.`,
+  },
+  {
+    id: 'general-strike',
+    title: 'THE COUNTRY STOPPED WORKING',
+    kind: 'collapse',
+    priority: 0,
+    epitaph: (s) =>
+      `Hess called a general strike on a Monday. By Wednesday the trains, the mines, the ports and the power stations had stopped. By Friday the Council of the Republic had found someone the unions would talk to, and it was not you.\n\n${s.day} days.`,
+  },
+];
+
 const SURVIVAL: EndingDef = {
   id: 'survival',
   title: 'PARLIAMENT CONFIRMED YOU',
@@ -154,6 +180,13 @@ export function confidenceVoteFailure(s: GameState): EndingResult {
   const chosen = ENDINGS.find((e) => e.id === 'noConfidence');
   if (!chosen) throw new Error('noConfidence ending is not registered');
   return endingResult(chosen, s);
+}
+
+/** Fire a specific ending by id — used when a faction's move against you
+ *  succeeds (demands.ts). Looks in ENDINGS and DEMAND_ENDINGS. */
+export function forcedEnding(s: GameState, id: string): EndingResult | undefined {
+  const chosen = [...ENDINGS, ...DEMAND_ENDINGS].find((e) => e.id === id);
+  return chosen ? endingResult(chosen, s) : undefined;
 }
 
 function endingResult(chosen: EndingDef, s: GameState): EndingResult {

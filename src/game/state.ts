@@ -19,8 +19,10 @@ import { applyEffects } from './effects';
  *  7→8: runDeck/bannedCards, for the run deck (§4.4).
  *  8→9: unlockedShopItemIds, for meta-progression's real unlock conditions
  *  (§4.5 step 2). 9→10: confidenceVote plus the serialisable vote phase,
- *  for the act-boundary result reveal. */
-export const SAVE_VERSION = 10;
+ *  for the act-boundary result reveal. 10→11: FactionDemand's new shape
+ *  (issuedDay/bribes/bribeRefused, no stored text) plus demandNotices, for
+ *  Phase 3's faction demands. */
+export const SAVE_VERSION = 11;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather
@@ -204,6 +206,8 @@ export function createGame(opts: NewGameOptions = {}): GameState {
     runDeck: [],
     bannedCards: [],
     unlockedShopItemIds: opts.unlockedShopItemIds ?? SHOP_ITEMS.map((i) => i.id),
+
+    demandNotices: [],
 
     alertsToday: 0,
     lastAlertDay: 0,

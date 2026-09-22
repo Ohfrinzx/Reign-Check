@@ -95,12 +95,35 @@ export interface FactionState {
   revealed: number;   // 0..3 — how much of their hidden motive you've learned
 }
 
+/**
+ * A live faction demand (Phase 3 step 1). `id` is a DemandDef id in
+ * content/demands.ts — the words and prices live there, not in the save.
+ * Rules (issuing, escalating, meeting, bribing) live in demands.ts.
+ */
 export interface FactionDemand {
   id: string;
-  text: string;
+  issuedDay: number;
+  /** last day to act before it escalates (or, at ultimatum, runs out) */
   dueDay: number;
-  /** what happens if it lapses unanswered */
+  /** murmur → formal → ultimatum; each stage costs more to meet */
   severity: 'murmur' | 'formal' | 'ultimatum';
+  /** extensions successfully bribed so far — each makes the next one harder */
+  bribes: number;
+  /** a bribe was refused at the current stage; no second try until it escalates */
+  bribeRefused?: boolean;
+}
+
+/**
+ * Something about a demand the player has not acknowledged yet. The UI shows
+ * these one at a time as pop-ups; dismissDemandNotice() removes the first.
+ * `text` is only set for the kinds that have no live demand to read from.
+ */
+export interface DemandNotice {
+  faction: FactionId;
+  kind: 'issued' | 'escalated' | 'attemptFailed' | 'punished';
+  day: number;
+  title?: string;
+  text?: string;
 }
 
 /* ------------------------------------------------------------- characters */
@@ -537,6 +560,9 @@ export interface GameState {
 
   current?: PendingCard;
   lastOutcome?: CardOutcome & { cardTitle: string; optionLabel: string; deltas: Partial<Stats> };
+
+  /** Phase 3 step 1: demand pop-ups not yet dismissed, oldest first */
+  demandNotices: DemandNotice[];
 
   /** breaking-alert bookkeeping */
   alertsToday: number;

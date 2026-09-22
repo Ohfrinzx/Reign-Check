@@ -3,6 +3,8 @@ import { FACTIONS, FACTION_ORDER, CHARACTER_MAP } from './content/country';
 import { DISPLAY_FACTIONS } from './display';
 import { STAGE_META, lookupCard, alertPressure } from './engine';
 import { band } from './stats';
+import { DEMAND_MAP } from './content/demands';
+import { STAGE_LABEL } from './demands';
 
 export interface BriefingItem {
   kind: 'issue' | 'warning' | 'opportunity' | 'demand' | 'pending' | 'hint';
@@ -121,7 +123,18 @@ export function buildBriefing(s: GameState): Briefing {
     // display labels mix singular (Army, Security, Money) and collective
     // (Workers, Street) nouns, so a fixed verb reads wrong for half of them.
     const shortName = DISPLAY_FACTIONS.find((d) => d.id === id)?.label ?? def.name;
-    if (f.patience < 30) {
+    // A live demand replaces the vague "patience" line with the real ask.
+    // Kind 'issue' (front page only) rather than 'demand', so it does not
+    // repeat in the rail's threat cards — the Demands panel already has it.
+    const live = f.demand && DEMAND_MAP[f.demand.id];
+    if (f.demand && live) {
+      items.push({
+        kind: 'issue', source: shortName,
+        severity: f.demand.severity === 'ultimatum' ? 3 : f.demand.severity === 'formal' ? 2 : 1,
+        headline: `${STAGE_LABEL[f.demand.severity]}: ${live.title}`,
+        text: `${live.ask} Due by day ${f.demand.dueDay}. Open it from the Demands panel.`,
+      });
+    } else if (f.patience < 30) {
       items.push({
         kind: 'demand', source: shortName, severity: f.patience < 16 ? 3 : 2,
         headline: f.patience < 16 ? `${shortName}: out of patience` : `${shortName}: patience running out`,

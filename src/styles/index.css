@@ -1042,3 +1042,84 @@ abbr.term{
   .title-toolbar{justify-content:center}
   .title-screen .sheet{padding-inline:14px}
 }
+
+/* =========================================================================
+   FACTION DEMANDS (Phase 3 step 1) — Demands.tsx.
+   A light pop-up over the day (never the dark Back Room look), a rail
+   panel whose rows expand in place, and a masthead button with a count.
+   Everything needed to decide — price, odds, deadline, what protects you —
+   is plain text; nothing depends on hover (ground rule 11).
+   ========================================================================= */
+
+.masthead-right .btn-ghost.has-demands{color:var(--bar-text)}
+.mh-count{
+  display:inline-block;margin-left:6px;background:var(--red);color:var(--paper);
+  font-family:var(--sans);font-weight:800;font-size:9px;padding:1px 5px;letter-spacing:0;
+}
+
+.dm-row{border:2px solid var(--ink);border-left-width:6px;margin-bottom:8px;background:var(--paper)}
+.dm-row:last-child{margin-bottom:0}
+.dm-row.murmur{border-left-color:var(--mustard)}
+.dm-row.formal{border-left-color:var(--red)}
+.dm-row.ultimatum{border-left-color:var(--red-deep);background:var(--paper-2)}
+.dm-head{
+  all:unset;box-sizing:border-box;width:100%;cursor:pointer;padding:8px 10px;
+  display:flex;flex-wrap:wrap;gap:2px 8px;align-items:baseline;
+}
+.dm-head:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.dm-fac{font-family:var(--black);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.dm-stage{font-family:var(--sans);font-weight:800;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--red)}
+.dm-title{flex-basis:100%;font-family:var(--sans);font-weight:700;font-size:12px;line-height:1.3}
+.dm-due{flex-basis:100%;font-family:var(--mono);font-size:9.5px;color:var(--ash)}
+.dm-row .dm-detail{padding:0 10px 10px;border-top:1px dashed var(--hair)}
+
+.dm-detail{display:flex;flex-direction:column;gap:7px}
+.dm-from{font-family:var(--sans);font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ash);margin-top:8px}
+.dm-ask{font-family:var(--body);font-size:13.5px;line-height:1.5;margin:0}
+.dm-next{font-family:var(--sans);font-size:11.5px;line-height:1.4;font-weight:700}
+.dm-next.murmur{color:var(--ink-soft)}
+.dm-next.formal,.dm-next.ultimatum{color:var(--red-deep)}
+.dm-protect{font-family:var(--sans);font-size:11.5px;line-height:1.4;color:var(--ink-soft)}
+.dm-actions{display:flex;flex-direction:column;gap:9px;margin-top:3px}
+.dm-act{display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+.dm-act .btn{white-space:normal;text-align:left}
+.dm-hint{font-family:var(--sans);font-size:11px;line-height:1.35;color:var(--ink-soft)}
+.dm-block{font-family:var(--mono);font-size:10px;color:var(--red)}
+
+.demand-scrim{
+  position:fixed;inset:0;z-index:450;background:rgba(22,19,15,.45);
+  display:grid;place-items:start center;padding:max(6vh, 86px) 16px 30px;overflow-y:auto;
+  animation:scrimIn .2s ease both;
+}
+.demand-pop{
+  width:100%;max-width:620px;background:var(--paper);border:3px solid var(--ink);
+  box-shadow:8px 8px 0 rgba(22,19,15,.3);animation:rise .3s cubic-bezier(.2,.9,.25,1) both;
+}
+.dm-banner{
+  background:var(--ink);color:var(--paper);padding:9px 18px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;
+  font-family:var(--black);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+}
+.demand-pop.formal .dm-banner,.demand-pop.bad .dm-banner{background:var(--red)}
+.demand-pop.ultimatum .dm-banner{background:var(--red-deep)}
+.dm-banner-due{margin-left:auto;font-family:var(--mono);font-size:10px;letter-spacing:.02em;text-transform:none;opacity:.9}
+.dm-body{padding:14px 18px 6px}
+.dm-h{margin:0 0 4px;font-family:var(--head);font-size:24px;text-transform:uppercase;line-height:1.1}
+.demand-pop .dm-actions{flex-direction:row;flex-wrap:wrap;gap:14px}
+.demand-pop .dm-act{flex:1 1 220px}
+.dm-foot{padding:12px 18px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.dm-foot-note{font-family:var(--mono);font-size:10px;color:var(--ash)}
+@media(prefers-reduced-motion:reduce){
+  .demand-scrim,.demand-pop{animation:none}
+}
+
+/* The Demands button made the masthead one button wider. Below 1180px,
+   tighten the masthead so the act label stays on one line. (It was already
+   cramped near 1000px before this — the game is desktop-first; see
+   docs/DESIGN_V2.md §10 for the mobile plan.) */
+@media (max-width:1180px){
+  .masthead .id{padding:11px 12px}
+  .masthead .mid{padding-left:8px}
+  .masthead .mid .lbl{padding:9px 12px;white-space:nowrap;letter-spacing:.1em}
+  .masthead-right{gap:2px}
+  .masthead-right .btn{padding:6px 7px;letter-spacing:.06em}
+}

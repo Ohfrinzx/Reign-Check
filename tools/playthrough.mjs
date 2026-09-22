@@ -39,6 +39,12 @@ for (let step = 0; step < 90; step++) {
     await page.waitForTimeout(200);
     continue;
   }
+  // Phase 3 faction demands: a pop-up covers the day until it is closed.
+  if (await page.locator('.demand-pop').count()) {
+    await page.locator('.demand-pop .dm-foot .btn').first().click();
+    await page.waitForTimeout(90);
+    continue;
+  }
   // breaking alert
   if (await page.locator('.alert-scrim .alert-card .opt').count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-ALERT.png`), fullPage: true }); }
@@ -105,11 +111,16 @@ const saveRaw = await page.evaluate(() => localStorage.getItem('dictator-sandbox
 log.push('SAVE PRESENT: ' + (saveRaw ? saveRaw.length + ' bytes' : 'NO'));
 await page.reload({ waitUntil: 'networkidle' });
 const hasContinue = await page.locator('button:has-text("Continue — Day")').count();
+let resumedOk = false;
 log.push('CONTINUE BUTTON AFTER RELOAD: ' + hasContinue);
 if (hasContinue) {
   await page.click('button:has-text("Continue — Day")');
   await page.waitForTimeout(500);
-  log.push('RESUMED OK: ' + (await page.locator('.masthead .mid .lbl').count() ? 'yes' : 'no'));
+  // The Back Room is fullscreen with no masthead, so a run saved mid-shop
+  // resumes into .shop instead — both count as a successful resume.
+  const resumed = await page.locator('.masthead .mid .lbl, .shop').count() > 0;
+  log.push('RESUMED OK: ' + (resumed ? 'yes' : 'no'));
+  resumedOk = resumed;
   await page.screenshot({ path: shotPath('98-resumed.png'), fullPage: true });
 }
 
@@ -120,4 +131,7 @@ await browser.close();
 assert.equal(errors.length, 0, errors.join('\n'));
 assert.ok(saveRaw, 'No autosave');
 assert.ok(!log.some((l) => l.startsWith('STUCK')), 'Playthrough got stuck');
-if (JSON.parse(saveRaw).phase !== 'ended') assert.ok(hasContinue, 'Save could not resume');
+if (JSON.parse(saveRaw).phase !== 'ended') {
+  assert.ok(hasContinue, 'Save could not resume');
+  assert.ok(resumedOk, 'Resumed save did not show the game or the Back Room');
+}

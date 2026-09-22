@@ -16,6 +16,7 @@ import { computeBudget } from './economy';
 import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
 import { currentMandate, MANDATE_CARDS } from './content/mandates';
+import { tickDemands } from './demands';
 import type { ShopItemDef } from './content/shop';
 import {
   buyLimit, canCutNow, canFireNow, capBlockReason, cutCostOf, dailyFromOwned, fireCostOf,
@@ -284,6 +285,12 @@ function dayUpkeep(s: GameState, rng: Rng) {
     if (id === 'chorus' && s.hidden.unrest > 50) f.influence = clamp(f.influence + 0.8);
   }
 
+  // --- factions out of patience make demands, and act on ones that ran out
+  // (Phase 3 step 1 — rules in demands.ts, words in content/demands.ts).
+  // This can end the run: a successful move against you sets s.ending.
+  notes.push(...tickDemands(s, rng));
+  if (s.ending) return notes;
+
   // --- characters who are ignored and ambitious start doing things
   for (const c of Object.values(s.characters)) {
     if (!c.inPost || !c.alive) continue;
@@ -348,12 +355,20 @@ export function prepareDay(prev: GameState): GameState {
 
   withRng(s, (rng) => {
     const notes = dayUpkeep(s, rng);
-    s.agenda = buildAgenda(s, rng);
-    s.todayDeck = drawDeck(s, rng);
+    if (!s.ending) {
+      s.agenda = buildAgenda(s, rng);
+      s.todayDeck = drawDeck(s, rng);
+    }
     s.flags.__upkeepNotes = notes.length;
   });
 
   s.trend = diffStats(s.statsAtDayStart, s.stats);
+  // A faction's move against you (demands.ts) can end the run overnight.
+  if (s.ending) {
+    s.phase = 'ended';
+    s.demandNotices = [];
+    return s;
+  }
   s.phase = 'briefing';
   return s;
 }

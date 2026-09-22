@@ -33,7 +33,7 @@ await page.waitForSelector('.frontpage');
 await page.waitForTimeout(400);
 await page.screenshot({ path: shotPath('P-briefing.png'), fullPage: false });
 
-let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0, votes = 0;
+let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0, votes = 0, demandPops = 0, demandsMet = 0;
 for (let i = 0; i < 600; i++) {
   if (await page.locator('.ending-title').count()) break;
   if (await page.locator('.vote-screen').count()) {
@@ -44,6 +44,13 @@ for (let i = 0; i < 600; i++) {
     await page.locator('.vote-clerk.revealed').waitFor();
     if (votes === 1) await page.screenshot({ path: shotPath('P-vote-result.png') });
     await page.locator('.vote-actions .btn-primary').click();
+  } else if (await page.locator('.demand-pop').count()) {
+    // Phase 3 faction demands: meet it when affordable, otherwise put it off.
+    demandPops++;
+    if (demandPops === 1) { await page.waitForTimeout(400); await page.screenshot({ path: shotPath('P-demand.png') }); }
+    const meet = page.locator('.demand-pop .dm-act .btn-primary:not([disabled])');
+    if (await meet.count()) { demandsMet++; await meet.click(); }
+    else await page.locator('.demand-pop .dm-foot .btn').first().click();
   } else if (await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count()) {
     alerts++;
     if (alerts === 1) { await page.waitForTimeout(600); await page.screenshot({ path: shotPath('P-alert.png') }); }
@@ -83,7 +90,7 @@ for (let i = 0; i < 600; i++) {
   } else break;
   await page.waitForTimeout(45);
 }
-notes.push(`days=${days} cards=${cards} alerts=${alerts} votes=${votes} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys}`);
+notes.push(`days=${days} cards=${cards} alerts=${alerts} votes=${votes} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys} demandPopups=${demandPops} demandsMet=${demandsMet}`);
 
 if (await page.locator('.ending-title').count()) {
   notes.push('ENDING: ' + await page.locator('.ending-title').innerText());

@@ -4,14 +4,21 @@ import { buildThreats } from '../../game/briefing';
 import { fill } from '../../game/text';
 import { Glossed } from './Prose';
 import { Pocket } from '../screens/Shop';
+import { DemandsPanel } from './Demands';
+import type { DemandActions } from './Demands';
 /**
- * The right-hand rail: Files (factions), On Your Desk (threats), Diary.
+ * The right-hand rail: Files (factions), Demands (Phase 3), On Your Desk
+ * (threats), Diary.
  *
  * Deliberately NOT tabbed. The whole point of the desk design is that
  * nothing is hidden behind a click — everything that matters has one fixed,
  * always-visible place. See docs/DESIGN_V2.md.
  */
-export function Rail({ s, onUseFavour }: { s: GameState; onUseFavour: (id: string) => void }) {
+export function Rail({ s, onUseFavour, demandActions }: {
+  s: GameState;
+  onUseFavour: (id: string) => void;
+  demandActions: DemandActions;
+}) {
   const threats = buildThreats(s, 3);
   const diary = s.scheduled.filter((d) => d.visible).slice(0, 5);
 
@@ -34,6 +41,8 @@ export function Rail({ s, onUseFavour }: { s: GameState; onUseFavour: (id: strin
           );
         })}
       </div>
+
+      <DemandsPanel s={s} actions={demandActions} />
 
       <div className="panel">
         <h3>On your desk {threats.length > 0 && <span>{threats.length}</span>}</h3>
