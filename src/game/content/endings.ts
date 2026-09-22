@@ -129,7 +129,7 @@ export const ENDINGS: EndingDef[] = [
  * Endings reached only when a faction's ultimatum runs out and its move
  * against you succeeds (demands.ts → FACTION_MOVES in content/demands.ts).
  * They have no `check`, so checkEndings() never picks them on its own.
- * The Army, Money and Street moves reuse 'coup', 'elite' and 'revolution'
+ * The Army, Elites and Street moves reuse 'coup', 'elite' and 'revolution'
  * from the list above; these two cover Security and Workers.
  */
 export const DEMAND_ENDINGS: EndingDef[] = [
@@ -269,7 +269,7 @@ function verdict(s: GameState): string {
   // faction colour
   const loved = FACTION_ORDER.filter((f) => s.factions[f].loyalty > 74);
   const hated = FACTION_ORDER.filter((f) => s.factions[f].loyalty < 16);
-  // Use the same short labels the rest of the UI shows (Army, Security, Money,
+  // Use the same short labels the rest of the UI shows (Army, Security, Elites,
   // Workers, Street), not the internal faction record names, so the epitaph
   // never names a group the player has not seen called that anywhere else.
   const fname = (id: (typeof FACTION_ORDER)[number]) =>

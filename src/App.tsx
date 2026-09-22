@@ -24,10 +24,10 @@ import { IntroScreen } from './ui/screens/Intro';
 import { ManageScreen } from './ui/screens/Manage';
 import { ProgressScreen } from './ui/screens/Progress';
 import { ConfidenceVoteScreen } from './ui/screens/Vote';
-import { DemandPopup, DemandsScreen } from './ui/components/Demands';
+import { DemandPopup } from './ui/components/Demands';
 import type { DemandActions } from './ui/components/Demands';
 import {
-  bribeDemand, canActOnDemands, dismissDemandNotice, factionLabel, liveDemands, meetDemand,
+  bribeDemand, canActOnDemands, dismissDemandNotice, factionLabel, meetDemand,
 } from './game/demands';
 import type { FactionId } from './game/types';
 
@@ -42,7 +42,6 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
-  const [showDemands, setShowDemands] = useState(false);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -105,7 +104,6 @@ export default function App() {
     setScreen('game');
     setShowIntro(true);
     setShowManage(false);
-    setShowDemands(false);
     setFlash({});
   }, [name, honorific, mandateId, legacy]);
 
@@ -205,7 +203,7 @@ export default function App() {
     setGame((g) => {
       if (!g) return g;
       const next = meetDemand(g, f);
-      if (!next.factions[f].demand && g.factions[f].demand) say(`Demand met. The ${factionLabel(f)} is satisfied, for now.`);
+      if (!next.factions[f].demand && g.factions[f].demand) say(`Demand met. The ${factionLabel(f)} will back off, for now.`);
       return next;
     });
   }, [say]);
@@ -232,11 +230,11 @@ export default function App() {
   // and nothing else is covering the screen.
   const notice = game?.demandNotices[0];
   const popupOpen = !!(game && notice && screen === 'game' && canActOnDemands(game) &&
-    !showIntro && !showManage && !showDemands);
+    !showIntro && !showManage);
 
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game || showIntro || showManage || showDemands || popupOpen) return;
+    if (screen !== 'game' || !game || showIntro || showManage || popupOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -267,7 +265,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, showDemands, popupOpen]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -342,9 +340,6 @@ export default function App() {
         <div className="masthead-right">
           <button className="btn btn-ghost" onClick={() => setShowIntro(true)} title="Who you are, how this works, how you lose">
             Brief me
-          </button>
-          <button className={`btn btn-ghost ${liveDemands(game).length ? 'has-demands' : ''}`} onClick={() => setShowDemands(true)} title="What the factions are demanding from you">
-            Demands{liveDemands(game).length > 0 && <span className="mh-count">{liveDemands(game).length}</span>}
           </button>
           <button className="btn btn-ghost" onClick={() => setShowManage(true)} title="Everyone you've hired, everything you've arranged">
             Advisors &amp; Deals
@@ -436,10 +431,6 @@ export default function App() {
 
       {popupOpen && notice && (
         <DemandPopup s={game} notice={notice} actions={demandActions} onDismiss={doDismissNotice} />
-      )}
-
-      {showDemands && (
-        <DemandsScreen s={game} actions={demandActions} onClose={() => setShowDemands(false)} />
       )}
 
       {showManage && (

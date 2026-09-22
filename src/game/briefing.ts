@@ -5,6 +5,7 @@ import { STAGE_META, lookupCard, alertPressure } from './engine';
 import { band } from './stats';
 import { DEMAND_MAP } from './content/demands';
 import { STAGE_LABEL } from './demands';
+import { characterWarnings } from './characterEvents';
 
 export interface BriefingItem {
   kind: 'issue' | 'warning' | 'opportunity' | 'demand' | 'pending' | 'hint';
@@ -120,7 +121,7 @@ export function buildBriefing(s: GameState): Briefing {
     const f = s.factions[id];
     const def = FACTIONS[id];
     // Colon form deliberately, not "X is/are out of patience": the short
-    // display labels mix singular (Army, Security, Money) and collective
+    // display labels mix singular (Army, Security) and plural/collective (Elites,
     // (Workers, Street) nouns, so a fixed verb reads wrong for half of them.
     const shortName = DISPLAY_FACTIONS.find((d) => d.id === id)?.label ?? def.name;
     // A live demand replaces the vague "patience" line with the real ask.
@@ -147,6 +148,17 @@ export function buildBriefing(s: GameState): Briefing {
         text: `Support is ${band(f.loyalty)}. ${def.threat}`,
       });
     }
+  }
+
+  /* --- characters losing faith in you (Phase 3 step 2). Plain words only;
+   * a character's betrayal can never arrive the same morning this first shows. */
+  for (const w of characterWarnings(s)) {
+    const name = CHARACTER_MAP[w.character]?.name ?? w.character;
+    items.push({
+      kind: 'warning', source: name, severity: w.turning ? 2 : 1,
+      headline: w.turning ? `${name} may act on their own` : `${name} is losing faith in you`,
+      text: w.text,
+    });
   }
 
   /* --- intelligence warnings derived from hidden state */

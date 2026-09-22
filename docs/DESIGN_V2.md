@@ -141,7 +141,8 @@ replaced. **LEGITIMACY 0** = the street removes you. **MONEY deeply negative**
 ### 3.2 Factions: 7 → 5, one number each — IMPLEMENTED
 
 Built in `src/game/display.ts::DISPLAY_FACTIONS` + `factionMood()`. **Army ·
-Security · Money · Workers · Street.** One faction record (`staff`, `sable`,
+Security · Money · Workers · Street.** *(2026-09-22: "Money" was renamed
+"Elites" at the owner's request — see Phase 3 step 1.)* One faction record (`staff`, `sable`,
 `concord`, `combine`, `chorus`) each. Shown as the existing 0–100 `loyalty`
 value mapped to a five-tier mood word per faction (e.g. Army: devoted /
 backing you / uneasy / hostile / ready to move) — not a new −100..+100 scale;
@@ -1165,6 +1166,9 @@ Everything here is genuinely deferred (needs an explicit go-ahead per
 2. **Character-driven events** (Milestone 3). Spawn a card when a
    character's `plotting` crosses a threshold. The data is already tracked;
    this is new spawn logic plus new cards.
+   **BUILT 2026-09-22, AWAITING PLAYTEST — see "Phase 3 step 2, as built"
+   below.** Triggered mainly by loyalty, not plotting alone (measured:
+   plotting barely moves for most characters).
 3. **Crisis chains** (Milestone 4). Multi-card escalating sequences — this
    pairs naturally with the act structure from §4.1 (a chain could span an
    act) and is worth revisiting with that structure in hand rather than
@@ -1207,11 +1211,11 @@ attempts, depending on standing with the faction and other conditions.
 
 **Defence per faction** (what the pop-up lists as "What protects you"):
 Army — Security's support, the security services, legitimacy. Security —
-the Army's support, power, information. Money — the elite, the economy,
+the Army's support, power, information. Elites — the elite, the economy,
 legitimacy. Workers — public support, stability, the Street's support.
 Street — the security services, Security's support, public support.
 
-**Endings:** Army → `coup`, Money → `elite`, Street → `revolution` (all
+**Endings:** Army → `coup`, Elites → `elite`, Street → `revolution` (all
 existing); Security → `sable-removal` and Workers → `general-strike` (new,
 never picked by `checkEndings()` on their own).
 
@@ -1222,6 +1226,49 @@ rail is hidden below 1080px. Nothing depends on hover.
 
 **Measured balance (not tuned):** always-first-option play 100% → 90%
 survival; random and always-last barely moved. Tuning belongs to step 4.
+
+**Owner changes after approval (2026-09-22):** the masthead "Demands"
+button was removed (pop-up + rail panel only), and the `concord` faction's
+display label changed from "Money" to **"Elites"** — "Money demands" read
+wrongly; "Money" now only ever means the treasury.
+
+### Phase 3 step 2, as built — character-driven events (2026-09-22)
+
+**Owner decisions:** events arrive as cards in the day, but with **their
+own design and layout** (the owner wants variety between ordinary cards,
+these, and future mini-games); both **betrayals and offers**; betrayals
+**never end the run directly**.
+
+**Why loyalty instead of plotting:** over 120 simulated runs per play
+style, `plotting` rose past 40 for only Adamek and Kostyn; every
+character's loyalty swung widely (e.g. Piek below 30 in ~60% of random
+runs; Hess above 72 in every always-first run). So the trigger is mostly
+loyalty, with plotting and grievances as extra routes in:
+
+| State | Rule | Effect |
+|---|---|---|
+| Wavering | loyalty < 40, or plotting ≥ 40, or 2+ grievances and loyalty < 55 | Front-page warning in plain words; day recorded |
+| Turning | loyalty < 30, or plotting ≥ 55, or 2+ grievances and loyalty < 45 | Betrayal card queued — only on a morning after the first warning |
+| Devoted | loyalty ≥ 72 and plotting < 30 | Offer card queued |
+
+One event per day at most, never two days running, none before day 3,
+each card once per run, only for characters in post. Betrayals first
+(least loyal first), otherwise one devoted character's offer (saved RNG).
+
+**Content:** 13 characters × (warning + betrayal + offer) = 26 cards in
+`content/characterEvents.ts`. Betrayal replies: confront, buy back,
+remove/arrest/sack, or let it go (which raises that character's pressure:
+coup for Varkov/Tern, leaks/scandal for Sarran/Doran/Loz, separatism for
+Kostyn/Vask, unrest for Vel/Hess, foreign/fiscal for Brask/Piek, power for
+Grebs, unrest for Adamek). Offers always carry a catch.
+
+**Presentation:** `CharacterCardView` — a light "private file": manila tab
+with a rotated stamp, portrait column in the character's accent colour
+with where they stand in words, a typewriter memo body, and reply slips
+in a two-column grid. Same `.doc`/`h1`/`.opt` hooks as ordinary cards.
+
+**Measured (not tuned):** ~4 events per run (random), ~5 (always-first,
+mostly offers), ~2 (always-last, mostly betrayals); first around day 4–5.
 
 ### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
 

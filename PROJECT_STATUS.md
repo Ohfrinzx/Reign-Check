@@ -1,6 +1,70 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
+## ▶ WHERE WE STOPPED — 2026-09-22, latest (PHASE 3 STEP 2: CHARACTER-DRIVEN EVENTS — BUILT, AWAITING PLAYTEST)
+
+**Step 1 (faction demands) is owner-approved** — see the block below. The
+owner then said *"go ahead and move forward"*, and answered three design
+questions for step 2:
+- **Delivery:** *"just like the cards during the day. But with a different
+  design and layout. I want there to be some variety between the cards and
+  mini-games when we add them to reduce visual and gameplay redundancy."*
+- **Scope:** betrayals **and** offers.
+- **Endings:** a betrayal never ends the run by itself; only indirectly,
+  through the existing pressures.
+
+Mid-build, the owner also asked for two changes to step 1: *"No need to
+have the demands tab at the top. and change the money factions name to
+'Elites' or 'The Elites' depending on the context. Wording like 'Money
+demands' doesn't make sense."* Both are done.
+
+**What was built:**
+- **Rules** — `src/game/characterEvents.ts` (no React). A character who
+  starts losing faith (loyalty below 40, or rising plotting/grievances)
+  gets a **front-page warning** in plain words. If they keep sliding
+  (loyalty below 30, or more plotting/grievances), their **betrayal** card
+  arrives on a later morning — never the same morning as the first
+  warning. A character who is devoted to you (loyalty 72+) brings an
+  **offer** instead. At most one per day, never two days running, none
+  before day 3, each card once per run, only for characters still in post.
+- **Why loyalty, not plotting:** measured over 120 simulated runs per play
+  style, plotting only ever rises for Adamek (sometimes Kostyn); loyalty
+  swings for everyone. The design doc's "plotting crosses a threshold" idea
+  would have produced almost nothing but Adamek events.
+- **Content** — `src/game/content/characterEvents.ts`: all 13 characters,
+  each with a warning line, a betrayal (3–4 replies: confront, buy back,
+  remove/arrest/sack, let it go) and an offer (3 replies, always with a
+  catch). 26 cards. Betrayals raise existing pressures (coup, leaks,
+  scandal, unrest, separatism…) and never end the run directly.
+- **Look** — `CharacterCardView` in `CardView.tsx`: a light "private file"
+  with a manila tab and stamp ("Acted alone" / "An offer"), a portrait
+  column in the character's colour with where they stand in words, a typed
+  memo, and reply slips side by side. Keyboard shortcuts still work.
+- **Step 1 changes** — the masthead **Demands** button is removed (demands
+  live in the pop-up and the rail panel only; below 1080px the pop-up is
+  the only view); the **Money faction now reads "Elites"** everywhere it is
+  shown ("the Elites" in sentences; the pop-up now says "A request from the
+  Elites"). "Money" on the masthead ledger is still the treasury.
+- **Save:** no `GameState` shape change — **`SAVE_VERSION` stays 11**, so
+  an in-progress run from step 1 carries over.
+
+**Measured (not tuned):** about 4 character events per run with random
+play (1.9 betrayals, 2.0 offers), about 5 with always-first (mostly
+offers — generous play earns loyalty), about 2 with always-last (mostly
+betrayals); at least one in 97–100% of runs, the first around day 4–5.
+Balance-probe survival barely moved (always-first 90% → 92%).
+
+**Verification:** 129/129 tests (6 new in `characterEvents.test.ts`),
+production build clean, and the full browser suite at 1366×700 with zero
+page errors, including new `tools/characters.mjs` (warning first, the
+betrayal the next morning in the private-file layout, side-by-side replies,
+keyboard choice removes Piek, offer styling, Elites label) and an updated
+`tools/demands.mjs` (no masthead button; the pop-up works at 1000px).
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-22, later (PHASE 3 STEP 1: FACTION DEMANDS — BUILT, AWAITING PLAYTEST)
 
 **UPDATE (same day): step 1 is PLAYTESTED AND OWNER-APPROVED.** Owner,
@@ -1178,10 +1242,10 @@ still needs to be explicitly asked for, same as every other item below:
 
 ## 6. Recommended next task
 
-**Current (2026-09-22, later): get the owner's playtest of Phase 3 step 1
-(faction demands).** Fix whatever it turns up. Only after the owner
-approves it, and gives the go-ahead, start step 2 (character-initiated
-events, `docs/DESIGN_V2.md` §9). The history below is kept for context.
+**Current (2026-09-22, latest): get the owner's playtest of Phase 3 step 2
+(character-driven events) and the two step-1 changes.** Fix whatever it
+turns up. Only after approval and a go-ahead, start step 3 (crisis chains,
+`docs/DESIGN_V2.md` §9). The history below is kept for context.
 
 **All of Phase 2 (§4.1–§4.5, every step) is built, playtested, and
 OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Owner,

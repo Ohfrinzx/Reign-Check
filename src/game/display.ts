@@ -94,7 +94,7 @@ export interface DisplayFactionDef {
 export const DISPLAY_FACTIONS: DisplayFactionDef[] = [
   { id: 'staff',   label: 'Army',     icon: '★', moods: ['devoted', 'backing you', 'uneasy', 'hostile', 'ready to move'] },
   { id: 'sable',   label: 'Security', icon: '◈', moods: ['loyal', 'watchful', 'guarded', 'suspicious', 'turning on you'] },
-  { id: 'concord', label: 'Money',    icon: '◆', moods: ['invested', 'content', 'wary', 'pulling out', 'hostile'] },
+  { id: 'concord', label: 'Elites',   icon: '◆', moods: ['invested', 'content', 'wary', 'pulling out', 'hostile'] },
   { id: 'combine', label: 'Workers',  icon: '⚒', moods: ['on side', 'calm', 'restless', 'angry', 'ready to strike'] },
   { id: 'chorus',  label: 'Street',   icon: '◎', moods: ['warm', 'quiet', 'restless', 'furious', 'in the square'] },
 ];

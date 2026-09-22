@@ -40,6 +40,25 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
+**2026-09-22 (latest) — PHASE 3 STEP 2, CHARACTER-DRIVEN EVENTS: BUILT,
+AWAITING OWNER PLAYTEST.** Owner decisions: events arrive as ordinary
+cards in the day **but with their own design and layout** (the owner wants
+visual and gameplay variety between ordinary cards, these, and future
+mini-games); both **betrayals and offers**; a betrayal **never ends the run
+by itself**. Rules in `src/game/characterEvents.ts`, 26 cards (a betrayal
+and an offer for each of the 13 characters, plus a front-page warning line
+each) in `src/game/content/characterEvents.ts`, drawn by
+`CharacterCardView` in `CardView.tsx` as a "private file". Triggered by
+**loyalty** (plus plotting and grievances), not plotting alone — measured,
+plotting only ever rises for one or two characters. A warning always shows
+at least one morning before a betrayal. No `GameState` shape change, so
+`SAVE_VERSION` stays **11**. Two owner-requested changes to step 1 shipped
+with it: the masthead **Demands button is gone** (demands live in the
+pop-up and the rail panel only), and the **"Money" faction is now labelled
+"Elites"** ("the Elites" in sentences) — "Money" still means the treasury
+resource. 129 tests, build, and the full browser suite (new
+`tools/characters.mjs`) pass. See §17.
+
 **UPDATE (same day): step 1 is PLAYTESTED AND OWNER-APPROVED.** Owner,
 verbatim: *"Ready all works. demands seemed relatively rare not sure if this
 is normal? This can be adjusted in the balancing phase so go ahead and move
@@ -59,15 +78,15 @@ and an unmet demand **can lead to a coup or another attempt at removal,
 depending on standing with that faction and other conditions.** Rules in
 `src/game/demands.ts`, words in `src/game/content/demands.ts` (10 demands,
 2 per visible faction, plus one "move" per faction), UI in
-`src/ui/components/Demands.tsx` (pop-up, rail "Demands" panel, masthead
-"Demands" button that opens the same list — the rail is hidden below
-1080px). Two new endings (`sable-removal`, `general-strike`); Army, Money
+`src/ui/components/Demands.tsx` (pop-up and rail "Demands" panel; a
+masthead "Demands" button was later removed at the owner's request). Two
+new endings (`sable-removal`, `general-strike`); Army, Elites
 and Street moves reuse `coup`, `elite` and `revolution`. `SAVE_VERSION` is
 **11**, so in-progress runs reset; meta history is unaffected. 123 tests,
 production build, and the full browser suite (including new
 `tools/demands.mjs`) pass. Balance was measured, not tuned: see §16.
-Phase 3 steps 2–4 (character events, crisis chains, balance pass) are not
-started and each needs its own go-ahead.
+Step 2 (character events) has since been built — see above. Steps 3–4
+(crisis chains, balance pass) are not started; each needs its own go-ahead.
 
 **2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
@@ -161,9 +180,9 @@ is the first thing to check at the start of any session.
 
 **What is deliberately NOT built**, and needs an explicit owner go-ahead
 before starting (full detail in `docs/DESIGN_V2.md` §9): the rest of
-Phase 3 — character-initiated events, crisis chains, and a balance pass
-(faction demands, step 1, is built and awaiting playtest; each later step
-still gets its own go-ahead); mobile/iOS (Phase 4, not scheduled — see §10 for the
+Phase 3 — crisis chains and a balance pass (step 1, faction demands, is
+owner-approved; step 2, character events, is built and awaiting playtest;
+each later step still gets its own go-ahead); mobile/iOS (Phase 4, not scheduled — see §10 for the
 guardrails to keep it possible without doing the work now); mini-games,
 sound, and remaining ending types (Phase 5).
 
@@ -298,7 +317,8 @@ npm test           # vitest: content integrity, 200 full simulated runs,
                    #   deals, caps), mandates, the run deck (§4.4),
                    #   meta-progression (§4.5, record + real unlock gating),
                    #   the confidence-vote reveal, and faction demands
-                   #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse)
+                   #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse),
+                   #   and character events (step 2: warn/betray/offer)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -315,7 +335,10 @@ node tools/legacy.mjs        # §4.5 step 1: ending → title, checks the record
                              # (seeds unlock history, checks both Unlocks
                              # access points and the filtered mandate picker)
 node tools/demands.mjs       # Phase 3 step 1: demand pop-up, rail panel,
-                             # meet, bribe, lapse pop-up, masthead access <1080px
+                             # meet, bribe, lapse pop-up, no masthead button,
+                             # pop-up still works <1080px (rail hidden)
+node tools/characters.mjs    # Phase 3 step 2: warning first, private-file
+                             # betrayal card, reply slips, keyboard, offer
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -350,6 +373,9 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe — THIS
                            run's save; separate from meta.ts's cross-run one
+  characterEvents.ts      PHASE 3 CHARACTER EVENTS — warnings, betrayals,
+                           offers (tickCharacterEvents() runs in dayUpkeep()).
+                           Cards live in content/characterEvents.ts
   demands.ts              PHASE 3 FACTION DEMANDS — issuing, escalation,
                            meet/bribe, what a faction does when an ultimatum
                            runs out (tickDemands() runs in dayUpkeep()).
@@ -361,6 +387,9 @@ src/game/                 no React, no DOM, fully testable
                            data — a new locked mandate/item is a one-line
                            addition here, nowhere else)
   content/mandates.ts      six origins, generic rule data, Stairwell card
+  content/characterEvents.ts  Phase 3 step 2: CHARACTER_EVENTS — per
+                           character a warning line, a betrayal card and an
+                           offer card (26 cards)
   content/demands.ts       Phase 3: DEMANDS (10, 2 per visible faction) and
                            FACTION_MOVES (per-faction removal attempt,
                            failure and punishment text/effects)
@@ -375,10 +404,11 @@ src/ui/
     Ledger.tsx             the masthead's 3-resource ledger
     Rail.tsx                Files / Demands / On your desk / Diary /
                             Standing costs — NOT tabbed, everything visible
-    Demands.tsx             Phase 3: demand pop-up (DemandPopup), the rail
-                            panel (DemandsPanel, rows expand in place) and
-                            the masthead overlay (DemandsScreen)
-    CardView.tsx             the doc — card-as-lead-story + decision box
+    Demands.tsx             Phase 3: demand pop-up (DemandPopup) and the rail
+                            panel (DemandsPanel, rows expand in place)
+    CardView.tsx             the doc — card-as-lead-story + decision box;
+                            CharacterCardView, the "private file" layout for
+                            character events (Phase 3 step 2)
     Prose.tsx               renders card text, applies the glossary
   screens/
     Screens.tsx             Title (incl. TitleRecord — §4.5's cross-run
@@ -425,6 +455,15 @@ tools/                     Playwright scripts; run-browser.mjs starts Vite
   only way out** — there is no `.strap-action` during the shop phase. Any
   tooling that drives the shop needs to check `.shop-foot .btn-primary`
   first, not `.strap-action`.
+- **The "Money" faction is labelled "Elites"** (owner request; `concord`'s
+  label in `DISPLAY_FACTIONS`). Write "the Elites" in sentences. "Money"
+  on the masthead ledger is the treasury resource, a different thing.
+- **There is no masthead Demands button** (owner removed it). Demands live
+  in the pop-up and the rail's Demands panel only; below 1080px, where the
+  rail is hidden, the pop-up is the only view.
+- **Character-event cards use their own layout** (`CharacterCardView`), not
+  the lead-story `.doc` header. Keep it visually distinct; the owner wants
+  variety between card types and future mini-games.
 - **Demand pop-ups cover the day until closed** (`.demand-scrim`). Any
   tooling that walks through days must close `.demand-pop` first (its
   `.dm-foot .btn`) — `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` and
@@ -638,7 +677,7 @@ don't leave it to "whoever reads this next." Specifically:
   no attempt applies `punishEffects`. The player sees `protectedBy` and a
   plain danger sentence (`dangerWord()`) on any ultimatum.
 - **Endings:** `sable-removal` and `general-strike` are new, in
-  `DEMAND_ENDINGS` (no `check`, never auto-picked). Army/Money/Street reuse
+  `DEMAND_ENDINGS` (no `check`, never auto-picked). Army/Elites/Street reuse
   `coup`/`elite`/`revolution`. `prepareDay()` sets phase `ended` if the
   upkeep ended the run.
 - **State:** `FactionDemand` now stores only ids/numbers (`id`,
@@ -665,3 +704,44 @@ don't leave it to "whoever reads this next." Specifically:
   `__forceEnding`/`__ending:<id>` flags that nothing reads, so a card
   cannot currently force an ending that way (no content uses it). The
   demand system does not rely on it — it calls `forcedEnding()` directly.
+
+## 17. Character-driven events slice notes (Phase 3 step 2, 2026-09-22)
+
+- **Triggers** (`characterEvents.ts`): *wavering* = loyalty < 40, or
+  plotting ≥ 40, or 2+ grievances (negative memories) with loyalty < 55.
+  *Turning* = loyalty < 30, or plotting ≥ 55, or 2+ grievances with
+  loyalty < 45. *Devoted* = loyalty ≥ 72 and plotting < 30. Loyalty is the
+  main signal on purpose: measured over 120 simulated runs per play style,
+  `plotting` only rises for Adamek (and sometimes Kostyn), while every
+  character's loyalty swings.
+- **Warning first, always.** The first morning a character wavers,
+  `flags['charWarned:<id>']` records the day and the front page / desk
+  shows their `warning` line ("<Name> is losing faith in you", or "… may
+  act on their own" once turning). A betrayal is only queued on a LATER
+  morning than the first warning, so the player always gets a day to react.
+- **Delivery:** `tickCharacterEvents()` runs in `dayUpkeep()` and pushes
+  the card into `s.queued` for today; `drawDeck()` (right after) puts
+  queued cards first, so the event is normally the day's first card. At
+  most one character event per day, never two days running
+  (`flags.charEventLast`), none before day 3, only for characters alive
+  and in post, each card once per run (`once: true`, plus
+  `flags['charQueued:<card>']`). Betrayals take priority (least loyal
+  first); otherwise one devoted character's offer, picked with the saved RNG.
+- **Cards** are `base: 0, weight: () => 0` — never drawn at random — and
+  tagged `character-event` + `betrayal`/`offer`. That tag is what switches
+  `CardView` to `CharacterCardView`: a light "private file" with a manila
+  tab and stamp ("Acted alone" / "An offer"), a portrait column in the
+  character's accent colour with where they stand in words (never the
+  number, ground rule 6), a typed memo body and side-by-side reply slips.
+  It keeps the `.doc`, `h1` and `.opt` hooks, so keyboard shortcuts and the
+  browser tools work unchanged. **Future mini-games should get their own
+  look too** (owner's stated goal: variety, less visual redundancy).
+- **No direct endings** (owner decision). Betrayal outcomes push the
+  existing pressures (coup, leak, scandal, unrest, separatism, foreign,
+  fiscal). "Remove/arrest/sack" options use `removeFromPost`.
+- **Adding one** is content only: add the character to `CHARACTER_EVENTS`
+  (a test checks every character in `country.ts` has an entry).
+- **Measured frequency (not tuned):** ~4 events per run with random play
+  (1.9 betrayals, 2.0 offers), ~5 with always-first (mostly offers), ~2
+  with always-last (mostly betrayals); at least one in 97–100% of runs,
+  first one around day 4–5. Balance probe survival barely moved.

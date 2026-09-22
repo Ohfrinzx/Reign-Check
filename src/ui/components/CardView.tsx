@@ -17,6 +17,9 @@ export function CardView({
   onChoose: (optionId: string) => void;
   alert?: boolean;
 }) {
+  if (card.tags?.includes('character-event') && card.actor && CHARACTER_MAP[card.actor]) {
+    return <CharacterCardView s={s} card={card} onChoose={onChoose} />;
+  }
   const actor = card.actor ? CHARACTER_MAP[card.actor] : undefined;
   const faction = card.faction ? FACTIONS[card.faction] : undefined;
   const cat = (card.category ?? 'decision') as CardCategory;
@@ -68,6 +71,100 @@ export function CardView({
               </button>
             );
           })}
+        </div>
+        {glossaryTerms.length > 0 && (
+          <div className="card-glossary">
+            {glossaryTerms.map((t) => (
+              <span key={t.term}><b>{t.term}</b>: {t.def}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Where a character stands with you, in words — never the number (ground rule 6). */
+function standing(loyalty: number): { word: string; tone: 'good' | 'ok' | 'warn' | 'bad' } {
+  if (loyalty >= 72) return { word: 'devoted to you', tone: 'good' };
+  if (loyalty >= 55) return { word: 'on your side', tone: 'good' };
+  if (loyalty >= 40) return { word: 'undecided', tone: 'ok' };
+  if (loyalty >= 30) return { word: 'losing faith', tone: 'warn' };
+  return { word: 'against you', tone: 'bad' };
+}
+
+/**
+ * PHASE 3 STEP 2 — a character-driven event, drawn as a PRIVATE FILE rather
+ * than the day's lead story (owner request: these should look and read
+ * differently from ordinary cards, and later mini-games will get their own
+ * looks too). Portrait column + typed memo + response slips side by side.
+ *
+ * Keeps the `.doc`, `h1` and `.opt` hooks the browser tools and keyboard
+ * shortcuts rely on; everything visual is overridden under `.char-card`.
+ */
+function CharacterCardView({
+  s, card, onChoose,
+}: {
+  s: GameState;
+  card: CardDef | AlertDef;
+  onChoose: (optionId: string) => void;
+}) {
+  const actor = CHARACTER_MAP[card.actor!];
+  const who = s.characters[actor.id];
+  const kind = card.tags?.includes('betrayal') ? 'betrayal' : 'offer';
+  const stand = standing(who?.loyalty ?? 50);
+  const glossaryTerms = termsIn([
+    fill(card.body, s),
+    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+  ]);
+
+  return (
+    <div className="doc-wrap">
+      <div
+        className={`doc char-card ${kind}`}
+        key={card.id}
+        style={{ ['--acc' as string]: actor.accent }}
+      >
+        <div className="cc-tab">
+          <span>Private file &middot; {actor.name}</span>
+          <span className="cc-stamp">{kind === 'betrayal' ? 'Acted alone' : 'An offer'}</span>
+        </div>
+        <div className="cc-grid">
+          <aside className="cc-who">
+            <div className="cc-portrait" aria-hidden="true">{actor.portrait}</div>
+            <div className="cc-name">{actor.name}</div>
+            <div className="cc-title">{actor.title}</div>
+            <div className="cc-stand">
+              Where they stand: <b className={`tone-${stand.tone}`}>{stand.word}</b>
+            </div>
+            <div className="cc-why">{actor.why}</div>
+          </aside>
+          <div className="cc-memo">
+            <div className="cc-kicker">
+              {kind === 'betrayal' ? `${actor.name.split(' ')[0]} did this without asking you` : `${actor.name.split(' ')[0]} came to you with this`}
+            </div>
+            <h1>{card.title}</h1>
+            <Prose text={fill(card.body, s)} />
+            <div className="cc-quirk">Known for: {actor.quirk}</div>
+          </div>
+        </div>
+        <div className="cc-replies">
+          <div className="cc-replies-h">Your reply</div>
+          <div className="cc-slips">
+            {card.options.map((o, i) => {
+              const locked = o.enabled ? !o.enabled(s) : false;
+              return (
+                <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>
+                  <span className="n">{i + 1}</span>
+                  <span className="body">
+                    <span className="lab">{fill(o.label, s)}</span>
+                    {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
+                    {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
         {glossaryTerms.length > 0 && (
           <div className="card-glossary">

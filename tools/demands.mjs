@@ -6,8 +6,8 @@ import { launchBrowser, shotPath } from './browser.mjs';
  * the pop-up appears on the morning a demand is issued, "Deal with it
  * later" keeps it in the rail's Demands panel, rows expand, Meet pays and
  * clears it, a bribe is either taken or refused (never both), a lapsed
- * ultimatum shows its outcome pop-up, and below 1080px (no rail) the
- * masthead's Demands button still reaches everything.
+ * ultimatum shows its outcome pop-up, there is no masthead Demands button
+ * (owner request), and below 1080px (no rail) a new demand still pops up.
  */
 const SAVE = 'dictator-sandbox:save:v1';
 
@@ -47,7 +47,7 @@ try {
   await seed(`s.factions.staff.patience = 12;`);
   const pop = page.locator('.demand-pop');
   await pop.waitFor();
-  assert.match(await pop.locator('.dm-banner').innerText(), /ARMY HAS A REQUEST/i);
+  assert.match(await pop.locator('.dm-banner').innerText(), /A REQUEST FROM THE ARMY/i);
   assert.match(await pop.innerText(), /Cost: \$\d/);
   assert.match(await pop.innerText(), /Bribe for 2 more days/i);
   assert.match(await pop.innerText(), /They (will probably|might) /i);
@@ -85,8 +85,7 @@ try {
   /* ---- 4. a bribe is taken or refused — never both, never neither */
   await seed(`s.factions.concord.demand = { id: 'money-tax-holiday', issuedDay: 3, dueDay: 4, severity: 'formal', bribes: 0 };`);
   assert.equal(await page.locator('.demand-pop').count(), 0, 'An already-seen demand should not pop up');
-  const mhDemands = page.locator('.masthead-right .btn', { hasText: 'Demands' });
-  assert.match(await mhDemands.innerText(), /Demands\s*1/i);
+  assert.equal(await page.locator('.masthead-right .btn', { hasText: 'Demands' }).count(), 0, 'Masthead Demands button should be gone');
   await page.locator('.demands-panel .dm-head').click();
   const b0 = await saved();
   await page.locator('.demands-panel .dm-act .btn', { hasText: 'Bribe' }).click();
@@ -112,21 +111,21 @@ try {
   await page.getByRole('button', { name: 'Understood', exact: true }).click();
   assert.equal(await page.locator('.demand-pop').count(), 0);
 
-  /* ---- 6. below 1080px the rail is hidden; the masthead button still reaches demands */
+  /* ---- 6. below 1080px the rail is hidden; a new demand still pops up, fully usable */
   await page.setViewportSize({ width: 1000, height: 700 });
-  await seed(`s.factions.combine.patience = 20; s.factions.combine.demand = { id: 'workers-mine-wages', issuedDay: 3, dueDay: 5, severity: 'murmur', bribes: 0 };`);
+  await seed(`s.factions.concord.patience = 12;`);
   assert.equal(await page.locator('.rail').isVisible(), false);
-  await page.locator('.masthead-right .btn', { hasText: 'Demands' }).click();
-  await page.locator('.demand-scrim .dm-row').waitFor();
-  await page.locator('.demand-scrim .dm-head').click();
-  await page.locator('.demand-scrim .dm-detail').waitFor();
+  await page.locator('.demand-pop').waitFor();
+  assert.match(await page.locator('.demand-pop .dm-banner').innerText(), /A REQUEST FROM THE ELITES/i);
+  const meetBox = await page.locator('.demand-pop .dm-act .btn-primary').boundingBox();
+  assert.ok(meetBox && meetBox.y + meetBox.height <= 700, 'Meet needs scrolling at 1000px');
   await page.waitForTimeout(400);
   await page.screenshot({ path: shotPath('D-demand-narrow.png') });
-  await page.locator('.demand-scrim .dm-foot .btn-primary', { hasText: 'Close' }).click();
+  await page.locator('.demand-pop .dm-foot .btn').click();
   assert.equal(await page.locator('.demand-scrim').count(), 0);
 
   assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-  console.log('DEMANDS: pop-up, rail, meet, bribe, lapse and narrow access all OK');
+  console.log('DEMANDS: pop-up, rail, meet, bribe, lapse, no masthead button, narrow pop-up all OK');
   console.log('--- ERRORS (0) ---');
 } finally {
   await browser.close();

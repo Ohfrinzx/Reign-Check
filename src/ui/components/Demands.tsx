@@ -16,8 +16,6 @@ import { usd } from '../../game/economy';
  *
  *  - DemandsPanel: the rail's "Demands" list. Each entry expands in place to
  *    show who is asking, what they want, and the Meet / Buy time buttons.
- *  - DemandsScreen: the same list as an overlay, opened from the masthead,
- *    so demands stay reachable below 1080px where the rail is hidden.
  *  - DemandPopup: the pop-up for the oldest unseen notice (a new demand, an
  *    escalation, or what a faction did when an ultimatum ran out).
  *
@@ -133,22 +131,6 @@ export function DemandsPanel({ s, actions }: { s: GameState; actions: DemandActi
   );
 }
 
-export function DemandsScreen({ s, actions, onClose }: { s: GameState; actions: DemandActions; onClose: () => void }) {
-  return (
-    <div className="demand-scrim" role="dialog" aria-modal="true" aria-label="Faction demands">
-      <div className="demand-pop">
-        <div className="dm-banner">Faction demands</div>
-        <div className="dm-body">
-          <DemandList s={s} actions={actions} />
-        </div>
-        <div className="dm-foot">
-          <button className="btn btn-primary" onClick={onClose}>Close</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /**
  * The pop-up for the oldest unseen notice. "Deal with it later" only closes
  * the pop-up — the demand stays in the Demands panel until it is met or
@@ -179,7 +161,7 @@ export function DemandPopup({ s, notice, actions, onDismiss }: {
 
   if (!live) return null;
   const kicker = notice.kind === 'issued'
-    ? `${label} has a request`
+    ? `A request from the ${label}`
     : `${label}: now ${STAGE_LABEL[live.demand.severity].toLowerCase()}`;
 
   return (
@@ -195,7 +177,7 @@ export function DemandPopup({ s, notice, actions, onDismiss }: {
         </div>
         <div className="dm-foot">
           <button className="btn" onClick={onDismiss} autoFocus>Deal with it later</button>
-          <span className="dm-foot-note">It stays in the Demands panel on the right, and under Demands at the top.</span>
+          <span className="dm-foot-note">It stays in the Demands panel on the right.</span>
         </div>
       </div>
     </div>
