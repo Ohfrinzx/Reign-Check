@@ -1,5 +1,33 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
+
+## ▶ WHERE WE STOPPED — 2026-09-22 (vote-reveal documentation only)
+
+**2026-09-22 — confidence-vote reveal planning only.** The owner requested
+documentation groundwork for a gradual parliamentary result reveal that
+shows the margin of survival/failure. See `docs/DESIGN_V2.md` §4.1a for
+concepts, current mechanics, proposed Phase 3 sequencing, future integration
+and verification notes. **No implementation or content additions authorized
+by this request.** The original after-buying placement and the recommended
+before-buying placement remain an open decision; the visual concept is also
+unselected. Phase 2 remains approved; Phase 3 and the reveal remain unbuilt.
+
+The owner asked to work the discussion into existing repo documentation and
+explicitly prohibited coding/content additions. The canonical proposal is
+now in DESIGN_V2 §4.1a, cross-referenced from the Phase 3 roadmap and agent
+handoffs. Recommended future sequence: result calculation/margin first,
+balance second, polished reveal third, final Phase 3 playtest last. All are
+future work requiring the usual explicit go-ahead.
+
+Carry forward the existing balance concern: repeatedly choosing the first
+option can reach day 18 too reliably. Re-measure survival versus
+noConfidence and actual vote margins; reaching the last day alone is not a
+win. The previous approved Phase 2 handoff is preserved below as history.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-21 (later session, Phase 2 approved complete)
 
 **PHASE 2 IS PLAYTESTED AND OWNER-APPROVED, IN FULL.** Owner, verbatim:
@@ -984,6 +1012,10 @@ of this file.
 ---
 
 ## 4. What is NOT built yet
+
+- **Confidence-vote reveal** — documentation only; see DESIGN_V2 §4.1a.
+  Timing relative to shopping and visual direction remain open. Proposed
+  delivery accompanies Phase 3 balancing and its final playtest.
 
 **Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains unbuilt
 or unplaytested.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),

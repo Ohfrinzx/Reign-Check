@@ -19,6 +19,15 @@ status also lives in `AGENTS.md` §2.
 
 ## Where the project actually is
 
+**2026-09-22 — confidence-vote reveal planning only.** The owner requested
+documentation groundwork for a gradual parliamentary result reveal that
+shows the margin of survival/failure. See `docs/DESIGN_V2.md` §4.1a for
+concepts, current mechanics, proposed Phase 3 sequencing, future integration
+and verification notes. **No implementation or content additions authorized
+by this request.** The original after-buying placement and the recommended
+before-buying placement remain an open decision; the visual concept is also
+unselected. Phase 2 remains approved; Phase 3 and the reveal remain unbuilt.
+
 **PHASE 1 (playable core + the Poster/Broadsheet rebuild) IS DONE AND
 OWNER-APPROVED.** The owner played the real build and said: *"Ok everything
 seems to run and look good. So I believe Phase one playtests are complete."*
