@@ -28,6 +28,17 @@ for (let step = 0; step < 90; step++) {
     await page.screenshot({ path: shotPath('99-ending.png'), fullPage: true });
     break;
   }
+  // act-boundary confidence vote
+  if (await page.locator('.vote-screen').count()) {
+    if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-vote-counting.png`), fullPage: true }); }
+    const reveal = page.getByRole('button', { name: 'Reveal now', exact: true });
+    if (await reveal.count()) await reveal.click();
+    await page.locator('.vote-clerk.revealed').waitFor();
+    log.push('VOTE: ' + await page.locator('.vote-stamp').innerText());
+    await page.locator('.vote-actions .btn-primary').click();
+    await page.waitForTimeout(200);
+    continue;
+  }
   // breaking alert
   if (await page.locator('.alert-scrim .alert-card .opt').count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-ALERT.png`), fullPage: true }); }

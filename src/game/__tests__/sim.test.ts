@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { createGame, ACT_LENGTH, NUM_ACTS, dayInAct } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve,
-  continueAfterAlert, activeCard, lookupCard, openShop, leaveShop,
+  continueAfterAlert, activeCard, lookupCard, openShop, leaveShop, completeConfidenceVote,
 } from '../engine';
 import { buildBriefing } from '../briefing';
 import { CARDS } from '../content/cards';
@@ -46,6 +46,9 @@ function playRun(seed: number, pick: (s: GameState, n: number) => number): GameS
         break;
       case 'alertResolve':
         s = continueAfterAlert(s);
+        break;
+      case 'vote':
+        s = completeConfidenceVote(s);
         break;
       case 'night':
         // The Back Room opens at the end of every day; a player who buys
@@ -171,6 +174,7 @@ describe('simulation', () => {
         else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
         else if (s.phase === 'resolve') s = continueAfterResolve(s);
         else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+        else if (s.phase === 'vote') s = completeConfidenceVote(s);
         else if (s.phase === 'night') s = openShop(s);
         else if (s.phase === 'shop') s = leaveShop(s);
       }

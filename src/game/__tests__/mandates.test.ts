@@ -9,7 +9,7 @@ import { computeBudget } from '../economy';
 import { shopPrice } from '../shop';
 import {
   prepareDay, beginStages, activeCard, chooseOption, continueAfterResolve,
-  continueAfterAlert, openShop, leaveShop,
+  continueAfterAlert, openShop, leaveShop, completeConfidenceVote,
 } from '../engine';
 import type { GameState } from '../types';
 
@@ -21,6 +21,7 @@ function step(s: GameState): GameState {
   }
   if (s.phase === 'resolve') return continueAfterResolve(s);
   if (s.phase === 'alertResolve') return continueAfterAlert(s);
+  if (s.phase === 'vote') return completeConfidenceVote(s);
   if (s.phase === 'night') return openShop(s);
   if (s.phase === 'shop') return leaveShop(s);
   return s;

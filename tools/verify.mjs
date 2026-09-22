@@ -33,10 +33,18 @@ await page.waitForSelector('.frontpage');
 await page.waitForTimeout(400);
 await page.screenshot({ path: shotPath('P-briefing.png'), fullPage: false });
 
-let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0;
+let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0, votes = 0;
 for (let i = 0; i < 600; i++) {
   if (await page.locator('.ending-title').count()) break;
-  if (await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count()) {
+  if (await page.locator('.vote-screen').count()) {
+    votes++;
+    if (votes === 1) await page.screenshot({ path: shotPath('P-vote-counting.png') });
+    const reveal = page.getByRole('button', { name: 'Reveal now', exact: true });
+    if (await reveal.count()) await reveal.click();
+    await page.locator('.vote-clerk.revealed').waitFor();
+    if (votes === 1) await page.screenshot({ path: shotPath('P-vote-result.png') });
+    await page.locator('.vote-actions .btn-primary').click();
+  } else if (await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count()) {
     alerts++;
     if (alerts === 1) { await page.waitForTimeout(600); await page.screenshot({ path: shotPath('P-alert.png') }); }
     const aCount = await page.locator('.alert-scrim .alert-card .opt:not([disabled])').count();
@@ -75,7 +83,7 @@ for (let i = 0; i < 600; i++) {
   } else break;
   await page.waitForTimeout(45);
 }
-notes.push(`days=${days} cards=${cards} alerts=${alerts} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys}`);
+notes.push(`days=${days} cards=${cards} alerts=${alerts} votes=${votes} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys}`);
 
 if (await page.locator('.ending-title').count()) {
   notes.push('ENDING: ' + await page.locator('.ending-title').innerText());

@@ -23,7 +23,13 @@ try {
     const exit = page.locator('.shop-foot .btn-primary');
     const next = page.locator('.strap-action');
     const options = page.locator('.stage-col .doc .opt:not([disabled])');
-    if (await exit.count()) await exit.click();
+    const vote = page.locator('.vote-screen');
+    if (await vote.count()) {
+      const reveal = page.getByRole('button', { name: 'Reveal now', exact: true });
+      if (await reveal.count()) await reveal.click();
+      await page.locator('.vote-actions .btn-primary').click();
+    }
+    else if (await exit.count()) await exit.click();
     else if (await next.count()) await next.click();
     else if (await options.count()) await options.first().click();
     else break;

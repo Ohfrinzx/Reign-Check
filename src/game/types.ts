@@ -436,6 +436,20 @@ export interface DaySummary {
   mood: string;
 }
 
+/** Frozen at the close of an act before the UI reveals parliament's result.
+ *  These are the exact unrounded values used by the engine; the animation is
+ *  presentation only and must never recalculate or randomise them. */
+export interface ConfidenceVoteResult {
+  act: number;
+  day: number;
+  grip: number;
+  legitimacy: number;
+  score: number;
+  threshold: number;
+  margin: number;
+  passed: boolean;
+}
+
 export type Phase =
   | 'title'
   | 'briefing'
@@ -444,6 +458,7 @@ export type Phase =
   | 'alert'
   | 'alertResolve'
   | 'minigame'
+  | 'vote'
   | 'night'
   | 'shop'
   | 'ended';
@@ -470,6 +485,8 @@ export interface GameState {
   /** which of the 3 acts you are in — see ACT_LENGTH/NUM_ACTS in state.ts */
   act: number;
   phase: Phase;
+  /** Present once an act-boundary result has been frozen for reveal. */
+  confidenceVote?: ConfidenceVoteResult;
 
   /** stages planned for today */
   agenda: StageKind[];

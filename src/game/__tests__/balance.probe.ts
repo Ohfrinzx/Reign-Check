@@ -1,5 +1,5 @@
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop, completeConfidenceVote } from '../engine';
 import { makeRng } from '../rng';
 import type { GameState } from '../types';
 
@@ -20,6 +20,7 @@ export function probe(n: number, policy: 'random' | 'first' | 'last') {
         s = chooseOption(s, opts[idx].id);
       } else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+      else if (s.phase === 'vote') s = completeConfidenceVote(s);
       else if (s.phase === 'night') s = openShop(s);
       else if (s.phase === 'shop') s = leaveShop(s);
     }

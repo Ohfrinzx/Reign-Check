@@ -3,7 +3,7 @@ import { createGame } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
-  ALL_CARD_MAP,
+  ALL_CARD_MAP, completeConfidenceVote,
 } from '../engine';
 import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
 import {
@@ -33,6 +33,7 @@ function playToShop(seed: number, untilDay: number, choose = (n: number) => n - 
       s = chooseOption(s, opts[choose(opts.length) % opts.length].id);
     } else if (s.phase === 'resolve') s = continueAfterResolve(s);
     else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+    else if (s.phase === 'vote') s = completeConfidenceVote(s);
     else if (s.phase === 'night') s = openShop(s);
     else if (s.phase === 'shop') s = leaveShop(s);
   }
@@ -264,6 +265,7 @@ describe('the Back Room', () => {
       else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+      else if (s.phase === 'vote') s = completeConfidenceVote(s);
       else if (s.phase === 'night') s = openShop(s);
       else if (s.phase === 'shop') {
         // An affordable offer can still no-op if it's blocked by the
@@ -365,6 +367,7 @@ describe('the Back Room', () => {
       else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+      else if (s.phase === 'vote') s = completeConfidenceVote(s);
       else if (s.phase === 'night') s = openShop(s);
     }
     if (s.phase !== 'shop') return;
@@ -558,6 +561,7 @@ describe('held deals', () => {
       else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+      else if (s.phase === 'vote') s = completeConfidenceVote(s);
       else if (s.phase === 'night') s = openShop(s);
       else if (s.phase === 'shop') s = leaveShop(s);
       else break;

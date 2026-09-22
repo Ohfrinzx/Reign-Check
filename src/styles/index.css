@@ -735,6 +735,97 @@ abbr.term{
   color:var(--ink-soft);line-height:1.5;border-bottom:1px solid var(--hair);
 }
 
+/* ================================================= CONFIDENCE VOTE REVEAL
+   A light public proceeding in the established Poster/Broadsheet language.
+   The cells show clerk returns arriving, not simulated MPs or a second vote. */
+
+.app.vote-full{display:block;overflow-y:auto}
+.vote-screen{
+  min-height:100%;padding:24px;display:grid;place-items:center;
+  background:
+    linear-gradient(rgba(242,233,213,.88),rgba(242,233,213,.88)),
+    radial-gradient(var(--dot) 1px,transparent 1px);
+  background-size:auto,4px 4px;
+}
+.vote-paper{
+  width:min(820px,100%);background:var(--paper);border:3px solid var(--ink);
+  box-shadow:10px 10px 0 var(--shadow);padding:24px 30px 18px;
+}
+.vote-heading{text-align:center;border-bottom:4px double var(--ink);padding-bottom:13px}
+.vote-heading h1{
+  font-family:var(--head);font-size:clamp(34px,6vw,64px);font-weight:400;
+  letter-spacing:.02em;line-height:.95;margin:7px 0 8px;
+}
+.vote-heading p{font-family:var(--body);font-style:italic;margin:0;color:var(--ink-soft)}
+.vote-board{max-width:650px;margin:20px auto 0}
+.vote-board-top{
+  display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--black);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+}
+.vote-board-top b{font-family:var(--mono);font-size:12px;color:var(--red)}
+.vote-lamps{
+  display:grid;grid-template-columns:repeat(12,1fr);gap:7px;margin:9px 0 16px;
+}
+.vote-lamps i{
+  height:18px;background:var(--paper-3);border:1px solid var(--hair);
+  transition:background .18s ease,transform .18s ease;
+}
+.vote-lamps i.counted{background:var(--ink);transform:translateY(-2px)}
+.vote-meter{height:18px;background:var(--paper-3);position:relative;margin:28px 0 9px}
+.vote-meter-fill{
+  position:absolute;inset:0 auto 0 0;background:var(--red);
+  transition:width .16s linear;
+}
+.vote-threshold{
+  position:absolute;top:-20px;bottom:-5px;width:2px;background:var(--ink);
+  transform:translateX(-1px);z-index:2;
+}
+.vote-threshold b,.vote-threshold small{
+  position:absolute;left:6px;white-space:nowrap;font-family:var(--mono);font-size:10px;
+}
+.vote-threshold b{top:-1px}.vote-threshold small{bottom:-16px;color:var(--ash)}
+.vote-live-number{
+  display:flex;justify-content:space-between;align-items:baseline;margin-top:21px;
+  border-bottom:2px solid var(--ink);padding-bottom:7px;
+  font-family:var(--black);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+}
+.vote-live-number b{font-family:var(--head);font-size:34px;letter-spacing:.02em;color:var(--red)}
+.vote-clerk{
+  max-width:650px;margin:14px auto 0;opacity:0;transform:translateY(8px);
+  transition:opacity .25s ease,transform .25s ease;visibility:hidden;text-align:center;
+}
+.vote-clerk.revealed{opacity:1;transform:none;visibility:visible}
+.vote-factors{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--hair)}
+.vote-factors>div{padding:6px 14px;border-right:1px solid var(--hair)}
+.vote-factors>div:last-child{border-right:0}
+.vote-factors span{
+  display:block;font-family:var(--black);font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ash);
+}
+.vote-factors b{display:block;font-family:var(--mono);font-size:16px;margin-top:2px}
+.vote-stamp{
+  width:max-content;max-width:100%;margin:16px auto 7px;padding:7px 14px;
+  border:4px solid currentColor;font-family:var(--head);font-size:clamp(22px,4vw,36px);
+  letter-spacing:.05em;line-height:1;transform:rotate(-2deg);
+}
+.vote-stamp.passed{color:var(--teal)}
+.vote-stamp.failed{color:var(--red)}
+.vote-margin{font-family:var(--body);font-style:italic;margin:0;color:var(--ink-soft)}
+.vote-actions{min-height:45px;margin-top:14px;display:flex;justify-content:center;align-items:center}
+.vote-method{
+  margin:10px 0 0;text-align:center;font-family:var(--mono);font-size:10px;color:var(--ash);
+}
+@media(max-width:620px){
+  .vote-screen{padding:12px}
+  .vote-paper{padding:18px 15px 14px;box-shadow:6px 6px 0 var(--shadow)}
+  .vote-lamps{grid-template-columns:repeat(8,1fr);gap:5px}
+  .vote-lamps i{height:14px}
+  .vote-factors>div{padding-inline:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  .vote-lamps i,.vote-meter-fill,.vote-clerk{transition:none}
+}
+
 /* =========================================================================
    THE BACK ROOM — DARK.
 

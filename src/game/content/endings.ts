@@ -1,4 +1,4 @@
-import type { GameState, EndingDef, EndingResult } from '../types';
+import type { ConfidenceVoteResult, GameState, EndingDef, EndingResult } from '../types';
 import { REGIME_KEYS } from '../types';
 import { money } from '../stats';
 import { FACTIONS, FACTION_ORDER } from './country';
@@ -11,16 +11,25 @@ import { isActEndDay } from '../state';
  * already watches on the masthead — no new hidden number. Parliament expects
  * more of you each time, so the bar rises act to act.
  */
-function passesConfidenceVote(s: GameState): boolean {
+export function computeConfidenceVote(s: GameState): ConfidenceVoteResult {
   const resources = computeResources(s);
   const grip = resources.find((r) => r.key === 'grip')?.value ?? 0;
   const legitimacy = resources.find((r) => r.key === 'legitimacy')?.value ?? 0;
-  const composite = (grip + legitimacy) / 2;
+  const score = (grip + legitimacy) / 2;
   const threshold = 33 + s.act * 7; // act 1: 40, act 2: 47, act 3: 54 — tuned against
   // simulated play so it bites reckless/mediocre runs (measurably, per act) without
   // ever touching careful/generous play, which already survives at ~98% by design
   // (docs/DESIGN_V2.md known limitation #2 — a balance pass is deferred to Phase 3).
-  return composite >= threshold;
+  return {
+    act: s.act,
+    day: s.day,
+    grip,
+    legitimacy,
+    score,
+    threshold,
+    margin: score - threshold,
+    passed: score >= threshold,
+  };
 }
 
 const ACT_NAMES = ['first', 'second', 'third'];
@@ -110,7 +119,7 @@ export const ENDINGS: EndingDef[] = [
     title: 'PARLIAMENT WITHDREW ITS CONFIDENCE',
     kind: 'noConfidence',
     priority: 65,
-    check: (s) => isActEndDay(s) && !passesConfidenceVote(s),
+    check: (s) => isActEndDay(s) && !computeConfidenceVote(s).passed,
     epitaph: (s) =>
       `Every act ends with the vote parliament always holds, and this time the numbers were not there.\n\nNobody staged anything. Nobody needed to. Enough of the chamber decided you had stopped being worth the trouble and voted accordingly, in an afternoon, with no drama at all.\n\nYou did not survive the ${ACT_NAMES[s.act - 1] ?? 'latest'} confidence vote, on day ${s.day}.`,
   },
@@ -125,10 +134,29 @@ const SURVIVAL: EndingDef = {
     `You reached the confirmation vote still holding the job, which — given how you got it, and at four in the morning — is more than anybody in that building expected.\n\nThe vote was not close. Several people who voted for you have since privately told several other people that they were surprised to be doing so.\n\n${s.day} days, and the country is still, recognisably, a country.`,
 };
 
-export function checkEndings(s: GameState, forceEnd = false): EndingResult | undefined {
-  const candidates = ENDINGS.filter((e) => e.check?.(s)).sort((a, b) => b.priority - a.priority);
+export function checkEndings(
+  s: GameState,
+  forceEnd = false,
+  includeConfidenceVote = true,
+): EndingResult | undefined {
+  const candidates = ENDINGS
+    .filter((e) => includeConfidenceVote || e.id !== 'noConfidence')
+    .filter((e) => e.check?.(s))
+    .sort((a, b) => b.priority - a.priority);
   const chosen = candidates[0] ?? (forceEnd ? SURVIVAL : undefined);
   if (!chosen) return undefined;
+  return endingResult(chosen, s);
+}
+
+/** Materialise the already-decided vote failure without running the check a
+ *  second time. The reveal consumes its frozen snapshot, not live UI state. */
+export function confidenceVoteFailure(s: GameState): EndingResult {
+  const chosen = ENDINGS.find((e) => e.id === 'noConfidence');
+  if (!chosen) throw new Error('noConfidence ending is not registered');
+  return endingResult(chosen, s);
+}
+
+function endingResult(chosen: EndingDef, s: GameState): EndingResult {
   return {
     id: chosen.id,
     title: chosen.title,

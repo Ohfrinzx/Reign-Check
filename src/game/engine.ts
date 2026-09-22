@@ -11,7 +11,7 @@ import { FOLLOWUPS } from './content/followups';
 import { ALERTS, ALERT_MAP } from './content/alerts';
 import { FACTION_ORDER, FACTIONS, CHARACTER_MAP } from './content/country';
 import { clampStat } from './stats';
-import { checkEndings } from './content/endings';
+import { checkEndings, computeConfidenceVote, confidenceVoteFailure } from './content/endings';
 import { computeBudget } from './economy';
 import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
@@ -520,7 +520,6 @@ function nextStage(s: GameState): GameState {
 
 function finishDay(s: GameState): GameState {
   s.current = undefined;
-  s.phase = 'night';
 
   const summary: DaySummary = {
     day: s.day,
@@ -532,28 +531,54 @@ function finishDay(s: GameState): GameState {
   };
   s.history.push(summary);
 
-  const ending = checkEndings(s);
+  // At an act boundary, higher-priority endings still resolve immediately.
+  // Parliament's own result is frozen separately so the UI can reveal it
+  // without recalculating or consuming gameplay RNG.
+  const voteDay = isActEndDay(s);
+  const ending = checkEndings(s, false, !voteDay);
   if (ending) {
     s.ending = ending;
     s.phase = 'ended';
     s.log.push({ day: s.day, kind: 'system', title: ending.title, text: ending.epitaph, tone: 'bad' });
-  } else if (isActEndDay(s)) {
-    if (s.act < NUM_ACTS) {
-      s.act += 1;
-      s.log.push({
-        day: s.day, kind: 'consequence', title: 'Confidence vote',
-        text: `Parliament held its confidence vote and let you keep the job. Act ${s.act} begins tomorrow.`,
-        tone: 'good',
-      });
-    } else {
-      // Final act's vote passed and nothing else forced an ending today — the run is won.
-      const survival = checkEndings(s, true);
-      if (survival) {
-        s.ending = survival;
-        s.phase = 'ended';
-        s.log.push({ day: s.day, kind: 'system', title: survival.title, text: survival.epitaph, tone: 'bad' });
-      }
-    }
+  } else if (voteDay) {
+    s.confidenceVote = computeConfidenceVote(s);
+    s.phase = 'vote';
+  } else {
+    s.phase = 'night';
+  }
+  return s;
+}
+
+/** Apply the already-frozen confidence result exactly once after its reveal. */
+export function completeConfidenceVote(prev: GameState): GameState {
+  const s = clone(prev);
+  if (s.phase !== 'vote' || !s.confidenceVote) return s;
+
+  if (!s.confidenceVote.passed) {
+    const ending = confidenceVoteFailure(s);
+    s.ending = ending;
+    s.phase = 'ended';
+    s.log.push({ day: s.day, kind: 'system', title: ending.title, text: ending.epitaph, tone: 'bad' });
+    return s;
+  }
+
+  if (s.act < NUM_ACTS) {
+    s.act += 1;
+    s.phase = 'night';
+    s.log.push({
+      day: s.day, kind: 'consequence', title: 'Confidence vote',
+      text: `Parliament held its confidence vote and let you keep the job. Act ${s.act} begins tomorrow.`,
+      tone: 'good',
+    });
+    return s;
+  }
+
+  // Final act's vote passed and nothing else forced an ending today — the run is won.
+  const survival = checkEndings(s, true);
+  if (survival) {
+    s.ending = survival;
+    s.phase = 'ended';
+    s.log.push({ day: s.day, kind: 'system', title: survival.title, text: survival.epitaph, tone: 'good' });
   }
   return s;
 }

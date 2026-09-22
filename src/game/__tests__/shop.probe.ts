@@ -15,7 +15,7 @@
  * the endings distribution does compared with a player who buys nothing.
  */
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, buyShopItem, useFavour, leaveShop } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, buyShopItem, useFavour, leaveShop, completeConfidenceVote } from '../engine';
 import { SHOP_MAP } from '../content/shop';
 import { shopPrice } from '../shop';
 import { makeRng } from '../rng';
@@ -40,6 +40,7 @@ function run(seed: number, buyer: Buyer, policy: 'random' | 'first') {
     }
     else if (s.phase === 'resolve') s = continueAfterResolve(s);
     else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
+    else if (s.phase === 'vote') s = completeConfidenceVote(s);
     else if (s.phase === 'night') s = openShop(s);
     else if (s.phase === 'shop') {
       if (buyer !== 'none') {

@@ -4,6 +4,7 @@ import { ACT_LENGTH, createGame, dayInAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
+  completeConfidenceVote,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
@@ -22,6 +23,7 @@ import { ShopScreen } from './ui/screens/Shop';
 import { IntroScreen } from './ui/screens/Intro';
 import { ManageScreen } from './ui/screens/Manage';
 import { ProgressScreen } from './ui/screens/Progress';
+import { ConfidenceVoteScreen } from './ui/screens/Vote';
 
 type Screen = 'title' | 'game';
 
@@ -145,6 +147,10 @@ export default function App() {
     });
   }, []);
 
+  const doCompleteVote = useCallback(() => {
+    setGame((g) => g ? completeConfidenceVote(g) : g);
+  }, []);
+
   const doBuy = useCallback((itemId: string) => {
     setGame((g) => {
       if (!g) return g;
@@ -256,6 +262,16 @@ export default function App() {
       <div className="app dark shop-full">
         <ShopScreen s={game} onBuy={doBuy} onLeave={doContinue} onFire={doFireAdvisor} onCut={doCutDeal} />
         {toast && <div className="toast">{toast}</div>}
+      </div>
+    );
+  }
+
+  // The act-boundary result is a full-screen public proceeding. Its engine
+  // result was frozen before this render; the UI only controls the reveal.
+  if (game.phase === 'vote') {
+    return (
+      <div className="app vote-full">
+        <ConfidenceVoteScreen s={game} onContinue={doCompleteVote} />
       </div>
     );
   }

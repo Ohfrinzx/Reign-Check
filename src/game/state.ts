@@ -18,8 +18,9 @@ import { applyEffects } from './effects';
  *  6→7: mandateId; generated effect IDs now use a saved flags counter.
  *  7→8: runDeck/bannedCards, for the run deck (§4.4).
  *  8→9: unlockedShopItemIds, for meta-progression's real unlock conditions
- *  (§4.5 step 2). */
-export const SAVE_VERSION = 9;
+ *  (§4.5 step 2). 9→10: confidenceVote plus the serialisable vote phase,
+ *  for the act-boundary result reveal. */
+export const SAVE_VERSION = 10;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather

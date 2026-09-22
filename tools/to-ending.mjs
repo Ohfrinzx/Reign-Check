@@ -16,6 +16,14 @@ const introBtn = page.locator('.intro-foot .btn-primary');
 if (await introBtn.count()) { await introBtn.click(); await page.waitForTimeout(300); }
 for (let i = 0; i < 400; i++) {
   if (await page.locator('.ending-title').count()) break;
+  if (await page.locator('.vote-screen').count()) {
+    const reveal = page.getByRole('button', { name: 'Reveal now', exact: true });
+    if (await reveal.count()) await reveal.click();
+    await page.locator('.vote-clerk.revealed').waitFor();
+    await page.locator('.vote-actions .btn-primary').click();
+    await page.waitForTimeout(110);
+    continue;
+  }
   const alertOpts = page.locator('.alert-scrim .alert-card .opt:not([disabled])');
   if (await alertOpts.count()) { await alertOpts.last().click(); await page.waitForTimeout(90); continue; }
   if (await page.locator('.alert-scrim .outcome').count()) { await page.locator('.alert-scrim .outcome .btn-primary').click(); await page.waitForTimeout(90); continue; }
