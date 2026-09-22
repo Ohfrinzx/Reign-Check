@@ -131,7 +131,7 @@ const SURVIVAL: EndingDef = {
   kind: 'survival',
   priority: 1,
   epitaph: (s) =>
-    `You reached the confirmation vote still holding the job, which — given how you got it, and at four in the morning — is more than anybody in that building expected.\n\nThe vote was not close. Several people who voted for you have since privately told several other people that they were surprised to be doing so.\n\n${s.day} days, and the country is still, recognisably, a country.`,
+    `You reached the confirmation vote still holding the job, which — given how you got it, and at four in the morning — is more than anybody in that building expected.\n\nThe clerk's final count confirmed you. Several people who voted for you have since privately told several other people that they were surprised to be doing so.\n\n${s.day} days, and the country is still, recognisably, a country.`,
 };
 
 export function checkEndings(

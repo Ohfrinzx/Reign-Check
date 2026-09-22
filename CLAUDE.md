@@ -19,14 +19,16 @@ status also lives in `AGENTS.md` §2.
 
 ## Where the project actually is
 
-**2026-09-22 — confidence-vote reveal planning only.** The owner requested
-documentation groundwork for a gradual parliamentary result reveal that
-shows the margin of survival/failure. See `docs/DESIGN_V2.md` §4.1a for
-concepts, current mechanics, proposed Phase 3 sequencing, future integration
-and verification notes. **No implementation or content additions authorized
-by this request.** The original after-buying placement and the recommended
-before-buying placement remain an open decision; the visual concept is also
-unselected. Phase 2 remains approved; Phase 3 and the reveal remain unbuilt.
+**2026-09-22 — confidence-vote reveal built; awaiting owner playtest.** The
+owner authorized the recommended division-board + clerk-tally direction.
+The reveal runs before the Back Room and preserves the existing deterministic
+vote cutoff. The engine freezes a serialisable `ConfidenceVoteResult`, enters
+the new `vote` phase, and applies that stored outcome exactly once when the
+player continues. `Vote.tsx` supplies the timed/skip/reduced-motion reveal,
+exact margin and accessible final announcement. `SAVE_VERSION` is 10, so
+version-9 in-progress runs reset; meta history remains. All 113 tests, build,
+and the full browser suite pass. See `docs/DESIGN_V2.md` §4.1a. Phase 3 has
+not started; its balance work still needs separate approval.
 
 **PHASE 1 (playable core + the Poster/Broadsheet rebuild) IS DONE AND
 OWNER-APPROVED.** The owner played the real build and said: *"Ok everything
@@ -101,7 +103,8 @@ and `SHOP_UNLOCKS` (`one-good-story`: survive once; `archivist`: finish 3
 runs — the shop's only two `rarity: 'rare'` items). `GameState.
 unlockedShopItemIds` (new field) is a snapshot taken once at
 `createGame()`, never re-evaluated mid-run — see the "§4.5 step 2" section
-below for the full detail on why. `SAVE_VERSION` is 9; prior saves reset.
+below for the full detail on why. `SAVE_VERSION` was 9 for that slice; prior
+saves reset.
 New `src/ui/screens/Progress.tsx` is reused in both places the owner
 asked for: a "Roster"/"Unlocks" tab pair in `Manage.tsx`, and a new
 "Unlocks" button on the title toolbar — which now also filters its own
@@ -336,7 +339,7 @@ respect a new `NewGameOptions.unlockedMandateIds`, with a fallback to the
 full pool if a filter would otherwise lock out every mandate — it can't
 happen with today's two-rule table (the four base mandates are never
 gated), but the guard exists so a future rule can't brick new-game
-creation. `SAVE_VERSION` is 9; version-8 saves reset.
+creation. `SAVE_VERSION` was 9 for that slice; version-8 saves reset.
 
 **New `src/ui/screens/Progress.tsx`** — `ProgressPanel` (the shared list:
 "Your record", then Mandates, then Rare offers, each row showing Unlocked
@@ -410,14 +413,13 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `9`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `10`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 8→9 for
-    `unlockedShopItemIds` (§4.5 step 2, meta-progression's real unlock
-    gating). A bump discards the owner's in-progress run — say so when you
-    report.
+    as long as the bump actually happens. Last bumped 9→10 for the saved
+    confidence-vote phase/result (§4.1a). A bump discards the owner's
+    in-progress run — say so when you report.
 11. **Keep all game logic — including everything Phase 2 adds — in
     `src/game/` with zero React or DOM dependency.** This is the whole
     reason a future mobile/iOS port stays possible without a rewrite (see

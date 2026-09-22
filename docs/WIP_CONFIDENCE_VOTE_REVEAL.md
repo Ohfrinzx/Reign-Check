@@ -3,7 +3,7 @@
 **Branch:** `codex/confidence-vote-reveal`
 **Base:** `20d0da908f8fd2c36ff033269cce256740bcebb1`
 **Started:** 2026-09-22
-**Status:** core implementation checkpointed; full regression and final documentation are still pending. Do not treat this branch as merged or playtest-ready.
+**Status:** implementation complete and verified; ready for direct merge and owner playtest.
 
 ## Authorized scope
 
@@ -26,16 +26,17 @@ The selected direction is the recommended **division board + clerk's tally** tre
 - [x] Add the division-board/clerk-tally screen and responsive styles.
 - [x] Update phase-driving tests and browser tools.
 - [x] Add focused tests for thresholds, act transitions, save-safe frozen results, and determinism.
-- [ ] Run all tests, production build, and the full browser verification suite at 1366×700.
-- [ ] Update this file and project handoff docs with final state before merge.
+- [x] Run all tests, production build, and the full browser verification suite at 1366×700.
+- [x] Update this file and project handoff docs with final state before merge.
 
 ## Checkpoint verification
 
-- Focused confidence-vote suite: **5 passed**.
+- Focused confidence-vote suite: **6 passed**.
 - Production build: **passed** (existing bundle-size advisory remains).
 - Dedicated `tools/vote.mjs` browser test: **passed** at 1366×700, including partial reveal, exact save/reload result, completed tally, viewport fit, and Act 2 continuation.
 - Visual check: `/tmp/reign-check-shots/V-confidence-result.png` in the implementation workspace.
-- Still required: full Vitest suite and the default multi-script browser suite.
+- Full Vitest suite: **113 passed**.
+- Default browser suite: **passed** with zero page errors; general phase drivers traverse vote screens without stalling.
 
 ## Resume notes
 

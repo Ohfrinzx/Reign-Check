@@ -60,13 +60,38 @@ try {
   assert.ok(action && action.y >= 0 && action.y + action.height <= 700, 'Vote continuation requires scrolling');
   await page.screenshot({ path: shotPath('V-confidence-result.png') });
 
+  await page.setViewportSize({ width: 390, height: 844 });
+  const narrowAction = await page.locator('.vote-actions .btn-primary').boundingBox();
+  assert.ok(narrowAction && narrowAction.y >= 0 && narrowAction.y + narrowAction.height <= 844, 'Narrow vote continuation requires scrolling');
+  const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  assert.ok(horizontalOverflow <= 1, `Narrow vote has ${horizontalOverflow}px horizontal overflow`);
+  await page.screenshot({ path: shotPath('V-confidence-result-narrow.png'), fullPage: true });
+
   await page.locator('.vote-actions .btn-primary').click();
   await page.locator('.night-sheet').waitFor();
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem('dictator-sandbox:save:v1')));
   assert.equal(after.act, 2);
   assert.equal(after.phase, 'night');
+
+  // Reduced-motion users should land directly on the completed result.
+  await page.evaluate(async () => {
+    const { computeConfidenceVote } = await import('/src/game/content/endings.ts');
+    const { saveGame } = await import('/src/game/save.ts');
+    const state = JSON.parse(localStorage.getItem('dictator-sandbox:save:v1'));
+    state.day = 12;
+    state.act = 2;
+    state.phase = 'vote';
+    state.confidenceVote = computeConfidenceVote(state);
+    saveGame(state);
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: 'Continue — Day 12', exact: true }).click();
+  await page.locator('.vote-clerk.revealed').waitFor();
+  assert.equal(await page.locator('.vote-lamps .counted').count(), 24);
+  assert.equal(await page.getByRole('button', { name: 'Reveal now', exact: true }).count(), 0);
   assert.equal(errors.length, 0, errors.join('\n'));
-  console.log(`VOTE: partial reveal, exact frozen reload, final factors, fit, and Act ${after.act} continuation passed at 1366×700.`);
+  console.log(`VOTE: partial reveal, exact frozen reload, final factors, desktop/narrow fit, reduced motion, and Act ${after.act} continuation passed.`);
 } finally {
   await browser.close();
 }

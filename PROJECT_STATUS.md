@@ -1,23 +1,31 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
-## ▶ WHERE WE STOPPED — 2026-09-22 (vote-reveal documentation only)
+## ▶ WHERE WE STOPPED — 2026-09-22 (confidence-vote reveal built)
 
-**2026-09-22 — confidence-vote reveal planning only.** The owner requested
-documentation groundwork for a gradual parliamentary result reveal that
-shows the margin of survival/failure. See `docs/DESIGN_V2.md` §4.1a for
-concepts, current mechanics, proposed Phase 3 sequencing, future integration
-and verification notes. **No implementation or content additions authorized
-by this request.** The original after-buying placement and the recommended
-before-buying placement remain an open decision; the visual concept is also
-unselected. Phase 2 remains approved; Phase 3 and the reveal remain unbuilt.
+**The confidence-vote reveal is implemented and fully verified; it awaits
+owner playtest.** After the earlier documentation-only pass, the owner gave
+an explicit implementation go-ahead and allowed the recommended direction.
+The selected design is a light Poster/Broadsheet **division board + clerk's
+tally**, placed **before the Back Room** so purchases cannot retroactively
+affect an already-calculated vote.
 
-The owner asked to work the discussion into existing repo documentation and
-explicitly prohibited coding/content additions. The canonical proposal is
-now in DESIGN_V2 §4.1a, cross-referenced from the Phase 3 roadmap and agent
-handoffs. Recommended future sequence: result calculation/margin first,
-balance second, polished reveal third, final Phase 3 playtest last. All are
-future work requiring the usual explicit go-ahead.
+The engine now owns one pure `computeConfidenceVote()` calculation and saves
+its exact result in `GameState.confidenceVote` during the new `vote` phase.
+The UI only animates that frozen result; it never decides or rerolls it.
+`completeConfidenceVote()` applies failure, intermediate act advancement, or
+final survival exactly once. Higher-priority endings still pre-empt the vote.
+The screen shows 24 clerk returns (not MPs or seats), the live score and
+required line, Grip, Legitimacy, exact signed distance, and the final stamp.
+It includes Reveal now, reduced-motion completion, reload safety, and one
+screen-reader announcement at the result.
+
+`SAVE_VERSION` bumped 9→10; old in-progress runs reset by design while meta
+history remains separate. Verification: 113/113 tests, production build,
+and the complete Playwright suite at 1366×700, including a dedicated partial
+count/save/reload/final-result/Act-2 test, all passed with zero page errors.
+No content or balance values changed. Phase 3 remains unstarted and still
+needs explicit approval. Full implementation record: DESIGN_V2 §4.1a.
 
 Carry forward the existing balance concern: repeatedly choosing the first
 option can reach day 18 too reliably. Re-measure survival versus
@@ -1013,9 +1021,8 @@ of this file.
 
 ## 4. What is NOT built yet
 
-- **Confidence-vote reveal** — documentation only; see DESIGN_V2 §4.1a.
-  Timing relative to shopping and visual direction remain open. Proposed
-  delivery accompanies Phase 3 balancing and its final playtest.
+- **Confidence-vote reveal:** built and verified; awaiting owner playtest.
+  See DESIGN_V2 §4.1a. Balance values were deliberately left unchanged.
 
 **Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains unbuilt
 or unplaytested.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),
@@ -1072,7 +1079,7 @@ still needs to be explicitly asked for, same as every other item below:
 | 2 | **Difficulty is asymmetric.** A player who consistently takes the accommodating/generous option survives to day 30 in ~98% of simulated runs; random play dies around day 13; consistently aggressive play dies around day 6. | Medium | Arguably correct (cooperation works, it is just expensive), but the generous path needs a sharper late-game cost. Deliberately left for a Phase 3 balance pass (`docs/DESIGN_V2.md` §9) rather than tuned now, since Phase 2's shop economy will change the curve anyway. |
 | 3 | The `coup` ending is reachable but rare (~1–5% of random runs) relative to revolution/fracture/scandal. | Low | Needs more military-pressure cards to feed it — part of the same Phase 3 balance pass. |
 | 4 | ~~Google Fonts loaded from CDN~~ | Fixed | Fonts are now self-hosted (`public/fonts/`), no runtime network dependency. |
-| 4b | Save format changed (`SAVE_VERSION` 1 → 2) for the honorific and commitments fields. Old saves are ignored rather than migrated. | Low | Correct behaviour for a pre-release game; the loader is version-guarded and fails safe. Did NOT bump again for the Poster rebuild — no `GameState` shape changed, only the display layer. Bumped repeatedly through Phase 2 as predicted: 2→3 (acts), 3→4→...→6 (the shop's several slices), 6→7 (mandates), 7→8 (the run deck). Each bump discards in-progress runs, by design — `save.ts` fails safe. §4.5 (meta-progression) will very likely need another bump if it lands. |
+| 4b | Save format changes discard old in-progress runs rather than migrate them. | Low | Correct pre-release behaviour; `save.ts` is version-guarded and fails safe. Current `SAVE_VERSION` is 10: Phase 2 advanced it through 9, and the serialisable confidence-vote phase/result advanced it 9→10. The separate meta-progression history is unaffected. |
 | 5 | Right rail is hidden below 1080px width. The game is desktop-first, as specified. | Low | No tablet/mobile layout yet — this is the real remaining gap for a future Phase 4 (mobile/iOS, `docs/DESIGN_V2.md` §10), not scheduled. |
 | 6 | `FactionState.demand`, `CharacterMemory` weights and `RunStats.moneyTaken` are tracked but not yet surfaced anywhere in the UI. | Low | Wiring, not rework. |
 | 7 | No undo. Decisions are final by design. | By design | |

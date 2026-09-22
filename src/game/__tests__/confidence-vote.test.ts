@@ -58,6 +58,15 @@ describe('confidence-vote reveal', () => {
     expect(completeConfidenceVote(completed)).toEqual(completed);
   });
 
+  it('lets a higher-priority ending pre-empt the reveal on a vote day', () => {
+    const state = voteDay(1, 60);
+    state.hidden.coup = 100;
+    const ended = beginStages(state);
+    expect(ended.phase).toBe('ended');
+    expect(ended.ending?.id).toBe('coup');
+    expect(ended.confidenceVote).toBeUndefined();
+  });
+
   it('applies the frozen failure exactly once', () => {
     const pending = beginStages(voteDay(2, 46.9));
     expect(pending.phase).toBe('vote');

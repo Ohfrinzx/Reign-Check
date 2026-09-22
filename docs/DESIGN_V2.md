@@ -219,17 +219,18 @@ check pattern in `engine.ts`/`endings.ts` for the vote's pass/fail logic
 rather than inventing a parallel system.
 
 **As built:** `GameState.act` (1..3), `ACT_LENGTH=6`/`NUM_ACTS=3` in
-`state.ts`. The vote is a `noConfidence` entry in `ENDINGS`
-(`content/endings.ts`) — `isActEndDay(s) && !passesConfidenceVote(s)` — so it
-runs through the exact same `checkEndings()` call every other ending already
-uses, gated to fire only on act-boundary days. `passesConfidenceVote()`
-checks the Grip/Legitimacy composite already shown on the masthead against a
-threshold that rises per act (40/47/54), tuned against simulated play to
-bite reckless/mediocre runs without touching careful play (docs/known
-limitation #2, the difficulty asymmetry, is unchanged by design — a real
-balance pass is still Phase 3). Passing act 3's vote with nothing else
-having ended the run resolves to the existing `survival` ending via
-`checkEndings(s, true)`. `SAVE_VERSION` bumped 2→3.
+`state.ts`. The vote uses the `noConfidence` entry in `ENDINGS` and the pure
+`computeConfidenceVote()` helper in `content/endings.ts`. It checks the
+Grip/Legitimacy composite already shown on the masthead against a threshold
+that rises per act (40/47/54), tuned against simulated play to bite reckless/
+mediocre runs without touching careful play (docs/known limitation #2, the
+difficulty asymmetry, is unchanged by design — a real balance pass is still
+Phase 3). Since §4.1a, act-boundary days defer only `noConfidence`, freeze
+the helper's result in the `vote` phase, then apply that stored outcome when
+the player continues. Other endings retain their priority. Passing act 3's
+vote with nothing else having ended the run resolves to the existing
+`survival` ending. The original act field bumped `SAVE_VERSION` 2→3; the
+saved reveal/result later bumped it 9→10.
 
 **Display follow-up:** the masthead and front-page briefing originally showed
 `Day X / 18` — progress through the whole run. Owner: *"Instead of having it
@@ -242,15 +243,14 @@ each act boundary; `GameState.day` itself, and everything else that reads it
 (the vote check above, saves, `dateLine()`), is untouched.
 
 
-### 4.1a Proposed confidence-vote reveal — DOCUMENTED ONLY (2026-09-22)
+### 4.1a Confidence-vote reveal — BUILT, AWAITING OWNER PLAYTEST (2026-09-22)
 
-**Status and authorization:** The owner wants a future animation that reveals
-parliament's vote gradually, builds anticipation, and shows how close the
-player came to failing. Their initial idea placed it **after the buying
-phase**. On 2026-09-22 they authorized documentation only: "Do not begin any
-legit content additions or coding. Just lay the ground work for future agents."
-Nothing in this section authorizes implementation, new content, balance
-changes, or starting Phase 3. Phase 2 remains complete and approved.
+**Status and authorization:** After first authorizing documentation only,
+the owner explicitly said to begin implementation and allowed the recommended
+direction. The selected treatment is the division-board + clerk's-tally
+hybrid, placed before buying. The feature is built and verified but has not
+yet received owner playtest approval. No content or balance values changed,
+and this did not start Phase 3.
 
 #### Current mechanic to preserve as the baseline
 
@@ -261,7 +261,7 @@ Reviewed on default at commit `9ef29a8`; re-check live code before building:
 - `display.ts::computeResources()`: Grip = 0.45 power + 0.25 security +
   0.15 military + 0.15 information. Displayed Legitimacy = 0.50 underlying
   legitimacy + 0.35 support + 0.15 stability.
-- `content/endings.ts::passesConfidenceVote()`: score = (Grip +
+- `content/endings.ts::computeConfidenceVote()`: score = (Grip +
   Legitimacy) / 2; threshold = 33 + act * 7 (40/47/54); equality passes.
   There is no vote RNG or simulation of individual MPs, seats, or blocs.
 - `engine.ts::finishDay()` checks the final state after the day's cards and
@@ -276,7 +276,7 @@ Reviewed on default at commit `9ef29a8`; re-check live code before building:
   never display "+0.0" beside a failure or silently change the comparison
   to match rounded presentation.
 
-#### Presentation concepts, not selected designs
+#### Presentation decision and alternatives considered
 
 1. **Division board:** a parliamentary tally board fills with indicators;
    the count develops progressively and a visible line shows the requirement.
@@ -287,15 +287,13 @@ Reviewed on default at commit `9ef29a8`; re-check live code before building:
    "Confidence retained" or "Confidence withdrawn" stamp. Closest to the
    existing newsprint and government-paperwork theme.
 
-The discussion's recommendation was a **Division board + Clerk's tally
-hybrid**, not an owner-selected design. Suggested pacing is approximately
-5–8 seconds: assembly/title beat, brisk early reveals, slower final marks,
-then the verdict and exact margin. Let comfortable wins be visibly
-comfortable; do not manufacture a last-ballot cliffhanger in every run.
-The result should show Grip, Legitimacy, score, required score, and signed
-margin. Optional descriptive margin bands are future copy/balance choices,
-not approved rules. Sound/gavel effects remain deferred with Phase 5 audio;
-the sequence must work silently.
+The implemented choice is the **Division board + Clerk's tally hybrid**.
+It runs for roughly five seconds: a short opening beat, brisk early clerk
+returns, slower final returns, then the verdict and exact margin. The 24
+indicators are explicitly returns, not ballots, MPs, seats, or blocs. The
+screen shows Grip, Legitimacy, recorded confidence, required score, and the
+distance above/below the line. Sound remains deferred with Phase 5 audio;
+the sequence works silently.
 
 **The earlier conversation mockups were conceptual, not production assets
 or a mathematically valid ballot model.** In particular, the 24-indicator
@@ -311,11 +309,11 @@ Retain the light Poster/Broadsheet skin and existing typography by default.
 The dark chamber concept is exploratory only: AGENTS.md §9 reserves the
 dark screen for the Back Room unless the owner approves another exception.
 
-#### Timing decision still open
+#### Timing decision
 
-The owner's original **after-buying** idea and the recommendation to reveal
-**before buying** are not the same decision. Documentation approval does not
-resolve that choice. Confirm timing when implementation is authorized.
+The owner authorized either recommended design direction. The implementation
+uses **before buying**, preserving the original mechanics and avoiding any
+suggestion that a purchase changed the result.
 
 Recommended flow, preserving today's mechanics:
 end-of-day state → check other endings → freeze vote result → reveal →
@@ -331,41 +329,33 @@ affect the vote. Recalculating after purchases is a gameplay/balance change;
 freezing the earlier result requires honest cutoff messaging and a defined
 flow for failures and the final act. Do not silently move that cutoff.
 
-#### Phase 3 sequencing proposal
+#### Relationship to Phase 3
 
 Keep the existing demands → character events → crisis chains order in §9.
-For the balance/reveal work, once separately authorized:
+The reusable result/margin and reveal are now built without changing the
+mathematics. When the Phase 3 balance pass is separately authorized, record
+margins by act and play policy alongside losses from other endings; do not
+treat reaching day 18 as equivalent to winning. Because the UI reads the
+shared helper's frozen result, later approved threshold/formula tuning does
+not require a second presentation formula. Include the reveal in the final
+Phase 3 playtest as feedback for close and comfortable outcomes.
 
-1. Establish a single reusable, pure vote-result calculation and inspectable
-   margin. It should initially reproduce the current boolean check exactly.
-2. Use that result in the Phase 3 balance pass. Record margins by act and
-   play policy, along with losses from other endings; do not treat reaching
-   day 18 as equivalent to winning.
-3. Once the vote rules are settled, implement and polish the agreed reveal.
-4. Include the reveal in final Phase 3 owner playtesting so close/comfortable
-   outcomes provide useful balance feedback.
+#### Implemented architecture and acceptance record
 
-The proposal is to design now, settle mathematics before polishing the
-animation, and test the finished presentation before signing off Phase 3.
-It is not an instruction to build a prototype or the result helper now.
-Each future slice still follows the owner's approval/playtest discipline.
+`ConfidenceVoteResult` stores act, day, Grip, Legitimacy, score, threshold,
+margin, and passed. The calculation lives in `src/game/content/endings.ts`,
+free of React/DOM. `finishDay()` first checks every higher-priority ending,
+then freezes the vote and enters `phase: 'vote'`. `Vote.tsx` animates only
+that snapshot. `completeConfidenceVote()` consumes the stored result exactly
+once; animation timers never decide gameplay and reveal ordering consumes no
+gameplay RNG. `SAVE_VERSION` bumped 9→10.
 
-#### Future implementation notes and acceptance criteria
+Integration points are `types.ts`, `state.ts`, `content/endings.ts`,
+`engine.ts::finishDay()`/`completeConfidenceVote()`, `App.tsx`, new
+`ui/screens/Vote.tsx`, styles, all phase-driving tests, and browser tools.
+Cross-run meta history remains intact.
 
-Suggested result snapshot fields: act, day, Grip, Legitimacy, score,
-threshold, margin, passed. Names and placement are suggestions. Keep
-calculation in `src/game/`, free of React/DOM; UI reads the frozen result.
-A dedicated vote phase and guarded completion transition should apply the
-outcome exactly once. Never use animation timers to decide game outcomes.
-Reveal ordering must not consume gameplay RNG or change future draws.
-
-Likely integration points: `types.ts`, `content/endings.ts`,
-`engine.ts::finishDay()`, `App.tsx`, a new screen under `src/ui/screens/`,
-and existing styles and simulation drivers. This is a future change map,
-not a record of implemented files. Adding saved phase/result fields requires
-the existing SAVE_VERSION policy; cross-run meta history must remain intact.
-
-Future verification should cover:
+Verification covers:
 - Below/equal/above each threshold, full decimal precision, and honest
   near-zero margin formatting; no independent formula in the UI.
 - Each act boundary, empty agendas, higher-priority losses, intermediate
@@ -381,9 +371,13 @@ Future verification should cover:
 - Update simulation/browser phase drivers when a vote phase is introduced,
   then run the repo's existing full verification gates.
 
-Before building, obtain the owner's choice of timing and visual direction,
-and settle whether any literal seat-count representation is wanted. Preserve
-the deterministic score check unless a separate mechanics change is approved.
+All 113 Vitest tests pass. The production build passes with only the existing
+bundle-size advisory. The full browser suite passes at 1366×700 with zero
+page errors; `tools/vote.mjs` verifies a partial timed reveal, exact frozen
+save/reload result, completed tally and factors, viewport fit, and Act 2
+continuation. The general phase-driving browser tools also traverse any vote
+they encounter without stalling. Owner playtest approval is the remaining
+step.
 
 ### 4.2 The Back Room — BOTH CHUNKS BUILT AND OWNER-APPROVED
 
@@ -1175,11 +1169,11 @@ crisis chains) are additive content/logic that layers on top of whatever
 run structure exists. Building them against the old flat-day model and then
 having to reconcile them with acts would be double work.
 
-**Proposed vote-reveal work around step 4 (documentation only):** see §4.1a.
-Once authorized, expose a reusable result/margin before balance tuning,
-settle the mathematics, then polish the agreed reveal before final Phase 3
-playtesting. This does not start Phase 3 or reorder steps 1–3. Placement
-relative to buying and the visual treatment still need an owner decision.
+**Vote reveal is built independently of Phase 3:** see §4.1a. The reusable
+result/margin and presentation now exist, but no balance value was changed.
+Use the exact recorded margins during Phase 3's later balance pass; if that
+pass changes the formula or thresholds, the reveal will display the shared
+calculation automatically. This does not start or reorder Phase 3 steps 1–3.
 
 ### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
 

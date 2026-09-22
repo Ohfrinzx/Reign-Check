@@ -40,14 +40,18 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
-**2026-09-22 — confidence-vote reveal planning only.** The owner requested
-documentation groundwork for a gradual parliamentary result reveal that
-shows the margin of survival/failure. See `docs/DESIGN_V2.md` §4.1a for
-concepts, current mechanics, proposed Phase 3 sequencing, future integration
-and verification notes. **No implementation or content additions authorized
-by this request.** The original after-buying placement and the recommended
-before-buying placement remain an open decision; the visual concept is also
-unselected. Phase 2 remains approved; Phase 3 and the reveal remain unbuilt.
+**2026-09-22 — confidence-vote reveal built; awaiting owner playtest.** The
+owner authorized the recommended division-board + clerk-tally direction.
+The reveal now runs before the Back Room, preserving the existing vote
+cutoff. `finishDay()` freezes a deterministic `ConfidenceVoteResult` and
+enters the serialisable `vote` phase; `completeConfidenceVote()` applies the
+stored pass/fail exactly once. `Vote.tsx` reveals 24 clearly-labelled clerk
+returns, the score threshold, Grip, Legitimacy, exact margin, and final stamp.
+It supports skip, reduced motion, save/reload, and screen-reader result copy.
+`SAVE_VERSION` is **10**, so version-9 in-progress runs reset; cross-run meta
+history is unaffected. All 113 tests, production build, and the full browser
+suite pass. See `docs/DESIGN_V2.md` §4.1a. This does **not** start Phase 3;
+balance changes remain unbuilt and require their own approval.
 
 **Phase 1** (playable core, then the Poster/Broadsheet rebuild) is done and
 owner-approved.
@@ -109,7 +113,7 @@ below §4.5.
   can never be locked out entirely. `shop.ts`'s `eligible()` and
   `engine.ts`'s `buyShopItem()` both check `unlockedShopItemIds` (the
   latter as a safety net, same pattern as `capBlockReason()`).
-  `SAVE_VERSION` is **9**; version-8 in-progress runs reset. New
+  `SAVE_VERSION` was **9** for this slice; version-8 in-progress runs reset. New
   `src/ui/screens/Progress.tsx` (`ProgressPanel` shared content +
   `ProgressScreen` standalone overlay) is reused in two places per the
   owner's spec: a "Roster"/"Unlocks" tab pair inside "Advisors & Deals"
