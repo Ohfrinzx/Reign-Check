@@ -1,9 +1,10 @@
-# Work in progress — confidence-vote reveal
+# Implementation record — confidence-vote reveal
 
 **Branch:** `codex/confidence-vote-reveal`
 **Base:** `20d0da908f8fd2c36ff033269cce256740bcebb1`
 **Started:** 2026-09-22
-**Status:** implementation complete and verified; ready for direct merge and owner playtest.
+**Merged:** `ed3f12b489669e77143483328e467d6c5af38c9d` into `claude/confident-meitner-lc0bgc` on 2026-09-22.
+**Status:** built, verified, playtested, and owner-approved. The owner confirmed: *"Play tested and working."*
 
 ## Authorized scope
 
@@ -18,7 +19,7 @@ The selected direction is the recommended **division board + clerk's tally** tre
 - The screen uses the light Poster/Broadsheet visual language. The Back Room remains the only dark screen.
 - Players can reveal immediately; reduced-motion users get the completed result without staged motion.
 
-## Planned integration
+## Completed integration
 
 - [x] Add a serialisable confidence-vote result and vote phase.
 - [x] Expose one pure vote calculation used by both ending logic and the reveal.
@@ -38,7 +39,7 @@ The selected direction is the recommended **division board + clerk's tally** tre
 - Full Vitest suite: **113 passed**.
 - Default browser suite: **passed** with zero page errors; general phase drivers traverse vote screens without stalling.
 
-## Resume notes
+## Future maintenance notes
 
 Start by reading `AGENTS.md`, then `docs/DESIGN_V2.md` §4.1/§4.1a.
 Primary files: `src/game/types.ts`, `src/game/content/endings.ts`,
@@ -46,4 +47,6 @@ Primary files: `src/game/types.ts`, `src/game/content/endings.ts`,
 `src/styles/index.css`, tests under `src/game/__tests__`, and phase-driving
 scripts under `tools/`.
 
-Inspect the branch diff and continue from the first unchecked step. Do not merge until the full repository gates pass.
+The implementation checklist is complete. Future vote-rule changes should
+update the pure result calculation and verify the revealed margins, save
+behavior, and act transitions. Phase 3 balance work is a separate slice.

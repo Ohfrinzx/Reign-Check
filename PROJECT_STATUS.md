@@ -1,10 +1,12 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
-## ▶ WHERE WE STOPPED — 2026-09-22 (confidence-vote reveal built)
+## ▶ WHERE WE STOPPED — 2026-09-22 (confidence-vote reveal approved)
 
-**The confidence-vote reveal is implemented and fully verified; it awaits
-owner playtest.** After the earlier documentation-only pass, the owner gave
+**The confidence-vote reveal is built, playtested, and owner-approved.**
+After the merged implementation, the owner said: *"Play tested and working.
+Please update all documentation on the REPO."* This approval closes the
+reveal slice. After the earlier documentation-only pass, the owner gave
 an explicit implementation go-ahead and allowed the recommended direction.
 The selected design is a light Poster/Broadsheet **division board + clerk's
 tally**, placed **before the Back Room** so purchases cannot retroactively
@@ -1021,8 +1023,8 @@ of this file.
 
 ## 4. What is NOT built yet
 
-- **Confidence-vote reveal:** built and verified; awaiting owner playtest.
-  See DESIGN_V2 §4.1a. Balance values were deliberately left unchanged.
+- **Confidence-vote reveal:** built, verified, playtested, and owner-approved.
+  See DESIGN_V2 §4.1a. Balance values were left unchanged.
 
 **Nothing in the roguelike layer (`docs/DESIGN_V2.md` §4) remains unbuilt
 or unplaytested.** Acts (§4.1), the Back Room shop (§4.2), mandates (§4.3),

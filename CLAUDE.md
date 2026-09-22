@@ -19,7 +19,7 @@ status also lives in `AGENTS.md` §2.
 
 ## Where the project actually is
 
-**2026-09-22 — confidence-vote reveal built; awaiting owner playtest.** The
+**2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
 The reveal runs before the Back Room and preserves the existing deterministic
 vote cutoff. The engine freezes a serialisable `ConfidenceVoteResult`, enters
@@ -27,8 +27,9 @@ the new `vote` phase, and applies that stored outcome exactly once when the
 player continues. `Vote.tsx` supplies the timed/skip/reduced-motion reveal,
 exact margin and accessible final announcement. `SAVE_VERSION` is 10, so
 version-9 in-progress runs reset; meta history remains. All 113 tests, build,
-and the full browser suite pass. See `docs/DESIGN_V2.md` §4.1a. Phase 3 has
-not started; its balance work still needs separate approval.
+and the full browser suite pass. The owner confirmed: *"Play tested and
+working."* See `docs/DESIGN_V2.md` §4.1a. Phase 3 has not started; its
+balance work still needs a separate go-ahead.
 
 **PHASE 1 (playable core + the Poster/Broadsheet rebuild) IS DONE AND
 OWNER-APPROVED.** The owner played the real build and said: *"Ok everything

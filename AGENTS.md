@@ -40,7 +40,7 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
-**2026-09-22 — confidence-vote reveal built; awaiting owner playtest.** The
+**2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
 The reveal now runs before the Back Room, preserving the existing vote
 cutoff. `finishDay()` freezes a deterministic `ConfidenceVoteResult` and
@@ -50,8 +50,9 @@ returns, the score threshold, Grip, Legitimacy, exact margin, and final stamp.
 It supports skip, reduced motion, save/reload, and screen-reader result copy.
 `SAVE_VERSION` is **10**, so version-9 in-progress runs reset; cross-run meta
 history is unaffected. All 113 tests, production build, and the full browser
-suite pass. See `docs/DESIGN_V2.md` §4.1a. This does **not** start Phase 3;
-balance changes remain unbuilt and require their own approval.
+suite pass. The owner confirmed: *"Play tested and working."* See
+`docs/DESIGN_V2.md` §4.1a. This approval closes the reveal slice; Phase 3
+balance changes remain unbuilt and need their own go-ahead.
 
 **Phase 1** (playable core, then the Poster/Broadsheet rebuild) is done and
 owner-approved.

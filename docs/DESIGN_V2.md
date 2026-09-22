@@ -1,5 +1,11 @@
 # Design V2 — simplification and the roguelike turn
 
+**Current update (2026-09-22): The confidence-vote reveal (§4.1a) is built,
+playtested, and owner-approved.** The owner reported: *"Play tested and
+working."* This approval covers the reveal slice. Phase 3 has not begun;
+its balance pass and other systems still require a separate go-ahead.
+The Phase 2 account below records its earlier completion.
+
 **Current status (2026-09-21, later session): Phase 1 and ALL of Phase 2
 (§4.1–§4.5, every step) are OWNER-APPROVED. Owner, verbatim: "Playtest
 good, ready for next slice. Won't be doing it now. Just update the
@@ -243,14 +249,14 @@ each act boundary; `GameState.day` itself, and everything else that reads it
 (the vote check above, saves, `dateLine()`), is untouched.
 
 
-### 4.1a Confidence-vote reveal — BUILT, AWAITING OWNER PLAYTEST (2026-09-22)
+### 4.1a Confidence-vote reveal — BUILT AND OWNER-APPROVED (2026-09-22)
 
 **Status and authorization:** After first authorizing documentation only,
 the owner explicitly said to begin implementation and allowed the recommended
 direction. The selected treatment is the division-board + clerk's-tally
-hybrid, placed before buying. The feature is built and verified but has not
-yet received owner playtest approval. No content or balance values changed,
-and this did not start Phase 3.
+hybrid, placed before buying. The feature passed automated verification and
+the owner confirmed after playtesting that it is working. No content or
+balance values changed, and this did not start Phase 3.
 
 #### Current mechanic to preserve as the baseline
 
@@ -376,8 +382,8 @@ bundle-size advisory. The full browser suite passes at 1366×700 with zero
 page errors; `tools/vote.mjs` verifies a partial timed reveal, exact frozen
 save/reload result, completed tally and factors, viewport fit, and Act 2
 continuation. The general phase-driving browser tools also traverse any vote
-they encounter without stalling. Owner playtest approval is the remaining
-step.
+they encounter without stalling. The owner then playtested and approved the
+result: *"Play tested and working."*
 
 ### 4.2 The Back Room — BOTH CHUNKS BUILT AND OWNER-APPROVED
 
