@@ -1156,8 +1156,9 @@ Everything here is genuinely deferred (needs an explicit go-ahead per
    §4). Issue dated, formal demands when patience drops, escalating murmur →
    formal → ultimatum, spawn a card when one expires. `FactionState.demand`
    and the `FactionDemand` type already exist as the hook.
-   **BUILT 2026-09-22, AWAITING PLAYTEST — see "Phase 3 step 1, as built"
-   below.** The owner changed the presentation from "spawn a card" to
+   **BUILT AND OWNER-APPROVED 2026-09-22 — see "Phase 3 step 1, as built"
+   below.** Owner noted demands feel relatively rare; measured at ~1.4–2.1
+   per run (first around day 6–9) and parked for the balance pass. The owner changed the presentation from "spawn a card" to
    pop-ups plus an expandable side panel, with Meet and a not-always-
    accepted bribe, and asked that an unmet ultimatum can end in a coup or
    another removal attempt, depending on standing and conditions.

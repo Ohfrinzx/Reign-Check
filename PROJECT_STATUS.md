@@ -3,6 +3,16 @@
 
 ## ▶ WHERE WE STOPPED — 2026-09-22, later (PHASE 3 STEP 1: FACTION DEMANDS — BUILT, AWAITING PLAYTEST)
 
+**UPDATE (same day): step 1 is PLAYTESTED AND OWNER-APPROVED.** Owner,
+verbatim: *"Ready all works. demands seemed relatively rare not sure if this
+is normal? This can be adjusted in the balancing phase so go ahead and move
+forward."* Measured afterwards (120 simulated runs per bot, no meeting or
+bribing): about 1.4–2.1 demands per run, at least one in 93–100% of runs,
+the first one around day 6–9. That is "relatively rare" by design — only a
+faction below 35 patience asks, and patience drains slowly. **Frequency is
+parked for the balance pass (step 4)**: the levers are `ISSUE_BELOW`,
+`STAGE_DAYS`, `MAX_LIVE`, and how fast patience drains in `dayUpkeep()`.
+
 **Phase 3 has started, one slice at a time. Step 1, faction demands, is
 built and verified; it now needs the owner's playtest before step 2.**
 Before starting, the branch was checked: the approved vote-reveal build

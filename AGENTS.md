@@ -40,6 +40,16 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
+**UPDATE (same day): step 1 is PLAYTESTED AND OWNER-APPROVED.** Owner,
+verbatim: *"Ready all works. demands seemed relatively rare not sure if this
+is normal? This can be adjusted in the balancing phase so go ahead and move
+forward."* Measured afterwards (120 simulated runs per bot, no meeting or
+bribing): about 1.4–2.1 demands per run, at least one in 93–100% of runs,
+the first one around day 6–9. That is "relatively rare" by design — only a
+faction below 35 patience asks, and patience drains slowly. **Frequency is
+parked for the balance pass (step 4)**: the levers are `ISSUE_BELOW`,
+`STAGE_DAYS`, `MAX_LIVE`, and how fast patience drains in `dayUpkeep()`.
+
 **2026-09-22 (later) — PHASE 3 STEP 1, FACTION DEMANDS: BUILT, AWAITING
 OWNER PLAYTEST.** The owner gave the go-ahead for Phase 3 and specified the
 design: demands arrive as **pop-ups**, are **stored in a side panel** the
