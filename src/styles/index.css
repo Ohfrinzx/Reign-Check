@@ -1383,3 +1383,18 @@ abbr.term{
 .fav-targets label small{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-soft);line-height:1.35}
 .fav-line{font-family:var(--sans);font-weight:700;font-size:13px;color:var(--teal);margin:8px 0 2px}
 .fav-deltas{padding:8px 0 0}
+
+/* balance slice D — factions remember, and it changes their demands */
+.fac-mem{font-family:var(--mono);font-size:10px;line-height:1.35;margin-top:4px;letter-spacing:.01em}
+.fac-mem.pos{color:var(--teal)}
+.fac-mem.neg{color:var(--red)}
+.dm-because{
+  font-family:var(--mono);font-size:11px;color:var(--teal);margin:0 0 6px;letter-spacing:.01em;
+}
+.dm-memory{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:3px}
+.dm-memory li{font-family:var(--mono);font-size:10.5px;line-height:1.4;padding-left:8px;border-left:3px solid var(--ash)}
+.dm-memory li b{font-family:var(--black);font-weight:400;text-transform:uppercase;letter-spacing:.08em}
+.dm-memory li.cheaper{border-color:var(--teal)}
+.dm-memory li.dearer{border-color:var(--mustard)}
+.dm-memory li.no-bribe{border-color:var(--red)}
+

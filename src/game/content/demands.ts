@@ -37,6 +37,12 @@ export interface DemandDef {
   /** optional extra requirement beyond having the money */
   canMeet?: (s: GameState) => boolean;
   lockedText?: string;
+  /**
+   * Balance slice D: a mark id (content/consequences.ts). A demand with
+   * this is never drawn at random: it is issued the morning after you make
+   * that decision (demands.ts issueTriggered()), and shows "Because you …".
+   */
+  triggeredBy?: string;
 }
 
 /**
@@ -237,7 +243,154 @@ export const DEMANDS: DemandDef[] = [
   },
 ];
 
-export const DEMAND_MAP: Record<string, DemandDef> = Object.fromEntries(DEMANDS.map((d) => [d.id, d]));
+/**
+ * BALANCE SLICE D — demands a faction makes BECAUSE of something you did.
+ * Each is issued the morning after its mark is made (if that faction has no
+ * live demand; otherwise as soon as it has room, within 6 days), shows
+ * "Because you …" and is never drawn at random.
+ */
+export const TRIGGERED_DEMANDS: DemandDef[] = [
+  {
+    id: 'street-release-vel',
+    faction: 'chorus',
+    from: 'vel',
+    title: 'The Street wants Sanna Vel released',
+    ask: 'Forty thousand people signed for Article 19\'s repeal. Now they want the woman who carried the petition out of a Sable Office cell, today.',
+    meetLabel: 'Release her.',
+    meetHint: 'The Street calms down. Sarran takes it personally.',
+    meetCost: 0.5,
+    meet: {
+      stats: { legitimacy: 4 },
+      hidden: { unrest: -10, fear: -5 },
+      factions: { sable: { loyalty: -8 } },
+      characters: { vel: { influence: 6 }, sarran: { loyalty: -5 } },
+    },
+    meetText: 'Vel walks out at dawn and thanks the crowd, not you. The Sable Office files a complaint about "precedent".',
+    triggeredBy: 'arrested-vel',
+  },
+  {
+    id: 'street-cold-week',
+    faction: 'chorus',
+    from: 'vel',
+    title: 'The Street wants the cold week paid back',
+    ask: 'Households went nine days on four-hour gas cuts while the smelters ran. The Street wants every household paid back on its next bill.',
+    meetLabel: 'Pay the households back.',
+    meetHint: 'Fair, visible and expensive. The Elites point out that industry kept the lights on.',
+    meetCost: 2,
+    meet: {
+      stats: { support: 4 },
+      hidden: { unrest: -6 },
+      factions: { concord: { loyalty: -4 } },
+    },
+    meetText: 'Every gas bill next month has a line that says "Returned by the government". People frame them.',
+    triggeredBy: 'rationed-homes',
+  },
+  {
+    id: 'street-channel-seven-deal',
+    faction: 'chorus',
+    from: 'vel',
+    title: 'The Street wants the Channel Seven deal published',
+    ask: 'Somebody counted the airtime. The Street wants the contract you signed with Loz published in full, with the price on page one.',
+    meetLabel: 'Publish the contract.',
+    meetHint: 'Honest, and embarrassing. Loz will not enjoy seeing his price in print.',
+    meetCost: 0.3,
+    meet: {
+      stats: { legitimacy: 5, support: -2 },
+      hidden: { cult: -6 },
+      factions: { concord: { loyalty: -3 } },
+      characters: { loz: { loyalty: -6 } },
+    },
+    meetText: 'The contract runs on four front pages. The line people quote is "eleven minutes a night of looking competent".',
+    triggeredBy: 'bought-news',
+  },
+  {
+    id: 'workers-gorsk-inquiry',
+    faction: 'combine',
+    from: 'hess',
+    title: 'The unions want the officers at Gorsk charged',
+    ask: 'Hess wants the officers who led the companies onto the Gorsk road named, suspended and put before a court. Not an inquiry. A court.',
+    meetLabel: 'Name them and suspend them.',
+    meetHint: 'The unions see justice. The army sees a government that sends soldiers and then blames them.',
+    meetCost: 1,
+    meet: {
+      stats: { legitimacy: 3 },
+      hidden: { unrest: -8, coup: 5 },
+      factions: { staff: { loyalty: -8 } },
+    },
+    meetText: 'Three officers are suspended on full pay. Hess says it is a start. Varkov says nothing, for a long time.',
+    triggeredBy: 'soldiers-gorsk',
+  },
+  {
+    id: 'workers-port-jobs',
+    faction: 'combine',
+    from: 'hess',
+    title: 'The dockers want their jobs guaranteed',
+    ask: 'Sereth now own forty per cent of the Mavro terminal. The dockers want a written guarantee that no Velmorran job there is cut for five years.',
+    meetLabel: 'Guarantee the jobs.',
+    meetHint: 'The dockers relax. Sereth\'s representative asks to see the clause, twice.',
+    meetCost: 2.5,
+    meet: {
+      stats: { stability: 3 },
+      hidden: { foreign: 3 },
+      factions: { concord: { loyalty: -4 } },
+    },
+    meetText: 'The guarantee is signed on the quayside. Sereth\'s lawyers send a letter that uses the word "unexpected" four times.',
+    triggeredBy: 'sold-port',
+  },
+  {
+    id: 'money-audit-limits',
+    faction: 'concord',
+    from: 'adamek',
+    title: 'The Elites want the audit kept to the Free Zone',
+    ask: 'Adamek has heard the Free Zone audit may "widen". The Elites want it limited in writing to the Zone\'s tax filings, and nothing else.',
+    meetLabel: 'Limit the audit in writing.',
+    meetHint: 'The Elites relax. Grebs files the letter where she keeps the letters she will need later.',
+    meetCost: 1,
+    meet: {
+      stats: { legitimacy: -3 },
+      hidden: { corruption: 4 },
+      factions: { grey: { loyalty: -6 } },
+      characters: { grebs: { trust: -5 } },
+    },
+    meetText: 'The letter is signed. The audit carries on, inside a fence.',
+    triggeredBy: 'audited-ilvet',
+  },
+  {
+    id: 'security-article-19-replacement',
+    faction: 'sable',
+    from: 'sarran',
+    title: 'Security wants something to replace Article 19',
+    ask: 'Sarran says the Office "cannot keep anyone safe with its hands tied". She wants a 72-hour holding power, limited, with a judge\'s signature.',
+    meetLabel: 'Grant the 72-hour power.',
+    meetHint: 'Security gets a tool back. The Street notices that it looks a lot like the old one.',
+    meetCost: 1,
+    meet: {
+      stats: { security: 5, legitimacy: -4 },
+      factions: { chorus: { loyalty: -8 } },
+      regime: { repression: 3 },
+    },
+    meetText: 'The 72-hour power passes. Vel calls it "Article 19, in a smaller coat".',
+    triggeredBy: 'repealed-19',
+  },
+  {
+    id: 'army-hadem-hardship',
+    faction: 'staff',
+    from: 'tern',
+    title: 'The army wants hardship pay for Hadem',
+    ask: 'The companies you sent to Hadem are sleeping in a school. Tern wants hardship pay for every soldier there, backdated to the day they arrived.',
+    meetLabel: 'Pay the hardship allowance.',
+    meetHint: 'The soldiers are grateful. The border region notices you are paying to stay.',
+    meetCost: 1.5,
+    meet: {
+      stats: { military: 3 },
+      hidden: { separatism: 3 },
+    },
+    meetText: 'The allowance is paid on Friday. Tern sends a handwritten note, as he always does.',
+    triggeredBy: 'troops-hadem',
+  },
+];
+
+export const DEMAND_MAP: Record<string, DemandDef> = Object.fromEntries([...DEMANDS, ...TRIGGERED_DEMANDS].map((d) => [d.id, d]));
 
 export const FACTION_MOVES: Partial<Record<FactionId, FactionMoveDef>> = {
   staff: {

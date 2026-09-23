@@ -172,7 +172,7 @@ describe('simulation', () => {
       let guard = 0;
       while (s.day <= 4 && s.phase !== 'ended' && guard++ < 400) {
         if (s.phase === 'briefing') s = beginStages(s);
-        else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
+        else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!.id);
         else if (s.phase === 'resolve') s = continueAfterResolve(s);
         else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
         else if (s.phase === 'vote') s = completeConfidenceVote(s);

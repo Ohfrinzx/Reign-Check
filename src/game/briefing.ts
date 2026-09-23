@@ -5,6 +5,7 @@ import { STAGE_META, lookupCard, alertPressure } from './engine';
 import { band } from './stats';
 import { DEMAND_MAP } from './content/demands';
 import { STAGE_LABEL, hostileActionToday } from './demands';
+import { becauseText, hasMark } from './consequences';
 import { characterWarnings } from './characterEvents';
 import { crisisBriefing } from './crises';
 
@@ -143,7 +144,7 @@ export function buildBriefing(s: GameState): Briefing {
         kind: 'issue', source: shortName,
         severity: f.demand.severity === 'ultimatum' ? 3 : f.demand.severity === 'formal' ? 2 : 1,
         headline: `${STAGE_LABEL[f.demand.severity]}: ${live.title}`,
-        text: `${live.ask} Due by day ${f.demand.dueDay}. Open it from the Demands panel.`,
+        text: `${live.triggeredBy && hasMark(s, live.triggeredBy) ? `${becauseText(s, live.triggeredBy)}. ` : ''}${live.ask} Due by day ${f.demand.dueDay}. Open it from the Demands panel.`,
       });
     } else if (f.patience < 30) {
       items.push({

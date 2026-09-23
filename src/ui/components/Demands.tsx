@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { becauseText, demandReactions, hasMark } from '../../game/consequences';
 import type { DemandNotice, FactionId, GameState } from '../../game/types';
 import {
   STAGE_LABEL, bribeBlockReason, bribeCost, bribeOddsWord, dangerWord, factionLabel,
@@ -47,6 +48,8 @@ export function DemandDetail({ s, live, actions }: { s: GameState; live: LiveDem
   const meetBlock = meetBlockReason(s, faction);
   const bCost = bribeCost(s, faction);
   const bribeBlock = bribeBlockReason(s, faction);
+  // The no-bribe reason shows under the Bribe button itself (bribeBlockReason).
+  const reactions = demandReactions(s, faction).filter((r) => r.kind !== 'no-bribe');
   const next = demand.severity === 'murmur'
     ? 'If ignored, this becomes a formal demand and they lose support for you.'
     : demand.severity === 'formal'
@@ -56,10 +59,23 @@ export function DemandDetail({ s, live, actions }: { s: GameState; live: LiveDem
   return (
     <div className="dm-detail">
       {who && <div className="dm-from">From {who.name}, {who.title}</div>}
+      {def.triggeredBy && hasMark(s, def.triggeredBy) && (
+        <div className="dm-because">{becauseText(s, def.triggeredBy)}.</div>
+      )}
       <p className="dm-ask">{def.ask}</p>
       <div className={`dm-next ${demand.severity}`}>{next}</div>
       {demand.severity === 'ultimatum' && move && (
         <div className="dm-protect">What protects you: {move.protectedBy}.</div>
+      )}
+
+      {reactions.length > 0 && (
+        <ul className="dm-memory">
+          {reactions.map((r) => (
+            <li key={r.text} className={r.kind}>
+              <b>{r.kind === 'cheaper' ? 'Cheaper' : 'Dearer'}</b> · {r.text}
+            </li>
+          ))}
+        </ul>
       )}
 
       <div className="dm-actions">

@@ -1,7 +1,8 @@
 import type { FactionDemand, FactionId, GameState, Rng } from './types';
 import { makeRng } from './rng';
 import { applyEffects } from './effects';
-import { DEMANDS, DEMAND_MAP, FACTION_MOVES, HOSTILE_ACTIONS } from './content/demands';
+import { DEMANDS, DEMAND_MAP, FACTION_MOVES, HOSTILE_ACTIONS, TRIGGERED_DEMANDS } from './content/demands';
+import { becauseText, hasMark, markFlag, meetMultiplier, noBribeBecause } from './consequences';
 import type { DemandDef, FactionMoveDef } from './content/demands';
 import { DISPLAY_FACTIONS, isHostile } from './display';
 import { forcedEnding } from './content/endings';
@@ -107,7 +108,8 @@ export function meetCost(s: GameState, faction: FactionId): number {
   const d = s.factions[faction]?.demand;
   const def = d && DEMAND_MAP[d.id];
   if (!d || !def) return 0;
-  return Math.round(def.meetCost * PRICE_MULT[d.severity] * 10) / 10;
+  // Balance slice D: what this faction remembers can make it cheaper or dearer.
+  return Math.round(def.meetCost * PRICE_MULT[d.severity] * meetMultiplier(s, faction) * 10) / 10;
 }
 
 /** Why the Meet button is disabled, in plain words — or undefined if it isn't. */
@@ -148,6 +150,7 @@ export function bribeChance(s: GameState, faction: FactionId): number {
 
 /** Plain-language odds — the player never sees the number (ground rule 6). */
 export function bribeOddsWord(s: GameState, faction: FactionId): string {
+  if (noBribeBecause(s, faction)) return 'They will not take one.';
   const p = bribeChance(s, faction);
   return p >= 0.65 ? 'They will probably take it.' : p >= 0.4 ? 'They might take it.' : 'They will probably refuse.';
 }
@@ -156,6 +159,8 @@ export function bribeBlockReason(s: GameState, faction: FactionId): string | und
   const d = s.factions[faction]?.demand;
   if (!d) return 'There is no demand to delay.';
   if (!canActOnDemands(s)) return 'Finish the current item first.';
+  const never = noBribeBecause(s, faction);
+  if (never) return never;
   if (d.bribeRefused) return 'They already refused a bribe. Try again if it escalates.';
   const cost = bribeCost(s, faction);
   if (cost > s.stats.treasury) return `Not enough money: needs $${cost.toFixed(1)}B.`;
@@ -247,10 +252,40 @@ export function tickDemands(s: GameState, rng: Rng): string[] {
   }
 
   if (!s.ending) {
-    const issued = maybeIssue(s, rng);
+    const issued = issueTriggered(s) ?? maybeIssue(s, rng);
     if (issued) notes.push(issued);
   }
   return notes;
+}
+
+/** Balance slice D: how long after a decision its triggered demand can still arrive. */
+const TRIGGER_WINDOW = 6;
+
+/**
+ * Issue a demand that a recent decision triggered (TRIGGERED_DEMANDS in
+ * content/demands.ts): the morning after, or as soon as that faction has no
+ * live demand, within TRIGGER_WINDOW days. Ignores patience and cooldown —
+ * the faction is reacting to what you did — but not MAX_LIVE. One a morning.
+ */
+function issueTriggered(s: GameState): string | undefined {
+  if (liveDemands(s).length >= MAX_LIVE) return undefined;
+  for (const def of TRIGGERED_DEMANDS) {
+    const mark = def.triggeredBy!;
+    if (!hasMark(s, mark) || s.flags[`demandUsed:${def.id}`]) continue;
+    const age = s.day - s.flags[markFlag(mark)];
+    if (age < 1 || age > TRIGGER_WINDOW) continue;
+    const f = s.factions[def.faction];
+    if (f.demand) continue;
+    f.demand = { id: def.id, issuedDay: s.day, dueDay: s.day + STAGE_DAYS, severity: 'murmur', bribes: 0 };
+    s.flags[`demandUsed:${def.id}`] = 1;
+    s.demandNotices.push({ faction: def.faction, kind: 'issued', day: s.day });
+    s.log.push({
+      day: s.day, kind: 'event', title: `${factionLabel(def.faction)}: a request`,
+      text: `${def.title}. ${becauseText(s, mark)}. Due by day ${s.day + STAGE_DAYS}.`, tone: 'neutral',
+    });
+    return `${factionLabel(def.faction)} made a request: ${def.title}.`;
+  }
+  return undefined;
 }
 
 function maybeIssue(s: GameState, rng: Rng): string | undefined {

@@ -46,7 +46,9 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
             an offer, a bill. You pick an option. There is no undo, and most choices solve one problem
             by creating another one later. Some decisions go <b>on the record</b> (listed on the right):
             later cards will offer a new option, block one, or play out differently because of them,
-            and say so with a &ldquo;Because you&hellip;&rdquo; note. The order of the options changes every run.
+            and say so with a &ldquo;Because you&hellip;&rdquo; note. The factions remember too: each one lists
+            what it remembers under its bar, and it may make a demand because of it, charge you more or less,
+            or refuse your bribes. The order of the options changes every run.
           </p>
         </Section>
 

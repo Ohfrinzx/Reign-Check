@@ -92,8 +92,45 @@ try {
   const ask = opts.filter({ hasText: 'Ask the question. Publish' });
   assert.match(await ask.locator('.because').innerText(), /CHANGED · Because you built the third Hadem road \(day 3\)/i);
 
+  /* ---- 5. balance slice D: factions remember, and make demands because of it */
+  await page.goto('http://127.0.0.1:5173/', { waitUntil: 'networkidle' });
+  await page.evaluate(async () => {
+    localStorage.clear();
+    const { createGame } = await import('/src/game/state.ts');
+    const { prepareDay } = await import('/src/game/engine.ts');
+    const { saveGame } = await import('/src/game/save.ts');
+    let s = createGame({ seed: 8182, leaderName: 'Adrin Vo', mandateId: 'accident' });
+    s.day = 7;
+    for (const k of Object.keys(s.hidden)) s.hidden[k] = 10;
+    for (const f of Object.values(s.factions)) { f.patience = 80; f.loyalty = 55; }
+    for (const c of Object.values(s.characters)) { c.loyalty = 50; c.plotting = 0; c.memory = []; }
+    s.flags['mark:arrested-vel'] = 6;
+    s.flags['mark:soldiers-gorsk'] = 5;
+    s = prepareDay(s);
+    s.factions.combine.demand = { id: 'workers-mine-wages', issuedDay: 7, dueDay: 9, severity: 'murmur', bribes: 0 };
+    saveGame(s);
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.getByRole('button', { name: /^Continue — Day/ }).click();
+  const pop = page.locator('.demand-pop', { hasText: 'Sanna Vel released' });
+  await pop.waitFor();
+  assert.match(await pop.locator('.dm-because').innerText(), /Because you had Sanna Vel arrested live on air \(day 6\)/);
+  assert.match(await pop.locator('.dm-block').last().innerText(), /Because you had Sanna Vel arrested live on air \(day 6\): nobody on the Street/);
+  assert.match(await pop.innerText(), /They will not take one\./);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: shotPath('K-faction-demand.png') });
+  while (await page.locator('.demand-pop').count()) await page.locator('.demand-pop .dm-foot .btn').first().click();
+  const workers = page.locator('.rail .fac', { hasText: 'WORKERS' });
+  assert.match((await workers.locator('.fac-mem.neg').allInnerTexts()).join(' | '), /Remembers: you sent soldiers to the Gorsk mines \(day 5\)/i);
+  const row = page.locator('.demands-panel .dm-row', { hasText: 'miners want a wage rise' });
+  await row.locator('.dm-head').click();
+  const bribe = row.getByRole('button', { name: /Bribe for/ });
+  assert.ok(await bribe.isDisabled(), 'A no-bribe memory should disable the bribe');
+  assert.match(await row.locator('.dm-block').last().innerText(), /the unions will not take money/);
+  await page.screenshot({ path: shotPath('K-faction-memory.png') });
+
   assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-  console.log('CONSEQUENCES: on-the-record result + rail, unlocked option (click + key), locked with reason, changed note all OK');
+  console.log('CONSEQUENCES: on-the-record result + rail, unlocked option (click + key), locked with reason, changed note, faction-triggered demand, faction memory, no-bribe all OK');
   console.log('--- ERRORS (0) ---');
 } finally {
   await browser.close();

@@ -1,11 +1,11 @@
-import type { GameState } from '../../game/types';
+import type { FactionId, GameState } from '../../game/types';
 import { DISPLAY_FACTIONS, factionMood } from '../../game/display';
 import { buildThreats } from '../../game/briefing';
 import { fill } from '../../game/text';
 import { Glossed } from './Prose';
 import { Pocket } from '../screens/Shop';
 import { DemandsPanel } from './Demands';
-import { marksMade } from '../../game/consequences';
+import { factionMemories, marksMade } from '../../game/consequences';
 import type { DemandActions } from './Demands';
 /**
  * The right-hand rail: Files (factions), Demands (Phase 3), On Your Desk
@@ -23,6 +23,7 @@ export function Rail({ s, onUseFavour, demandActions }: {
   const threats = buildThreats(s, 3);
   const diary = s.scheduled.filter((d) => d.visible).slice(0, 5);
   const record = marksMade(s);
+  const memories = (id: FactionId) => factionMemories(s, id).slice(0, 2);
 
   return (
     <aside className="rail">
@@ -39,6 +40,12 @@ export function Rail({ s, onUseFavour, demandActions }: {
                 <span className={`md tone-${mood.tone}`}>{mood.word}</span>
               </div>
               <div className="bar"><div className={`bg-${mood.tone}`} style={{ width: `${Math.max(3, f.loyalty)}%`, height: '100%' }} /></div>
+              {/* balance slice D: what this faction remembers about you (newest first) */}
+              {memories(def.id).map((m) => (
+                <div className={`fac-mem ${m.weight > 0 ? 'pos' : 'neg'}`} key={m.id}>
+                  {m.weight > 0 ? '▲' : '▼'} Remembers: you {m.because} (day {m.day})
+                </div>
+              ))}
             </div>
           );
         })}

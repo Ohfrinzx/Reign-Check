@@ -21,7 +21,7 @@ import { tickCharacterEvents } from './characterEvents';
 import { CHARACTER_EVENT_CARDS } from './content/characterEvents';
 import { tickCrises } from './crises';
 import { spendFavour } from './favours';
-import { shownOptions, marksSetBy, becauseText, hasMark, markFlag } from './consequences';
+import { shownOptions, marksSetBy, becauseText, hasMark, markFlag, tickFactionMemory } from './consequences';
 import { CRISIS_CARDS } from './content/crises';
 import type { ShopItemDef } from './content/shop';
 import {
@@ -319,6 +319,10 @@ function dayUpkeep(s: GameState, rng: Rng) {
     if (id === 'staff' && s.hidden.coup > 50) f.power = clamp(f.power + 0.6);
     if (id === 'chorus' && s.hidden.unrest > 50) f.influence = clamp(f.influence + 0.8);
   }
+
+  // --- factions remember what you did: for a few mornings after a decision
+  // they have feelings about, their mood keeps drifting (balance slice D)
+  tickFactionMemory(s, rng);
 
   // --- factions at the bottom of their bar work against you every morning
   // (balance slice B — rules in demands.ts, words in content/demands.ts)

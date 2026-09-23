@@ -1,4 +1,4 @@
-import type { CardOutcome, ConsequenceKind } from '../types';
+import type { CardOutcome, ConsequenceKind, FactionId } from '../types';
 
 /**
  * BALANCE SLICE C — CONSEQUENCES (content only; the rules live in
@@ -21,6 +21,13 @@ export interface MarkDef {
   /** finishes the sentence "Because you …" — past tense, plain words */
   because: string;
   setBy: { card: string; option: string }[];
+  /**
+   * How each visible faction feels about it (balance slice D): +1/+2 pleased,
+   * −1/−2 resentful. The faction shows it under "Remembers" on its Files
+   * row, and its mood drifts that way for a few mornings (consequences.ts
+   * tickFactionMemory()). Only the five visible factions (display.ts).
+   */
+  factions?: Partial<Record<FactionId, number>>;
 }
 
 export interface ConsequenceDef {
@@ -37,35 +44,170 @@ export interface ConsequenceDef {
   outcome?: CardOutcome;
   /** lock only: why it is off the table, after "Because you …:" */
   lockedText?: string;
+  /** optional: the faction whose memory this is — the note then ends "— the <Faction> remember" */
+  faction?: FactionId;
+}
+
+/**
+ * BALANCE SLICE D — how a faction's memory changes the way its DEMANDS can
+ * be handled (demands.ts reads this through consequences.ts):
+ *   cheaper  — meeting costs less (×0.6)
+ *   dearer   — meeting costs more (×1.5)
+ *   no-bribe — they will not take a bribe at all
+ * Shown in the demand pop-up and panel as "Because you …: <text>".
+ */
+export interface DemandReactionDef {
+  mark: string;
+  faction: FactionId;
+  kind: 'cheaper' | 'dearer' | 'no-bribe';
+  text: string;
 }
 
 export const MARKS: MarkDef[] = [
-  { id: 'bought-news', because: 'paid Loz $5 billion for Channel Seven\'s coverage', setBy: [{ card: 'channel-seven', option: 'buy' }] },
-  { id: 'threatened-loz', because: 'threatened Loz\'s broadcast licence', setBy: [{ card: 'channel-seven', option: 'threaten' }] },
-  { id: 'arrested-vel', because: 'had Sanna Vel arrested live on air', setBy: [{ card: 'student-petition', option: 'arrest' }] },
-  { id: 'repealed-19', because: 'repealed Article 19', setBy: [{ card: 'student-petition', option: 'repeal' }] },
-  { id: 'audited-ilvet', because: 'ordered the Free Zone audit', setBy: [{ card: 'ilvet-audit', option: 'audit' }] },
+  {
+    id: 'bought-news',
+    because: 'paid Loz $5 billion for Channel Seven\'s coverage',
+    setBy: [{ card: 'channel-seven', option: 'buy' }],
+    factions: { chorus: -1, concord: 1 },
+  },
+  {
+    id: 'threatened-loz',
+    because: 'threatened Loz\'s broadcast licence',
+    setBy: [{ card: 'channel-seven', option: 'threaten' }],
+    factions: { chorus: -1, concord: -1, sable: 1 },
+  },
+  {
+    id: 'arrested-vel',
+    because: 'had Sanna Vel arrested live on air',
+    setBy: [{ card: 'student-petition', option: 'arrest' }],
+    factions: { chorus: -2, combine: -1, sable: 1 },
+  },
+  {
+    id: 'repealed-19',
+    because: 'repealed Article 19',
+    setBy: [{ card: 'student-petition', option: 'repeal' }],
+    factions: { chorus: 2, sable: -2 },
+  },
+  {
+    id: 'audited-ilvet',
+    because: 'ordered the Free Zone audit',
+    setBy: [{ card: 'ilvet-audit', option: 'audit' }],
+    factions: { concord: -2 },
+  },
+  {
+    id: 'took-gift',
+    because: 'took Adamek\'s $4 billion welcome gift',
+    setBy: [{ card: 'welcome-gift', option: 'accept' }],
+    factions: { concord: 1, chorus: -1 },
+  },
   {
     id: 'walked-dovra',
     because: 'walked the Dovra kilometre in the rain',
     setBy: [{ card: 'saint-dovra', option: 'walk' }, { card: 'saint-dovra', option: 'expand' }, { card: 'dovra-day-weather', option: 'walk' }],
+    factions: { chorus: 1 },
   },
-  { id: 'car-dovra', because: 'took the car on Dovra Day', setBy: [{ card: 'saint-dovra', option: 'car' }, { card: 'dovra-day-weather', option: 'car' }] },
-  { id: 'built-road', because: 'built the third Hadem road', setBy: [{ card: 'hadem-road', option: 'build' }] },
-  { id: 'troops-hadem', because: 'sent troops to Hadem instead of a road', setBy: [{ card: 'hadem-road', option: 'garrison' }] },
-  { id: 'asked-widow', because: 'let Krast\'s widow decide his funeral', setBy: [{ card: 'state-funeral', option: 'ask-widow' }] },
-  { id: 'blamed-prisoner', because: 'blamed a man in custody for the stairwell', setBy: [{ card: 'stairwell-question', option: 'blame' }] },
-  { id: 'sold-port', because: 'sold forty per cent of the Mavro port to Sereth', setBy: [{ card: 'sereth-offer', option: 'all' }] },
-  { id: 'refused-miners', because: 'quoted the strike law at Hess', setBy: [{ card: 'gorsk-strike-notice', option: 'refuse' }] },
-  { id: 'soldiers-gorsk', because: 'sent soldiers to the Gorsk mines', setBy: [{ card: 'strike-begins', option: 'soldiers' }] },
+  {
+    id: 'car-dovra',
+    because: 'took the car on Dovra Day',
+    setBy: [{ card: 'saint-dovra', option: 'car' }, { card: 'dovra-day-weather', option: 'car' }],
+    factions: { chorus: -1 },
+  },
+  {
+    id: 'built-road',
+    because: 'built the third Hadem road',
+    setBy: [{ card: 'hadem-road', option: 'build' }],
+    factions: { combine: 1 },
+  },
+  {
+    id: 'troops-hadem',
+    because: 'sent troops to Hadem instead of a road',
+    setBy: [{ card: 'hadem-road', option: 'garrison' }],
+    factions: { staff: 1, chorus: -1 },
+  },
+  {
+    id: 'asked-widow',
+    because: 'let Krast\'s widow decide his funeral',
+    setBy: [{ card: 'state-funeral', option: 'ask-widow' }],
+    factions: { chorus: 1 },
+  },
+  {
+    id: 'blamed-prisoner',
+    because: 'blamed a man in custody for the stairwell',
+    setBy: [{ card: 'stairwell-question', option: 'blame' }],
+    factions: { sable: 1, chorus: -1 },
+  },
+  {
+    id: 'sold-port',
+    because: 'sold forty per cent of the Mavro port to Sereth',
+    setBy: [{ card: 'sereth-offer', option: 'all' }],
+    factions: { concord: 1, combine: -1 },
+  },
+  {
+    id: 'rationed-homes',
+    because: 'cut households\' gas to keep industry running',
+    setBy: [{ card: 'power-cuts', option: 'homes' }],
+    factions: { chorus: -2, combine: -1, concord: 1 },
+  },
+  {
+    id: 'rationed-industry',
+    because: 'rationed industry to keep homes warm',
+    setBy: [{ card: 'power-cuts', option: 'industry' }],
+    factions: { chorus: 1, combine: 1, concord: -2 },
+  },
+  {
+    id: 'refused-miners',
+    because: 'quoted the strike law at Hess',
+    setBy: [{ card: 'gorsk-strike-notice', option: 'refuse' }],
+    factions: { combine: -2, concord: 1 },
+  },
+  {
+    id: 'soldiers-gorsk',
+    because: 'sent soldiers to the Gorsk mines',
+    setBy: [{ card: 'strike-begins', option: 'soldiers' }],
+    factions: { combine: -2, staff: -1, chorus: -1 },
+  },
   {
     id: 'paid-miners',
     because: 'met the miners\' wage claim',
     setBy: [{ card: 'gorsk-strike-notice', option: 'meet-wages' }, { card: 'strike-begins', option: 'concede' }],
+    factions: { combine: 2, concord: -1 },
   },
-  { id: 'told-truth', because: 'told the country you did not have a plan yet', setBy: [{ card: 'first-address', option: 'honest' }] },
-  { id: 'burned-file', because: 'told Sarran to destroy her file', setBy: [{ card: 'sarran-file', option: 'refuse' }] },
-  { id: 'went-gorsk', because: 'went to the Gorsk funeral without cameras', setBy: [{ card: 'char-request-hess', option: 'go' }] },
+  {
+    id: 'told-truth',
+    because: 'told the country you did not have a plan yet',
+    setBy: [{ card: 'first-address', option: 'honest' }],
+    factions: { chorus: 1 },
+  },
+  {
+    id: 'burned-file',
+    because: 'told Sarran to destroy her file',
+    setBy: [{ card: 'sarran-file', option: 'refuse' }],
+    factions: { sable: -1 },
+  },
+  {
+    id: 'went-gorsk',
+    because: 'went to the Gorsk funeral without cameras',
+    setBy: [{ card: 'char-request-hess', option: 'go' }],
+    factions: { combine: 1 },
+  },
+  {
+    id: 'honoured-ilic',
+    because: 'gave Sergeant Ilić his medal yourself',
+    setBy: [{ card: 'char-request-varkov', option: 'go' }],
+    factions: { staff: 2 },
+  },
+  {
+    id: 'vetted-garrison',
+    because: 'had the Sable Office vet the garrison\'s officers',
+    setBy: [{ card: 'garrison-rotation', option: 'vet' }],
+    factions: { staff: -2, sable: 1 },
+  },
+  {
+    id: 'let-aureth-audit',
+    because: 'let Aureth audit the army\'s books',
+    setBy: [{ card: 'aureth-defence-audit', option: 'accept' }],
+    factions: { staff: -2 },
+  },
 ];
 
 export const CONSEQUENCES: ConsequenceDef[] = [
@@ -633,4 +775,176 @@ export const CONSEQUENCES: ConsequenceDef[] = [
       },
     },
   },
+
+  /* =====================================================================
+   * BALANCE SLICE D — factions react on cards, and more blocked options.
+   * `faction` names whose memory it is; the note then ends "— the <Faction>
+   * remember".
+   * ===================================================================== */
+  {
+    mark: 'soldiers-gorsk',
+    card: 'alert-square',
+    kind: 'lock',
+    option: 'clear',
+    faction: 'staff',
+    lockedText: 'Varkov has said, in writing, that the army will not be sent against a crowd again.',
+  },
+  {
+    mark: 'soldiers-gorsk',
+    card: 'alert-gorsk-accident',
+    kind: 'lock',
+    option: 'go',
+    faction: 'combine',
+    lockedText: 'the miners\' families have asked that nobody from your government come to the pithead.',
+  },
+  {
+    mark: 'repealed-19',
+    card: 'alert-leak',
+    kind: 'lock',
+    option: 'find-source',
+    faction: 'sable',
+    lockedText: 'without Article 19 the Sable Office cannot hold anyone overnight to find a source, and Sarran has said so.',
+  },
+  {
+    mark: 'burned-file',
+    card: 'stairwell-question',
+    kind: 'lock',
+    option: 'blame',
+    faction: 'sable',
+    lockedText: 'Sarran will not produce a confession for a Chair who once told her to burn a file.',
+  },
+  {
+    mark: 'audited-ilvet',
+    card: 'university-grant',
+    kind: 'lock',
+    option: 'fund',
+    lockedText: 'Grebs\'s audit team now reads every grant. You cannot pay for a quiet study quietly.',
+  },
+  {
+    mark: 'audited-ilvet',
+    card: 'char-request-adamek',
+    kind: 'lock',
+    option: 'go',
+    faction: 'concord',
+    lockedText: 'your auditors are in his office this week. Sitting in his box would look like a deal.',
+  },
+  {
+    mark: 'threatened-loz',
+    card: 'char-request-loz',
+    kind: 'lock',
+    option: 'live',
+    lockedText: 'Loz will not put you on live air again. He says the licence letter "changed the terms".',
+  },
+  {
+    mark: 'sold-port',
+    card: 'ostrene-lithium',
+    kind: 'lock',
+    option: 'sign',
+    lockedText: 'Sereth\'s contract bans any exclusive export deal through the Mavro terminal.',
+  },
+  {
+    mark: 'sold-port',
+    card: 'sereth-stadium-offer',
+    kind: 'lock',
+    option: 'sell',
+    lockedText: 'Sereth already own the naming rights. There is nothing left to sell them.',
+  },
+  {
+    mark: 'vetted-garrison',
+    card: 'char-request-tern',
+    kind: 'lock',
+    option: 'pay',
+    faction: 'staff',
+    lockedText: 'the Sable Office now checks every garrison payment, and an early one is flagged automatically.',
+  },
+  {
+    mark: 'honoured-ilic',
+    card: 'aureth-defence-audit',
+    kind: 'change',
+    option: 'accept',
+    faction: 'staff',
+    hint: 'Free. The loan clears. Varkov remembers who stood at Ilić\'s funeral, and takes it better than she would have.',
+    outcome: {
+      text: 'Varkov reads the audit terms in your office, not hers. "You gave Ilić his medal," she says. "I can give you this."\n\nThe audit finds what everyone suspected. The loan clears on schedule. The officers grumble, and she tells them to stop.',
+      tone: 'good',
+      effects: {
+        stats: { treasury: 6, legitimacy: 3 },
+        hidden: { foreign: -5, corruption: -4 },
+        factions: { staff: { loyalty: -3 } },
+      },
+    },
+  },
+  {
+    mark: 'went-gorsk',
+    card: 'gorsk-strike-notice',
+    kind: 'change',
+    option: 'negotiate',
+    faction: 'combine',
+    hint: 'Cost: $3.0B now. Hess remembers you stood in the chapel at Gorsk. He is more willing to wait for the rest.',
+    outcome: {
+      text: 'Hess hears the offer out, sitting down for once. "You came to Gorsk when there were no cameras," he says. "Half now, half from the lithium. I will sell that to the men."\n\nHe does. The notice is withdrawn on Friday.',
+      tone: 'good',
+      effects: {
+        stats: { treasury: -3, stability: 6 },
+        hidden: { unrest: -8 },
+        factions: { combine: { loyalty: 8 } },
+        characters: { hess: { loyalty: 6, trust: 5 } },
+      },
+    },
+  },
+  {
+    mark: 'took-gift',
+    card: 'ilvet-casino-license',
+    kind: 'change',
+    option: 'refuse',
+    faction: 'concord',
+    hint: 'Free. Adamek remembers the $4 billion you took from him. Refusing him now will cost more.',
+    outcome: {
+      text: 'Adamek takes the refusal in person. He does not argue. He mentions, once, the welcome gift, and what it was for.\n\nThat evening the Elites\' newspapers discover a sudden interest in your spending.',
+      tone: 'bad',
+      effects: {
+        stats: { legitimacy: 2 },
+        hidden: { scandal: 6 },
+        factions: { concord: { loyalty: -12 }, grey: { loyalty: 5 } },
+        characters: { adamek: { loyalty: -10 } },
+      },
+    },
+  },
+  {
+    mark: 'rationed-homes',
+    card: 'alert-square',
+    kind: 'change',
+    option: 'concede',
+    faction: 'chorus',
+    hint: 'Cost: $6.0B. The square remembers the cold week. They want the heating back before anything else.',
+    outcome: {
+      text: 'You announce the gas cuts are over, tonight, for every home. The square cheers, and then stays another hour to make sure you mean it.\n\nIt empties by two in the morning. The Elites send a four-page letter about industrial output.',
+      tone: 'good',
+      effects: {
+        stats: { treasury: -6, support: 10, stability: 9 },
+        hidden: { unrest: -20 },
+        factions: { chorus: { loyalty: 10 }, concord: { loyalty: -5 } },
+      },
+    },
+  },
+];
+
+/* ======================================================================
+ * BALANCE SLICE D — demands react to what a faction remembers.
+ * ==================================================================== */
+export const DEMAND_REACTIONS: DemandReactionDef[] = [
+  { mark: 'soldiers-gorsk', faction: 'combine', kind: 'no-bribe', text: 'the unions will not take money from the government that sent soldiers.' },
+  { mark: 'refused-miners', faction: 'combine', kind: 'dearer', text: 'Hess prices in the strike law you quoted at him.' },
+  { mark: 'paid-miners', faction: 'combine', kind: 'cheaper', text: 'Hess trusts you to pay, so he asks for less.' },
+  { mark: 'arrested-vel', faction: 'chorus', kind: 'no-bribe', text: 'nobody on the Street will be seen taking your money.' },
+  { mark: 'repealed-19', faction: 'chorus', kind: 'cheaper', text: 'the Street gives you credit for it.' },
+  { mark: 'rationed-homes', faction: 'chorus', kind: 'dearer', text: 'the Street wants something for the cold week first.' },
+  { mark: 'repealed-19', faction: 'sable', kind: 'dearer', text: 'Security wants back what it lost.' },
+  { mark: 'burned-file', faction: 'sable', kind: 'no-bribe', text: 'Sarran will not take money from a Chair who will not take her files.' },
+  { mark: 'audited-ilvet', faction: 'concord', kind: 'dearer', text: 'the Elites price in the audit.' },
+  { mark: 'rationed-industry', faction: 'concord', kind: 'dearer', text: 'the Elites want the lost week of output paid for first.' },
+  { mark: 'took-gift', faction: 'concord', kind: 'cheaper', text: 'Adamek considers you a friend of the house.' },
+  { mark: 'honoured-ilic', faction: 'staff', kind: 'cheaper', text: 'Varkov remembers who gave Ilić his medal.' },
+  { mark: 'let-aureth-audit', faction: 'staff', kind: 'no-bribe', text: 'the officers will not take money from the government that let Aureth count theirs.' },
+  { mark: 'vetted-garrison', faction: 'staff', kind: 'dearer', text: 'the officers remember being vetted like suspects.' },
 ];

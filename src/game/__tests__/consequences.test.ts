@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../state';
 import { lookupCard, orderedOptions, chooseOption } from '../engine';
-import { MARKS, CONSEQUENCES } from '../content/consequences';
+import { MARKS, CONSEQUENCES, DEMAND_REACTIONS } from '../content/consequences';
+import { TRIGGERED_DEMANDS } from '../content/demands';
 import { hasMark, markFlag, shownOptions } from '../consequences';
 import type { GameState } from '../types';
 
@@ -24,7 +25,10 @@ describe('balance slice C: consequences content', () => {
         expect(card, `${m.id} → ${k.card}`).toBeTruthy();
         expect(card!.options.some((o) => o.id === k.option), `${m.id} → ${k.card}/${k.option}`).toBe(true);
       }
-      expect(CONSEQUENCES.some((c) => c.mark === m.id), `${m.id} has no reaction`).toBe(true);
+      const reacts = CONSEQUENCES.some((c) => c.mark === m.id)
+        || DEMAND_REACTIONS.some((r) => r.mark === m.id)
+        || TRIGGERED_DEMANDS.some((d) => d.triggeredBy === m.id);
+      expect(reacts, `${m.id} has no reaction`).toBe(true);
     }
   });
 
