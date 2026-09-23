@@ -309,8 +309,11 @@ directly.
    then confirm it with the resulting commit.
 5. Only then tell the owner it is ready to playtest.
 
-When a session ends, delete its branch from the remote once it is merged
-(the owner asked for unused branches to be cleaned up).
+The owner wants unused branches cleaned up. Once a branch is fully merged
+it can go, but **cloud sessions are not allowed to delete remote branches**
+(git returns 403). List the merged ones for the owner instead; they delete
+them at https://github.com/Ohfrinzx/Reign-Check/branches. Never delete
+the default branch or the current session's branch.
 
 ## 11. Keeping the docs current
 

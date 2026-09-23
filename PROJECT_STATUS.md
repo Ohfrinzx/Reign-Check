@@ -44,7 +44,12 @@ remaining ending types.
 - **2026-09-23** — Balance slice D (factions remember) built and merged.
   The docs were reorganised: `AGENTS.md` is the single guide, `CLAUDE.md`
   only points to it, `docs/SYSTEMS.md` is new, and the history moved to
-  `docs/archive/`. Stale branches deleted.
+  `docs/archive/`. Six old branches are fully merged and can be deleted
+  (the cloud session is not allowed to delete branches, so the owner does
+  it on GitHub): `claude/reign-check-naming-iie3u7`,
+  `codex/confidence-vote-planning`, `codex/confidence-vote-reveal`,
+  `codex/document-vote-playtest-approval`, `codex/mandates-and-review`,
+  `codex/run-deck-review`.
 - **2026-09-23** — The owner chose a free mobile web version on GitHub
   Pages. The repo was made public and Pages switched on. Brief written
   (`docs/MOBILE_AND_HOSTING.md`), plus `tools/phone-audit.mjs`.
