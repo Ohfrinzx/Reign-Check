@@ -5,6 +5,7 @@ import { fill } from '../../game/text';
 import { Glossed } from './Prose';
 import { Pocket } from '../screens/Shop';
 import { DemandsPanel } from './Demands';
+import { marksMade } from '../../game/consequences';
 import type { DemandActions } from './Demands';
 /**
  * The right-hand rail: Files (factions), Demands (Phase 3), On Your Desk
@@ -21,6 +22,7 @@ export function Rail({ s, onUseFavour, demandActions }: {
 }) {
   const threats = buildThreats(s, 3);
   const diary = s.scheduled.filter((d) => d.visible).slice(0, 5);
+  const record = marksMade(s);
 
   return (
     <aside className="rail">
@@ -71,6 +73,18 @@ export function Rail({ s, onUseFavour, demandActions }: {
           <div className="slip" key={d.id}>
             <div className="d">DAY {d.day}</div>
             <div className="t">{fill(d.label, s)}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* balance slice C: decisions later cards will remember */}
+      <div className="panel record-panel">
+        <h3>On the record {record.length > 0 && <span>{record.length}</span>}</h3>
+        {record.length === 0 && <div className="empty">Nothing yet. Some decisions are remembered, and they come back.</div>}
+        {record.slice(-6).reverse().map((m) => (
+          <div className="slip" key={m.id}>
+            <div className="d">DAY {m.day}</div>
+            <div className="t">You {m.because}.</div>
           </div>
         ))}
       </div>

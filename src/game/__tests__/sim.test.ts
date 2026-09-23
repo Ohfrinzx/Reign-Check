@@ -3,6 +3,7 @@ import { createGame, ACT_LENGTH, NUM_ACTS, dayInAct } from '../state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve,
   continueAfterAlert, activeCard, lookupCard, openShop, leaveShop, completeConfidenceVote,
+  orderedOptions,
 } from '../engine';
 import { buildBriefing } from '../briefing';
 import { CARDS } from '../content/cards';
@@ -33,8 +34,8 @@ function playRun(seed: number, pick: (s: GameState, n: number) => number): GameS
       case 'alert': {
         const card = activeCard(s)!;
         expect(card).toBeTruthy();
-        const usable = card.options.filter((o) => !o.enabled || o.enabled(s));
-        const opts = usable.length ? usable : card.options;
+        const usable = orderedOptions(s, card).filter((o) => !o.enabled || o.enabled(s));
+        const opts = usable.length ? usable : orderedOptions(s, card);
         const chosen = opts[pick(s, opts.length) % opts.length];
         const before = s.phase;
         s = chooseOption(s, chosen.id);

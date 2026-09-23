@@ -53,7 +53,21 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE B BUILT, AWAITING OWNER PLAYTEST
+## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE C BUILT, AWAITING OWNER PLAYTEST
+
+**2026-09-23 (latest).** Slice B was playtested and approved (*"Current
+playtesting checks out, move onto Part C."*). Slice C — consequences: 18
+**marks** left by existing decisions and 36 **reactions** on later cards
+that **unlock** a new option, **lock** one, or **change** one's outcome,
+each shown as "Because you … (day N)" (`content/consequences.ts`,
+`src/game/consequences.ts`); results say "On the record" when a mark is
+made, and the rail has an **On the record** panel. About 5.7 cards per run
+show a reaction. **`SAVE_VERSION` 13→14** (in-progress runs reset). 158
+tests, build, and the full browser suite (new `tools/consequences.mjs`)
+pass. See the balance slice C notes at the end of this file (and
+`AGENTS.md` §21).
+
+## PHASE 3 — STEP 4, SLICE B — PLAYTESTED AND APPROVED
 
 **2026-09-23 (later).** Slice A was playtested and approved (*"the named
 changes you made I can confirm seem to work well"*). The owner then asked
@@ -530,7 +544,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-150 vitest tests pass (see the `npm test` line in Commands below for the
+158 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -560,11 +574,12 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `13`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `14`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 12→13 for the
+    as long as the bump actually happens. Last bumped 13→14 for
+    `lastOutcome.because`/`marked` (balance slice C); 12→13 was the
     bloc-counted `ConfidenceVoteResult` (balance slice B); 11→12 was
     `crisis`/`crisesDone` (Phase 3 step 3, crisis chains); 10→11 was
     `FactionDemand`'s new shape plus `demandNotices` (step 1). A bump discards the owner's
@@ -627,7 +642,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 150 tests: integrity, 200 full runs, determinism, variety,
+npm test           # 158 tests: integrity, 200 full runs, determinism, variety,
                    #   glossary, dayInAct, mandates, the run deck (§4.4),
                    #   meta-progression (§4.5, record + real unlock gating),
                    #   the Back Room shop (stock/pricing, firing
@@ -638,7 +653,8 @@ npm test           # 150 tests: integrity, 200 full runs, determinism, variety,
                    #   crisis chains (step 3: start/calm-hot/end),
                    #   favours (balance slice A: targets, receipts), and
                    #   difficulty (slice B: hostile factions, bloc vote,
-                   #   option shuffle, regime label)
+                   #   option shuffle, regime label), and consequences
+                   #   (slice C: marks, unlock/lock/change)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -663,6 +679,8 @@ node tools/favours.mjs       # balance slice A: useful-now, disabled-with-reason
                              # target dialog, named receipt, target really gone
 node tools/hostile.mjs       # balance slice B: hostile pop-up, front-page action,
                              # desk danger 3 of 3, demand issued
+node tools/consequences.mjs  # balance slice C: on-the-record note + rail panel,
+                             # unlocked / locked / changed options with reasons
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -692,6 +710,11 @@ orderedOptions()`): render options and map number keys through it, never
 by text and press its shown number. **The confidence vote is counted in
 faction blocs** (`Vote.tsx`); hostile factions (loyalty < 20) vote against
 as one and get a `hostile` demand pop-up the first morning.
+
+**Options can carry a "Because you…" note** (balance slice C,
+`OptionText` in `CardView.tsx`): a new, changed or locked option says which
+earlier decision caused it. Game-driving tests and tools must pick from
+`orderedOptions()` (the shown set), never `card.options`.
 
 **Demand pop-ups cover the day until closed** (`.demand-scrim`). Any tooling
 that walks through days must close `.demand-pop` first (its `.dm-foot
@@ -723,6 +746,10 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe — THIS
                            run's save; separate from meta.ts's cross-run one
+  consequences.ts         BALANCE SLICE C — marks (flags 'mark:<id>') and
+                           shownOptions(): unlock/lock/change later options
+                           with a "Because you…" note. Words live in
+                           content/consequences.ts
   favours.ts              BALANCE SLICE A — favour targets (scandal/demand/
                            crisis), block reasons, spendFavour() + receipt
   crises.ts               PHASE 3 CRISIS CHAINS — start/advance/end the
@@ -817,8 +844,8 @@ AGENTS.md                 shared, model-agnostic knowledge base for every
 no further work unless a future playtest turns something up.
 
 Phase 3 steps 1–3 are built and played; step 4 (the balance phase) is in
-progress — slice A approved, slice B built and awaiting playtest, slice C
-next (see
+progress — slices A and B approved, slice C built and awaiting playtest
+(see
 "PHASE 3" above). Everything below is genuinely deferred and needs an explicit
 go-ahead before starting, one step at a time. Full detail and ordering in
 `docs/DESIGN_V2.md` §9 (Phases 3–5): the balance pass (step 4, the rest of
@@ -1274,7 +1301,54 @@ confirming them with the meter full ("100%").
   rises, but there is no chain for it yet); no card content was edited — if
   one option type still dominates in play, that is card-level tuning.
 
-**What is next — balance slice C (consequences).** Decisions leave marks
-that unlock, lock or change later options and outcomes, with a visible
-"Because you…" note on the affected option. Needs the owner's playtest of
-slice B first.
+Slice B was playtested and approved; slice C (below) came next.
+
+## Balance slice C notes (consequences, 2026-09-23)
+
+Owner, after playtesting slice B: *"Current playtesting checks out, move
+onto Part C."* The goal (from the balance-phase brief): *"make sure that
+certain decisions can trigger and influence certain choice options and
+outcomes."*
+
+- **Marks.** `content/consequences.ts MARKS`: 18 marks, each set by one or
+  more existing options (`setBy`: card id + option id), e.g. `bought-news`
+  (Channel Seven / pay), `arrested-vel`, `built-road`, `sold-port`,
+  `paid-miners`, `told-truth`, `burned-file`. A mark is the flag
+  `mark:<id>` holding the day it was made, set through `applyEffects()` in
+  `engine.ts chooseOption()` via `consequences.ts marksSetBy()`. No card
+  file was edited.
+- **Reactions.** `CONSEQUENCES`: 36 rules, each mark + card + kind +
+  option. **unlock** adds a new option (label/hint/outcome), **lock**
+  blocks an existing option with `lockedText`, **change** replaces an
+  option's hint and outcome. `consequences.ts shownOptions()` applies them;
+  `engine.ts orderedOptions()` now shuffles the *shown* options, so the UI,
+  number keys, the probe and `chooseOption()` all see the same set. A
+  locked option cannot be chosen. **Tests/tooling that drive the game must
+  pick from `orderedOptions()`, not `card.options`**: the sim, deck, shop
+  and mandate tests were switched over.
+- **Visible everywhere it matters.** Each shown option carries `because`
+  (`types.ts ShownOption`/`Because`): the option shows "NEW OPTION ·
+  Because you … (day N)" (teal edge) or "CHANGED · Because you …"
+  (mustard edge); a locked one shows "✕ Because you … (day N): <reason>".
+  The result repeats the reason (`lastOutcome.because`), and a decision
+  that makes a mark says "ON THE RECORD: You … (day N). This will come up
+  again." (`lastOutcome.marked`). The rail has a new **On the record**
+  panel (`marksMade()`), under the Diary. "Brief me" explains it.
+- **Rule for content:** a card must never have every option locked. A
+  test sets every mark at once and checks each reacting card keeps at
+  least two usable options. Adding a mark or reaction is content only.
+- **State:** marks live in `flags` (no new field), but `lastOutcome` gained
+  `because`/`marked`, so **`SAVE_VERSION` 13→14** (in-progress runs reset).
+- **Measured** (100 random-play runs): a "Because you…" option on about
+  **5.7 cards per run**, in 98% of runs, first around day 5; about 6 marks
+  made per run; mostly changes (67%), then unlocks (29%), locks (4%).
+  Balance probe: careful 62% → **67%** (reactions reward consistent
+  choices), random 4%, first 2%, last 1%.
+- **Not done:** reactions on demands and Back Room items (only cards react
+  so far); more locks (they are the rarest kind); the coup crisis chain
+  (still open from slice B).
+
+**What is next.** Owner playtest of slice C. After that the balance phase
+(Phase 3 step 4) is complete unless the playtest turns something up; Phase
+4 (mobile/iOS) stays unscheduled and Phase 5 (mini-games, sound, remaining
+endings) needs its own go-ahead.

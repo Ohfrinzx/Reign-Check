@@ -8,6 +8,7 @@ import { canAfford, canCutNow, canFireNow } from '../shop';
 import {
   prepareDay, beginStages, activeCard, chooseOption, continueAfterResolve,
   buyShopItem, useFavour,
+  orderedOptions,
 } from '../engine';
 import type { GameState } from '../types';
 
@@ -34,7 +35,7 @@ describe('review regressions', () => {
   it('a repeated decision cannot charge, resolve, or advance twice', () => {
     const s = beginStages(prepareDay(createGame({ seed: 50, mandateId: 'accident' })));
     const before = structuredClone(s);
-    const option = activeCard(s)!.options.find((o) => !o.enabled || o.enabled(s))!;
+    const option = orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!;
     const chosen = chooseOption(s, option.id);
     expect(chooseOption(chosen, option.id)).toEqual(chosen);
     const next = continueAfterResolve(chosen);

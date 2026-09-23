@@ -25,7 +25,7 @@ function voteDay(act: 1 | 2 | 3, value: number): GameState {
 
 describe('confidence-vote reveal', () => {
   it('bumps the save version and stores a serialisable snapshot, counted in faction blocs', () => {
-    expect(SAVE_VERSION).toBe(13);
+    expect(SAVE_VERSION).toBe(14);
     const s = beginStages(voteDay(1, 50));
     expect(s.phase).toBe('vote');
     const v = s.confidenceVote!;

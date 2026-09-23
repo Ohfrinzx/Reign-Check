@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createGame, SAVE_VERSION } from '../state';
 import { applyEffects } from '../effects';
-import { prepareDay, beginStages, activeCard, chooseOption, continueAfterResolve, continueAfterAlert, openShop, leaveShop, completeConfidenceVote } from '../engine';
+import { prepareDay, beginStages, activeCard, chooseOption, continueAfterResolve, continueAfterAlert, openShop, leaveShop, completeConfidenceVote, orderedOptions } from '../engine';
 import { makeRng } from '../rng';
 import type { GameState } from '../types';
 
@@ -17,8 +17,8 @@ function playAndCount(s: GameState, days: number, cardId: string): number {
       s = beginStages(s);
     } else if (s.phase === 'stage' || s.phase === 'alert') {
       const c = activeCard(s)!;
-      const usable = c.options.filter((o) => !o.enabled || o.enabled(s));
-      s = chooseOption(s, (usable.length ? usable : c.options)[0].id);
+      const usable = orderedOptions(s, c).filter((o) => !o.enabled || o.enabled(s));
+      s = chooseOption(s, (usable.length ? usable : orderedOptions(s, c))[0].id);
     } else if (s.phase === 'resolve') s = continueAfterResolve(s);
     else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
     else if (s.phase === 'vote') s = completeConfidenceVote(s);

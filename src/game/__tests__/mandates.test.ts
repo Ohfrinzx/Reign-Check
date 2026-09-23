@@ -10,13 +10,14 @@ import { shopPrice } from '../shop';
 import {
   prepareDay, beginStages, activeCard, chooseOption, continueAfterResolve,
   continueAfterAlert, openShop, leaveShop, completeConfidenceVote,
+  orderedOptions,
 } from '../engine';
 import type { GameState } from '../types';
 
 function step(s: GameState): GameState {
   if (s.phase === 'briefing') return beginStages(s);
   if (s.phase === 'stage' || s.phase === 'alert') {
-    const option = activeCard(s)!.options.find((o) => !o.enabled || o.enabled(s))!;
+    const option = orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!;
     return chooseOption(s, option.id);
   }
   if (s.phase === 'resolve') return continueAfterResolve(s);

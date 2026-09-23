@@ -1318,7 +1318,7 @@ The owner started it with five points and one goal (verbatim in
   when there is nothing to aim at, and end with a receipt naming what went
   away.
 
-**Slice B — difficulty (built, awaiting playtest).** Triggered by the
+**Slice B — difficulty (playtested and approved).** Triggered by the
 slice A playtest: factions near zero did nothing, and the owner passed the
 final vote at "100%" with the Elites hostile, the Street furious and the
 treasury at -$20.3B.
@@ -1340,9 +1340,14 @@ treasury at -$20.3B.
 - Measured (120 runs): careful 62%, random 4%, first/last 1%. Demands ~2.5
   per full run. Not done: a coup crisis chain; no card edits.
 
-**Slice C — consequences (after B).** Decisions leave marks that unlock,
-lock or change later options and outcomes, shown on the option as
-"Because you…".
+**Slice C — consequences (built, awaiting playtest).** 18 marks left by
+existing decisions (flags `mark:<id>` = the day) and 36 reactions on later
+cards (`content/consequences.ts`): unlock a new option, lock one with a
+reason, or change one's outcome. Every reaction is shown as "Because you …
+(day N)" on the option and in the result; a decision that makes a mark says
+"On the record", and the rail lists them. No card file edited: reactions
+are keyed by card and option id. About 5.7 reacting cards per run; careful
+survival 62% → 67%. `SAVE_VERSION` 13→14.
 
 The original step-4 list (items 1–4 addressed by slice B; 5 unchanged):
 

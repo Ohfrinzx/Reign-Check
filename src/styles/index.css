@@ -336,6 +336,26 @@ abbr.term{
 .opt .lab{font-family:var(--black);font-size:14.5px;line-height:1.25}
 .opt .hint{display:block;font-family:var(--body);font-size:12.5px;color:var(--ash);margin-top:3px;font-weight:400;line-height:1.4}
 .opt .locked{display:block;font-family:var(--mono);font-size:10.5px;color:var(--red);margin-top:4px;letter-spacing:.02em}
+/* balance slice C — an option added, changed or blocked by an earlier decision */
+.opt .because{
+  display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;line-height:1.35;
+  margin-bottom:4px;color:var(--teal);
+}
+.opt .because b{font-family:var(--black);font-weight:400;text-transform:uppercase;letter-spacing:.08em}
+.opt .because.change{color:var(--mustard)}
+.opt.because-unlock{box-shadow:inset 3px 0 0 var(--teal)}
+.opt.because-change{box-shadow:inset 3px 0 0 var(--mustard)}
+.opt.because-lock:disabled{opacity:.72}
+.opt:hover:not(:disabled) .because{color:var(--paper)}
+.outcome-because{
+  padding:10px 22px 0;font-family:var(--mono);font-size:11px;letter-spacing:.02em;color:var(--teal);
+}
+.outcome-because.change{color:var(--mustard)}
+.outcome-marked{
+  margin:0 22px 14px;padding:8px 12px;border-left:3px solid var(--ink);background:var(--paper-2);
+  font-family:var(--body);font-size:13.5px;line-height:1.45;
+}
+.outcome-marked b{font-family:var(--black);font-weight:400;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .opt .c{font-family:var(--head);font-size:16px;color:var(--red);margin-left:auto;white-space:nowrap;flex:none}
 
 /* plain-text glossary footnote — replaces the old hover-only <abbr>, so a

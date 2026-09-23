@@ -44,7 +44,9 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
           <p>
             Every day you will be handed three to five <b>cards</b> (one more with The Accident): a minister with a request, a crisis,
             an offer, a bill. You pick an option. There is no undo, and most choices solve one problem
-            by creating another one later.
+            by creating another one later. Some decisions go <b>on the record</b> (listed on the right):
+            later cards will offer a new option, block one, or play out differently because of them,
+            and say so with a &ldquo;Because you&hellip;&rdquo; note. The order of the options changes every run.
           </p>
         </Section>
 

@@ -1,7 +1,39 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
-## ▶ WHERE WE STOPPED — 2026-09-23, later (BALANCE PHASE, SLICE B — BUILT, AWAITING PLAYTEST)
+## ▶ WHERE WE STOPPED — 2026-09-23, latest (BALANCE PHASE, SLICE C — BUILT, AWAITING PLAYTEST)
+
+**Slice B was playtested and approved.** Owner, verbatim: *"Current
+playtesting checks out, move onto Part C."*
+
+**Slice C — consequences, built.** The owner's goal from the balance-phase
+brief: *"make sure that certain decisions can trigger and influence certain
+choice options and outcomes."*
+- 18 **marks** left by existing decisions (e.g. paying Loz for Channel
+  Seven, arresting Vel, repealing Article 19, building the Hadem road,
+  sending troops instead, selling the port, meeting or refusing the miners,
+  telling the country you had no plan, telling Sarran to burn her file).
+- 36 **reactions** on later cards: a **new option** appears (e.g. "Have
+  Channel Seven run your version first" on the stairwell question; "Release
+  Sanna Vel" in the square), an option is **blocked** with the reason
+  (e.g. the cranes deal after selling the port; the Vel debate while she is
+  in a cell), or an option **plays out differently** (e.g. the census after
+  the road vs. after the troops).
+- Always visible: "NEW OPTION · Because you … (day N)", "CHANGED · Because
+  you …", "✕ Because you … : <reason>"; the result repeats it; a decision
+  that makes a mark says "On the record … This will come up again."; a new
+  **On the record** panel on the right lists them. "Brief me" explains it.
+- Measured: about 5.7 cards per run show a reaction, in 98% of runs, first
+  around day 5. Careful-play survival 62% → 67%; random 4%.
+- **`SAVE_VERSION` 13→14**: the in-progress run resets (record/unlocks kept).
+- 158 tests, build, and the full browser suite (new
+  `tools/consequences.mjs`) at 1366×700 pass with zero page errors.
+
+**Next:** owner playtest of slice C. That completes the balance phase
+unless the playtest turns something up. Not done: reactions on demands and
+Back Room items; the coup crisis chain.
+
+## ▶ WHERE WE STOPPED — 2026-09-23, later (BALANCE PHASE, SLICE B — PLAYTESTED AND APPROVED)
 
 **Slice A was playtested and approved; the owner asked for much more
 balancing.** Owner, verbatim: *"The changes you have added worked. Maybe

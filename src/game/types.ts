@@ -399,6 +399,25 @@ export interface CardOption {
   outcome: CardOutcome | ((s: GameState, rng: Rng) => CardOutcome);
 }
 
+/**
+ * Balance slice C — consequences. A mark (content/consequences.ts) left by an
+ * earlier decision can add an option to a later card ('unlock'), block one
+ * ('lock'), or change what one does ('change'). The option then carries the
+ * plain-words reason, shown as "Because you …".
+ */
+export type ConsequenceKind = 'unlock' | 'lock' | 'change';
+
+export interface Because {
+  kind: ConsequenceKind;
+  /** e.g. "Because you bought Channel Seven's coverage (day 3)" */
+  text: string;
+}
+
+/** An option as the player sees it on this run, after marks are applied. */
+export interface ShownOption extends CardOption {
+  because?: Because;
+}
+
 export interface CardDef {
   id: string;
   title: string;
@@ -589,7 +608,15 @@ export interface GameState {
   unlockedShopItemIds: string[];
 
   current?: PendingCard;
-  lastOutcome?: CardOutcome & { cardTitle: string; optionLabel: string; deltas: Partial<Stats> };
+  lastOutcome?: CardOutcome & {
+    cardTitle: string;
+    optionLabel: string;
+    deltas: Partial<Stats>;
+    /** balance slice C: why this option existed or went this way */
+    because?: Because;
+    /** balance slice C: marks this decision just left ("you bought …") */
+    marked?: string[];
+  };
 
   /** Phase 3 step 1: demand pop-ups not yet dismissed, oldest first */
   demandNotices: DemandNotice[];

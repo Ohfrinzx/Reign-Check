@@ -15,7 +15,7 @@
  * the endings distribution does compared with a player who buys nothing.
  */
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, buyShopItem, useFavour, leaveShop, completeConfidenceVote } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, buyShopItem, useFavour, leaveShop, completeConfidenceVote, orderedOptions } from '../engine';
 import { SHOP_MAP } from '../content/shop';
 import { shopPrice } from '../shop';
 import { makeRng } from '../rng';
@@ -32,8 +32,8 @@ function run(seed: number, buyer: Buyer, policy: 'random' | 'first') {
     if (s.phase === 'briefing') s = beginStages(s);
     else if (s.phase === 'stage' || s.phase === 'alert') {
       const c = activeCard(s)!;
-      const usable = c.options.filter((o) => !o.enabled || o.enabled(s));
-      const opts = usable.length ? usable : c.options;
+      const usable = orderedOptions(s, c).filter((o) => !o.enabled || o.enabled(s));
+      const opts = usable.length ? usable : orderedOptions(s, c);
       s = chooseOption(s, opts[policy === 'random' ? rng.int(opts.length) : 0].id);
       // spend favours as soon as you have them
       for (const f of [...s.heldFavours]) s = useFavour(s, f);

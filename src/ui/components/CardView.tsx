@@ -1,4 +1,4 @@
-import type { GameState, CardDef, AlertDef, CardCategory } from '../../game/types';
+import type { GameState, CardDef, AlertDef, CardCategory, ShownOption } from '../../game/types';
 import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
 import { termsIn } from '../../game/glossary';
@@ -7,6 +7,27 @@ import { crisisOfCard, STAGE_NAMES } from '../../game/content/crises';
 import type { CrisisDef } from '../../game/content/crises';
 import { crisisMood } from '../../game/crises';
 import { orderedOptions } from '../../game/engine';
+
+/** Balance slice C: an option added, changed or blocked by an earlier decision. */
+function optClass(o: ShownOption): string {
+  return o.because ? `opt because-${o.because.kind}` : 'opt';
+}
+
+/** The inside of an option button, shared by every card layout. */
+function OptionText({ s, o, locked }: { s: GameState; o: ShownOption; locked: boolean }) {
+  return (
+    <>
+      {o.because && o.because.kind !== 'lock' && (
+        <span className={`because ${o.because.kind}`}>
+          <b>{o.because.kind === 'unlock' ? 'New option' : 'Changed'}</b> · {o.because.text}
+        </span>
+      )}
+      <span className="lab">{fill(o.label, s)}</span>
+      {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
+      {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+    </>
+  );
+}
 
 /**
  * The document — a card rendered as the day's "lead story". Options are the
@@ -34,7 +55,7 @@ export function CardView({
   const glossaryTerms = termsIn([
     fill(card.body, s),
     card.flavor ? fill(card.flavor, s) : '',
-    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+    ...orderedOptions(s, card).map((o) => (o.hint ? fill(o.hint, s) : '')),
   ]);
 
   return (
@@ -66,15 +87,13 @@ export function CardView({
             return (
               <button
                 key={o.id}
-                className="opt"
+                className={optClass(o)}
                 disabled={locked}
                 onClick={() => onChoose(o.id)}
               >
                 <span className="n">{i + 1}</span>
                 <span className="body">
-                  <span className="lab">{fill(o.label, s)}</span>
-                  {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
-                  {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                  <OptionText s={s} o={o} locked={locked} />
                 </span>
               </button>
             );
@@ -123,7 +142,7 @@ function CharacterCardView({
   const stand = standing(who?.loyalty ?? 50);
   const glossaryTerms = termsIn([
     fill(card.body, s),
-    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+    ...orderedOptions(s, card).map((o) => (o.hint ? fill(o.hint, s) : '')),
   ]);
 
   return (
@@ -166,12 +185,10 @@ function CharacterCardView({
             {orderedOptions(s, card).map((o, i) => {
               const locked = o.enabled ? !o.enabled(s) : false;
               return (
-                <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>
+                <button key={o.id} className={optClass(o)} disabled={locked} onClick={() => onChoose(o.id)}>
                   <span className="n">{i + 1}</span>
                   <span className="body">
-                    <span className="lab">{fill(o.label, s)}</span>
-                    {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
-                    {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                    <OptionText s={s} o={o} locked={locked} />
                   </span>
                 </button>
               );
@@ -216,7 +233,7 @@ function CrisisCardView({
   });
   const glossaryTerms = termsIn([
     fill(card.body, s),
-    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+    ...orderedOptions(s, card).map((o) => (o.hint ? fill(o.hint, s) : '')),
   ]);
 
   return (
@@ -259,12 +276,10 @@ function CrisisCardView({
             {orderedOptions(s, card).map((o, i) => {
               const locked = o.enabled ? !o.enabled(s) : false;
               return (
-                <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>
+                <button key={o.id} className={optClass(o)} disabled={locked} onClick={() => onChoose(o.id)}>
                   <span className="n">{i + 1}</span>
                   <span className="body">
-                    <span className="lab">{fill(o.label, s)}</span>
-                    {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
-                    {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                    <OptionText s={s} o={o} locked={locked} />
                   </span>
                 </button>
               );
@@ -303,7 +318,15 @@ export function OutcomeView({
           <h3>{o.cardTitle}</h3>
           <div className="chose">“{fill(o.optionLabel, s)}”</div>
         </div>
+        {o.because && <div className={`outcome-because ${o.because.kind}`}>{o.because.text}.</div>}
         <div className="outcome-body"><Prose text={fill(o.text, s)} /></div>
+        {o.marked && o.marked.length > 0 && (
+          <div className="outcome-marked">
+            {o.marked.map((m) => (
+              <div key={m}><b>On the record:</b> {m}. This will come up again.</div>
+            ))}
+          </div>
+        )}
         {Object.keys(o.deltas).length > 0 && (
           <div className="deltas">
             {Object.entries(o.deltas).map(([k, v], i) => (

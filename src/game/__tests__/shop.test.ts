@@ -4,6 +4,7 @@ import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
   ALL_CARD_MAP, completeConfidenceVote,
+  orderedOptions,
 } from '../engine';
 import { SHOP_ITEMS, SHOP_MAP } from '../content/shop';
 import {
@@ -28,8 +29,8 @@ function playToShop(seed: number, untilDay: number, choose = (n: number) => n - 
     if (s.phase === 'briefing') s = beginStages(s);
     else if (s.phase === 'stage' || s.phase === 'alert') {
       const c = activeCard(s)!;
-      const usable = c.options.filter((o) => !o.enabled || o.enabled(s));
-      const opts = usable.length ? usable : c.options;
+      const usable = orderedOptions(s, c).filter((o) => !o.enabled || o.enabled(s));
+      const opts = usable.length ? usable : orderedOptions(s, c);
       s = chooseOption(s, opts[choose(opts.length) % opts.length].id);
     } else if (s.phase === 'resolve') s = continueAfterResolve(s);
     else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
@@ -262,7 +263,7 @@ describe('the Back Room', () => {
     let guard = 0;
     while (s.phase !== 'ended' && guard++ < 3000) {
       if (s.phase === 'briefing') s = beginStages(s);
-      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
+      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!.id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
       else if (s.phase === 'vote') s = completeConfidenceVote(s);
@@ -364,7 +365,7 @@ describe('the Back Room', () => {
     let guard = 0;
     while (s.phase !== 'shop' && s.phase !== 'ended' && guard++ < 400) {
       if (s.phase === 'briefing') s = beginStages(s);
-      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
+      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!.id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
       else if (s.phase === 'vote') s = completeConfidenceVote(s);
@@ -558,7 +559,7 @@ describe('held deals', () => {
     let guard = 0;
     while (s.heldDeals.length > 0 && s.phase !== 'ended' && guard++ < 800) {
       if (s.phase === 'briefing') s = beginStages(s);
-      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, activeCard(s)!.options[0].id);
+      else if (s.phase === 'stage' || s.phase === 'alert') s = chooseOption(s, orderedOptions(s, activeCard(s)!).find((o) => !o.enabled || o.enabled(s))!.id);
       else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
       else if (s.phase === 'vote') s = completeConfidenceVote(s);

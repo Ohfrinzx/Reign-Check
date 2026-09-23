@@ -1,5 +1,5 @@
 import type {
-  GameState, CardDef, AlertDef, StageKind, Rng, CardOutcome, Stats, DaySummary, FactionId,
+  GameState, CardDef, AlertDef, StageKind, Rng, CardOutcome, Stats, DaySummary, FactionId, ShownOption,
 } from './types';
 import { STAT_KEYS } from './types';
 import { makeRng, hashString } from './rng';
@@ -21,6 +21,7 @@ import { tickCharacterEvents } from './characterEvents';
 import { CHARACTER_EVENT_CARDS } from './content/characterEvents';
 import { tickCrises } from './crises';
 import { spendFavour } from './favours';
+import { shownOptions, marksSetBy, becauseText, hasMark, markFlag } from './consequences';
 import { CRISIS_CARDS } from './content/crises';
 import type { ShopItemDef } from './content/shop';
 import {
@@ -49,9 +50,10 @@ export const ALL_CARD_MAP: Record<string, CardDef> = {
  * a strategy; reading the options is. The UI, the keyboard shortcuts and the
  * balance probe all go through this.
  */
-export function orderedOptions(s: GameState, card: CardDef | AlertDef): CardDef['options'] {
+export function orderedOptions(s: GameState, card: CardDef | AlertDef): ShownOption[] {
   const rng = makeRng(hashString(`${s.seed}:${card.id}`));
-  return rng.shuffle([...card.options]);
+  // Balance slice C: marks from earlier decisions add, block or change options.
+  return rng.shuffle([...shownOptions(s, card)]);
 }
 
 /** Alerts are cards too, as far as the UI is concerned. */
@@ -461,7 +463,7 @@ export function chooseOption(prev: GameState, optionId: string): GameState {
   if (!['stage', 'alert'].includes(s.phase) || !s.current) return s;
   const def = lookupCard(s.current.cardId);
   if (!def) return s;
-  const opt = def.options.find((o) => o.id === optionId);
+  const opt = orderedOptions(s, def).find((o) => o.id === optionId);
   if (!opt) return s;
   if (opt.enabled && !opt.enabled(s)) return s;
 
@@ -470,6 +472,14 @@ export function chooseOption(prev: GameState, optionId: string): GameState {
   );
 
   const deltas = withRng(s, (rng) => applyEffects(s, outcome.effects, rng, def.id));
+
+  // Balance slice C: this decision may leave a mark that later cards react to.
+  const marked: string[] = [];
+  for (const m of marksSetBy(def.id, opt.id)) {
+    if (hasMark(s, m)) continue;
+    withRng(s, (rng) => applyEffects(s, { flags: { [markFlag(m)]: s.day } }, rng, `mark:${m}`));
+    marked.push(becauseText(s, m).replace(/^Because you /, 'You '));
+  }
 
   s.stat.decisions += 1;
   if (s.current.isAlert) s.stat.alertsSurvived += 1;
@@ -485,7 +495,11 @@ export function chooseOption(prev: GameState, optionId: string): GameState {
     tone: outcome.tone ?? toneFromDelta(deltas),
   });
 
-  s.lastOutcome = { ...outcome, cardTitle: def.title, optionLabel: opt.label, deltas };
+  s.lastOutcome = {
+    ...outcome, cardTitle: def.title, optionLabel: opt.label, deltas,
+    ...(opt.because && opt.because.kind !== 'lock' ? { because: opt.because } : {}),
+    ...(marked.length ? { marked } : {}),
+  };
   s.phase = s.current.isAlert ? 'alertResolve' : 'resolve';
   return s;
 }
