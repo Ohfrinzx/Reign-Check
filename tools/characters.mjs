@@ -56,6 +56,9 @@ try {
   assert.match(await card.innerText(), /Where they stand/i);
   assert.match(await card.locator('h1').innerText(), /Piek Leaked/i);
   assert.equal(await page.locator('.stage-col .doc .dh').count(), 0, 'Character card should not use the lead-story header');
+  // Let the card's .42s rise-in animation finish first: the two boxes are
+  // measured one after the other, so mid-animation they report different y.
+  await page.waitForTimeout(500);
   const slips = card.locator('.cc-slips .opt');
   assert.ok(await slips.count() >= 3);
   const [a, b] = [await slips.nth(0).boundingBox(), await slips.nth(1).boundingBox()];

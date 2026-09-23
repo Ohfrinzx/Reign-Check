@@ -126,6 +126,21 @@ export interface DemandNotice {
   text?: string;
 }
 
+/**
+ * The crisis chain currently running (Phase 3 step 3). `id` is a CrisisDef id
+ * in content/crises.ts; `cardId` is the stage card most recently queued.
+ * Rules live in crises.ts. How well it is going is `flags['crisis:<id>']`.
+ */
+export interface ActiveCrisis {
+  id: string;
+  /** 1..3 */
+  stage: number;
+  cardId: string;
+  startedDay: number;
+  /** the morning the next stage (or the ending) is due */
+  nextDay: number;
+}
+
 /* ------------------------------------------------------------- characters */
 
 export type CharacterId = string;
@@ -563,6 +578,10 @@ export interface GameState {
 
   /** Phase 3 step 1: demand pop-ups not yet dismissed, oldest first */
   demandNotices: DemandNotice[];
+  /** Phase 3 step 3: the crisis chain running now, if any */
+  crisis?: ActiveCrisis;
+  /** crisis chain ids already played this run (each runs once) */
+  crisesDone: string[];
 
   /** breaking-alert bookkeeping */
   alertsToday: number;

@@ -19,6 +19,8 @@ import { currentMandate, MANDATE_CARDS } from './content/mandates';
 import { tickDemands } from './demands';
 import { tickCharacterEvents } from './characterEvents';
 import { CHARACTER_EVENT_CARDS } from './content/characterEvents';
+import { tickCrises } from './crises';
+import { CRISIS_CARDS } from './content/crises';
 import type { ShopItemDef } from './content/shop';
 import {
   buyLimit, canCutNow, canFireNow, capBlockReason, cutCostOf, dailyFromOwned, fireCostOf,
@@ -28,7 +30,7 @@ import {
 
 /* ------------------------------------------------------------- registries */
 
-const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS];
+const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS, ...CRISIS_CARDS];
 export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...CARD_MAP,
   ...Object.fromEntries(MANDATE_CARDS.map((c) => [c.id, c])),
@@ -36,6 +38,7 @@ export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...Object.fromEntries(CARDS3.map((c) => [c.id, c])),
   ...Object.fromEntries(FOLLOWUPS.map((c) => [c.id, c])),
   ...Object.fromEntries(CHARACTER_EVENT_CARDS.map((c) => [c.id, c])),
+  ...Object.fromEntries(CRISIS_CARDS.map((c) => [c.id, c])),
 };
 
 /** Alerts are cards too, as far as the UI is concerned. */
@@ -313,6 +316,11 @@ function dayUpkeep(s: GameState, rng: Rng) {
   // characterEvents.ts, cards in content/characterEvents.ts). Queued cards
   // join today's deck in drawDeck(), which runs right after this.
   notes.push(...tickCharacterEvents(s, rng));
+
+  // --- crisis chains: start one when a pressure boils over, advance or end
+  // the running one (Phase 3 step 3 — rules in crises.ts, cards in
+  // content/crises.ts). Queued stage cards join today's deck in drawDeck().
+  notes.push(...tickCrises(s, rng));
 
   // Origin rules begin on the second morning, after the first day in office.
   if (s.day > 1) applyEffects(s, currentMandate(s).daily, rng, 'mandate:daily');

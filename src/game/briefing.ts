@@ -6,6 +6,7 @@ import { band } from './stats';
 import { DEMAND_MAP } from './content/demands';
 import { STAGE_LABEL } from './demands';
 import { characterWarnings } from './characterEvents';
+import { crisisBriefing } from './crises';
 
 export interface BriefingItem {
   kind: 'issue' | 'warning' | 'opportunity' | 'demand' | 'pending' | 'hint';
@@ -149,6 +150,10 @@ export function buildBriefing(s: GameState): Briefing {
       });
     }
   }
+
+  /* --- the crisis chain running now (Phase 3 step 3) */
+  const cb = crisisBriefing(s);
+  if (cb) items.push({ kind: 'warning', source: 'Crisis', severity: cb.severity, headline: cb.headline, text: cb.text });
 
   /* --- characters losing faith in you (Phase 3 step 2). Plain words only;
    * a character's betrayal can never arrive the same morning this first shows. */

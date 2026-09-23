@@ -40,8 +40,25 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
-**2026-09-22 (latest) — PHASE 3 STEP 2, CHARACTER-DRIVEN EVENTS: BUILT,
-AWAITING OWNER PLAYTEST.** Owner decisions: events arrive as ordinary
+**2026-09-22 (latest) — PHASE 3 STEP 3, CRISIS CHAINS: BUILT, AWAITING
+OWNER PLAYTEST.** Step 2 (character-driven events) is owner-approved
+(*"all works. Go to the next part."*). Five crisis chains, each a situation
+told in three stages over about a week — **The Bread Riots** (unrest),
+**The Free Zone Ledger** (corruption), **The Kordiva Referendum**
+(separatism), **The Ostrene Gas Cutoff** (foreign) and **The Stairwell
+Tapes** (scandal). A chain starts when its hidden pressure boils over
+(from day 4, one at a time, each once per run); stages 2 and 3 arrive in a
+**calm** or **hot** version depending on how you handled the stage before.
+Rules in `src/game/crises.ts`, 25 cards in `src/game/content/crises.ts`,
+drawn by `CrisisCardView` in `CardView.tsx` as a "situation room" (third
+distinct card look). The running crisis also shows on the front page and
+desk. No direct endings. **`SAVE_VERSION` 11→12** (`crisis`/`crisesDone`),
+so in-progress runs reset. 135 tests, build, and the full browser suite
+(new `tools/crises.mjs`) pass. See §18. **Next: step 4, the balance pass**
+— the last piece of Phase 3; see §18's "What is next".
+
+**2026-09-22 (later) — PHASE 3 STEP 2, CHARACTER-DRIVEN EVENTS: BUILT AND
+OWNER-APPROVED.** Owner decisions: events arrive as ordinary
 cards in the day **but with their own design and layout** (the owner wants
 visual and gameplay variety between ordinary cards, these, and future
 mini-games); both **betrayals and offers**; a betrayal **never ends the run
@@ -85,8 +102,8 @@ and Street moves reuse `coup`, `elite` and `revolution`. `SAVE_VERSION` is
 **11**, so in-progress runs reset; meta history is unaffected. 123 tests,
 production build, and the full browser suite (including new
 `tools/demands.mjs`) pass. Balance was measured, not tuned: see §16.
-Step 2 (character events) has since been built — see above. Steps 3–4
-(crisis chains, balance pass) are not started; each needs its own go-ahead.
+Steps 2 (character events) and 3 (crisis chains) have since been built —
+see above. Step 4 (balance pass) is not started and needs its own go-ahead.
 
 **2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
@@ -180,9 +197,8 @@ is the first thing to check at the start of any session.
 
 **What is deliberately NOT built**, and needs an explicit owner go-ahead
 before starting (full detail in `docs/DESIGN_V2.md` §9): the rest of
-Phase 3 — crisis chains and a balance pass (step 1, faction demands, is
-owner-approved; step 2, character events, is built and awaiting playtest;
-each later step still gets its own go-ahead); mobile/iOS (Phase 4, not scheduled — see §10 for the
+Phase 3 — the balance pass, step 4 (steps 1–2 are owner-approved; step 3,
+crisis chains, is built and awaiting playtest); mobile/iOS (Phase 4, not scheduled — see §10 for the
 guardrails to keep it possible without doing the work now); mini-games,
 sound, and remaining ending types (Phase 5).
 
@@ -318,7 +334,8 @@ npm test           # vitest: content integrity, 200 full simulated runs,
                    #   meta-progression (§4.5, record + real unlock gating),
                    #   the confidence-vote reveal, and faction demands
                    #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse),
-                   #   and character events (step 2: warn/betray/offer)
+                   #   character events (step 2: warn/betray/offer),
+                   #   and crisis chains (step 3: start/calm-hot/end)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -339,6 +356,8 @@ node tools/demands.mjs       # Phase 3 step 1: demand pop-up, rail panel,
                              # pop-up still works <1080px (rail hidden)
 node tools/characters.mjs    # Phase 3 step 2: warning first, private-file
                              # betrayal card, reply slips, keyboard, offer
+node tools/crises.mjs        # Phase 3 step 3: front page, situation-room
+                             # card, tracker, log, orders, hot stage 2
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -373,6 +392,9 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe — THIS
                            run's save; separate from meta.ts's cross-run one
+  crises.ts               PHASE 3 CRISIS CHAINS — start/advance/end the
+                           running chain (tickCrises() runs in dayUpkeep()).
+                           Cards live in content/crises.ts
   characterEvents.ts      PHASE 3 CHARACTER EVENTS — warnings, betrayals,
                            offers (tickCharacterEvents() runs in dayUpkeep()).
                            Cards live in content/characterEvents.ts
@@ -387,6 +409,8 @@ src/game/                 no React, no DOM, fully testable
                            data — a new locked mandate/item is a one-line
                            addition here, nowhere else)
   content/mandates.ts      six origins, generic rule data, Stairwell card
+  content/crises.ts        Phase 3 step 3: CRISES — 5 chains × 5 cards
+                           (stage 1, stage 2 calm/hot, stage 3 calm/hot)
   content/characterEvents.ts  Phase 3 step 2: CHARACTER_EVENTS — per
                            character a warning line, a betrayal card and an
                            offer card (26 cards)
@@ -408,7 +432,9 @@ src/ui/
                             panel (DemandsPanel, rows expand in place)
     CardView.tsx             the doc — card-as-lead-story + decision box;
                             CharacterCardView, the "private file" layout for
-                            character events (Phase 3 step 2)
+                            character events (Phase 3 step 2);
+                            CrisisCardView, the "situation room" layout for
+                            crisis chains (Phase 3 step 3)
     Prose.tsx               renders card text, applies the glossary
   screens/
     Screens.tsx             Title (incl. TitleRecord — §4.5's cross-run
@@ -461,6 +487,9 @@ tools/                     Playwright scripts; run-browser.mjs starts Vite
 - **There is no masthead Demands button** (owner removed it). Demands live
   in the pop-up and the rail's Demands panel only; below 1080px, where the
   rail is hidden, the pop-up is the only view.
+- **Crisis-chain cards use a third layout** (`CrisisCardView`, "situation
+  room"). Measure layout in browser tools only after the card's rise-in
+  animation finishes (wait ~500ms).
 - **Character-event cards use their own layout** (`CharacterCardView`), not
   the lead-story `.doc` header. Keep it visually distinct; the owner wants
   variety between card types and future mini-games.
@@ -745,3 +774,75 @@ don't leave it to "whoever reads this next." Specifically:
   (1.9 betrayals, 2.0 offers), ~5 with always-first (mostly offers), ~2
   with always-last (mostly betrayals); at least one in 97–100% of runs,
   first one around day 4–5. Balance probe survival barely moved.
+
+## 18. Crisis chains slice notes (Phase 3 step 3, 2026-09-22)
+
+- **Shape:** a chain (`CrisisDef` in `content/crises.ts`) has `stage1`,
+  `stage2.{calm,hot}` and `stage3.{calm,hot}` — 5 cards. Stage names:
+  "It starts", "It spreads", "It comes to a head".
+- **Score, in content:** options add to `flags['crisis:<id>']` (+1/+2
+  handled well, −1/−2 made worse). `crises.ts` picks the `calm` version of
+  the next stage when the score is ≥ 0, `hot` when it is negative. An option
+  can end the chain early with `flags['crisisEnd:<id>']` (two options do:
+  accepting Kostyn's deal, accepting Ostrene's price). Adding a chain is
+  content only.
+- **Start:** from `START_DAY` (4), when no chain is running and the
+  cooldown (3 days after the last one ended) is over, any chain whose
+  `pressure` ≥ `startAt` (45; 50 for the tapes) can start; the most
+  over-threshold one wins. One at a time; each once per run
+  (`GameState.crisesDone`).
+- **Advance / end:** `tickCrises()` in `dayUpkeep()` (after character
+  events). A stage card is queued for that day (first in the deck); the next
+  stage comes `STAGE_GAP` (2) days after, but only once the current card has
+  actually been played (`seenOnce`). The morning after stage 3 (or an early
+  end) the chain closes: `crisesDone`, a log line, and a `bigMoments` entry
+  for the end-of-run summary ("Handled / Got through / Barely survived
+  <name>").
+- **No random rolls** in crises.ts — pressure decides which chain starts,
+  the score decides which version arrives. No direct endings; outcomes move
+  ordinary stats/pressures.
+- **State:** `GameState.crisis?: ActiveCrisis` (`id`, `stage`, `cardId`,
+  `startedDay`, `nextDay`) and `crisesDone: string[]`. `SAVE_VERSION` 11→12.
+- **Look:** the `crisis-chain` tag switches `CardView` to `CrisisCardView`,
+  a light "situation room": red crisis band with the name and a 3-step
+  tracker, the story beside a **situation log** (earlier stage titles and
+  what you ordered, read back from `s.log`) and "So far: holding / getting
+  worse…" in words (`crisisMood()`, never the number), then the options as
+  numbered **orders** side by side. Keeps the `.doc`/`h1`/`.opt` hooks.
+  That is now three distinct card looks (lead story, private file,
+  situation room) — keep future types (mini-games) distinct too.
+- **Front page / desk:** `crisisBriefing()` adds "Crisis: <name> (stage N
+  of 3)" as a warning with the summary, how it is going, and when the next
+  development is due.
+- **Measured (not tuned):** ~1 chain per run (0.8–1.2), in 78–95% of runs,
+  first around day 7–12. Generous play almost always gets the Ledger
+  (corruption); harsh play gets Bread, Gas and the Referendum; random play
+  sees all five. Both versions of every stage were reached. Random-play
+  survival moved 47% → 42% in the balance probe; always-first 92%.
+- **Browser tools:** measure layout only after the card's `.42s` rise-in
+  animation (`page.waitForTimeout(500)`) — two `boundingBox()` calls taken
+  mid-animation report different `y` values. This bit both
+  `characters.mjs` and `crises.mjs` once.
+
+**What is next — Phase 3 step 4, the balance pass** (needs its own
+go-ahead). Everything Phase 3 added was measured but deliberately not
+tuned. The pass would, using the balance probe and the per-system probes
+described in §16–§18:
+1. **Fix "one option every time wins"** (known limitation #2): always-first
+   play still survives ~90% of runs. Give the generous path a sharper
+   late-game cost (e.g. patience that drains faster the more you give,
+   bigger upkeep on accumulated commitments).
+2. **Demand frequency** (owner noted demands felt rare: ~1.5–2 per run,
+   first around day 6–9). Levers: `ISSUE_BELOW`, `STAGE_DAYS`, `MAX_LIVE`,
+   patience drain in `dayUpkeep()`.
+3. **Coup pressure almost never rises** (3–15% of runs reach 40), so the
+   coup ending is rare (known limitation #3) and there is no coup crisis
+   chain yet. Feed coup pressure from more military cards/events, then add
+   a coup chain as content.
+4. **Confidence-vote thresholds and margins** (40/47/54): re-check against
+   real vote margins now that demands, character events and crises add
+   pressure; random-play survival fell from ~51% to ~42% across Phase 3.
+5. **Crisis and character-event pacing**: ~1 crisis and ~4 character
+   events per run; decide whether that is the right density for 18 days.
+After step 4, Phase 3 is complete; Phase 4 (mobile/iOS) stays unscheduled
+and Phase 5 (mini-games, sound, remaining endings) needs its own go-ahead.

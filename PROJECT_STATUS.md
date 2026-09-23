@@ -1,6 +1,67 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
+## ▶ WHERE WE STOPPED — 2026-09-22, latest (PHASE 3 STEP 3: CRISIS CHAINS — BUILT, AWAITING PLAYTEST)
+
+**Step 2 (character-driven events, plus the Elites rename and the removed
+Demands button) is owner-approved.** Owner, verbatim: *"all works. Go to
+the next part. make sure documentation is up to date. Follow the previous
+output guidelines but include a description of what is next."* So this
+slice is step 3, and the hand-off below ends with what comes next.
+
+**What was built:**
+- **Five crisis chains** (`src/game/content/crises.ts`, 25 cards): The
+  Bread Riots (unrest), The Free Zone Ledger (corruption), The Kordiva
+  Referendum (separatism), The Ostrene Gas Cutoff (foreign), The Stairwell
+  Tapes (scandal). Each is three stages — it starts, it spreads, it comes
+  to a head — and stages 2 and 3 each have a **calm** and a **hot**
+  version.
+- **Rules** (`src/game/crises.ts`, no React, no random rolls): from day 4,
+  when a pressure reaches its threshold (45; 50 for the tapes) and no chain
+  is running, the most over-threshold chain starts. Stage cards arrive two
+  days apart as the day's first card. Your choices add to a hidden score;
+  a score below zero brings the hot version of the next stage. A couple of
+  choices end a chain early (Kostyn's deal, Ostrene's price). One chain at
+  a time, each once per run, 3-day gap between chains. The end-of-run
+  summary records how you did ("Handled / Got through / Barely survived").
+- **Why these five:** measured over 120 simulated runs per play style,
+  these are the pressures that actually climb. Coup pressure almost never
+  does (3–15% of runs reach 40), so a coup chain waits for the balance pass.
+- **Look:** `CrisisCardView` — a third distinct card design, the
+  "situation room": red crisis band with a 3-step tracker, the story beside
+  a situation log of what you ordered at earlier stages and how it is going
+  in words, and the options as numbered orders side by side.
+- **Front page / desk** show "Crisis: <name> (stage N of 3)", how it is
+  going, and when the next development is due.
+- **Save:** `SAVE_VERSION` 11→12 — **in-progress runs reset**; the
+  cross-run record is untouched.
+
+**Measured (not tuned):** ~1 chain per run, in 78–95% of runs, the first
+around day 7–12. Generous play almost always meets the Ledger; harsh play
+meets Bread, Gas and the Referendum; random play sees all five. Both
+versions of every stage get reached. Random-play survival 47% → 42%;
+always-first 92%.
+
+**Verification:** 135/135 tests (6 new in `crises.test.ts`), production
+build clean, full browser suite at 1366×700 with zero page errors,
+including new `tools/crises.mjs`. `tools/characters.mjs` needed a timing
+fix (measure after the card's rise-in animation); it was a test issue,
+not a layout bug.
+
+**What is next — Phase 3 step 4, the balance pass** (the last piece of
+Phase 3; needs a go-ahead). Everything Phase 3 added was measured, not
+tuned. The pass would: (1) fix "one option every time wins" (always-first
+still survives ~90%); (2) make demands more frequent (owner felt they were
+rare); (3) make coup pressure actually rise, then add a coup crisis chain;
+(4) re-check the confidence-vote thresholds (40/47/54) against the new
+pressure — random-play survival fell ~51% → ~42% over Phase 3; (5) settle
+crisis and character-event pacing. After that Phase 3 is complete. Full
+list: `AGENTS.md` §18 "What is next" and `docs/DESIGN_V2.md` §9.
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-22, latest (PHASE 3 STEP 2: CHARACTER-DRIVEN EVENTS — BUILT, AWAITING PLAYTEST)
 
 **Step 1 (faction demands) is owner-approved** — see the block below. The
@@ -1242,10 +1303,10 @@ still needs to be explicitly asked for, same as every other item below:
 
 ## 6. Recommended next task
 
-**Current (2026-09-22, latest): get the owner's playtest of Phase 3 step 2
-(character-driven events) and the two step-1 changes.** Fix whatever it
-turns up. Only after approval and a go-ahead, start step 3 (crisis chains,
-`docs/DESIGN_V2.md` §9). The history below is kept for context.
+**Current (2026-09-22, latest): get the owner's playtest of Phase 3 step 3
+(crisis chains).** Fix whatever it turns up. Then step 4, the balance pass
+(see the "What is next" list in the block at the top) — the last piece of
+Phase 3. The history below is kept for context.
 
 **All of Phase 2 (§4.1–§4.5, every step) is built, playtested, and
 OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Owner,

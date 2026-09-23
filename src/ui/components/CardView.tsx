@@ -3,6 +3,9 @@ import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
 import { termsIn } from '../../game/glossary';
 import { Prose, Glossed } from './Prose';
+import { crisisOfCard, STAGE_NAMES } from '../../game/content/crises';
+import type { CrisisDef } from '../../game/content/crises';
+import { crisisMood } from '../../game/crises';
 
 /**
  * The document — a card rendered as the day's "lead story". Options are the
@@ -19,6 +22,10 @@ export function CardView({
 }) {
   if (card.tags?.includes('character-event') && card.actor && CHARACTER_MAP[card.actor]) {
     return <CharacterCardView s={s} card={card} onChoose={onChoose} />;
+  }
+  if (card.tags?.includes('crisis-chain')) {
+    const where = crisisOfCard(card as CardDef);
+    if (where) return <CrisisCardView s={s} card={card} onChoose={onChoose} chain={where.chain} stage={where.stage} />;
   }
   const actor = card.actor ? CHARACTER_MAP[card.actor] : undefined;
   const faction = card.faction ? FACTIONS[card.faction] : undefined;
@@ -151,6 +158,99 @@ function CharacterCardView({
         <div className="cc-replies">
           <div className="cc-replies-h">Your reply</div>
           <div className="cc-slips">
+            {card.options.map((o, i) => {
+              const locked = o.enabled ? !o.enabled(s) : false;
+              return (
+                <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>
+                  <span className="n">{i + 1}</span>
+                  <span className="body">
+                    <span className="lab">{fill(o.label, s)}</span>
+                    {o.hint && <span className="hint"><Glossed text={fill(o.hint, s)} /></span>}
+                    {locked && <span className="locked">✕ {o.lockedText ?? 'Not available to you.'}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {glossaryTerms.length > 0 && (
+          <div className="card-glossary">
+            {glossaryTerms.map((t) => (
+              <span key={t.term}><b>{t.term}</b>: {t.def}</span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * PHASE 3 STEP 3 — a crisis-chain stage, drawn as a SITUATION ROOM sheet:
+ * a band with the crisis name and a three-stage tracker, the stage's story,
+ * a situation log of what you ordered at earlier stages, and the options as
+ * numbered orders side by side. Deliberately unlike both the lead story and
+ * the character "private file" (owner request: card types should differ).
+ * Keeps the `.doc`, `h1` and `.opt` hooks for tooling and keyboard use.
+ */
+function CrisisCardView({
+  s, card, onChoose, chain, stage,
+}: {
+  s: GameState;
+  card: CardDef | AlertDef;
+  onChoose: (optionId: string) => void;
+  chain: CrisisDef;
+  stage: number;
+}) {
+  // Earlier stages of this chain, and what you chose — read back from the log.
+  const earlier = [chain.stage1, chain.stage2.calm, chain.stage2.hot, chain.stage3.calm, chain.stage3.hot]
+    .filter((c) => c.id !== card.id && s.seenOnce.includes(c.id));
+  const history = earlier.map((c) => {
+    const entry = s.log.find((l) => l.kind === 'decision' && l.title === c.title);
+    return { title: c.title, day: entry?.day, chose: entry?.text.split(' — ')[0] };
+  });
+  const glossaryTerms = termsIn([
+    fill(card.body, s),
+    ...card.options.map((o) => (o.hint ? fill(o.hint, s) : '')),
+  ]);
+
+  return (
+    <div className="doc-wrap">
+      <div className={`doc crisis-card stage-${stage}`} key={card.id}>
+        <div className="cr-band">
+          <span className="cr-tag">Crisis</span>
+          <span className="cr-name">{chain.name}</span>
+          <ol className="cr-track" aria-label={`Stage ${stage} of 3`}>
+            {STAGE_NAMES.map((n, i) => (
+              <li key={n} className={i + 1 < stage ? 'done' : i + 1 === stage ? 'now' : ''}>
+                <span className="dot">{i + 1 < stage ? '✓' : i + 1}</span>
+                <span className="lbl">{n}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div className="cr-grid">
+          <div className="cr-main">
+            <div className="cr-kicker">Stage {stage} of 3 &middot; {STAGE_NAMES[stage - 1]} &middot; Day {s.day}</div>
+            <h1>{card.title}</h1>
+            <Prose text={fill(card.body, s)} />
+          </div>
+          <aside className="cr-log">
+            <div className="cr-log-h">Situation log</div>
+            {history.length === 0 && <div className="cr-log-empty">This is where it starts.</div>}
+            {history.map((h) => (
+              <div className="cr-log-row" key={h.title}>
+                <div className="d">{h.day ? `Day ${h.day}` : 'Earlier'}</div>
+                <div className="t">{h.title}</div>
+                {h.chose && <div className="c">You: {fill(h.chose, s)}</div>}
+              </div>
+            ))}
+            <div className="cr-mood">So far: <b>{crisisMood(s, chain.id)}</b></div>
+          </aside>
+        </div>
+        <div className="cr-orders">
+          <div className="cr-orders-h">Your orders</div>
+          <div className="cr-order-row">
             {card.options.map((o, i) => {
               const locked = o.enabled ? !o.enabled(s) : false;
               return (

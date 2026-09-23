@@ -1166,13 +1166,15 @@ Everything here is genuinely deferred (needs an explicit go-ahead per
 2. **Character-driven events** (Milestone 3). Spawn a card when a
    character's `plotting` crosses a threshold. The data is already tracked;
    this is new spawn logic plus new cards.
-   **BUILT 2026-09-22, AWAITING PLAYTEST — see "Phase 3 step 2, as built"
+   **BUILT AND OWNER-APPROVED 2026-09-22 — see "Phase 3 step 2, as built"
    below.** Triggered mainly by loyalty, not plotting alone (measured:
    plotting barely moves for most characters).
 3. **Crisis chains** (Milestone 4). Multi-card escalating sequences — this
    pairs naturally with the act structure from §4.1 (a chain could span an
    act) and is worth revisiting with that structure in hand rather than
    against the old flat 30-day timeline.
+   **BUILT 2026-09-22, AWAITING PLAYTEST — see "Phase 3 step 3, as built"
+   below.**
 4. **A balance pass.** Difficulty asymmetry (known limitation #2) and the
    rare coup ending (#3) are real, but deliberately not tuned yet —
    rebalancing now would be wasted work, since the shop economy and 18-day
@@ -1269,6 +1271,46 @@ in a two-column grid. Same `.doc`/`h1`/`.opt` hooks as ordinary cards.
 
 **Measured (not tuned):** ~4 events per run (random), ~5 (always-first,
 mostly offers), ~2 (always-last, mostly betrayals); first around day 4–5.
+
+### Phase 3 step 3, as built — crisis chains (2026-09-22)
+
+**Five chains**, each tied to a hidden pressure measured to actually climb
+in real play (120 simulated runs per play style): The Bread Riots
+(unrest), The Free Zone Ledger (corruption), The Kordiva Referendum
+(separatism), The Ostrene Gas Cutoff (foreign), The Stairwell Tapes
+(scandal). No coup chain yet: coup pressure reaches 40 in only 3–15% of
+runs — a balance-pass item.
+
+| Rule | Value |
+|---|---|
+| Start | day ≥ 4, no chain running, 3-day cooldown over, pressure ≥ `startAt` (45; tapes 50); most over-threshold wins |
+| Stages | 3 — it starts / it spreads / it comes to a head; 2 days apart; each only after the previous card was played |
+| Branching | stages 2 and 3 have `calm` and `hot` versions; `hot` if `flags['crisis:<id>']` < 0 |
+| Early end | an option sets `flags['crisisEnd:<id>']` |
+| Limits | one at a time; each once per run; no direct endings; no random rolls |
+| Record | `crisesDone`, a log line, and a `bigMoments` line for the end-of-run summary |
+
+**Presentation:** `CrisisCardView`, the "situation room" — the third
+distinct card design after the lead story and the character "private
+file": red crisis band with a three-step tracker, the stage story beside a
+situation log (earlier stages and what you ordered), "so far: holding /
+getting worse" in words, and the options as numbered orders side by side.
+The front page and desk show the running crisis and when the next stage is
+due.
+
+**Measured (not tuned):** ~1 chain per run, in 78–95% of runs, first
+around day 7–12; play style decides which chains you meet.
+
+### Phase 3 step 4 — the balance pass (next; needs a go-ahead)
+
+The last piece of Phase 3. Everything above was measured, not tuned:
+1. "One option every time wins": always-first play survives ~90–92%.
+2. Demands feel rare (owner): ~1.5–2 per run, first around day 6–9.
+3. Coup pressure barely rises, so the coup ending is rare and there is no
+   coup chain; feed it, then add a coup chain as content.
+4. Confidence-vote thresholds (40/47/54) against the new pressure —
+   random-play survival fell ~51% → ~42% over Phase 3.
+5. Pacing of crises (~1/run) and character events (~4/run).
 
 ### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
 
