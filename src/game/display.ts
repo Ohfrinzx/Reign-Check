@@ -99,8 +99,17 @@ export const DISPLAY_FACTIONS: DisplayFactionDef[] = [
   { id: 'chorus',  label: 'Street',   icon: '◎', moods: ['warm', 'quiet', 'restless', 'furious', 'in the square'] },
 ];
 
+/** Balance slice B: a faction below this loyalty is HOSTILE — the bottom mood
+ *  on its bar. It works against you every morning (demands.ts tickHostility())
+ *  and its deputies vote against you as one (content/endings.ts). */
+export const HOSTILE_BELOW = 20;
+
+export function isHostile(s: GameState, id: FactionId): boolean {
+  return s.factions[id].loyalty < HOSTILE_BELOW;
+}
+
 export function factionMood(def: DisplayFactionDef, loyalty: number): { word: string; tone: 'good' | 'ok' | 'warn' | 'bad' } {
-  const idx = loyalty >= 72 ? 0 : loyalty >= 55 ? 1 : loyalty >= 38 ? 2 : loyalty >= 20 ? 3 : 4;
+  const idx = loyalty >= 72 ? 0 : loyalty >= 55 ? 1 : loyalty >= 38 ? 2 : loyalty >= HOSTILE_BELOW ? 3 : 4;
   const toneByIdx: ('good' | 'ok' | 'warn' | 'bad')[] = ['good', 'good', 'ok', 'warn', 'bad'];
   return { word: def.moods[idx], tone: idx <= 1 ? 'good' : toneByIdx[idx] };
 }

@@ -348,3 +348,126 @@ export const FACTION_MOVES: Partial<Record<FactionId, FactionMoveDef>> = {
     },
   },
 };
+
+/**
+ * BALANCE SLICE B — what a HOSTILE faction does every morning. A faction is
+ * hostile when its loyalty is below HOSTILE_BELOW (display.ts): the bottom
+ * mood on its bar ("ready to move", "turning on you", "hostile", "ready to
+ * strike", "in the square"). Owner feedback: "Even when it's practically zero
+ * nothing happens." Now something does, every morning, until you win them
+ * back. `turned` is the pop-up the first morning it happens. The actions
+ * rotate so the same one does not repeat two days running.
+ */
+export interface HostileActionDef {
+  title: string;
+  text: string;
+  effects: Effects;
+}
+
+export interface HostileDef {
+  turned: string;
+  actions: HostileActionDef[];
+}
+
+export const HOSTILE_ACTIONS: Partial<Record<FactionId, HostileDef>> = {
+  staff: {
+    turned: 'Varkov\'s officers have stopped pretending. Until you win them back, the army works against you every morning: meetings without you, orders ignored, and a coup that gets easier to organise each day.',
+    actions: [
+      {
+        title: 'Officers are meeting without you',
+        text: 'Twelve colonels had dinner at the Staff College. Nobody from your office was invited.',
+        effects: { stats: { military: -2 }, hidden: { coup: 4 } },
+      },
+      {
+        title: 'The garrison ignored an order',
+        text: 'A transfer you signed was "lost in the system". The officer is still at his desk.',
+        effects: { stats: { power: -3 }, hidden: { coup: 3 } },
+      },
+      {
+        title: 'Varkov briefed the Council against you',
+        text: 'The Chief of Staff told the Council of the Republic that the army is "concerned". Everyone knows what that word means here.',
+        effects: { stats: { legitimacy: -2 }, hidden: { coup: 3 } },
+      },
+    ],
+  },
+  sable: {
+    turned: 'The Sable Office has decided you are a problem. Until you win them back, it works against you every morning: leaks, missing reports, and files that reach the wrong desks.',
+    actions: [
+      {
+        title: 'Your files are leaking',
+        text: 'Two of your private memos were read out on Channel Seven. Only the Sable Office had copies.',
+        effects: { stats: { information: -3 }, hidden: { leak: 4, scandal: 2 } },
+      },
+      {
+        title: 'The reports stopped arriving',
+        text: 'Your morning intelligence summary was one page long. It was about the weather.',
+        effects: { stats: { information: -4, security: -2 } },
+      },
+      {
+        title: 'Your ministers are being watched',
+        text: 'Three of your ministers found the same small device in their offices. Nobody is saying who put them there.',
+        effects: { stats: { stability: -2 }, hidden: { fear: 3, leak: 3 } },
+      },
+    ],
+  },
+  concord: {
+    turned: 'The Elites have given up on you. Until you win them back, they work against you every morning: money leaves the country, loans get dearer, and investment stops.',
+    actions: [
+      {
+        title: 'Money is leaving the country',
+        text: 'About $2 billion moved from Velmorran banks to Sereth overnight. The central bank sold reserves to hold the currency.',
+        effects: { stats: { treasury: -1.5, economy: -1.5 }, hidden: { fiscal: 2 } },
+      },
+      {
+        title: 'The banks raised your borrowing costs',
+        text: 'The Ilvet banks now charge the government two points more to borrow. They say it is "the risk".',
+        effects: { stats: { treasury: -1 }, hidden: { fiscal: 4 } },
+      },
+      {
+        title: 'Investment is on hold',
+        text: 'Three factories and a port extension were "paused pending clarity". The clarity they want is you leaving.',
+        effects: { stats: { economy: -2, treasury: -1 } },
+      },
+    ],
+  },
+  combine: {
+    turned: 'The unions have turned against you. Until you win them back, they work against you every morning: slowdowns, wildcat strikes, and trains that run late on purpose.',
+    actions: [
+      {
+        title: 'Work-to-rule at the port',
+        text: 'The Mavro dockers are following every safety rule exactly. Ships are waiting four days to unload.',
+        effects: { stats: { economy: -2, treasury: -1 } },
+      },
+      {
+        title: 'A wildcat strike in the mines',
+        text: 'Two Gorsk lithium shafts stopped for the day. Hess says she did not call it. She did not stop it either.',
+        effects: { stats: { treasury: -1.5 }, hidden: { unrest: 3 } },
+      },
+      {
+        title: 'The trains ran late on purpose',
+        text: 'Every commuter train into Sarnica ran forty minutes late. The union blamed "the government\'s attitude".',
+        effects: { stats: { stability: -2, economy: -1, support: -1 } },
+      },
+    ],
+  },
+  chorus: {
+    turned: 'The Street has turned against you. Until you win them back, it works against you every morning: protests, hostile papers, and marches on the ministries.',
+    actions: [
+      {
+        title: 'Protests every evening',
+        text: 'A few thousand people gathered in the main square again last night. There were more than the night before.',
+        effects: { stats: { stability: -2 }, hidden: { unrest: 4 } },
+      },
+      {
+        title: 'The papers turned on you',
+        text: 'Every morning paper led with a story about your government. None of them were kind.',
+        effects: { stats: { support: -3, legitimacy: -2 } },
+      },
+      {
+        title: 'A march on the ministry',
+        text: 'Students marched on the Interior Ministry and painted your name on the gate. The paint is still there.',
+        effects: { stats: { support: -2 }, hidden: { unrest: 3 } },
+      },
+    ],
+  },
+};

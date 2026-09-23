@@ -1,23 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ConfidenceVoteResult, GameState } from '../../game/types';
 import { NUM_ACTS } from '../../game/state';
-
-const RETURN_COUNT = 24;
-
-function displayNumber(value: number): string {
-  return Math.abs(value - Math.round(value)) < 0.005
-    ? String(Math.round(value))
-    : value.toFixed(1);
-}
+import { DISPLAY_FACTIONS } from '../../game/display';
+import { TOTAL_SEATS } from '../../game/content/endings';
 
 function marginLine(vote: ConfidenceVoteResult): string {
-  const distance = Math.abs(vote.margin);
-  if (distance < 0.01) {
-    return vote.passed ? 'Exactly on the required line' : 'Less than 0.01 below the required line';
-  }
-  return `${displayNumber(distance)} point${distance >= 1.5 ? 's' : ''} ${vote.passed ? 'above' : 'below'} the required line`;
+  const d = Math.abs(vote.margin);
+  if (d === 0) return 'Exactly the number needed';
+  return `${d} vote${d === 1 ? '' : 's'} ${vote.passed ? 'more' : 'fewer'} than needed`;
 }
 
+function blocName(faction: string): { label: string; icon: string } {
+  const d = DISPLAY_FACTIONS.find((x) => x.id === faction);
+  return { label: d?.label ?? faction, icon: d?.icon ?? '' };
+}
+
+/**
+ * The confidence vote, counted bloc by bloc (balance slice B). Each row is
+ * one faction's deputies; filled seats voted for you. Everything that decides
+ * it is already on screen elsewhere — the faction bars, Grip, Legitimacy and
+ * Money — so the reveal only shows the count, never a hidden number.
+ */
 export function ConfidenceVoteScreen({
   s,
   onContinue,
@@ -26,13 +29,15 @@ export function ConfidenceVoteScreen({
   onContinue: () => void;
 }) {
   const vote = s.confidenceVote;
+  const blocs = vote?.blocs ?? [];
+  const returns = blocs.length;
   const [revealed, setRevealed] = useState(0);
 
   useEffect(() => {
     if (!vote) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reducedMotion) {
-      setRevealed(RETURN_COUNT);
+      setRevealed(returns);
       return;
     }
 
@@ -43,22 +48,23 @@ export function ConfidenceVoteScreen({
       if (cancelled) return;
       current += 1;
       setRevealed(current);
-      if (current < RETURN_COUNT) {
-        timer = window.setTimeout(tick, current >= RETURN_COUNT - 5 ? 270 : 125);
-      }
+      if (current < returns) timer = window.setTimeout(tick, current >= returns - 1 ? 900 : 620);
     };
     timer = window.setTimeout(tick, 650);
     return () => {
       cancelled = true;
       window.clearTimeout(timer);
     };
-  }, [vote]);
+  }, [vote, returns]);
 
-  const complete = revealed >= RETURN_COUNT;
-  const shownScore = vote ? vote.score * (revealed / RETURN_COUNT) : 0;
-  const cells = useMemo(() => Array.from({ length: RETURN_COUNT }, (_, i) => i), []);
+  const complete = revealed >= returns;
+  const shownScore = useMemo(
+    () => blocs.slice(0, revealed).reduce((a, b) => a + b.votesFor, 0),
+    [blocs, revealed],
+  );
 
   if (!vote) return null;
+  const pct = (v: number) => `${(v / TOTAL_SEATS) * 100}%`;
 
   const continuation = vote.passed && vote.act < NUM_ACTS
     ? 'To the evening edition →'
@@ -70,54 +76,65 @@ export function ConfidenceVoteScreen({
         <header className="vote-heading">
           <div className="kicker">Assembly of the Republic · Act {vote.act} confidence division</div>
           <h1 id="vote-title">PARLIAMENT IS COUNTING</h1>
-          <p>The clerk is entering the chamber&apos;s returns. The government needs {displayNumber(vote.threshold)}.</p>
+          <p>The clerk is counting the blocs. The government needs {vote.threshold} of {TOTAL_SEATS} votes.</p>
         </header>
 
         <section className="vote-board" aria-label="Confidence count">
           <div className="vote-board-top">
-            <span>Returns received</span>
-            <b>{revealed} / {RETURN_COUNT}</b>
+            <span>Blocs counted</span>
+            <b>{revealed} / {returns}</b>
           </div>
-          <div className="vote-lamps" aria-hidden="true">
-            {cells.map((cell) => (
-              <i key={cell} className={cell < revealed ? 'counted' : ''} />
-            ))}
-          </div>
+          <ol className="vote-blocs">
+            {blocs.map((b, i) => {
+              const { label, icon } = blocName(b.faction);
+              const counted = i < revealed;
+              return (
+                <li key={b.faction} className={counted ? 'counted' : ''}>
+                  <span className="vb-name">{icon} {label}</span>
+                  <span className="vb-seats" aria-hidden="true">
+                    {Array.from({ length: b.seats }, (_, n) => (
+                      <i key={n} className={counted ? (n < b.votesFor ? 'for' : 'against') : ''} />
+                    ))}
+                  </span>
+                  <span className="vb-count">{counted ? `${b.votesFor} / ${b.seats}` : '…'}</span>
+                  <span className="vb-why">{counted ? b.why : 'counting'}</span>
+                </li>
+              );
+            })}
+          </ol>
           <div
             className="vote-meter"
             role="progressbar"
-            aria-label="Current confidence count"
+            aria-label="Votes for the government so far"
             aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(shownScore)}
+            aria-valuemax={TOTAL_SEATS}
+            aria-valuenow={shownScore}
           >
-            <span className="vote-meter-fill" style={{ width: `${Math.max(0, Math.min(100, shownScore))}%` }} />
-            <span className="vote-threshold" style={{ left: `${vote.threshold}%` }}>
-              <b>{displayNumber(vote.threshold)}</b>
-              <small>required</small>
+            <span className="vote-meter-fill" style={{ width: pct(Math.max(0, Math.min(TOTAL_SEATS, shownScore))) }} />
+            <span className="vote-threshold" style={{ left: pct(vote.threshold) }}>
+              <b>{vote.threshold}</b>
+              <small>needed</small>
             </span>
           </div>
           <div className="vote-live-number" aria-hidden={!complete}>
-            <span>Recorded confidence</span>
-            <b>{displayNumber(shownScore)}</b>
+            <span>Votes for you</span>
+            <b>{shownScore}</b>
           </div>
         </section>
 
         <section className={`vote-clerk ${complete ? 'revealed' : ''}`} aria-hidden={!complete}>
-          <div className="vote-factors">
-            <div><span>Grip</span><b>{displayNumber(vote.grip)}</b></div>
-            <div><span>Legitimacy</span><b>{displayNumber(vote.legitimacy)}</b></div>
-            <div><span>Required</span><b>{displayNumber(vote.threshold)}</b></div>
-          </div>
           <div className={`vote-stamp ${vote.passed ? 'passed' : 'failed'}`}>
             {vote.passed ? 'CONFIDENCE RETAINED' : 'CONFIDENCE WITHDRAWN'}
           </div>
-          <p className="vote-margin">{marginLine(vote)}.</p>
+          <p className="vote-margin">
+            {marginLine(vote)}.
+            {vote.debtCost && ' The empty treasury cost you votes in every bloc.'}
+          </p>
         </section>
 
         <div className="vote-actions">
           {!complete ? (
-            <button className="btn btn-primary" type="button" onClick={() => setRevealed(RETURN_COUNT)}>
+            <button className="btn btn-primary" type="button" onClick={() => setRevealed(returns)}>
               Reveal now
             </button>
           ) : (
@@ -127,14 +144,15 @@ export function ConfidenceVoteScreen({
           )}
         </div>
 
-        <p className="vote-method">The result combines the government&apos;s Grip and Legitimacy. No ballot is random.</p>
+        <p className="vote-method">
+          Each bloc follows its faction&apos;s mood, plus your Grip and Legitimacy. A hostile faction votes against you as one. Debt costs votes everywhere. No ballot is random.
+        </p>
         <div className="sr-only" aria-live="polite">
           {complete
-            ? `${vote.passed ? 'Confidence retained' : 'Confidence withdrawn'}. Score ${displayNumber(vote.score)}, required ${displayNumber(vote.threshold)}. ${marginLine(vote)}.`
+            ? `${vote.passed ? 'Confidence retained' : 'Confidence withdrawn'}. ${vote.score} votes for, ${vote.threshold} needed. ${marginLine(vote)}.`
             : 'Parliament is counting.'}
         </div>
       </div>
     </main>
   );
 }
-

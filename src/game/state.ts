@@ -22,8 +22,9 @@ import { applyEffects } from './effects';
  *  for the act-boundary result reveal. 10→11: FactionDemand's new shape
  *  (issuedDay/bribes/bribeRefused, no stored text) plus demandNotices, for
  *  Phase 3's faction demands. 11→12: crisis/crisesDone, for Phase 3's
- *  crisis chains. */
-export const SAVE_VERSION = 12;
+ *  crisis chains. 12→13: ConfidenceVoteResult counts faction blocs
+ *  (blocs/debtCost), for balance slice B. */
+export const SAVE_VERSION = 13;
 
 /** A run is 3 acts of ACT_LENGTH days each, every act ending in a confidence
  *  vote (see checkEndings' 'noConfidence' entry in content/endings.ts) rather

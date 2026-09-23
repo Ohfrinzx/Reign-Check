@@ -4,7 +4,7 @@ import { DISPLAY_FACTIONS } from './display';
 import { STAGE_META, lookupCard, alertPressure } from './engine';
 import { band } from './stats';
 import { DEMAND_MAP } from './content/demands';
-import { STAGE_LABEL } from './demands';
+import { STAGE_LABEL, hostileActionToday } from './demands';
 import { characterWarnings } from './characterEvents';
 import { crisisBriefing } from './crises';
 
@@ -129,6 +129,15 @@ export function buildBriefing(s: GameState): Briefing {
     // Kind 'issue' (front page only) rather than 'demand', so it does not
     // repeat in the rail's threat cards — the Demands panel already has it.
     const live = f.demand && DEMAND_MAP[f.demand.id];
+    // Balance slice B: a hostile faction did something to you this morning.
+    const act = hostileActionToday(s, id);
+    if (act) {
+      items.push({
+        kind: 'warning', source: shortName, severity: 3,
+        headline: `${shortName}: working against you — ${act.title}`,
+        text: `${act.text} This happens every morning while the ${shortName} are hostile. Win them back to stop it: meet their demand, or side with them.`,
+      });
+    }
     if (f.demand && live) {
       items.push({
         kind: 'issue', source: shortName,
@@ -142,7 +151,7 @@ export function buildBriefing(s: GameState): Briefing {
         headline: f.patience < 16 ? `${shortName}: out of patience` : `${shortName}: patience running out`,
         text: def.redLine,
       });
-    } else if (f.loyalty < 30) {
+    } else if (f.loyalty < 30 && !act) {
       items.push({
         kind: 'warning', source: shortName, severity: 2,
         headline: `${shortName}: turning against you`,

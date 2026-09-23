@@ -67,8 +67,10 @@ try {
   await page.screenshot({ path: shotPath('C-betrayal.png') });
   await page.screenshot({ path: shotPath('C-betrayal-full.png'), fullPage: true });
 
-  // the keyboard still chooses: "3" = sack him
-  await page.keyboard.press('3');
+  // the keyboard still chooses: the number shown on "Sack him." (option order is shuffled per run)
+  const sackAt = (await slips.allInnerTexts()).findIndex((x) => /Sack him/.test(x));
+  assert.ok(sackAt >= 0, 'No "Sack him." option');
+  await page.keyboard.press(String(sackAt + 1));
   await page.locator('.stage-col .outcome').waitFor();
   const after = await page.evaluate(() => JSON.parse(localStorage.getItem('dictator-sandbox:save:v1')));
   assert.equal(after.characters.piek.inPost, false, 'Option 3 did not remove Piek');

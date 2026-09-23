@@ -1,30 +1,57 @@
-import type { ConfidenceVoteResult, GameState, EndingDef, EndingResult } from '../types';
+import type { ConfidenceVoteResult, GameState, EndingDef, EndingResult, FactionId, VoteBloc } from '../types';
 import { REGIME_KEYS } from '../types';
 import { money } from '../stats';
 import { FACTIONS, FACTION_ORDER } from './country';
-import { DISPLAY_FACTIONS, computeResources } from '../display';
+import { DISPLAY_FACTIONS, HOSTILE_BELOW, computeResources } from '../display';
 import { isActEndDay } from '../state';
 
 /**
- * Confidence vote: held at the end of every act (see ACT_LENGTH/NUM_ACTS in
- * state.ts), checked against the same Grip/Legitimacy composite the player
- * already watches on the masthead — no new hidden number. Parliament expects
- * more of you each time, so the bar rises act to act.
+ * Confidence vote (balance slice B). The Grand Convocation votes in blocs,
+ * one per visible faction. Each bloc's deputies follow that faction's mood
+ * (60%) and how the government looks overall — Grip and Legitimacy (40%).
+ * A faction that has turned hostile (the bottom mood on its bar) votes
+ * against you as one. An empty treasury costs votes in every bloc. The bar
+ * rises each act: a simple majority first, three-fifths at the end.
+ *
+ * Deterministic — no dice. Everything that goes in is on screen: the faction
+ * bars, Grip, Legitimacy and Money.
  */
+export const VOTE_SEATS: { faction: FactionId; seats: number }[] = [
+  { faction: 'staff', seats: 15 },
+  { faction: 'sable', seats: 10 },
+  { faction: 'concord', seats: 20 },
+  { faction: 'combine', seats: 25 },
+  { faction: 'chorus', seats: 30 },
+];
+export const TOTAL_SEATS = VOTE_SEATS.reduce((a, b) => a + b.seats, 0);
+/** votes needed at the end of act 1, 2, 3 */
+export const VOTES_NEEDED = [45, 58, 68];
+
 export function computeConfidenceVote(s: GameState): ConfidenceVoteResult {
   const resources = computeResources(s);
   const grip = resources.find((r) => r.key === 'grip')?.value ?? 0;
   const legitimacy = resources.find((r) => r.key === 'legitimacy')?.value ?? 0;
-  const score = (grip + legitimacy) / 2;
-  const threshold = 33 + s.act * 7; // act 1: 40, act 2: 47, act 3: 54 — tuned against
-  // simulated play so it bites reckless/mediocre runs (measurably, per act) without
-  // ever touching careful/generous play, which already survives at ~98% by design
-  // (docs/DESIGN_V2.md known limitation #2 — a balance pass is deferred to Phase 3).
+  const standing = (grip + legitimacy) / 2;
+  const debt = s.stats.treasury < 0 ? Math.min(25, 8 + Math.abs(s.stats.treasury) * 0.5) : 0;
+
+  const blocs: VoteBloc[] = VOTE_SEATS.map(({ faction, seats }) => {
+    const loyalty = s.factions[faction].loyalty;
+    if (loyalty < HOSTILE_BELOW) return { faction, seats, votesFor: 0, why: 'hostile: all voted against' };
+    const lean = 0.6 * loyalty + 0.4 * standing - debt;
+    const share = Math.max(0, Math.min(1, (lean - 30) / 40));
+    const votesFor = Math.round(seats * share);
+    const why = share >= 0.85 ? 'backed you' : share >= 0.5 ? 'mostly backed you' : share > 0.15 ? 'mostly voted against' : 'voted against you';
+    return { faction, seats, votesFor, why };
+  });
+  const score = blocs.reduce((a, b) => a + b.votesFor, 0);
+  const threshold = VOTES_NEEDED[Math.min(VOTES_NEEDED.length, Math.max(1, s.act)) - 1];
   return {
     act: s.act,
     day: s.day,
     grip,
     legitimacy,
+    blocs,
+    debtCost: debt > 0,
     score,
     threshold,
     margin: score - threshold,
@@ -232,9 +259,13 @@ export function regimeLabel(s: GameState): string {
     devolution: 'loosely-held',
     isolation: 'inward-looking',
   };
-  const base = NAMES[first] ?? 'a Government';
-  const mod = s.regime[second] > top * 0.55 ? `${MODIFIER[second]} ` : '';
-  return `${mod}${base}`.replace(/^(\w)/, (m) => m.toUpperCase());
+  const noun = (NAMES[first] ?? 'a Government').replace(/^an? /, '');
+  // The modifier goes after the article: "An Earnest Security State", never
+  // "Earnest a Security State" (owner playtest, balance slice B).
+  const mod = s.regime[second] > top * 0.55 ? MODIFIER[second] : '';
+  const title = (w: string) => w.replace(/(^|-)(\w)/g, (_m, sep: string, c: string) => sep + c.toUpperCase());
+  const words = mod ? `${title(mod)} ${noun}` : noun;
+  return `${/^[AEIOU]/i.test(words) ? 'An' : 'A'} ${words}`;
 }
 
 function verdict(s: GameState): string {

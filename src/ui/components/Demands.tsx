@@ -142,11 +142,13 @@ export function DemandPopup({ s, notice, actions, onDismiss }: {
   const label = factionLabel(notice.faction);
   const live = liveDemands(s).find((l) => l.faction === notice.faction);
 
-  if (notice.kind === 'attemptFailed' || notice.kind === 'punished') {
+  if (notice.kind === 'attemptFailed' || notice.kind === 'punished' || notice.kind === 'hostile') {
     return (
       <div className="demand-scrim" role="dialog" aria-modal="true" aria-label={notice.title}>
         <div className="demand-pop bad">
-          <div className="dm-banner">{icon(notice.faction)} {label} &middot; ultimatum ran out</div>
+          <div className="dm-banner">
+            {icon(notice.faction)} {label} &middot; {notice.kind === 'hostile' ? 'hostile' : 'ultimatum ran out'}
+          </div>
           <div className="dm-body">
             <h2 className="dm-h">{notice.title}</h2>
             <p className="dm-ask">{notice.text}</p>

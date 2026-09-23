@@ -1,7 +1,57 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
-## ▶ WHERE WE STOPPED — 2026-09-23 (BALANCE PHASE, SLICE A — BUILT, AWAITING PLAYTEST)
+## ▶ WHERE WE STOPPED — 2026-09-23, later (BALANCE PHASE, SLICE B — BUILT, AWAITING PLAYTEST)
+
+**Slice A was playtested and approved; the owner asked for much more
+balancing.** Owner, verbatim: *"The changes you have added worked. Maybe
+you haven't done it yet but the game needs WAYYYYY more balancing. I really
+only notice 2-3 factions of the 6 drop. Even when its practically zero
+nothing happens. Also look at these end game stats from my recent
+playtest. I passed the last vote of confidence with 100% votes despite
+these facts. as mentioned before the named changes you made I can confirm
+seem to work well."* Their end screen: Elites **hostile**, Street
+**furious**, treasury **-$20.3B**, public support 87, "Parliament confirmed
+you", regime label "Earnest a Security State".
+
+**What was wrong, measured:** the vote only read Grip and Legitimacy, never
+the factions or the money; a faction at zero loyalty triggered nothing
+unless its patience also ran out; always-first play had a visible faction
+below 20 in 97% of runs and still survived 92%; public support was not tied
+to the Street at all.
+
+**Slice B, built:**
+- **Option order shuffled per run** (seeded by run + card; same after a
+  reload). Always-first survival: 91% → 1%.
+- **Hostile factions act.** A faction at the bottom of its bar (loyalty
+  below 20) pops up once ("The Elites turned against you"), then does
+  something to you every morning — money leaves, leaks, strikes, protests,
+  coup plotting — shown on the front page and desk ("working against you",
+  danger 3 of 3), and makes a demand straight away. Stops when won back.
+- **The confidence vote counts five faction blocs** (100 seats: Army 15,
+  Security 10, Elites 20, Workers 25, Street 30). Each bloc follows its
+  faction's mood plus Grip and Legitimacy; a hostile faction votes against
+  as one; debt costs votes everywhere. Needed: 45 / 58 / 68. The reveal
+  counts bloc by bloc. The owner's end state would now fail.
+- **Rebalance:** rivals lose more when you please a faction; goodwill fades
+  (keeping everyone happy takes constant work); public support follows the
+  Street and Workers; a "Pensions & subsidies" cost that grows every day;
+  lower taxes; an unhappy army raises coup pressure; demands come sooner
+  and more often (~2.5 per full run, was ~1.7).
+- **Fixed:** "Earnest a Security State" → "An Earnest Security State";
+  desk threat pips now say "DANGER N OF 3" (they were never stages).
+- **Measured after** (balance probe, 120 runs each): careful reader 62%,
+  random 4%, always-first 1%, always-last 1%.
+- **`SAVE_VERSION` 12→13** — the owner's in-progress run resets (the
+  cross-run record and unlocks are untouched).
+- 150 tests, production build, and the full browser suite (new
+  `tools/hostile.mjs`) at 1366×700 pass with zero page errors.
+
+**Next:** owner playtest of slice B. Then slice C (consequences: decisions
+that unlock, lock or change later options, with a visible "Because you…"
+note). Not done in B: a coup crisis chain; no card text was edited.
+
+## ▶ WHERE WE STOPPED — 2026-09-23 (BALANCE PHASE, SLICE A — PLAYTESTED AND APPROVED)
 
 **Crisis chains were played; the owner started the balance phase.** Owner,
 verbatim: *"Lets move to the balance phase. 1st thing to address, Private

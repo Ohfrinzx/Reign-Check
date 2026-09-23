@@ -52,7 +52,7 @@ export function Rail({ s, onUseFavour, demandActions }: {
             <div className="t">{t.headline}</div>
             <div className="d"><Glossed text={fill(t.body, s)} /></div>
             <div className="m">
-              STAGE {t.severity} OF 3
+              DANGER {t.severity} OF 3
               {[1, 2, 3].map((n) => (
                 <span key={n} className={`pip ${n <= t.severity ? 'on' : ''}`} />
               ))}

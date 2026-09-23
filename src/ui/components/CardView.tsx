@@ -6,6 +6,7 @@ import { Prose, Glossed } from './Prose';
 import { crisisOfCard, STAGE_NAMES } from '../../game/content/crises';
 import type { CrisisDef } from '../../game/content/crises';
 import { crisisMood } from '../../game/crises';
+import { orderedOptions } from '../../game/engine';
 
 /**
  * The document — a card rendered as the day's "lead story". Options are the
@@ -60,7 +61,7 @@ export function CardView({
           {card.flavor && <div className="q"><Glossed text={fill(card.flavor, s)} /></div>}
         </div>
         <div className="opts">
-          {card.options.map((o, i) => {
+          {orderedOptions(s, card).map((o, i) => {
             const locked = o.enabled ? !o.enabled(s) : false;
             return (
               <button
@@ -162,7 +163,7 @@ function CharacterCardView({
         <div className="cc-replies">
           <div className="cc-replies-h">Your reply</div>
           <div className="cc-slips">
-            {card.options.map((o, i) => {
+            {orderedOptions(s, card).map((o, i) => {
               const locked = o.enabled ? !o.enabled(s) : false;
               return (
                 <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>
@@ -255,7 +256,7 @@ function CrisisCardView({
         <div className="cr-orders">
           <div className="cr-orders-h">Your orders</div>
           <div className="cr-order-row">
-            {card.options.map((o, i) => {
+            {orderedOptions(s, card).map((o, i) => {
               const locked = o.enabled ? !o.enabled(s) : false;
               return (
                 <button key={o.id} className="opt" disabled={locked} onClick={() => onChoose(o.id)}>

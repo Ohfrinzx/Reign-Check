@@ -1,9 +1,9 @@
 import type { FactionDemand, FactionId, GameState, Rng } from './types';
 import { makeRng } from './rng';
 import { applyEffects } from './effects';
-import { DEMANDS, DEMAND_MAP, FACTION_MOVES } from './content/demands';
+import { DEMANDS, DEMAND_MAP, FACTION_MOVES, HOSTILE_ACTIONS } from './content/demands';
 import type { DemandDef, FactionMoveDef } from './content/demands';
-import { DISPLAY_FACTIONS } from './display';
+import { DISPLAY_FACTIONS, isHostile } from './display';
 import { forcedEnding } from './content/endings';
 
 /**
@@ -28,7 +28,7 @@ import { forcedEnding } from './content/endings';
  */
 
 /** patience below this issues a demand */
-export const ISSUE_BELOW = 35;
+export const ISSUE_BELOW = 45;
 /** a murmur is dropped if patience recovers to this */
 export const DROP_AT = 50;
 /** days allowed at each stage before it escalates or runs out */
@@ -258,11 +258,12 @@ function maybeIssue(s: GameState, rng: Rng): string | undefined {
   if (liveDemands(s).length >= MAX_LIVE) return undefined;
   const candidates = DEMAND_FACTIONS.filter((id) => {
     const f = s.factions[id];
-    return !f.demand && f.patience < ISSUE_BELOW && (s.flags[`demandCooldown:${id}`] ?? 0) <= s.day;
+    // A hostile faction always has something to ask for (balance slice B).
+    return !f.demand && (f.patience < ISSUE_BELOW || isHostile(s, id)) && (s.flags[`demandCooldown:${id}`] ?? 0) <= s.day;
   });
   if (!candidates.length) return undefined;
-  // The least patient faction speaks first; one new demand per morning.
-  candidates.sort((a, b) => s.factions[a].patience - s.factions[b].patience);
+  // Hostile factions speak first, then the least patient; one new demand per morning.
+  candidates.sort((a, b) => Number(isHostile(s, b)) - Number(isHostile(s, a)) || s.factions[a].patience - s.factions[b].patience);
   const id = candidates[0];
 
   const pool = DEMANDS.filter((d) => d.faction === id);
@@ -331,6 +332,63 @@ export function withdrawDemand(s: GameState, faction: FactionId, rng: Rng, sourc
   raisePatienceTo(s, faction, 60, rng, source);
   s.flags[`demandCooldown:${faction}`] = s.day + COOLDOWN_MET;
   return def.title;
+}
+
+/* ------------------------------------------------- hostile factions */
+
+/** Morning upkeep flag: the day a faction turned hostile (0 when it is not). */
+export const hostileSinceFlag = (id: FactionId) => `hostileSince:${id}`;
+/** Morning upkeep flag: 1 + the index of what a hostile faction did today. */
+const hostileActFlag = (id: FactionId) => `hostileAct:${id}`;
+
+/** What a hostile faction did this morning, if anything — for the front page. */
+export function hostileActionToday(s: GameState, id: FactionId) {
+  const i = (s.flags[hostileActFlag(id)] ?? 0) - 1;
+  if (i < 0 || s.flags[`${hostileActFlag(id)}:day`] !== s.day) return undefined;
+  return HOSTILE_ACTIONS[id]?.actions[i];
+}
+
+/**
+ * BALANCE SLICE B. Run each morning from dayUpkeep(), before tickDemands().
+ * A faction at the bottom of its bar (isHostile()) works against you: a
+ * pop-up the first morning, then one action from HOSTILE_ACTIONS every
+ * morning until its loyalty recovers. Hostile factions also lose patience
+ * fast, so a demand — the way to buy them back — follows quickly.
+ * No dice: the action rotates by day.
+ */
+export function tickHostility(s: GameState, rng: Rng): string[] {
+  const notes: string[] = [];
+  DEMAND_FACTIONS.forEach((id, n) => {
+    const def = HOSTILE_ACTIONS[id];
+    if (!def) return;
+    const label = factionLabel(id);
+    const since = s.flags[hostileSinceFlag(id)] ?? 0;
+    if (!isHostile(s, id)) {
+      if (since) {
+        s.flags[hostileSinceFlag(id)] = 0;
+        s.log.push({
+          day: s.day, kind: 'consequence', title: `The ${label} stepped back`,
+          text: `The ${label} are no longer working against you. They are still not friends.`, tone: 'good',
+        });
+        notes.push(`The ${label} stopped working against you.`);
+      }
+      return;
+    }
+    if (!since) {
+      s.flags[hostileSinceFlag(id)] = s.day;
+      s.demandNotices.push({ faction: id, kind: 'hostile', day: s.day, title: `The ${label} turned against you`, text: def.turned });
+      s.stat.bigMoments.push({ day: s.day, text: `The ${label} turned against you.` });
+    }
+    const i = (s.day + n) % def.actions.length;
+    const act = def.actions[i];
+    applyEffects(s, act.effects, rng, `hostile:${id}`);
+    applyEffects(s, { factions: { [id]: { patience: -5 } } }, rng, `hostile:${id}`);
+    s.flags[hostileActFlag(id)] = i + 1;
+    s.flags[`${hostileActFlag(id)}:day`] = s.day;
+    s.log.push({ day: s.day, kind: 'consequence', title: `${label}: ${act.title}`, text: act.text, tone: 'bad' });
+    notes.push(`${label}: ${act.title}.`);
+  });
+  return notes;
 }
 
 /* ------------------------------------------------------- player actions */

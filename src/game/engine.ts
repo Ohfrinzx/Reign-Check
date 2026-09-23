@@ -2,7 +2,7 @@ import type {
   GameState, CardDef, AlertDef, StageKind, Rng, CardOutcome, Stats, DaySummary, FactionId,
 } from './types';
 import { STAT_KEYS } from './types';
-import { makeRng } from './rng';
+import { makeRng, hashString } from './rng';
 import { applyEffects, mergeDeltas } from './effects';
 import { CARDS, CARD_MAP } from './content/cards';
 import { CARDS2 } from './content/cards2';
@@ -16,7 +16,7 @@ import { computeBudget } from './economy';
 import { NUM_ACTS, isActEndDay } from './state';
 import { SHOP_MAP } from './content/shop';
 import { currentMandate, MANDATE_CARDS } from './content/mandates';
-import { tickDemands } from './demands';
+import { tickDemands, tickHostility } from './demands';
 import { tickCharacterEvents } from './characterEvents';
 import { CHARACTER_EVENT_CARDS } from './content/characterEvents';
 import { tickCrises } from './crises';
@@ -41,6 +41,18 @@ export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...Object.fromEntries(CHARACTER_EVENT_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CRISIS_CARDS.map((c) => [c.id, c])),
 };
+
+/**
+ * Balance slice B: every run shows a card's options in its own order, fixed
+ * for that run. It is derived from the run's seed and the card id, so a reload
+ * shows the same order and nothing needs saving. "Always press 1" stops being
+ * a strategy; reading the options is. The UI, the keyboard shortcuts and the
+ * balance probe all go through this.
+ */
+export function orderedOptions(s: GameState, card: CardDef | AlertDef): CardDef['options'] {
+  const rng = makeRng(hashString(`${s.seed}:${card.id}`));
+  return rng.shuffle([...card.options]);
+}
 
 /** Alerts are cards too, as far as the UI is concerned. */
 export function lookupCard(id: string): CardDef | undefined {
@@ -145,6 +157,9 @@ function drawDeck(s: GameState, rng: Rng): string[] {
 }
 
 /* -------------------------------------------------- start-of-day upkeep */
+
+/** Balance slice B: faction loyalty above this fades back a little each morning. */
+const EXPECTATION_FROM = 60;
 
 function dayUpkeep(s: GameState, rng: Rng) {
   const notes: string[] = [];
@@ -252,6 +267,11 @@ function dayUpkeep(s: GameState, rng: Rng) {
     });
   }
 
+  // Balance slice B: public support follows the Street and the Workers. It
+  // can no longer sit at 87 while the Street is furious (owner playtest).
+  const mood = 0.45 * s.factions.chorus.loyalty + 0.35 * s.factions.combine.loyalty + 0.2 * 50;
+  s.stats.support = clampStat('support', s.stats.support + (mood - s.stats.support) * 0.1);
+
   // economy drifts toward a level set by stability, corruption and strain
   const target = 50 + (s.stats.stability - 50) * 0.25 - s.hidden.corruption * 0.18 - s.hidden.fiscal * 0.12;
   s.stats.economy = clampStat('economy', s.stats.economy + (target - s.stats.economy) * 0.12);
@@ -266,7 +286,9 @@ function dayUpkeep(s: GameState, rng: Rng) {
 
   // --- hidden pressures breathe
   drift(s, 'unrest', -1.9 + (55 - s.stats.support) * 0.05 + (50 - s.stats.stability) * 0.055);
-  drift(s, 'coup', -0.8 + (52 - s.stats.military) * 0.075 + s.hidden.fear * 0.014 + plotPressure(s, ['varkov', 'tern']) * 0.05);
+  // Balance slice B: an unhappy army is itself coup pressure (it almost never rose before).
+  drift(s, 'coup', -0.8 + (52 - s.stats.military) * 0.075 + s.hidden.fear * 0.014 + plotPressure(s, ['varkov', 'tern']) * 0.05
+    + Math.max(0, 45 - s.factions.staff.loyalty) * 0.06);
   drift(s, 'scandal', -2.9 + sumScandalHeat(s) * 0.02 + Math.max(0, 40 - s.stats.legitimacy) * 0.02);
   drift(s, 'leak', -1.0 + (55 - s.stats.information) * 0.035);
   drift(s, 'foreign', -0.9);
@@ -283,14 +305,22 @@ function dayUpkeep(s: GameState, rng: Rng) {
   // --- factions lose patience when they are unhappy and unattended
   for (const id of FACTION_ORDER) {
     const f = s.factions[id];
-    if (f.loyalty < 40) applyEffects(s, { factions: { [id]: { patience: -1.6 } } }, rng, 'patience');
+    if (f.loyalty < 40) applyEffects(s, { factions: { [id]: { patience: -2.2 } } }, rng, 'patience');
     else if (f.loyalty > 65) f.patience = clamp(f.patience + 0.5);
     // Generosity resets the baseline: what was a gift last week is an expectation now.
     if (f.loyalty > 72) applyEffects(s, { factions: { [id]: { patience: -era * 1.4 } } }, rng, 'patience');
+    // Balance slice B: goodwill fades. A happy faction slides back toward
+    // neutral a little every morning, faster later in the run, so keeping
+    // everyone happy takes constant work (owner: "no real strategy").
+    if (f.loyalty > EXPECTATION_FROM) f.loyalty = clamp(f.loyalty - (f.loyalty - EXPECTATION_FROM) * (0.04 + era * 0.05));
     // power follows loyalty and the general drift of the state
     if (id === 'staff' && s.hidden.coup > 50) f.power = clamp(f.power + 0.6);
     if (id === 'chorus' && s.hidden.unrest > 50) f.influence = clamp(f.influence + 0.8);
   }
+
+  // --- factions at the bottom of their bar work against you every morning
+  // (balance slice B — rules in demands.ts, words in content/demands.ts)
+  notes.push(...tickHostility(s, rng));
 
   // --- factions out of patience make demands, and act on ones that ran out
   // (Phase 3 step 1 — rules in demands.ts, words in content/demands.ts).

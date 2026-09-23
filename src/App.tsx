@@ -3,7 +3,7 @@ import type { GameState, StatKey } from './game/types';
 import { ACT_LENGTH, createGame, dayInAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, STAGE_META, openShop, buyShopItem, leaveShop, fireAdvisor, cutDeal,
+  activeCard, orderedOptions, STAGE_META, openShop, buyShopItem, leaveShop, fireAdvisor, cutDeal,
   completeConfidenceVote,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
@@ -266,7 +266,7 @@ export default function App() {
       }
       if ((game.phase === 'stage' || game.phase === 'alert') && /^[1-9]$/.test(e.key)) {
         const card = activeCard(game);
-        const opt = card?.options[Number(e.key) - 1];
+        const opt = card ? orderedOptions(game, card)[Number(e.key) - 1] : undefined;
         if (opt && (!opt.enabled || opt.enabled(game))) {
           e.preventDefault();
           doChoose(opt.id);

@@ -53,7 +53,26 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE A BUILT, AWAITING OWNER PLAYTEST
+## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE B BUILT, AWAITING OWNER PLAYTEST
+
+**2026-09-23 (later).** Slice A was playtested and approved (*"the named
+changes you made I can confirm seem to work well"*). The owner then asked
+for *"WAYYYYY more balancing"*: factions near zero did nothing, and they
+passed the final vote at 100% with the Elites hostile, the Street furious
+and the treasury at -$20.3B. Slice B: option order **shuffled per run**
+(`engine.ts orderedOptions()`); a faction at the bottom of its bar is
+**hostile** and does something to you every morning (`demands.ts
+tickHostility()`, `content/demands.ts HOSTILE_ACTIONS`); the **confidence
+vote counts five faction blocs** (`content/endings.ts`, `Vote.tsx` —
+hostile blocs vote against as one, debt costs votes, 45/58/68 of 100
+needed); rivals, fading goodwill, support tied to the Street and Workers,
+rising running costs, more demands, more coup pressure. Measured: careful
+play survives 62%, random 4%, always-first 1% (was 91%). **`SAVE_VERSION`
+12→13** (in-progress runs reset). 150 tests, build, and the full browser
+suite (new `tools/hostile.mjs`) pass. See the balance slice B notes at the
+end of this file (and `AGENTS.md` §20).
+
+## PHASE 3 — STEP 4, SLICE A — PLAYTESTED AND APPROVED
 
 **2026-09-23.** Step 3 (crisis chains) was played; the owner moved on to
 the balance phase with five points of feedback plus one goal (verbatim in
@@ -511,7 +530,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-142 vitest tests pass (see the `npm test` line in Commands below for the
+150 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -541,11 +560,12 @@ tracks — read its header comment before changing what's on screen.
    `.strap-action` in `App.tsx` for the current fix: the "next" action lives
    in the always-visible top strap, not only at the bottom of scrollable
    content.
-10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `12`) whenever
+10. **Bump `SAVE_VERSION` in `src/game/state.ts` (currently `13`) whenever
     `GameState`'s shape changes** — adding fields for mandates, the run deck,
     or meta-progression all count. `save.ts` already discards saves with a
     mismatched version rather than crashing, so this is safe by construction
-    as long as the bump actually happens. Last bumped 11→12 for
+    as long as the bump actually happens. Last bumped 12→13 for the
+    bloc-counted `ConfidenceVoteResult` (balance slice B); 11→12 was
     `crisis`/`crisesDone` (Phase 3 step 3, crisis chains); 10→11 was
     `FactionDemand`'s new shape plus `demandNotices` (step 1). A bump discards the owner's
     in-progress run — say so when you report.
@@ -607,7 +627,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 142 tests: integrity, 200 full runs, determinism, variety,
+npm test           # 150 tests: integrity, 200 full runs, determinism, variety,
                    #   glossary, dayInAct, mandates, the run deck (§4.4),
                    #   meta-progression (§4.5, record + real unlock gating),
                    #   the Back Room shop (stock/pricing, firing
@@ -615,8 +635,10 @@ npm test           # 142 tests: integrity, 200 full runs, determinism, variety,
                    #   confidence-vote reveal, and faction demands
                    #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse),
                    #   character events (step 2: warn/betray/offer),
-                   #   crisis chains (step 3: start/calm-hot/end), and
-                   #   favours (balance slice A: targets, receipts)
+                   #   crisis chains (step 3: start/calm-hot/end),
+                   #   favours (balance slice A: targets, receipts), and
+                   #   difficulty (slice B: hostile factions, bloc vote,
+                   #   option shuffle, regime label)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -639,6 +661,8 @@ node tools/crises.mjs        # Phase 3 step 3 + slice A: front page, the dark
                              # situation-room scene, tracker, log, orders, hot stage 2
 node tools/favours.mjs       # balance slice A: useful-now, disabled-with-reason,
                              # target dialog, named receipt, target really gone
+node tools/hostile.mjs       # balance slice B: hostile pop-up, front-page action,
+                             # desk danger 3 of 3, demand issued
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -661,6 +685,13 @@ distinct — the owner wants variety, including for future mini-games.
 do not darken anything else without asking. Browser tools find cards under
 `:is(.stage-col, .sr-stage)`. **Favours open `FavourDialog`** (pick a
 target, then a receipt) — tooling that spends favours must click through it.
+
+**Option order is shuffled per run** (balance slice B, `engine.ts
+orderedOptions()`): render options and map number keys through it, never
+`card.options` directly; browser tools that need a specific choice find it
+by text and press its shown number. **The confidence vote is counted in
+faction blocs** (`Vote.tsx`); hostile factions (loyalty < 20) vote against
+as one and get a `hostile` demand pop-up the first morning.
 
 **Demand pop-ups cover the day until closed** (`.demand-scrim`). Any tooling
 that walks through days must close `.demand-pop` first (its `.dm-foot
@@ -703,6 +734,8 @@ src/game/                 no React, no DOM, fully testable
   demands.ts              PHASE 3 FACTION DEMANDS — issuing, escalation,
                            meet/bribe, what a faction does when an ultimatum
                            runs out (tickDemands() runs in dayUpkeep()).
+                           Also HOSTILE factions (balance slice B:
+                           tickHostility(), before tickDemands()).
                            Words live in content/demands.ts
   meta.ts                 §4.5 META-PROGRESSION — cross-run record, own
                            localStorage key/version, deliberately outside
@@ -784,7 +817,8 @@ AGENTS.md                 shared, model-agnostic knowledge base for every
 no further work unless a future playtest turns something up.
 
 Phase 3 steps 1–3 are built and played; step 4 (the balance phase) is in
-progress — slice A built and awaiting playtest, slices B and C next (see
+progress — slice A approved, slice B built and awaiting playtest, slice C
+next (see
 "PHASE 3" above). Everything below is genuinely deferred and needs an explicit
 go-ahead before starting, one step at a time. Full detail and ordering in
 `docs/DESIGN_V2.md` §9 (Phases 3–5): the balance pass (step 4, the rest of
@@ -1172,11 +1206,75 @@ and Phase 5 (mini-games, sound, remaining endings) needs its own go-ahead.
   on 45 of 81 standard cards; always-first's money grows $44B → $92B over a
   run; its vote margins sit at +11 to +44 over the line (median +30).
 
-**What is next — balance slice B (difficulty), then slice C
-(consequences).** B: shuffle option order per run (seeded, stable across
-reloads) AND rebalance so no option type always wins — the generous path
-gets real costs (money that actually runs short, expectations that rise),
-confidence-vote thresholds retuned so careful play survives about half the
-time (owner chose Hard), demand frequency and coup pressure raised. C:
-decisions leave marks that unlock, lock or change later options and
-outcomes, with a visible "Because you…" note on the affected option.
+Slice A was playtested and approved; slice B (below) came next.
+
+## Balance slice B notes (difficulty, 2026-09-23)
+
+Owner playtest of slice A (approved: *"the named changes you made I can
+confirm seem to work well"*), then: *"the game needs WAYYYYY more
+balancing. I really only notice 2-3 factions … drop. Even when its
+practically zero nothing happens."* Their end screen showed the Elites
+hostile, the Street furious, the treasury at -$20.3B, and parliament
+confirming them with the meter full ("100%").
+
+- **Option order is shuffled per run.** `engine.ts orderedOptions(s, card)`
+  derives the order from `hashString(seed + ':' + card.id)` — fixed for the
+  run, the same after a reload, nothing stored. Every card view
+  (`CardView`, `CharacterCardView`, `CrisisCardView`), the number-key
+  shortcuts in `App.tsx`, and the balance probe go through it. **Browser
+  tools must not assume option N is a particular choice** — find the option
+  by its text, then press its shown number (`characters.mjs`,
+  `crises.mjs` do this). Content order in the card files is untouched.
+- **Hostile factions act.** `display.ts HOSTILE_BELOW` (20) is the bottom
+  mood on a faction's bar; `isHostile(s, id)`. `demands.ts tickHostility()`
+  runs in `dayUpkeep()` before `tickDemands()`: the first morning a
+  `hostile` demand notice (pop-up, "<Faction> · hostile"), then one action
+  from `content/demands.ts HOSTILE_ACTIONS` every morning (3 per faction,
+  rotating by day — no dice), logged, on the front page as
+  "<Faction>: working against you — <what they did>" (danger 3 of 3), and
+  −5 patience. Flags: `hostileSince:<id>` (day, 0 when not hostile),
+  `hostileAct:<id>` / `hostileAct:<id>:day`. A hostile faction makes a
+  demand even while patient, and speaks first. Winning it back logs "The
+  <Faction> stepped back". Army actions feed coup pressure; Elites and
+  Workers cost money; Security leaks; the Street raises unrest.
+- **The confidence vote counts faction blocs.** `content/endings.ts
+  computeConfidenceVote()`: 100 seats (`VOTE_SEATS`: Army 15, Security 10,
+  Elites 20, Workers 25, Street 30). Each bloc's lean = 0.6 × that
+  faction's loyalty + 0.4 × (Grip + Legitimacy)/2 − a debt penalty
+  (treasury < 0: 8 + half the debt, max 25); its share voting for you runs
+  from 0 at lean 30 to all at lean 70. A hostile faction's bloc votes
+  against as one. Needed: `VOTES_NEEDED` = 45 / 58 / 68 of 100 (acts 1–3).
+  Still deterministic, still frozen before the reveal.
+  `ConfidenceVoteResult` gained `blocs` and `debtCost` (**`SAVE_VERSION`
+  12→13**). `Vote.tsx` now counts bloc by bloc: a row per faction with its
+  seats (filled = for, red outline = against), "11 / 15", and a reason in
+  words; the meter and "Votes for you" run to the needed line.
+- **Rebalance** (all in upkeep, no card edits): faction relations spill
+  0.12 → 0.25 (`effects.ts RELATION_SPILL`), so pleasing one faction costs
+  its rivals; goodwill fades — loyalty above 60 slides back each morning,
+  faster later in the run (`engine.ts EXPECTATION_FROM`); public support
+  drifts toward the Street and Workers (it can no longer read 87 with the
+  Street furious); a new budget line, **Pensions & subsidies**, grows
+  $0.06B a day for every day in office; taxes 1.6 → 1.2 × economy; an
+  unhappy army (loyalty < 45) adds coup pressure; demands start below 45
+  patience (was 35) and patience drains 2.2/day (was 1.6) for a faction
+  below 40 loyalty.
+- **Measured** (`balance.probe.ts`, 120 runs each; the probe now has a
+  `careful` policy — picks the option that leaves the visible position
+  best 3 times in 4, misjudges the rest): careful **62%** survive (target
+  "about half" for a real reader, who sees hints, not exact numbers);
+  random 4%; always-first / always-last 1% (was 91% / 1%). Most deaths are
+  the vote (`noConfidence`). Demands: ~2.5 per full run (was ~1.7); coup
+  pressure now reaches 40 in some runs.
+- **Also fixed:** the regime label read "Earnest a Security State"; now
+  "An Earnest Security State" (`regimeLabel()`). The desk's threat pips say
+  "DANGER N OF 3" instead of "STAGE N OF 3" (they were never stages). The
+  "Brief me" screen explains the bloc vote and hostile factions.
+- **Not done (possible later):** a coup crisis chain (coup pressure now
+  rises, but there is no chain for it yet); no card content was edited — if
+  one option type still dominates in play, that is card-level tuning.
+
+**What is next — balance slice C (consequences).** Decisions leave marks
+that unlock, lock or change later options and outcomes, with a visible
+"Because you…" note on the affected option. Needs the owner's playtest of
+slice B first.

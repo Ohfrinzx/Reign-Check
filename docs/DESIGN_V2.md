@@ -1306,7 +1306,7 @@ around day 7–12; play style decides which chains you meet.
 The owner started it with five points and one goal (verbatim in
 `PROJECT_STATUS.md`). Split into three slices, each playtested:
 
-**Slice A — feel and clarity (built, awaiting playtest).**
+**Slice A — feel and clarity (playtested and approved).**
 - A private file every day from day 2: 13 new "request" cards (one per
   character) join betrayals and offers; priority betrayal → offer →
   request. Measured: 96–100% of days.
@@ -1318,16 +1318,33 @@ The owner started it with five points and one goal (verbatim in
   when there is nothing to aim at, and end with a receipt naming what went
   away.
 
-**Slice B — difficulty (next).** Shuffle option order per run (owner:
-"Both") and rebalance so no option type always wins; money that runs
-short; confidence vote retuned to Hard (careful play survives about half
-the time); more demands; coup pressure that actually rises.
+**Slice B — difficulty (built, awaiting playtest).** Triggered by the
+slice A playtest: factions near zero did nothing, and the owner passed the
+final vote at "100%" with the Elites hostile, the Street furious and the
+treasury at -$20.3B.
+- Option order shuffled per run (`orderedOptions()`, seeded by run + card,
+  nothing stored). Always-first: 91% → 1% survival.
+- Hostile factions (loyalty < 20, the bottom mood) act every morning —
+  one pop-up, then a rotating action from `HOSTILE_ACTIONS` (money out,
+  leaks, strikes, protests, coup plotting), on the front page and desk —
+  and demand at once.
+- The confidence vote counts five faction blocs (100 seats); each follows
+  its faction's mood (60%) plus Grip and Legitimacy (40%); hostile blocs
+  vote against as one; debt costs votes everywhere; 45 / 58 / 68 needed.
+  The reveal counts bloc by bloc. **This replaces the old "average of Grip
+  and Legitimacy vs 40/47/54" rule.**
+- Rebalance in upkeep only: relation spill 0.12 → 0.25, fading goodwill
+  above loyalty 60, support drifts toward Street/Workers, "Pensions &
+  subsidies" +$0.06B/day per day in office, taxes 1.6 → 1.2 × economy,
+  army loyalty < 45 feeds coup pressure, demands from patience < 45.
+- Measured (120 runs): careful 62%, random 4%, first/last 1%. Demands ~2.5
+  per full run. Not done: a coup crisis chain; no card edits.
 
 **Slice C — consequences (after B).** Decisions leave marks that unlock,
 lock or change later options and outcomes, shown on the option as
 "Because you…".
 
-The original step-4 list, still the checklist for slice B:
+The original step-4 list (items 1–4 addressed by slice B; 5 unchanged):
 
 The last piece of Phase 3. Everything above was measured, not tuned:
 1. "One option every time wins": always-first play survives ~90–92%.

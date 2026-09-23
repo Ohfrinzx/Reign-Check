@@ -64,8 +64,11 @@ try {
   assert.ok(a && b && Math.abs(a.y - b.y) < 2 && b.x > a.x, 'Orders should sit side by side');
   await page.screenshot({ path: shotPath('X-crisis-stage1.png') });
 
-  // keyboard: "3" = say the rise is temporary (makes it worse)
-  await page.keyboard.press('3');
+  // keyboard: the number shown on "Say the price rise is temporary" (makes it worse;
+  // option order is shuffled per run since balance slice B)
+  const waitAt = (await orders.allInnerTexts()).findIndex((x) => /price rise is temporary/.test(x));
+  assert.ok(waitAt >= 0, 'No "temporary" order');
+  await page.keyboard.press(String(waitAt + 1));
   await page.locator('.sr-stage .outcome').waitFor();
   assert.match(await page.locator('.sr-stage .outcome .btn-primary').innerText(), /Leave the situation room/i);
   await page.waitForTimeout(400);
@@ -73,7 +76,7 @@ try {
   await page.locator('.sr-stage .outcome .btn-primary').click();
   await page.locator('.masthead').waitFor();
   const after = await saved();
-  assert.equal(after.flags['crisis:bread'], -1, 'Order 3 did not make the crisis worse');
+  assert.equal(after.flags['crisis:bread'], -1, 'The "temporary" order did not make the crisis worse');
 
   /* ---- 2. two days later: stage 2 arrives in its worse version, with the log */
   await seed(`

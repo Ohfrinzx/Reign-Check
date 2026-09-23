@@ -270,6 +270,9 @@ function applyCoupling(s: GameState, k: StatKey, d: number): number {
   return out;
 }
 
+/** How much of a faction's loyalty change leaks to its rivals and friends, per relation point. */
+export const RELATION_SPILL = 0.25;
+
 /** Loyalty gained by one faction leaks, at a fraction, along its relations. */
 function spreadThroughRelations(s: GameState, fid: FactionId, loyaltyDelta: number) {
   const defs = FACTION_RELATIONS[fid];
@@ -277,7 +280,8 @@ function spreadThroughRelations(s: GameState, fid: FactionId, loyaltyDelta: numb
   for (const [other, rel] of Object.entries(defs) as [FactionId, number][]) {
     const f = s.factions[other];
     if (!f) continue;
-    const spill = loyaltyDelta * rel * 0.12;
+    // Balance slice B: 0.12 → 0.25, so pleasing one faction really costs its rivals.
+    const spill = loyaltyDelta * rel * RELATION_SPILL;
     if (Math.abs(spill) < 0.05) continue;
     bump(f as unknown as Record<string, number>, 'loyalty', spill);
   }

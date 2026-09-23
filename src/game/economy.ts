@@ -32,7 +32,7 @@ export function computeBudget(s: GameState): Budget {
   /* ------------------------------------------------------------ revenue */
   lines.push({ kind: 'revenue', label: 'Lithium & salt exports', amount: 1.7 * eco, note: '44% of exports. One serious buyer.' });
   lines.push({ kind: 'revenue', label: 'Port & transit fees', amount: 0.8 * eco, note: 'Mavro corridor tolls.' });
-  lines.push({ kind: 'revenue', label: 'Taxes', amount: 1.6 * eco, note: 'Income, sales, corporate.' });
+  lines.push({ kind: 'revenue', label: 'Taxes', amount: 1.2 * eco, note: 'Income, sales, corporate.' });
   lines.push({
     kind: 'revenue',
     label: 'Ilvet Free Zone',
@@ -49,6 +49,11 @@ export function computeBudget(s: GameState): Budget {
   lines.push({ kind: 'spending', label: 'State payroll', amount: 2.05, note: 'One in six working adults.' });
   lines.push({ kind: 'spending', label: 'Energy imports', amount: 0.5, note: 'Gas, bought at whatever the price is.' });
   lines.push({ kind: 'spending', label: 'Police & armed forces', amount: 0.6 });
+
+  // Balance slice B: the longer you govern, the more the state is expected to
+  // pay for — pensions, subsidies, raises promised by nobody in particular.
+  const expectations = 0.06 * Math.max(0, s.day - 1);
+  if (expectations > 0.05) lines.push({ kind: 'spending', label: 'Pensions & subsidies', amount: expectations, note: 'Rises every day you stay in office.' });
 
   const debt = s.hidden.fiscal / 42;
   if (debt > 0.05) lines.push({ kind: 'spending', label: 'Debt service', amount: debt, note: 'What previous borrowing costs you now.' });

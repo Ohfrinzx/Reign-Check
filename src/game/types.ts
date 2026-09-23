@@ -120,7 +120,7 @@ export interface FactionDemand {
  */
 export interface DemandNotice {
   faction: FactionId;
-  kind: 'issued' | 'escalated' | 'attemptFailed' | 'punished';
+  kind: 'issued' | 'escalated' | 'attemptFailed' | 'punished' | 'hostile';
   day: number;
   title?: string;
   text?: string;
@@ -477,12 +477,27 @@ export interface DaySummary {
 /** Frozen at the close of an act before the UI reveals parliament's result.
  *  These are the exact unrounded values used by the engine; the animation is
  *  presentation only and must never recalculate or randomise them. */
+/** One faction's deputies in a confidence vote (balance slice B). */
+export interface VoteBloc {
+  faction: FactionId;
+  seats: number;
+  votesFor: number;
+  /** plain-words reason for how the bloc voted, e.g. "hostile: voted against as one" */
+  why: string;
+}
+
 export interface ConfidenceVoteResult {
   act: number;
   day: number;
   grip: number;
   legitimacy: number;
+  /** balance slice B: the chamber votes in faction blocs */
+  blocs: VoteBloc[];
+  /** true when an empty treasury cost votes in every bloc */
+  debtCost: boolean;
+  /** votes for you, out of TOTAL_SEATS */
   score: number;
+  /** votes needed to survive this act's vote */
   threshold: number;
   margin: number;
   passed: boolean;

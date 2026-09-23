@@ -36,9 +36,10 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
         <Section title="What you are trying to do">
           <p>
             The run is <b>{NUM_ACTS} acts</b> of about {ACT_LENGTH} days each ({s.maxDays} days in all).
-            Every act ends with a <b>confidence vote</b> in parliament — a real check of your Grip and
-            Legitimacy, not a countdown. Lose one and the job ends there and then. Survive all {NUM_ACTS} and
-            you have won.
+            Every act ends with a <b>confidence vote</b> in parliament. The chamber votes in five blocs, one
+            per faction on the right. Each bloc follows its faction&apos;s mood plus your Grip and Legitimacy. A
+            faction at the bottom of its bar votes against you as one, and debt costs votes everywhere. The
+            bar rises each act. Lose one and the job ends there and then. Survive all {NUM_ACTS} and you have won.
           </p>
           <p>
             Every day you will be handed three to five <b>cards</b> (one more with The Accident): a minister with a request, a crisis,
@@ -74,7 +75,8 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
 
         <Section title="How you lose">
           <ul className="intro-list">
-            <li><b>Parliament votes no confidence.</b> Let Grip and Legitimacy both sag going into an end-of-act vote and you are out, no matter what else is going well.</li>
+            <li><b>Parliament votes no confidence.</b> Let factions turn hostile, or Grip and Legitimacy sag, going into an end-of-act vote and you are out.</li>
+            <li><b>A hostile faction works against you.</b> A faction at the bottom of its bar does something to you every morning until you win it back.</li>
             <li><b>The army removes you.</b> Underfund them, break a promise to them, or order them to shoot at civilians.</li>
             <li><b>The street removes you.</b> Let public anger build with nothing to release it.</li>
             <li><b>The money runs out.</b> Spend faster than you earn for long enough.</li>
@@ -84,7 +86,7 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
           </ul>
           <p className="intro-note">
             None of these happen out of nowhere. Each one builds for days, and you will see it coming as a
-            card on your desk — under &ldquo;On your desk&rdquo; on the right — with a stage number and what it is about.
+            card on your desk — under &ldquo;On your desk&rdquo; on the right — with a danger level and what it is about.
           </p>
         </Section>
 
