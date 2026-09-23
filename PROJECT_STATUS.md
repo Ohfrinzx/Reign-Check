@@ -1,7 +1,48 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
-## ▶ WHERE WE STOPPED — 2026-09-23, latest (BALANCE PHASE, SLICE C — BUILT, AWAITING PLAYTEST)
+## ▶ WHERE WE STOPPED — 2026-09-23, end of session (PHASE 3 COMPLETE → NEXT: MOBILE WEB + GITHUB PAGES)
+
+**Slice C was playtested and approved.** Owner, verbatim: *"Those
+playtests check out."* That completes the balance phase and Phase 3.
+
+**The owner's next goal.** Verbatim: *"I am wanting to play this on my
+phone and maybe share with family. I don't want to pay to host or publish
+obviously as this is just a small side project for fun. Is it worth trying
+to change all the code and allow everything to dynamically fit any screen
+proportions … Or should we just move on to the minigames …?"*
+
+The previous agent recommended doing the phone layout before the
+mini-games:
+- the game logic is already separate, so this is layout work only;
+- mini-games built afterwards get designed once, for both screen sizes.
+
+For hosting it explained GitHub Pages. The owner answered: *"I really
+don't care if it's switched to a public repo as I am never going to share
+or promote it"*, then made the repo public and turned on Pages with source
+"GitHub Actions". Verified: the API shows `visibility: public` and
+`has_pages: true`. The source setting can't be read from the cloud
+sandbox.
+
+**Not built yet:** the deploy workflow, the first deploy, and the phone
+layout. Measured at iPhone size, the game is unusable on a phone today:
+- the menu and the Money/Grip/Legitimacy ledger are clipped off the right
+  edge;
+- the front page overlaps;
+- the result screen is 82px too wide, with Continue off-screen;
+- the faction rail is hidden below 1080px.
+
+A new tool, `tools/phone-audit.mjs`, measures this.
+
+**Open question for the owner:** publish first, or the phone layout
+first.
+
+**The owner is handing this to a new agent session.** Owner, verbatim:
+*"I will use a new agent for this … Include how I plan to run it on mobile
+as well so the next agent is able to help me with it if needed."* The full
+brief is **`docs/MOBILE_AND_HOSTING.md`**.
+
+## ▶ WHERE WE STOPPED — 2026-09-23, latest (BALANCE PHASE, SLICE C — PLAYTESTED AND APPROVED)
 
 **Slice B was playtested and approved.** Owner, verbatim: *"Current
 playtesting checks out, move onto Part C."*

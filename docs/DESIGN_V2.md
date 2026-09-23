@@ -1340,7 +1340,7 @@ treasury at -$20.3B.
 - Measured (120 runs): careful 62%, random 4%, first/last 1%. Demands ~2.5
   per full run. Not done: a coup crisis chain; no card edits.
 
-**Slice C — consequences (built, awaiting playtest).** 18 marks left by
+**Slice C — consequences (playtested and approved; Phase 3 complete).** 18 marks left by
 existing decisions (flags `mark:<id>` = the day) and 36 reactions on later
 cards (`content/consequences.ts`): unlock a new option, lock one with a
 reason, or change one's outcome. Every reaction is shown as "Because you …
@@ -1360,7 +1360,13 @@ The last piece of Phase 3. Everything above was measured, not tuned:
    random-play survival fell ~51% → ~42% over Phase 3.
 5. Pacing of crises (~1/run) and character events (~4/run).
 
-### Phase 4 — Mobile / iOS readiness (deferred — see section 10)
+### Phase 4 — Mobile / iOS readiness (NEXT, as a mobile WEB version — see `docs/MOBILE_AND_HOSTING.md`)
+
+**2026-09-23 update:** the owner wants to play on their phone and share with
+family for free, so Phase 4 is next, but as a responsive **web** layout
+hosted on GitHub Pages, not Capacitor/native. The brief, status and scope
+are in `docs/MOBILE_AND_HOSTING.md`. The original note below is kept for
+history:
 
 Not started, not scheduled. See section 10 below for what "keep it in mind"
 concretely means for Phase 2/3 work, and what Phase 4 itself would involve
@@ -1385,6 +1391,11 @@ game done — they're listed so the next several sessions of work have a
 clear runway instead of stopping at "what next?" after Phase 2.
 
 ## 10. Mobile / iOS — deferred, but keep the door open
+
+**2026-09-23: no longer deferred.** It is next, as a mobile web version on
+free GitHub Pages hosting; see `docs/MOBILE_AND_HOSTING.md`. The guidance
+below still applies. In particular, the engine separation it asked to
+preserve is intact, which is why this is layout work only.
 
 The owner wants this eventually but explicitly does not want it slowing
 Phase 2 down: *"that may be pushed back to a different time for now as I

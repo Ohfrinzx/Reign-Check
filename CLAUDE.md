@@ -3,7 +3,9 @@
 You are picking up **Reign Check** (development codename: Dictator Sandbox), a
 browser-based, card-driven political leadership simulation set in the
 fictional Republic of Velmorra. This file is the handover. Read it, then
-`PROJECT_STATUS.md`, then `docs/DESIGN_V2.md`.
+`PROJECT_STATUS.md`, then `docs/DESIGN_V2.md`. **The current next job (a
+mobile web version on free GitHub Pages hosting) is briefed in
+`docs/MOBILE_AND_HOSTING.md`. Read that too before starting.**
 
 **Also read `AGENTS.md`.** The owner runs more than one agent tool on this
 project (Claude Code and ChatGPT-based agents both), and `AGENTS.md` is the
@@ -18,6 +20,11 @@ next) stays Claude-Code-specific narrative; the short version of current
 status also lives in `AGENTS.md` §2.
 
 ## Where the project actually is
+
+**Latest first:** Phase 3 is complete. The next job is the mobile web
+version and GitHub Pages hosting (the "NEXT" section below and
+`docs/MOBILE_AND_HOSTING.md`). The dated sections below are history, newest
+first after this one.
 
 **2026-09-22 — confidence-vote reveal built, playtested, and owner-approved.** The
 owner authorized the recommended division-board + clerk-tally direction.
@@ -53,7 +60,24 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE C BUILT, AWAITING OWNER PLAYTEST
+## NEXT — MOBILE WEB + FREE HOSTING (GITHUB PAGES) — READ docs/MOBILE_AND_HOSTING.md
+
+**2026-09-23 (end of session) — PHASE 3 COMPLETE. NEXT: A MOBILE WEB
+VERSION, HOSTED FREE ON GITHUB PAGES.** Slice C was playtested and approved
+(*"Those playtests check out."*), which closes the balance phase and Phase
+3. The owner wants to **play on their phone and share with family, for
+free**: a link-based web version hosted on **GitHub Pages**, opened in
+the phone's browser and added to the Home Screen. It is not a native app.
+The owner has already made the repo **public** and turned on **Pages
+(source: GitHub Actions)**. The deploy workflow and the phone layout are
+**not built yet**. The game is currently unusable on a phone: the masthead
+menu and ledger are clipped, the front page overlaps, the result screen
+overflows, and the faction rail is hidden below 1080px. **The next agent's
+full brief is `docs/MOBILE_AND_HOSTING.md`. Read it before starting.** An
+open question for the owner: publish first, or the phone layout first.
+The owner is starting a new agent session for this work.
+
+## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE C — PLAYTESTED AND APPROVED
 
 **2026-09-23 (latest).** Slice B was playtested and approved (*"Current
 playtesting checks out, move onto Part C."*). Slice C — consequences: 18
@@ -681,6 +705,8 @@ node tools/hostile.mjs       # balance slice B: hostile pop-up, front-page actio
                              # desk danger 3 of 3, demand issued
 node tools/consequences.mjs  # balance slice C: on-the-record note + rail panel,
                              # unlocked / locked / changed options with reasons
+node tools/phone-audit.mjs   # NOT pass/fail yet: screenshots + overflow numbers
+                             # at 390×844 (see docs/MOBILE_AND_HOSTING.md)
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -823,6 +849,9 @@ src/styles/index.css      the whole Poster design system
 public/fonts/              self-hosted type (Anton, Archivo Black, Libre
                            Franklin, Lora, Courier Prime — latin subset only)
 docs/
+  MOBILE_AND_HOSTING.md     NEXT WORK: phone layout + GitHub Pages hosting —
+                            owner's plan, setup status, draft workflow,
+                            measured phone problems, scope, guardrails
   DESIGN_V2.md              the design decisions, measured evidence, and what
                             is still open — read this before UI work
   mockups/                  the design exploration that led here (desk.html,
@@ -843,8 +872,9 @@ AGENTS.md                 shared, model-agnostic knowledge base for every
 (§4.1–§4.5) are built, playtested, and owner-approved. Phase 2 itself needs
 no further work unless a future playtest turns something up.
 
-Phase 3 steps 1–3 are built and played; step 4 (the balance phase) is in
-progress — slices A and B approved, slice C built and awaiting playtest
+Phase 3 is complete: steps 1–3 are played, and step 4 (the balance
+phase, slices A–C) is approved. The owner has now asked for the mobile web
+version plus free GitHub Pages hosting; see `docs/MOBILE_AND_HOSTING.md`
 (see
 "PHASE 3" above). Everything below is genuinely deferred and needs an explicit
 go-ahead before starting, one step at a time. Full detail and ordering in
@@ -1348,7 +1378,7 @@ outcomes."*
   so far); more locks (they are the rarest kind); the coup crisis chain
   (still open from slice B).
 
-**What is next.** Owner playtest of slice C. After that the balance phase
-(Phase 3 step 4) is complete unless the playtest turns something up; Phase
-4 (mobile/iOS) stays unscheduled and Phase 5 (mini-games, sound, remaining
-endings) needs its own go-ahead.
+**Slice C was playtested and approved** (*"Those playtests check out."*).
+The balance phase, and with it Phase 3, is complete. **Next: the mobile
+web version and free GitHub Pages hosting. The full brief is
+`docs/MOBILE_AND_HOSTING.md`** (and `AGENTS.md` §22).

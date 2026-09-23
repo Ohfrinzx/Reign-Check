@@ -19,6 +19,9 @@ reference for how to work in it correctly.
 **Read this file first, in full, before touching any code.** Then read
 `PROJECT_STATUS.md` (current status, "WHERE WE STOPPED" block at the top)
 and `docs/DESIGN_V2.md` (the full design record) before starting real work.
+**The current next job (a mobile web version on free GitHub Pages
+hosting) is briefed in `docs/MOBILE_AND_HOSTING.md`. Read that before
+starting it** (§22 has the summary).
 
 ---
 
@@ -40,8 +43,23 @@ untouched 10-stat/7-faction engine underneath. A glossary system
 
 ## 2. Where the project actually is
 
+**2026-09-23 (end of session) — PHASE 3 COMPLETE. NEXT: A MOBILE WEB
+VERSION, HOSTED FREE ON GITHUB PAGES.** Slice C was playtested and approved
+(*"Those playtests check out."*), which closes the balance phase and Phase
+3. The owner wants to **play on their phone and share with family, for
+free**: a link-based web version hosted on **GitHub Pages**, opened in
+the phone's browser and added to the Home Screen. It is not a native app.
+The owner has already made the repo **public** and turned on **Pages
+(source: GitHub Actions)**. The deploy workflow and the phone layout are
+**not built yet**. The game is currently unusable on a phone: the masthead
+menu and ledger are clipped, the front page overlaps, the result screen
+overflows, and the faction rail is hidden below 1080px. **The next agent's
+full brief is `docs/MOBILE_AND_HOSTING.md`. Read it before starting.** An
+open question for the owner: publish first, or the phone layout first.
+The owner is starting a new agent session for this work.
+
 **2026-09-23 (latest) — PHASE 3 STEP 4, THE BALANCE PHASE: SLICE C BUILT,
-AWAITING OWNER PLAYTEST.** Slices A and B are playtested and approved
+PLAYTESTED AND APPROVED.** Slices A and B are playtested and approved
 (*"Current playtesting checks out, move onto Part C."*). Slice C —
 consequences: 18 **marks** left by existing decisions and 36 **reactions**
 on later cards that **unlock** a new option, **lock** one, or **change**
@@ -388,6 +406,8 @@ node tools/hostile.mjs       # balance slice B: hostile pop-up, front-page actio
                              # desk danger 3 of 3, demand issued
 node tools/consequences.mjs  # balance slice C: on-the-record note + rail panel,
                              # unlocked / locked / changed options with reasons
+node tools/phone-audit.mjs   # NOT pass/fail yet: screenshots + overflow numbers
+                             # at 390×844 (see docs/MOBILE_AND_HOSTING.md)
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -499,6 +519,9 @@ src/styles/index.css      the whole Poster design system
 public/fonts/              self-hosted type (Anton, Archivo Black, Libre
                            Franklin, Lora, Courier Prime — latin subset only)
 docs/
+  MOBILE_AND_HOSTING.md     NEXT WORK: phone layout + GitHub Pages hosting —
+                            owner's plan, setup status, draft workflow,
+                            measured phone problems, scope, guardrails
   DESIGN_V2.md              the design decisions, measured evidence, and what
                             is still open — read this before UI work
   mockups/                  the design exploration that led here — reference,
@@ -1067,7 +1090,36 @@ outcomes."*
   so far); more locks (they are the rarest kind); the coup crisis chain
   (still open from slice B).
 
-**What is next.** Owner playtest of slice C. After that the balance phase
-(Phase 3 step 4) is complete unless the playtest turns something up; Phase
-4 (mobile/iOS) stays unscheduled and Phase 5 (mini-games, sound, remaining
-endings) needs its own go-ahead.
+**Slice C was playtested and approved** (*"Those playtests check out."*).
+The balance phase, and with it Phase 3, is complete. Next is §22.
+
+## 22. Next: mobile web + free hosting on GitHub Pages (2026-09-23)
+
+The owner, verbatim: *"I am wanting to play this on my phone and maybe
+share with family. I don't want to pay to host or publish obviously as this
+is just a small side project for fun."* Then: *"I really don't care if it's
+switched to a public repo as I am never going to share or promote it."*
+
+- **Plan:** GitHub Pages (free static hosting) serves `npm run build`'s
+  `dist/`. A GitHub Actions workflow deploys on every push to
+  `claude/confident-meitner-lc0bgc`, so every verified merge goes live.
+  Address: `https://ohfrinzx.github.io/Reign-Check/`. On the phone: open
+  the link, then "Add to Home Screen". Saves stay in each device's
+  browser (`localStorage`), with no accounts, and each family member has
+  their own games. A `SAVE_VERSION` bump resets in-progress runs on
+  every device.
+- **Done by the owner:** repo is public (API: `visibility: public`); Pages
+  on with source "GitHub Actions" (API: `has_pages: true`; the source
+  setting can't be read from the cloud sandbox).
+- **Not done:** the deploy workflow (a draft is in the brief), the first
+  deploy, and the phone layout. Measured phone problems: masthead menu and
+  ledger clipped, front page overlapping, result screen 82px too wide with
+  Continue off-screen, faction rail hidden below 1080px.
+- **Open decision for the owner:** publish now, or phone layout first.
+- **The cloud sandbox cannot open `*.github.io`**, so the owner checks
+  the live site.
+- **Full brief:** `docs/MOBILE_AND_HOSTING.md`. It covers the plan, the
+  status table, the draft workflow, troubleshooting, the measured
+  problems, the suggested slice scope and guardrails (desktop at 1366×700
+  unchanged, no `src/game/` changes, no hover-only info), and how to
+  verify. `tools/phone-audit.mjs` is the starting measurement tool.
