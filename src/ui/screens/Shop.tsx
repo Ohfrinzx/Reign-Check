@@ -11,6 +11,7 @@ import { currentMandate } from '../../game/content/mandates';
 import { usd } from '../../game/economy';
 import { CutControl, FireControl, ManageRow } from './Manage';
 import { favourBlockReason, favourUsefulNow } from '../../game/favours';
+import { TOUCH, useMedia } from '../useMedia';
 
 /**
  * THE BACK ROOM — the shop, rendered as the day's last document, plus a
@@ -34,6 +35,7 @@ export function ShopScreen({
 }) {
   const stock = s.shopStock.map((id) => SHOP_MAP[id]).filter(Boolean);
   const big = isActRoom(s);
+  const touch = useMedia(TOUCH); // no "press Enter" hint on a touch screen
   const head = shopHeading(s);
   const boughtTonight = s.log.filter((l) => l.day === s.day && l.kind === 'purchase');
   const closed = roomIsClosed(s);
@@ -68,7 +70,7 @@ export function ShopScreen({
             <button className="btn btn-primary" onClick={onLeave}>
               Leave and begin Day {s.day + 1} →
             </button>
-            <span className="note">Nothing here is compulsory. Or press Enter.</span>
+            <span className="note">{`Nothing here is compulsory.${touch ? '' : ' Or press Enter.'}`}</span>
           </div>
 
           {stock.length === 0 && s.shopBuysTonight === 0 && (

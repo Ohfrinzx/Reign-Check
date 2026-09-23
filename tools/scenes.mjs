@@ -164,7 +164,7 @@ export const SCENES = [
     await p.evaluate(() => localStorage.clear());
     await p.reload({ waitUntil: 'networkidle' });
   } },
-  { name: 'title-unlocks', primary: null, go: async (p) => {
+  { name: 'title-unlocks', primary: '.intro-foot .btn-primary', go: async (p) => {
     await p.goto(BASE, { waitUntil: 'networkidle' });
     await p.evaluate(() => localStorage.clear());
     await p.reload({ waitUntil: 'networkidle' });
@@ -182,7 +182,7 @@ export const SCENES = [
   } },
   { name: 'private-file', primary: null, go: async (p) => { await seed(p, 'privateFile'); await closeDemandPops(p); } },
   { name: 'alert', primary: null, go: async (p) => { await seed(p, 'alert'); await closeDemandPops(p); } },
-  { name: 'alert-outcome', primary: '.alert-card .outcome-foot .btn-primary', go: async (p) => {
+  { name: 'alert-outcome', primary: ':is(.strap-action, .alert-card .outcome-foot .btn-primary)', go: async (p) => {
     await seed(p, 'alert'); await closeDemandPops(p);
     await p.locator('.alert-card .opt:not([disabled])').first().click();
   } },
@@ -203,11 +203,11 @@ export const SCENES = [
     await seed(p, 'briefing'); await closeDemandPops(p);
     await openMenuItem(p, 'Brief me');
   } },
-  { name: 'manage', primary: null, go: async (p) => {
+  { name: 'manage', primary: '.intro-foot .btn-primary', go: async (p) => {
     await seed(p, 'briefing'); await closeDemandPops(p);
     await openMenuItem(p, 'Advisors & Deals');
   } },
-  { name: 'files', primary: null, go: async (p) => {
+  { name: 'files', primary: '.rail-top .btn', go: async (p) => {
     await seed(p, 'demand'); await closeDemandPops(p);
     await openFiles(p);
   } },

@@ -20,8 +20,11 @@ export function Ledger({ s }: { s: GameState }) {
         <div
           className="r"
           key={r.key}
-          onMouseEnter={() => setOpen(r.key)}
-          onMouseLeave={() => setOpen(null)}
+          // Hover opens the explanation for a mouse only. A tap on a phone
+          // also fires the hover events, which would open it and then let
+          // the click close it straight away — so touch uses the click alone.
+          onPointerEnter={(e) => { if (e.pointerType === 'mouse') setOpen(r.key); }}
+          onPointerLeave={(e) => { if (e.pointerType === 'mouse') setOpen(null); }}
           onClick={() => setOpen(open === r.key ? null : r.key)}
         >
           <div className="l">{r.label}</div>

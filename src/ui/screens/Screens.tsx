@@ -367,7 +367,7 @@ export function EndingScreen({ s, onRestart, onTitle }: { s: GameState; onRestar
           </div>
         )}
 
-        <div className="row wrap" style={{ justifyContent: 'center' }}>
+        <div className="row wrap ending-actions" style={{ justifyContent: 'center' }}>
           <button className="btn btn-primary" onClick={onRestart}>Try again →</button>
           <button className="btn btn-ghost" onClick={onTitle}>Back to title</button>
         </div>

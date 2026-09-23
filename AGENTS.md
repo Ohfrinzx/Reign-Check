@@ -11,7 +11,8 @@ the code map, change it here.
 1. This file, in full.
 2. `PROJECT_STATUS.md` — where things stand today and what is next (short).
 3. `docs/SYSTEMS.md` — how every game system works now, with the numbers.
-4. For the next job (mobile web + hosting): `docs/MOBILE_AND_HOSTING.md`.
+4. For the phone layout and GitHub Pages hosting: `docs/MOBILE_AND_HOSTING.md`
+   (§0 is what was built).
 5. `docs/DESIGN_V2.md` before UI or design work — the design record.
 
 `docs/archive/` holds old handovers and slice notes. It is history, not
@@ -46,11 +47,13 @@ anything else without asking.**
   make demands because of your decisions, and handle demands differently
   (cheaper, dearer, no bribes); more blocked options on cards. Details in
   `docs/SYSTEMS.md` §5 and §8.
-- **Next job: a mobile web version, hosted free on GitHub Pages.** The
-  repo is public and Pages is switched on (source: GitHub Actions); the
-  deploy workflow and the phone layout are not built yet. Full brief:
-  `docs/MOBILE_AND_HOSTING.md`. An open question for the owner there:
-  publish first, or the phone layout first.
+- **Mobile web version + free GitHub Pages hosting — built, verified,
+  awaiting the owner's playtest on a real phone.** Every merge into the
+  default branch now tests, builds and publishes the game to
+  https://ohfrinzx.github.io/Reign-Check/ (`.github/workflows/deploy.yml`).
+  At 1080px and narrower the game uses a phone layout (☰ menu, faction
+  strip + Files drawer, bottom action bar); desktop is pixel-identical to
+  before. Details: `docs/MOBILE_AND_HOSTING.md` §0.
 - **Later, with the owner's go-ahead:** mini-games (build them mobile-first,
   each with its own look), sound, a coup crisis chain.
 - `SAVE_VERSION` is **14**. Tests: **165**, all passing.
@@ -208,8 +211,15 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
+| `phone.mjs` | the phone layout: 20 screens × 4 sizes (390×844, 360×800, 768×1024, 844×390) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
-| `phone-audit.mjs` (not pass/fail yet) | screenshots + overflow numbers at 390×844 |
+| `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 20 screens at 1366×700 and 1100×700. `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
+| `pages-preview.mjs` (no dev server; run after `npm run build`) | serves `dist/` from `/Reign-Check/` like GitHub Pages: no failed requests, all fonts load, manifest + icons, game starts |
+| `phone-audit.mjs` | the original measuring tool (screenshots + numbers), superseded by `phone.mjs` |
+
+`tools/scenes.mjs` reaches each of those 20 screens from a fixed seed; both
+`phone.mjs` and `desktop-snap.mjs` use it. `tools/make-icons.mjs` redraws
+the Home Screen icons in `public/icons/`.
 
 **Cloud sessions (Claude Code on the web):** run `npm install` first. The
 pre-installed Chromium does not match the Playwright version, so use
@@ -226,6 +236,11 @@ Screenshots go to `<OS temp>/reign-check-shots/` (`REIGN_SHOTS` overrides).
 - Measure layout only after the card's ~0.42s rise-in (`waitForTimeout(500)`).
 - Favours open `FavourDialog` (pick a target, then a receipt).
 - Choose options by their text (see ground rule 12), never by position.
+- **At 1080px and narrower** the masthead buttons are in the ☰ menu
+  (`.m-menu-btn`), the rail is a drawer opened by the faction strip
+  (`.m-files-btn` → `.rail.open`), and `.strap-action` is a bar fixed to
+  the bottom. `tools/scenes.mjs` has `openMenuItem()` / `openFiles()` that
+  work on both layouts.
 
 ## 8. Map of the code
 
@@ -255,14 +270,19 @@ src/game/            pure logic, no React/DOM, fully testable
                      consequences (marks, reactions), characterEvents,
                      characterRequests, crises, shop
 src/ui/
-  components/        CardView (3 card layouts + OptionText), Rail, Ledger,
-                     Demands (pop-up + panel), FavourDialog, Prose
+  components/        CardView (3 card layouts + OptionText), Rail (also the
+                     phone Files drawer), Ledger, Demands (pop-up + panel),
+                     FavourDialog, Prose, FactionStrip (phone only)
+  useMedia.ts        media-query hook for the few words that differ on a phone
   screens/           Screens (title, front page, night, ending), Vote, Shop,
                      Manage (Advisors & Deals), Progress (Unlocks), Intro
                      (Brief me)
 src/App.tsx          phases → screens; keyboard; the early returns for the
                      Back Room and the situation room
-src/styles/index.css the whole design system
+src/styles/index.css the whole design system; PHONE LAYOUT block at the end
+public/              fonts/ (relative URLs — required under /Reign-Check/),
+                     icons/ + manifest.webmanifest (Home Screen)
+.github/workflows/   deploy.yml — test, build, publish to GitHub Pages
 tools/               Playwright browser checks (§7)
 docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, DESIGN_V2.md,
                      mockups/ (design exploration), archive/ (history)
@@ -278,8 +298,9 @@ docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, DESIGN_V2.md,
   new option, mustard = changed, a locked one is disabled and shows its
   reason. Results show `.outcome-because` and `.outcome-marked`.
 - **The rail** (Files with faction memories, Demands, On your desk, the
-  Back Room favours, Diary, On the record, Standing costs) is **hidden below
-  1080px** — a known gap for the phone layout.
+  Back Room favours, Diary, On the record, Standing costs) sits on the
+  right on desktop; **at 1080px and narrower it is the Files drawer**,
+  opened from the faction strip.
 - **The "Money" faction is labelled "Elites"** ("the Elites" in sentences);
   "Money" on the masthead is the treasury.
 - **There is no masthead Demands button** (the owner removed it).
@@ -288,12 +309,22 @@ docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, DESIGN_V2.md,
   `body`).
 - **Advisors and deals are capped at 3 each**; freeing a slot means firing
   or cutting one.
+- **Phone layout (1080px and narrower, tablets included).** All of it is in
+  the PHONE LAYOUT block at the end of `index.css` plus a few small
+  components (`FactionStrip`, the ☰ menu in `App.tsx`, `Rail`'s drawer
+  mode). **Desktop must not change:** run `desktop-snap.mjs` before and
+  after any UI work. Don't wrap existing desktop text in new spans (it
+  shifts glyphs); build phone-only wording as one string with `useMedia`.
+  Anything new that is gameplay-critical must be reachable on a phone too
+  (in the drawer, the menu, or on the page).
 
 ## 10. Git and verification workflow
 
 `claude/confident-meitner-lc0bgc` is the default branch — the one the owner
-looks at, and the one GitHub Pages will publish from once the deploy
-workflow exists. **Every agent session works on its own branch.** Commit
+looks at, and **the one GitHub Pages publishes from: every push to it goes
+live** at https://ohfrinzx.github.io/Reign-Check/ within a few minutes (if
+`npm test` passes in the workflow). A `SAVE_VERSION` bump therefore resets
+in-progress runs on every family member's device — say so before merging. **Every agent session works on its own branch.** Commit
 with clear messages. Do not open a pull request unless asked — merge
 directly.
 
@@ -301,7 +332,8 @@ directly.
 
 1. Do the work, committing on your own branch.
 2. Verify for real: `npm test` (all pass), `npm run build` (clean), and the
-   browser checks for anything UI-facing.
+   browser checks for anything UI-facing — including `phone.mjs`, and
+   `desktop-snap.mjs` before/after for layout work.
 3. **Only if all of that passes**, merge your branch into
    `claude/confident-meitner-lc0bgc` and push. If anything fails, fix it
    and re-verify; never merge broken or unverified work.

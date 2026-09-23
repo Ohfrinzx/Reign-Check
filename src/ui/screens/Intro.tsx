@@ -4,6 +4,7 @@ import { computeResources, DISPLAY_FACTIONS } from '../../game/display';
 import { FACTIONS } from '../../game/content/country';
 import { currentMandate } from '../../game/content/mandates';
 import { HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
+import { NARROW, useMedia } from '../useMedia';
 
 /**
  * Shown once before Day 1, and reachable any time from the "Brief me" button.
@@ -13,6 +14,10 @@ import { HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
 export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: () => void; returning?: boolean }) {
   const opening = currentMandate(s);
   const resources = computeResources(s);
+  // On a phone the rail is the Files drawer, not a column "on the right".
+  // Each sentence that says so is ONE template string, so desktop gets the
+  // exact same single text run as before (split runs shift glyphs slightly).
+  const narrow = useMedia(NARROW);
   const keyPeople = CHARACTERS.filter((c) => ['varkov', 'sarran', 'brask', 'doran', 'adamek', 'hess'].includes(c.id));
   const honorific = HONORIFICS.find((h) => h.id === s.honorific || h.word === s.honorific) ?? HONORIFICS[0];
 
@@ -36,19 +41,12 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
         <Section title="What you are trying to do">
           <p>
             The run is <b>{NUM_ACTS} acts</b> of about {ACT_LENGTH} days each ({s.maxDays} days in all).
-            Every act ends with a <b>confidence vote</b> in parliament. The chamber votes in five blocs, one
-            per faction on the right. Each bloc follows its faction&apos;s mood plus your Grip and Legitimacy. A
-            faction at the bottom of its bar votes against you as one, and debt costs votes everywhere. The
-            bar rises each act. Lose one and the job ends there and then. Survive all {NUM_ACTS} and you have won.
+            Every act ends with a <b>confidence vote</b>{` in parliament. The chamber votes in five blocs, one per faction ${narrow ? 'in your Files (tap the faction strip)' : 'on the right'}. Each bloc follows its faction's mood plus your Grip and Legitimacy. A faction at the bottom of its bar votes against you as one, and debt costs votes everywhere. The bar rises each act. Lose one and the job ends there and then. Survive all `}{NUM_ACTS} and you have won.
           </p>
           <p>
             Every day you will be handed three to five <b>cards</b> (one more with The Accident): a minister with a request, a crisis,
             an offer, a bill. You pick an option. There is no undo, and most choices solve one problem
-            by creating another one later. Some decisions go <b>on the record</b> (listed on the right):
-            later cards will offer a new option, block one, or play out differently because of them,
-            and say so with a &ldquo;Because you&hellip;&rdquo; note. The factions remember too: each one lists
-            what it remembers under its bar, and it may make a demand because of it, charge you more or less,
-            or refuse your bribes. The order of the options changes every run.
+            by creating another one later. Some decisions go <b>on the record</b>{` (listed ${narrow ? 'in your Files' : 'on the right'}): later cards will offer a new option, block one, or play out differently because of them, and say so with a “Because you…” note. The factions remember too: each one lists what it remembers under its bar, and it may make a demand because of it, charge you more or less, or refuse your bribes. The order of the options changes every run.`}
           </p>
         </Section>
 
@@ -89,8 +87,7 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
             <li><b>A foreign government replaces you.</b> Push your main trading partner too far.</li>
           </ul>
           <p className="intro-note">
-            None of these happen out of nowhere. Each one builds for days, and you will see it coming as a
-            card on your desk — under &ldquo;On your desk&rdquo; on the right — with a danger level and what it is about.
+            {`None of these happen out of nowhere. Each one builds for days, and you will see it coming as a card on your desk — under “On your desk” ${narrow ? 'in your Files' : 'on the right'} — with a danger level and what it is about.`}
           </p>
         </Section>
 

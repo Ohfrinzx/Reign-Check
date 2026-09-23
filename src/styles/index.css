@@ -961,7 +961,7 @@ abbr.term{
 }
 @media (max-width:1080px){
   .shop-layout{grid-template-columns:1fr}
-  .held-panel{display:none}
+  /* phone/tablet: the held-panel stacks under the offers (see PHONE LAYOUT) */
 }
 
 /* a deal with a day-to-day timer says so right on the offer, same plain-text
@@ -1398,3 +1398,258 @@ abbr.term{
 .dm-memory li.dearer{border-color:var(--mustard)}
 .dm-memory li.no-bribe{border-color:var(--red)}
 
+
+/* =========================================================================
+   PHONE LAYOUT (mobile-web slice, docs/MOBILE_AND_HOSTING.md).
+
+   Everything for phones and tablets lives in the media blocks below, so the
+   desktop layout is untouched — tools/desktop-snap.mjs proves that pixel by
+   pixel at 1366×700 and 1100×700. 1080px is the existing point where the
+   rail stops fitting, so it is the breakpoint for the whole compact layout:
+   - the masthead folds its three buttons into a ☰ menu and puts the
+     Money/Grip/Legitimacy ledger on its own full-width row;
+   - a faction strip (FactionStrip.tsx) sits under the strap, and tapping it
+     opens the rail as a drawer (Rail.tsx, `.rail.open`);
+   - the strap's primary action becomes a bar fixed to the bottom of the
+     screen (ground rule 9: reachable without scrolling). Content scroll
+     areas get bottom padding so the bar never hides their last lines —
+     the reason .action-bar is NOT sticky on desktop;
+   - two-column pieces (front page, Back Room held-panel, Advisors & Deals
+     rows) stack; keyboard hints hide on touch screens.
+   The two dark screens (Back Room, situation room) keep their look.
+   ========================================================================= */
+
+.m-menu-btn,.m-menu,.m-menu-scrim,.m-files-btn,.rail-scrim{display:none}
+
+@media (hover:none){
+  .kbd-hint{display:none}
+}
+
+@keyframes drawerIn{from{transform:translateX(100%)}to{transform:none}}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
+@media (max-width:1080px){
+  /* keep content out from under a landscape phone's notch (viewport-fit=cover) */
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+
+  /* minmax(0,1fr): no row's minimum content can widen the page past the screen */
+  .app{grid-template-rows:auto auto auto minmax(0,1fr);grid-template-columns:minmax(0,1fr)}
+
+  /* ---- masthead: name + act chip + ☰ on top, the ledger underneath */
+  .masthead{grid-template-columns:minmax(0,1fr) auto auto;overflow:visible}
+  .masthead .id{padding:8px 10px 8px 12px;min-width:0;gap:9px}
+  .masthead .id > div:last-child{min-width:0}
+  .masthead .id .n,.masthead .id .r{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .masthead .id .n{font-size:20px}
+  .masthead .mid{grid-column:2;grid-row:1;padding:0 4px 0 0}
+  .masthead .mid .lbl{padding:8px 12px;font-size:9.5px;letter-spacing:.08em}
+  .masthead-right{display:contents}
+  .masthead-right > .btn{display:none}
+  .m-menu-btn{
+    grid-column:3;grid-row:1;
+    display:grid;place-items:center;min-width:48px;min-height:48px;margin-left:6px;
+    background:transparent;color:var(--bar-text);border:0;border-left:1px solid rgba(242,233,213,.2);
+    font-size:20px;line-height:1;cursor:pointer;
+  }
+  .masthead .res{grid-column:1 / -1;grid-row:2;min-width:0;border-top:1px solid rgba(242,233,213,.18)}
+  .res .l,.res .s{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .res .r{flex:1;min-width:0;padding:6px 12px 7px;text-align:left;position:static;cursor:pointer}
+  .res .v{font-size:22px}
+  /* a tapped resource explains itself in a full-width box under the ledger */
+  .res .tip{left:8px;right:8px;width:auto;top:calc(100% + 4px)}
+
+  .m-menu-scrim{display:block;position:fixed;inset:0;z-index:440;background:rgba(22,19,15,.35)}
+  .m-menu{
+    display:flex;flex-direction:column;gap:8px;position:fixed;top:56px;right:8px;z-index:441;
+    width:min(280px,calc(100vw - 16px));padding:12px;background:var(--paper);border:3px solid var(--ink);
+    box-shadow:6px 6px 0 var(--shadow);animation:menuIn .15s ease both;
+  }
+  .m-menu .btn{width:100%;text-align:left;min-height:46px;font-size:12px}
+  .m-menu-note{font-family:var(--mono);font-size:10px;color:var(--ash);padding:2px 2px 0}
+
+  /* ---- strap: status on one line, the long note under it, action at the bottom */
+  .strap{flex-wrap:wrap;gap:2px 12px;padding:5px 12px}
+  .strap .threat{padding:4px 8px;margin:0}
+  .strap .sp{
+    flex-basis:100%;margin-left:0;order:5;font-size:10.5px;line-height:1.35;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .strap-action{
+    position:fixed;left:0;right:0;bottom:0;z-index:420;margin:0;
+    min-height:56px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    font-size:13px;letter-spacing:.12em;border-top:3px solid var(--ink);
+  }
+  .strap-action:hover{background:var(--red)}
+  .strap-action:active{background:var(--ink)}
+
+  /* ---- faction strip (FactionStrip.tsx) — the way into the Files drawer */
+  .m-files-btn{
+    display:flex;align-items:stretch;gap:6px;width:100%;padding:7px 8px 8px 10px;margin:0;
+    background:var(--paper-2);border:0;border-bottom:2px solid var(--ink);cursor:pointer;
+    text-align:left;color:var(--ink);font:inherit;min-width:0;overflow:hidden;
+  }
+  .mf-fac{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .mf-fac .nm{
+    font-family:var(--black);font-size:9px;letter-spacing:0;text-transform:uppercase;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mf-fac .nm i{font-style:normal;color:var(--red);margin-right:4px}
+  .mf-fac .bar{display:block;height:7px;background:var(--paper);border:1.5px solid var(--ink)}
+  .mf-fac .bar i{display:block;height:100%}
+  .mf-fac .md{
+    font-family:var(--sans);font-weight:700;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .mf-fac.hostile .nm{color:var(--red)}
+  .mf-fac.hostile .bar{border-color:var(--red)}
+  .mf-more{
+    flex:none;display:flex;align-items:center;gap:4px;padding-left:7px;border-left:1px solid var(--hair);
+    font-family:var(--black);font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;
+  }
+  .mf-more b{background:var(--red);color:var(--paper);padding:1px 6px;font-weight:400}
+
+  /* ---- the rail as a drawer */
+  .rail.open{
+    display:flex;position:fixed;top:0;right:0;bottom:0;z-index:431;width:min(420px,100%);
+    border-left:3px solid var(--ink);box-shadow:-10px 0 30px rgba(22,19,15,.3);
+    padding:0 16px calc(28px + env(safe-area-inset-bottom));animation:drawerIn .22s cubic-bezier(.2,.9,.25,1) both;
+  }
+  .rail-scrim{display:block;position:fixed;inset:0;z-index:430;background:rgba(22,19,15,.45);animation:scrimIn .2s ease both}
+  .rail-top{
+    position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;
+    margin:0 -16px;padding:10px 16px;background:var(--ink);color:var(--paper);
+    font-family:var(--head);font-size:22px;text-transform:uppercase;letter-spacing:.02em;
+  }
+  .rail-top .btn{background:var(--paper);color:var(--ink);border-color:var(--paper);min-height:44px}
+
+  /* ---- scroll areas leave room for the fixed action bar */
+  .stage-col{padding:14px 12px calc(24px + env(safe-area-inset-bottom))}
+  .app.has-bar .stage-col{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .stage-col .screen{padding:0 0 8px}
+  .alert-scrim{padding:10px 10px calc(24px + env(safe-area-inset-bottom))}
+  .app.has-bar .alert-scrim{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(72px + env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}
+
+  /* ---- touch targets: at least ~44px */
+  .btn{min-height:44px}
+  .seg-btn{min-height:44px}
+  .opt{min-height:52px}
+  .dm-head{min-height:44px}
+
+  /* ---- front page: one column */
+  .frontpage{margin-top:4px}
+  .fp-mast{grid-template-columns:1fr;gap:6px;text-align:center}
+  .fp-mast .edition,.fp-mast .weather{text-align:center}
+  .fp-mast .title{font-size:36px}
+  .fp-grid{grid-template-columns:1fr}
+  .fp-lead{padding:12px 0 16px;border-right:0}
+  .fp-rail{padding:14px 0 12px;border-top:2px solid var(--ink)}
+
+  /* ---- ending: the way on stays on screen */
+  .ending-sheet{margin-top:18px}
+  /* sticky elements stop short of the scroll area's bottom padding, so pull
+     this one down over it (the -24px matches .stage-col's padding-bottom) */
+  .ending-actions{
+    position:sticky;bottom:calc(-24px - env(safe-area-inset-bottom));z-index:2;
+    padding:12px 0 calc(36px + 2 * env(safe-area-inset-bottom));
+    background:var(--paper);border-top:2px solid var(--ink);
+  }
+
+  /* ---- Brief me / Advisors & Deals / Unlocks: Close stays on screen */
+  .intro{padding:0 14px}
+  .intro-foot{
+    position:sticky;bottom:0;z-index:2;background:var(--paper);
+    padding:12px 0 calc(12px + env(safe-area-inset-bottom));
+  }
+
+  /* ---- the situation room: title over the ledger; its way out stays on screen */
+  .sr-top{flex-wrap:wrap;gap:0}
+  .sr-title{padding:10px 14px;flex-wrap:wrap;gap:4px 10px}
+  .sr-top .res{width:100%;border-top:1px solid rgba(239,228,210,.12)}
+  .sr-stage{padding:14px 10px calc(24px + env(safe-area-inset-bottom))}
+  .sr-stage .outcome-foot{
+    position:sticky;bottom:0;z-index:2;background:var(--paper);
+    padding-top:12px;padding-bottom:calc(16px + env(safe-area-inset-bottom));border-top:1px solid #3b2723;
+  }
+
+  /* ---- the vote: its way on stays on screen */
+  .vote-actions{
+    position:sticky;bottom:0;z-index:2;background:var(--paper);
+    padding:10px 0 calc(10px + env(safe-area-inset-bottom));
+  }
+
+  /* ---- the Back Room: slimmer margins, held slots under the offers */
+  .app.shop-full{padding:12px 10px calc(40px + env(safe-area-inset-bottom))}
+  .held-panel{border-left:0;border:2px solid var(--ink)}
+}
+
+@media (max-width:620px){
+  .masthead .id .mark{width:26px;height:26px;font-size:12px}
+  .masthead .id .r{font-size:8px;letter-spacing:.14em}
+  .res .r{padding:5px 10px 6px}
+  .res .l{font-size:8px;letter-spacing:.14em}
+  .res .v{font-size:20px}
+  .mf-fac .nm i,.mf-fac .md{display:none}
+
+  .doc .dh{padding:7px 12px}
+  .doc .db{padding:14px 14px 4px}
+  .doc h1{font-size:30px}
+  .doc p{font-size:15px}
+  .opts{padding:4px 10px 12px}
+  .opt{gap:10px;padding:12px 2px}
+  .card-glossary{padding:8px 14px 12px}
+  .outcome{border-left-width:6px}
+  .outcome-top{padding:10px 14px}
+  .outcome-top h3{font-size:20px}
+  .outcome-body{padding:14px;font-size:15px}
+  .outcome-because{padding:10px 14px 0}
+  .outcome-marked{margin:0 14px 12px}
+  .deltas{padding:0 14px 14px}
+  .outcome-foot{padding:0 14px 16px}
+  .char-card .cc-memo{padding:14px 14px 8px}
+  .char-card h1{font-size:24px}
+  .char-card .cc-replies{padding:10px 10px 12px}
+  .crisis-card .cr-main{padding:14px 14px 8px}
+  .crisis-card h1{font-size:28px}
+  .crisis-card .cr-orders{padding:10px 10px 12px}
+  .crisis-card .cr-band{padding:10px 12px}
+
+  .night-head h2{font-size:32px}
+  .ending-title{font-size:36px}
+  .ending-prose{padding:16px;font-size:15.5px}
+  .intro-head{padding:16px}
+  .intro-head h1{font-size:30px}
+
+  .manage-row{flex-direction:column;gap:8px}
+  .manage-right{align-items:flex-start;text-align:left;min-width:0}
+  .manage-fire{align-items:flex-start}
+  .manage-row.compact{flex-direction:row}
+
+  .shop-head{padding:12px 14px 10px}
+  .shop-head h1{font-size:28px}
+  .offer{padding:12px 14px}
+  .offer .line .tag{width:78px}
+  .shop-foot{padding:12px 14px}
+  .shop-receipt{padding:12px 14px}
+}
+
+/* Landscape phones (short screens): the stacked header would leave only a
+   sliver for the story, so the ledger joins the masthead's single row, the
+   strap's note and the strip's mood words go (both are in the Files drawer
+   and on the front page), and the bottom bar slims down. */
+@media (max-width:1080px) and (max-height:500px){
+  .masthead{grid-template-columns:minmax(0,1fr) auto auto auto}
+  .masthead .id{padding-top:4px;padding-bottom:4px}
+  .masthead .id .r{display:none}
+  .masthead .res{grid-column:3;grid-row:1;border-top:0}
+  .m-menu-btn{grid-column:4;min-height:44px}
+  .res .r{flex:none;padding:4px 10px;border-left:1px solid rgba(242,233,213,.22)}
+  .res .v{font-size:18px}
+  .res .s{display:none}
+  .strap .sp{display:none}
+  .mf-fac .md{display:none}
+  .m-files-btn{padding-top:5px;padding-bottom:6px}
+  .strap-action{min-height:44px;padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+  .app.has-bar .stage-col,.app.has-bar .alert-scrim{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .m-menu{top:48px}
+}

@@ -17,6 +17,7 @@ import { MANDATES } from './game/content/mandates';
 import { SHOP_ITEMS } from './game/content/shop';
 import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
+import { FactionStrip } from './ui/components/FactionStrip';
 import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
 import { ShopScreen } from './ui/screens/Shop';
@@ -45,6 +46,11 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  // Phone/tablet layout only (1080px and narrower): the ☰ menu that holds the
+  // masthead buttons, and the rail shown as a drawer. See PHONE LAYOUT in
+  // index.css; neither can open on a wider screen.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
   // Balance slice A: the favour being used (dialog open) and its receipt.
   const [favourOpen, setFavourOpen] = useState<string | null>(null);
   const [favourReceipt, setFavourReceipt] = useState<FavourResult | null>(null);
@@ -63,6 +69,24 @@ export default function App() {
       setName(meta.leaderName);
     }
   }, []);
+
+  /* ---- phone menu and drawer: close on Escape, and if the window grows
+   *  past the phone/tablet breakpoint (they have no desktop form). */
+  useEffect(() => {
+    if (!menuOpen && !filesOpen) return;
+    const wide = window.matchMedia('(min-width: 1081px)');
+    const close = () => { setMenuOpen(false); setFilesOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    const onWide = () => { if (wide.matches) close(); };
+    window.addEventListener('keydown', onKey);
+    wide.addEventListener('change', onWide);
+    return () => { window.removeEventListener('keydown', onKey); wide.removeEventListener('change', onWide); };
+  }, [menuOpen, filesOpen]);
+
+  // ...and whenever the day moves to another phase, so neither reappears by
+  // surprise after the Back Room, a vote or the situation room.
+  const phase = game?.phase;
+  useEffect(() => { setMenuOpen(false); setFilesOpen(false); }, [phase]);
 
   /* ---- load the cross-run record on mount (§4.5, separate from any save) */
   useEffect(() => {
@@ -125,6 +149,8 @@ export default function App() {
   const backToTitle = useCallback(() => {
     setScreen('title');
     setShowManage(false);
+    setMenuOpen(false);
+    setFilesOpen(false);
     const meta = loadGame();
     setSavedDay(meta && meta.phase !== 'ended' ? meta.day : undefined);
   }, []);
@@ -250,7 +276,7 @@ export default function App() {
 
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game || showIntro || showManage || popupOpen || favourOpen) return;
+    if (screen !== 'game' || !game || showIntro || showManage || popupOpen || favourOpen || menuOpen || filesOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -281,7 +307,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen, favourOpen]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen, favourOpen, menuOpen, filesOpen]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -367,8 +393,12 @@ export default function App() {
   const stage = game.agenda[game.stageIndex];
   const remaining = Math.max(0, game.todayDeck.length - game.stageIndex);
 
+  // Phone/tablet: the strap's primary action is a bar fixed to the bottom of
+  // the screen; scroll areas only reserve room for it while it is showing.
+  const hasBar = ['briefing', 'resolve', 'alertResolve', 'night'].includes(game.phase);
+
   return (
-    <div className="app">
+    <div className={hasBar ? 'app has-bar' : 'app'}>
       {/* --------------------------------------------------------- masthead */}
       <header className="masthead">
         <div className="id">
@@ -393,7 +423,28 @@ export default function App() {
           </button>
           <Ledger s={game} />
         </div>
+        {/* phone/tablet only: the three buttons above, folded into one */}
+        <button
+          type="button"
+          className="m-menu-btn"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </header>
+      {menuOpen && (
+        <>
+          <div className="m-menu-scrim" onClick={() => setMenuOpen(false)} />
+          <nav className="m-menu" aria-label="Menu">
+            <button className="btn" onClick={() => { setMenuOpen(false); setShowIntro(true); }}>Brief me</button>
+            <button className="btn" onClick={() => { setMenuOpen(false); setShowManage(true); }}>Advisors &amp; Deals</button>
+            <button className="btn" onClick={backToTitle}>Main menu</button>
+            <span className="m-menu-note">Your run is saved automatically.</span>
+          </nav>
+        </>
+      )}
 
       {/* ------------------------------------------------------------ strap */}
       <div className="strap">
@@ -418,6 +469,9 @@ export default function App() {
         )}
       </div>
 
+      {/* phone/tablet only: the factions at a glance; tap for the drawer */}
+      <FactionStrip s={game} open={filesOpen} onOpen={() => setFilesOpen(true)} />
+
       {/* ----------------------------------------------------------- main */}
       <div className="main">
         <div className="stage-col">
@@ -439,8 +493,10 @@ export default function App() {
           )}
         </div>
 
-        <Rail s={game} onUseFavour={doUseFavour} demandActions={demandActions} />
+        <Rail s={game} onUseFavour={doUseFavour} demandActions={demandActions}
+          open={filesOpen} onClose={() => setFilesOpen(false)} />
       </div>
+      {filesOpen && <div className="rail-scrim" onClick={() => setFilesOpen(false)} />}
 
       {/* --------------------------------------------------- breaking alert */}
       {inAlert && (

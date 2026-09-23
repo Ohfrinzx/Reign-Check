@@ -14,11 +14,18 @@ import type { DemandActions } from './Demands';
  * Deliberately NOT tabbed. The whole point of the desk design is that
  * nothing is hidden behind a click — everything that matters has one fixed,
  * always-visible place. See docs/DESIGN_V2.md.
+ *
+ * On a phone or tablet (1080px and narrower) the rail has no room beside the
+ * card, so it becomes a drawer: hidden until the faction strip
+ * (FactionStrip.tsx) is tapped, then slid in over the page with `open` set.
+ * The close bar only renders while open, so desktop never sees it.
  */
-export function Rail({ s, onUseFavour, demandActions }: {
+export function Rail({ s, onUseFavour, demandActions, open = false, onClose }: {
   s: GameState;
   onUseFavour: (id: string) => void;
   demandActions: DemandActions;
+  open?: boolean;
+  onClose?: () => void;
 }) {
   const threats = buildThreats(s, 3);
   const diary = s.scheduled.filter((d) => d.visible).slice(0, 5);
@@ -26,7 +33,13 @@ export function Rail({ s, onUseFavour, demandActions }: {
   const memories = (id: FactionId) => factionMemories(s, id).slice(0, 2);
 
   return (
-    <aside className="rail">
+    <aside className={open ? 'rail open' : 'rail'} aria-label="Your files" {...(open ? { role: 'dialog', 'aria-modal': true } : {})}>
+      {open && (
+        <div className="rail-top">
+          <span>Your files</span>
+          <button type="button" className="btn" onClick={onClose} autoFocus>Close ✕</button>
+        </div>
+      )}
       <div className="panel">
         <h3>Files</h3>
         {DISPLAY_FACTIONS.map((def) => {

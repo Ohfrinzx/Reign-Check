@@ -1,11 +1,91 @@
 # Mobile and hosting — handover for the next agent
 
+> **2026-09-23 (later): BUILT.** The deploy workflow, the Home Screen
+> polish and the phone layout are built and verified; see **§0 As built**
+> right below. The rest of this file is the original brief, kept because
+> §2 (how the owner runs it) and the troubleshooting notes still apply.
+> Where the brief's draft and §0 disagree, §0 is what shipped.
+
 **Written 2026-09-23, at the end of Phase 3; checked again after balance
 slice D.** Read this after `AGENTS.md`, `PROJECT_STATUS.md` and
 `docs/SYSTEMS.md`. It is the brief for the next piece of work. The owner
 is starting a new agent session for it. Slice D (factions remember) added
 memory lines under each faction on the Files rail, which the phone layout
 must show too.
+
+## 0. As built (2026-09-23)
+
+Owner decisions, answering the brief's open questions: **build everything,
+then one merge** (so the first public version already works on phones);
+**add Home Screen polish**; **factions as an always-visible strip plus a
+Files drawer**; **tablets get the phone layout**; **CI runs the unit tests
+before every deploy**.
+
+**Hosting**
+- `.github/workflows/deploy.yml`: every push to
+  `claude/confident-meitner-lc0bgc` runs `npm ci`, `npm test`, `npm run
+  build`, then publishes `dist/`. A failing test stops the deploy. Newer
+  action versions than the draft in §4 (checked against each action's git
+  tags and release notes): checkout@v7, setup-node@v7 (Node 22),
+  configure-pages@v6, upload-pages-artifact@v5, deploy-pages@v5, plus
+  `actions: read` (deploy-pages v4+ release notes ask for it).
+- **Bug fixed that the brief missed:** `public/fonts/fonts.css` loaded the
+  fonts from `/fonts/…` (the site root). Under `/Reign-Check/` every font
+  would have 404'd. The URLs are now relative.
+- **Home Screen:** `public/manifest.webmanifest` (standalone, cream
+  background, near-black theme), icons in `public/icons/` (192, 512 also
+  used as "maskable", 180 apple-touch-icon) drawn by
+  `tools/make-icons.mjs`, and the iPhone/Android meta tags in `index.html`
+  (`viewport-fit=cover`, so the bottom bar can pad for the home indicator).
+- `tools/pages-preview.mjs` serves the build from `/Reign-Check/` and checks
+  no request fails, all five fonts load, the manifest and icons are served,
+  and a game starts. It fails with the old font paths (tested).
+
+**Phone layout** (everything at 1080px and narrower; tablets included)
+- **Masthead:** name + act/day chip + a ☰ button on one row; Brief me,
+  Advisors & Deals and Main menu live in the ☰ menu. Money / Grip /
+  Legitimacy sit on their own full-width row, always visible; tapping one
+  explains it (`Ledger.tsx` now opens on hover for a mouse only, since a
+  tap fired hover-then-click and closed it at once).
+- **Faction strip** (`FactionStrip.tsx`) under the strap: five mini bars
+  (same length/colour as the rail), hostile factions in red, a red count
+  of live demands, and "Files ›". Tapping it opens the **rail as a
+  drawer** (`Rail.tsx` `open`): factions with their memories, Demands (meet
+  / bribe work in it), On your desk, Back Room favours, Diary, On the
+  record, Standing costs. Close ✕, a tap outside, or Escape closes it.
+- **Bottom bar:** the strap's primary action ("Begin the day →",
+  "Continue →", "To the Back Room →") is a red bar fixed to the bottom.
+  Scroll areas reserve room for it only while it shows (`.app.has-bar`).
+  Screens without it keep their way on in reach: the ending's buttons,
+  the vote's button, the situation room's "Leave…", and the Close of Brief
+  me / Advisors & Deals / Unlocks stick to the bottom.
+- Front page one column; Back Room held slots stack under the offers;
+  Advisors & Deals rows stack; cards, results and dialogs full width with
+  slimmer margins; touch targets ≥ 44px; "or press Enter" hidden on touch
+  screens; Brief me says "in your Files" instead of "on the right".
+- **Landscape phones** (short screens) get a one-row masthead with the
+  ledger inline, no strap note or mood words, and a slimmer bar.
+- **No game logic changed** (`src/game/` untouched), **no `SAVE_VERSION`
+  bump**. Both dark screens keep their look.
+
+**Proof desktop did not change:** `tools/desktop-snap.mjs` screenshots 20
+screens (title, front page, card, result, private file, alert, night, both
+Back Rooms, vote, situation room, demand pop-up, Brief me, Advisors &
+Deals, Files, favour dialog, ending…) at 1366×700 and 1100×700 and compares
+them pixel by pixel with pictures taken before any change: all 40
+identical. (It caught one thing: wrapping existing text in a span shifts
+glyphs by a sub-pixel, so wording that differs on a phone is built as one
+plain string — see `src/ui/useMedia.ts`.)
+
+**Phone check:** `tools/phone.mjs` (in the default browser suite) runs the
+same 20 screens at 390×844, 360×800, 768×1024 and 844×390 with touch:
+nothing sticks out sideways, the primary action is on screen, not covered
+and ≥ 40px tall; then the menu, ledger, strip, drawer and touch hints; then
+two days played by tapping only.
+
+**Still only the owner can check:** the live site on a real phone (the
+sandbox cannot open `*.github.io`), "Add to Home Screen" on iPhone and
+Android, and how iPhone treats saves for a Home Screen app (see §2.6).
 
 ## 1. What the owner wants, in their words
 
@@ -58,19 +138,18 @@ link. Nobody pays for anything.
 |---|---|---|
 | Repo made **public** (owner, Settings → General → Change visibility) | **Done** | GitHub API reports `"visibility": "public"`, `"private": false` |
 | **Pages** turned on with **Source: GitHub Actions** (owner, Settings → Pages) | **Done per the owner.** `has_pages: true` confirmed | The API reports `"has_pages": true`. The Pages settings endpoint is blocked from the cloud sandbox, so "Source: GitHub Actions" is the owner's word |
-| Workflow file `.github/workflows/deploy.yml` | **Not started** | — |
-| First deploy / live site | **Not started** | The site will 404 until the workflow runs once |
-| Phone layout | **Not started** — measured only (§5) | — |
+| Workflow file `.github/workflows/deploy.yml` | **Built** (§0) | `npm ci` + `npm test` + build run locally; `tools/pages-preview.mjs` serves the build from `/Reign-Check/` |
+| First deploy / live site | **Runs on the first merge into the default branch** | The owner checks the Actions tab and the live link — the sandbox cannot |
+| Phone layout | **Built** (§0) | `tools/phone.mjs` (4 sizes × 20 screens + tap-through); desktop unchanged per `tools/desktop-snap.mjs` |
 
-**Open decision (ask the owner first):** publish now, or phone layout first?
+**Decided by the owner (2026-09-23): phone layout first, one merge** (§0). The options were:
 - **Publish now:** the link works on a PC today, and phones work once the
   layout slice lands. Updates go live on each merge anyway.
 - **Phone layout first:** the first version anyone sees works on both.
   This was the previous agent's recommendation, because family will open
   it on phones.
 
-Either way it is a small first step: add the workflow, then build the
-layout slice. **Do not decide this for the owner.**
+(Kept for history.)
 
 **Cloud-sandbox limits the next agent will hit:**
 - The egress proxy blocks `*.github.io`, `docs.github.com` and
@@ -85,7 +164,7 @@ layout slice. **Do not decide this for the owner.**
   (`mcp__github__actions_list` / `actions_get` / `get_job_logs`). If not,
   ask the owner to open the repo's **Actions** tab.
 
-## 4. The deploy workflow (to add)
+## 4. The deploy workflow (original draft — superseded by §0)
 
 A draft, from memory, not verified this session. Check the action
 versions against GitHub's docs (links below) before relying on it:

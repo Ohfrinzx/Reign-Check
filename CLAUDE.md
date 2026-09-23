@@ -9,8 +9,8 @@ Other agent tools on this project (ChatGPT-based ones too) read the same
 Then read, in order:
 1. `PROJECT_STATUS.md` — where things stand today and what is next.
 2. `docs/SYSTEMS.md` — how every game system works now, with the numbers.
-3. `docs/MOBILE_AND_HOSTING.md` — the brief for the next job (a mobile web
-   version hosted free on GitHub Pages).
+3. `docs/MOBILE_AND_HOSTING.md` — the phone layout and GitHub Pages
+   hosting (§0 is what was built).
 4. `docs/DESIGN_V2.md` — before any UI or design work.
 
 `docs/archive/` is history, not instructions.
@@ -18,8 +18,10 @@ Then read, in order:
 ## The few things Claude Code sessions must not miss
 
 - **Status (2026-09-23):** Phases 1–3 are done and approved. Balance slice
-  D (factions remember your decisions) is merged and awaiting the owner's
-  playtest. Next: the mobile web version (`docs/MOBILE_AND_HOSTING.md`).
+  D (factions remember your decisions) and the mobile web version + GitHub
+  Pages deploy are merged and awaiting the owner's playtest
+  (`docs/MOBILE_AND_HOSTING.md` §0). **Every merge into the default branch
+  now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
   only after `npm test`, `npm run build` and the browser checks pass.
   Announce the merge before and after** (`AGENTS.md` §10). No pull request

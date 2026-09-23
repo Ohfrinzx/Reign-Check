@@ -1359,7 +1359,12 @@ The last piece of Phase 3. Everything above was measured, not tuned:
 
 **2026-09-23 update:** the owner wants to play on their phone and share with
 family for free, so Phase 4 is next, but as a responsive **web** layout
-hosted on GitHub Pages, not Capacitor/native. The brief, status and scope
+hosted on GitHub Pages, not Capacitor/native. **Built the same day**
+(awaiting the owner's phone playtest): a compact layout at 1080px and
+narrower — ☰ menu, always-visible ledger, a faction strip that opens the
+rail as a drawer, a fixed bottom action bar — plus the deploy workflow and
+Home Screen manifest; desktop is pixel-identical. As built:
+`docs/MOBILE_AND_HOSTING.md` §0. The brief, status and scope
 are in `docs/MOBILE_AND_HOSTING.md`. The original note below is kept for
 history:
 

@@ -8,6 +8,28 @@ one line per step. Full old handovers are in
 
 ## Now (2026-09-23)
 
+**Built, verified and merged, awaiting the owner's playtest on a real
+phone: the mobile web version, hosted free on GitHub Pages.** Owner's
+choices: build it all, then one merge; Home Screen polish; factions as a
+strip + Files drawer; tablets get the phone layout; tests before every
+deploy.
+- **Live link:** https://ohfrinzx.github.io/Reign-Check/ — every merge
+  into the default branch now runs the tests, builds and publishes
+  (`.github/workflows/deploy.yml`). The first deploy happens on this merge.
+- **Phone layout** (1080px and narrower): ☰ menu, the three resources
+  always visible, a faction strip that opens the Files drawer (everything
+  from the desktop rail, faction memories included), a red action bar at
+  the bottom, one-column front page, stacked Back Room, touch-sized
+  buttons, no keyboard hints on touch screens, a tighter landscape mode.
+- **Home Screen:** icon, name, full-screen launch (`manifest.webmanifest`).
+- **Found and fixed:** the fonts would all have failed on GitHub Pages
+  (they pointed at the site root); tapping Money/Grip/Legitimacy on a phone
+  opened and closed its explanation at once.
+- **Desktop is pixel-identical** to before (40 screenshots compared). No
+  game logic changed; no save reset (`SAVE_VERSION` stays 14).
+- Slice D (factions remember) is included in this publish; it is still
+  awaiting its own playtest.
+
 **Built and merged, awaiting the owner's playtest: balance slice D —
 factions remember your decisions.** The owner asked for it, verbatim: *"I
 do want to update the consequences so factions react to my decisions as
@@ -29,18 +51,16 @@ remember, and faction reactions on cards.
 - No save reset: `SAVE_VERSION` stays 14. Balance: careful play survives
   59% (was 67%), random 3%.
 
-**Next job, handed to a new agent session: a mobile web version hosted
-free on GitHub Pages.** The repo is public and Pages is on (source: GitHub
-Actions). The deploy workflow and the phone layout are not built. Brief:
-`docs/MOBILE_AND_HOSTING.md`. An open question for the owner: publish
-first, or the phone layout first.
-
 **Later, each needing the owner's go-ahead:** mini-games (build them
 mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
 
+- **2026-09-23** — Mobile web version + GitHub Pages deploy built,
+  verified and merged (see "Now"; `docs/MOBILE_AND_HOSTING.md` §0). New
+  checks: `tools/phone.mjs` (default suite), `tools/desktop-snap.mjs`,
+  `tools/pages-preview.mjs`.
 - **2026-09-23** — Balance slice D (factions remember) built and merged.
   The docs were reorganised: `AGENTS.md` is the single guide, `CLAUDE.md`
   only points to it, `docs/SYSTEMS.md` is new, and the history moved to

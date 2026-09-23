@@ -15,6 +15,19 @@ Survive **three acts of six days**, each ending in a confidence vote.
 
 ## Play
 
+### On your phone or computer — just open the link
+
+**https://ohfrinzx.github.io/Reign-Check/** (the capital letters in
+`Reign-Check` matter). It is published automatically from the default
+branch. On a phone, use the browser's **Add to Home Screen** (Safari: Share
+→ Add to Home Screen; Chrome: ⋮ → Add to Home screen) to get an icon that
+opens it like an app. Saves stay in that browser on that device.
+
+On a phone: the ☰ button holds Brief me, Advisors & Deals and the main
+menu; the strip of five faction bars opens your **Files** (factions,
+demands, what's on your desk, favours, diary); the red bar at the bottom
+is always the way on.
+
 ### In the browser, no install (GitHub Codespaces)
 
 On the repository page: **Code → Codespaces → Create codespace on
@@ -85,7 +98,8 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-The browser suite starts Vite and tests at 1366×700. For a custom Chromium
+The browser suite starts Vite and tests at 1366×700, plus the phone layout
+at phone, tablet and landscape sizes (`tools/phone.mjs`). For a custom Chromium
 binary, set `PLAYWRIGHT_EXECUTABLE_PATH`. Screenshots go to the OS temporary
 directory under `reign-check-shots`; set `REIGN_SHOTS` to override it.
 Save version 14 replaces earlier in-progress runs (the cross-run record is kept).
@@ -99,7 +113,7 @@ Sable Office would like to discuss with you.
 **For developers and agents:** start with **[AGENTS.md](AGENTS.md)** (rules,
 workflow, code map), then **[PROJECT_STATUS.md](PROJECT_STATUS.md)** (where
 things stand) and **[docs/SYSTEMS.md](docs/SYSTEMS.md)** (how each system
-works). A mobile web version on GitHub Pages is the next job — see
+works). The phone layout and GitHub Pages hosting are described in
 **[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**.
 
 ## Commands
@@ -109,4 +123,4 @@ works). A mobile web version on GitHub Pages is the next job — see
 | `npm run dev` | Dev server on :5173 |
 | `npm run build` | Typecheck + production build to `dist/` |
 | `npm test` | Simulation tests: 200 full runs, content integrity, determinism |
-| `npm run test:browser` | Real-browser checks of every screen at 1366×700 |
+| `npm run test:browser` | Real-browser checks of every screen at 1366×700, and the phone layout |

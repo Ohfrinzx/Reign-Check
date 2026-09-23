@@ -342,7 +342,7 @@ export function OutcomeView({
         )}
         <div className="outcome-foot">
           <button className="btn btn-primary" onClick={onContinue}>{continueLabel}</button>
-          <span className="note">or press Enter</span>
+          <span className="note kbd-hint">or press Enter</span>
         </div>
       </div>
     </div>
