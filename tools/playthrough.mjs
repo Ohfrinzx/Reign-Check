@@ -116,9 +116,12 @@ log.push('CONTINUE BUTTON AFTER RELOAD: ' + hasContinue);
 if (hasContinue) {
   await page.click('button:has-text("Continue — Day")');
   await page.waitForTimeout(500);
-  // The Back Room is fullscreen with no masthead, so a run saved mid-shop
-  // resumes into .shop instead — both count as a successful resume.
-  const resumed = await page.locator('.masthead .mid .lbl, .shop').count() > 0;
+  // The Back Room, the situation room (a crisis stage) and the confidence
+  // vote are fullscreen with no masthead, so a run saved in one of them
+  // resumes there — all count as a successful resume. (This run is not
+  // seeded, so where it stops varies; the situation room was missing here
+  // until a run happened to stop mid-crisis.)
+  const resumed = await page.locator('.masthead .mid .lbl, .shop, .sr-stage .doc, .vote-screen').count() > 0;
   log.push('RESUMED OK: ' + (resumed ? 'yes' : 'no'));
   resumedOk = resumed;
   await page.screenshot({ path: shotPath('98-resumed.png'), fullPage: true });
