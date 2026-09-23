@@ -72,21 +72,21 @@ for (let i = 0; i < 600; i++) {
     if (/begin the day/i.test(t)) days++;
     if (/back room/i.test(t)) shops++;
     await page.locator('.strap-action').click();
-  } else if (await page.locator('.stage-col .outcome').count()) {
+  } else if (await page.locator(':is(.stage-col, .sr-stage) .outcome').count()) {
     if (cards === 1) await page.screenshot({ path: shotPath('P-outcome.png') });
-    await page.locator('.stage-col .outcome .btn-primary').click();
-  } else if (await page.locator('.stage-col .doc .opt:not([disabled])').count()) {
+    await page.locator(':is(.stage-col, .sr-stage) .outcome .btn-primary').click();
+  } else if (await page.locator(':is(.stage-col, .sr-stage) .doc .opt:not([disabled])').count()) {
     cards++;
     if (cards === 2) await page.screenshot({ path: shotPath('P-card.png') });
-    const hints = await page.locator('.stage-col .doc .opt .hint').allInnerTexts();
+    const hints = await page.locator(':is(.stage-col, .sr-stage) .doc .opt .hint').allInnerTexts();
     if (hints.some(h => /\$\d/.test(h))) priced++;
     // the glossary is a plain-text footnote now, not a hover (see Prose.tsx)
     if (cards === 3) {
-      const foot = page.locator('.stage-col .card-glossary span').first();
+      const foot = page.locator(':is(.stage-col, .sr-stage) .card-glossary span').first();
       if (await foot.count()) notes.push('glossary footnote on card 3: ' + (await foot.innerText()).slice(0, 70));
     }
-    const optCount = await page.locator('.stage-col .doc .opt:not([disabled])').count();
-    await page.locator('.stage-col .doc .opt:not([disabled])').nth(i % Math.max(1, optCount)).click();
+    const optCount = await page.locator(':is(.stage-col, .sr-stage) .doc .opt:not([disabled])').count();
+    await page.locator(':is(.stage-col, .sr-stage) .doc .opt:not([disabled])').nth(i % Math.max(1, optCount)).click();
   } else break;
   await page.waitForTimeout(45);
 }

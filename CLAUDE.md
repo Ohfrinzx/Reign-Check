@@ -53,7 +53,32 @@ underneath. The current glossary uses plain-text Terms footnotes on cards
 and shop offers; `Prose.tsx` does not use hover annotations. Current test
 coverage and status are listed below and in the handoff.
 
-## PHASE 3 — STEP 3 (CRISIS CHAINS) BUILT, AWAITING OWNER PLAYTEST
+## PHASE 3 — STEP 4 (BALANCE PHASE) — SLICE A BUILT, AWAITING OWNER PLAYTEST
+
+**2026-09-23.** Step 3 (crisis chains) was played; the owner moved on to
+the balance phase with five points of feedback plus one goal (verbatim in
+`PROJECT_STATUS.md`): (1) private files should be part of the daily events;
+(2) the crisis screen should be isolated, like Breaking alerts — the owner
+chose *"its own full dark screen mode with red accents… an underground
+hidden situation room"*; (3) favours feel like "a very empty button" — not
+clear if they worked, when to use them, or what they were used on; (4) no
+real strategy — spamming option 1 wins; (5) the confidence vote is not a
+threat — the owner chose **Hard** (careful play survives about half the
+time); plus: decisions should trigger and influence later options and
+outcomes. Split into three playtested slices: **A — feel and clarity**
+(1–3, built), **B — difficulty** (4–5: shuffle option order per run AND
+rebalance, per the owner's "both"), **C — consequences** (decisions that
+unlock/lock/change later options, visibly). Slice A: a private file
+**every day** from day 2 (13 new request cards,
+`content/characterRequests.ts`); crises open in a full-screen dark
+**situation room** (`App.tsx` early return, `.app.situation-room`);
+favours are **aimed** at a named scandal, a faction's demand or a running
+crisis and show a **receipt** (`src/game/favours.ts`,
+`src/ui/components/FavourDialog.tsx`). No `GameState` shape change —
+`SAVE_VERSION` stays **12**. 142 tests, build, and the full browser suite
+(new `tools/favours.mjs`) pass. See the balance slice A notes at the end of this file (and `AGENTS.md` §19).
+
+## PHASE 3 — STEP 3 (CRISIS CHAINS) — PLAYED
 
 **2026-09-22 (latest).** Step 2 (character-driven events) is owner-approved
 (*"all works. Go to the next part."*). Five crisis chains, each a situation
@@ -230,7 +255,8 @@ day-to-day timer (three-judges plus two new: `pigeon-endorsement`,
 Pricing and variety were measured with `src/game/__tests__/shop.probe.ts` —
 **run that probe before changing any shop rule.**
 
-**The Back Room is the one dark screen in the game** (owner request: it should
+**The Back Room is one of the game's two dark screens** — the other is the
+crisis situation room (balance slice A, also owner-requested) (owner request: it should
 feel like you are somewhere else). `.app.dark` in `src/styles/index.css` swaps
 the surface tokens for the shop phase only. This is NOT a revival of the dark
 desk skin rejected in Phase 1 — **do not darken any other screen without
@@ -485,7 +511,7 @@ React 18 + TypeScript + Vite, no backend, hand-written CSS, self-hosted fonts
 in). `src/game/` is pure logic with no React in it and is fully testable.
 `GameState` is plain serialisable JSON; all content is code keyed by string
 id, so save/load is `JSON.stringify` and new content needs no engine changes.
-135 vitest tests pass (see the `npm test` line in Commands below for the
+142 vitest tests pass (see the `npm test` line in Commands below for the
 current breakdown), including 200 full simulated runs. `src/game/display.ts`
 is the one place that decides what the player sees vs. what the engine
 tracks — read its header comment before changing what's on screen.
@@ -581,7 +607,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build
-npm test           # 135 tests: integrity, 200 full runs, determinism, variety,
+npm test           # 142 tests: integrity, 200 full runs, determinism, variety,
                    #   glossary, dayInAct, mandates, the run deck (§4.4),
                    #   meta-progression (§4.5, record + real unlock gating),
                    #   the Back Room shop (stock/pricing, firing
@@ -589,7 +615,8 @@ npm test           # 135 tests: integrity, 200 full runs, determinism, variety,
                    #   confidence-vote reveal, and faction demands
                    #   (Phase 3 step 1: issue/escalate/meet/bribe/lapse),
                    #   character events (step 2: warn/betray/offer),
-                   #   and crisis chains (step 3: start/calm-hot/end)
+                   #   crisis chains (step 3: start/calm-hot/end), and
+                   #   favours (balance slice A: targets, receipts)
 ```
 
 Browser verification (needs `npm run dev` running). **Test at 1366×700** —
@@ -608,8 +635,10 @@ node tools/demands.mjs       # Phase 3 step 1: demand pop-up, rail panel,
                              # pop-up still works <1080px (rail hidden)
 node tools/characters.mjs    # Phase 3 step 2: warning first, private-file
                              # betrayal card, reply slips, keyboard, offer
-node tools/crises.mjs        # Phase 3 step 3: front page, situation-room
-                             # card, tracker, log, orders, hot stage 2
+node tools/crises.mjs        # Phase 3 step 3 + slice A: front page, the dark
+                             # situation-room scene, tracker, log, orders, hot stage 2
+node tools/favours.mjs       # balance slice A: useful-now, disabled-with-reason,
+                             # target dialog, named receipt, target really gone
 ```
 
 **Cloud sessions (Claude Code on the web):** the pre-installed Chromium does
@@ -625,6 +654,13 @@ pop-up and the rail panel. **Character-event cards use their own
 "situation room" layout** (`CrisisCardView`) — measure layout in browser
 tools only after the ~.42s rise-in animation; keep card types visually
 distinct — the owner wants variety, including for future mini-games.
+
+**Crisis stages play in their own full-screen dark "situation room" scene**
+(balance slice A, owner request; `.app.situation-room` early return in
+`App.tsx`). With the Back Room, two screens are dark — both owner-requested;
+do not darken anything else without asking. Browser tools find cards under
+`:is(.stage-col, .sr-stage)`. **Favours open `FavourDialog`** (pick a
+target, then a receipt) — tooling that spends favours must click through it.
 
 **Demand pop-ups cover the day until closed** (`.demand-scrim`). Any tooling
 that walks through days must close `.demand-pop` first (its `.dm-foot
@@ -656,6 +692,8 @@ src/game/                 no React, no DOM, fully testable
   text.ts                 {sir}/{leader} token replacement
   save.ts                 localStorage, version-guarded, fails safe — THIS
                            run's save; separate from meta.ts's cross-run one
+  favours.ts              BALANCE SLICE A — favour targets (scandal/demand/
+                           crisis), block reasons, spendFavour() + receipt
   crises.ts               PHASE 3 CRISIS CHAINS — start/advance/end the
                            running chain (tickCrises() runs in dayUpkeep()).
                            Cards live in content/crises.ts
@@ -673,6 +711,8 @@ src/game/                 no React, no DOM, fully testable
                            data — a new locked mandate/item is a one-line
                            addition here, nowhere else)
   content/mandates.ts      six origins, generic rule data, Stairwell card
+  content/characterRequests.ts  balance slice A: 13 everyday private-file
+                           requests (one per character)
   content/crises.ts        Phase 3 step 3: CRISES — 5 chains × 5 cards
                            (stage 1, stage 2 calm/hot, stage 3 calm/hot)
   content/characterEvents.ts  Phase 3 step 2: CHARACTER_EVENTS — per
@@ -694,6 +734,8 @@ src/ui/
                             Standing costs — NOT tabbed, everything visible
     Demands.tsx             Phase 3: demand pop-up (DemandPopup) and the rail
                             panel (DemandsPanel, rows expand in place)
+    FavourDialog.tsx        balance slice A: pick a favour's target, then a
+                            receipt of what it did
     CardView.tsx             the doc — card-as-lead-story + decision box;
                             CharacterCardView, the "private file" layout for
                             character events (Phase 3 step 2);
@@ -741,9 +783,9 @@ AGENTS.md                 shared, model-agnostic knowledge base for every
 (§4.1–§4.5) are built, playtested, and owner-approved. Phase 2 itself needs
 no further work unless a future playtest turns something up.
 
-Phase 3 steps 1–2 (faction demands, character events) are owner-approved;
-step 3 (crisis chains) is built and awaiting playtest — see "PHASE 3"
-above. Everything below is genuinely deferred and needs an explicit
+Phase 3 steps 1–3 are built and played; step 4 (the balance phase) is in
+progress — slice A built and awaiting playtest, slices B and C next (see
+"PHASE 3" above). Everything below is genuinely deferred and needs an explicit
 go-ahead before starting, one step at a time. Full detail and ordering in
 `docs/DESIGN_V2.md` §9 (Phases 3–5): the balance pass (step 4, the rest of
 Phase 3);
@@ -1084,3 +1126,57 @@ described in §16–§18:
    events per run; decide whether that is the right density for 18 days.
 After step 4, Phase 3 is complete; Phase 4 (mobile/iOS) stays unscheduled
 and Phase 5 (mini-games, sound, remaining endings) needs its own go-ahead.
+
+## Balance slice A notes (feel and clarity, 2026-09-23)
+
+- **Private files every day** (owner: "most runs I don't get one until act
+  2 or later"). `characterEvents.ts` now runs from day 2 with no "never two
+  days running" rule, one per day. Priority: betrayal (turning, warned on an
+  earlier morning) → offer (devoted) → **request** (anyone else in post).
+  Requests (`content/characterRequests.ts`, 13 cards, one per character) are
+  personal asks — grant for loyalty, refuse and lose some — which is what
+  later tips a character toward an offer or a betrayal. Characters with no
+  file yet this run are favoured, so the cast rotates. Tag `request`; the
+  private-file stamp reads "A request". Measured: a private file on
+  **96–100% of days**, first on day 2; some late days (after day 13) come
+  up empty once a character has used all three of theirs — more request
+  cards are content-only if that needs filling.
+- **Crisis stages are their own scene.** `tickCrises()` now runs BEFORE
+  `tickCharacterEvents()` so a crisis stage is always the day's first card.
+  `App.tsx` early-returns `<div className="app situation-room">` (like the
+  Back Room's `shop-full`) whenever the current card is tagged
+  `crisis-chain` and the phase is `stage` or `resolve`: a black top bar
+  ("Situation room · Level B2", pulsing red light, the 3 resources), the
+  crisis card, then its outcome with "Leave the situation room →". Dark
+  tokens are swapped on `.app.situation-room` (same method as `.app.dark`).
+  **Two screens are dark now — the Back Room and the situation room — both
+  at the owner's request. Do not darken anything else without asking.**
+  Browser tools find cards under `:is(.stage-col, .sr-stage)`.
+- **Favours are aimed and give a receipt** (`favours.ts`). Each favour's
+  `use` in `content/shop.ts` now has `targets` (`scandal`, `demand`,
+  `demand:<faction>`, `crisis:<id>`), optional `needsTarget`, and
+  `whenUseful` (plain words; shown in the shop as "Use it" and in the rail
+  as "Keep it for"). The rail shows **"Useful now: <names>"** when a target
+  exists; a `needsTarget` favour with nothing to aim at is **disabled with
+  a reason**. "Use it…" opens `FavourDialog`: pick the target → the
+  receipt names what went away ("\"The stairwell\" is gone…", "The Army
+  dropped their demand…", "<crisis> is over… handled") plus the stat
+  changes. Target effects: a scandal is removed from play; a demand is
+  withdrawn unpaid (`demands.ts withdrawDemand()`); a crisis ends as
+  handled (score +2, end flag; `crises.ts` now closes on the end flag even
+  if today's card was never played, and the unplayed card is removed from
+  today's deck and agenda). `engine.ts useFavour(s, id, target?)` is kept
+  as a thin wrapper over `spendFavour()`.
+- **Balance, measured (not tuned yet — that is slice B):** always-first
+  survives ~91%, random ~43%, always-last ~1%. Option 1 is the best option
+  on 45 of 81 standard cards; always-first's money grows $44B → $92B over a
+  run; its vote margins sit at +11 to +44 over the line (median +30).
+
+**What is next — balance slice B (difficulty), then slice C
+(consequences).** B: shuffle option order per run (seeded, stable across
+reloads) AND rebalance so no option type always wins — the generous path
+gets real costs (money that actually runs short, expectations that rise),
+confidence-vote thresholds retuned so careful play survives about half the
+time (owner chose Hard), demand frequency and coup pressure raised. C:
+decisions leave marks that unlock, lock or change later options and
+outcomes, with a visible "Because you…" note on the affected option.

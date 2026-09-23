@@ -1,6 +1,7 @@
 import type { CharacterState, GameState, Rng } from './types';
 import { CHARACTER_EVENTS, CHARACTER_EVENT_MAP } from './content/characterEvents';
 import type { CharacterEventDef } from './content/characterEvents';
+import { requestId } from './content/characterRequests';
 
 /**
  * PHASE 3 STEP 2 — CHARACTER-DRIVEN EVENTS. No React, no DOM (ground rule 11).
@@ -16,14 +17,19 @@ import type { CharacterEventDef } from './content/characterEvents';
  *     day to win them back.
  *   - OFFER. A character who is firmly on your side (isDevoted()) brings
  *     you their offer card instead.
+ *   - REQUEST (balance slice A). Anyone else in post brings a personal ask
+ *     (content/characterRequests.ts). Granting it wins their loyalty;
+ *     refusing costs some — which is what later tips them toward an offer or
+ *     a betrayal. Owner request: a private file EVERY day, and requests are
+ *     what make that possible, since offers and betrayals need extremes.
  *
  * Why loyalty and not just `plotting`: measured over 120 simulated runs per
  * play style, `plotting` only ever climbs for one or two characters, while
  * loyalty swings for all of them. Plotting and grievances still count.
  *
- * Limits: at most one character event per day, never two days running,
- * nothing before day 3, each card once per run (the cards are `once`), and
- * only for characters still alive and in post. A betrayal never ends the run
+ * Limits: one character event per day (every day from day 2, while anyone
+ * has something left to bring), each card once per run (the cards are
+ * `once`), only for characters still alive and in post. A betrayal never ends the run
  * by itself (owner decision); its cards raise the existing pressures instead.
  *
  * State lives in `flags` only, so no GameState shape change.
@@ -32,7 +38,7 @@ import type { CharacterEventDef } from './content/characterEvents';
 export const TURN_BELOW = 30;
 export const WARN_BELOW = 40;
 export const DEVOTED_AT = 72;
-const FIRST_DAY = 3;
+const FIRST_DAY = 2;
 
 export const betrayalId = (id: string) => `char-betray-${id}`;
 export const offerId = (id: string) => `char-offer-${id}`;
@@ -72,10 +78,9 @@ export function tickCharacterEvents(s: GameState, rng: Rng): string[] {
     if (isWavering(c) && !s.flags[`charWarned:${ev.character}`]) s.flags[`charWarned:${ev.character}`] = s.day;
   }
 
-  // 2. at most one event, not two days running, not before day 3
+  // 2. one event a day, from day 2
   if (s.day < FIRST_DAY) return [];
-  const last = s.flags.charEventLast;
-  if (last !== undefined && s.day - last < 2) return [];
+  if (s.flags.charEventLast === s.day) return [];
 
   const betrayals = CHARACTER_EVENTS.filter((ev) => {
     const c = s.characters[ev.character];
@@ -95,6 +100,19 @@ export function tickCharacterEvents(s: GameState, rng: Rng): string[] {
   if (offers.length) {
     const pick = rng.pick(offers);
     return [queue(s, pick, offerId(pick.character), 'has an offer')];
+  }
+
+  // Everyone else in post can bring a personal request. Characters who have
+  // not brought you anything yet this run are favoured, so the cast rotates.
+  const requests = CHARACTER_EVENTS.filter((ev) => {
+    const c = s.characters[ev.character];
+    return active(c) && !isTurning(c) && !isDevoted(c) && !used(s, requestId(ev.character));
+  });
+  if (requests.length) {
+    const fresh = (ev: CharacterEventDef) =>
+      [betrayalId(ev.character), offerId(ev.character)].some((id) => used(s, id)) ? 1 : 3;
+    const pick = rng.weighted(requests, fresh) ?? requests[0];
+    return [queue(s, pick, requestId(pick.character), 'has a request')];
   }
   return [];
 }

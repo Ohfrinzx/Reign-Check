@@ -3,7 +3,7 @@ import type { GameState, StatKey } from './game/types';
 import { ACT_LENGTH, createGame, dayInAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
-  activeCard, STAGE_META, openShop, buyShopItem, useFavour, leaveShop, fireAdvisor, cutDeal,
+  activeCard, STAGE_META, openShop, buyShopItem, leaveShop, fireAdvisor, cutDeal,
   completeConfidenceVote,
 } from './game/engine';
 import { buildBriefing } from './game/briefing';
@@ -25,6 +25,9 @@ import { ManageScreen } from './ui/screens/Manage';
 import { ProgressScreen } from './ui/screens/Progress';
 import { ConfidenceVoteScreen } from './ui/screens/Vote';
 import { DemandPopup } from './ui/components/Demands';
+import { FavourDialog } from './ui/components/FavourDialog';
+import { spendFavour } from './game/favours';
+import type { FavourResult } from './game/favours';
 import type { DemandActions } from './ui/components/Demands';
 import {
   bribeDemand, canActOnDemands, dismissDemandNotice, factionLabel, meetDemand,
@@ -42,6 +45,9 @@ export default function App() {
   const [showIntro, setShowIntro] = useState(false);
   const [showManage, setShowManage] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
+  // Balance slice A: the favour being used (dialog open) and its receipt.
+  const [favourOpen, setFavourOpen] = useState<string | null>(null);
+  const [favourReceipt, setFavourReceipt] = useState<FavourResult | null>(null);
   const [savedDay, setSavedDay] = useState<number | undefined>(undefined);
   const [toast, setToast] = useState<string | null>(null);
   const [, setFlash] = useState<Partial<Record<StatKey, number>>>({});
@@ -166,15 +172,25 @@ export default function App() {
     });
   }, []);
 
+  // The rail's "Use it…" opens the favour dialog; the dialog spends it.
   const doUseFavour = useCallback((itemId: string) => {
+    setFavourReceipt(null);
+    setFavourOpen(itemId);
+  }, []);
+
+  const doSpendFavour = useCallback((itemId: string, targetKey?: string) => {
     setGame((g) => {
       if (!g) return g;
-      const next = useFavour(g, itemId);
-      setFlash(next.lastOutcome?.deltas ?? {});
-      say('Favour spent.');
-      return next;
+      const { state, result } = spendFavour(g, itemId, targetKey);
+      if (result) { setFavourReceipt(result); setFlash(result.deltas); }
+      return state;
     });
-  }, [say]);
+  }, []);
+
+  const closeFavour = useCallback(() => {
+    setFavourOpen(null);
+    setFavourReceipt(null);
+  }, []);
 
   const doFireAdvisor = useCallback((itemId: string) => {
     setGame((g) => {
@@ -230,11 +246,11 @@ export default function App() {
   // and nothing else is covering the screen.
   const notice = game?.demandNotices[0];
   const popupOpen = !!(game && notice && screen === 'game' && canActOnDemands(game) &&
-    !showIntro && !showManage);
+    !showIntro && !showManage && !favourOpen);
 
   /* ---- keyboard: 1-4 to choose, Enter/Space to continue */
   useEffect(() => {
-    if (screen !== 'game' || !game || showIntro || showManage || popupOpen) return;
+    if (screen !== 'game' || !game || showIntro || showManage || popupOpen || favourOpen) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -265,7 +281,7 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen]);
+  }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen, favourOpen]);
 
   /* ---------------------------------------------------------------- render */
 
@@ -313,6 +329,34 @@ export default function App() {
     return (
       <div className="app vote-full">
         <ConfidenceVoteScreen s={game} onContinue={doCompleteVote} />
+      </div>
+    );
+  }
+
+  // Balance slice A (owner request): a crisis stage is its own scene — a
+  // full-screen, dark "underground situation room" with red accents, like
+  // the Back Room is its own scene. No masthead strap, no rail; only the
+  // three resources stay visible. The card and its outcome both play here,
+  // then "Leave the situation room" returns to the ordinary day.
+  const current = game.current ? activeCard(game) : undefined;
+  if (current?.tags?.includes('crisis-chain') && (game.phase === 'stage' || game.phase === 'resolve')) {
+    return (
+      <div className="app situation-room">
+        <header className="sr-top">
+          <div className="sr-title">
+            <span className="sr-dot" aria-hidden="true" />
+            <span className="sr-name">Situation room</span>
+            <span className="sr-sub">Level B2 &middot; Day {game.day} &middot; {game.leaderName}</span>
+          </div>
+          <Ledger s={game} />
+        </header>
+        <main className="sr-stage">
+          {game.phase === 'stage' && <CardView s={game} card={current} onChoose={doChoose} />}
+          {game.phase === 'resolve' && (
+            <OutcomeView s={game} onContinue={doContinue} continueLabel="Leave the situation room →" />
+          )}
+        </main>
+        {toast && <div className="toast">{toast}</div>}
       </div>
     );
   }
@@ -427,6 +471,10 @@ export default function App() {
             <IntroScreen s={game} onBegin={() => setShowIntro(false)} returning={game.day > 1 || game.phase !== 'briefing'} />
           </div>
         </div>
+      )}
+
+      {favourOpen && (
+        <FavourDialog s={game} itemId={favourOpen} receipt={favourReceipt} onSpend={doSpendFavour} onClose={closeFavour} />
       )}
 
       {popupOpen && notice && (

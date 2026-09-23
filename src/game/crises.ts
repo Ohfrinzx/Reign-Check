@@ -62,6 +62,9 @@ export function tickCrises(s: GameState, _rng: Rng): string[] {
   if (c) {
     const def = CRISIS_MAP[c.id];
     if (!def) { s.crisis = undefined; return []; }
+    // Ended early (a stage option, or a favour spent on it — favours.ts):
+    // close it now, even if a queued stage card was never played.
+    if (s.flags[endFlag(c.id)]) return [finish(s, def)];
     const played = s.seenOnce.includes(c.cardId);
     if (!played) {
       // Not played yet (it is queued for today, or the day was cut short):
@@ -69,7 +72,7 @@ export function tickCrises(s: GameState, _rng: Rng): string[] {
       if (s.day >= c.nextDay) queue(s, c.cardId);
       return [];
     }
-    if (c.stage >= 3 || s.flags[endFlag(c.id)]) return [finish(s, def)];
+    if (c.stage >= 3) return [finish(s, def)];
     if (s.day < c.nextDay) return [];
     c.stage += 1;
     c.cardId = stageCard(def, c.stage, s);

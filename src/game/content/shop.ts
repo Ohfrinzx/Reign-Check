@@ -82,6 +82,19 @@ export interface ShopItemDef {
     label: string;
     text: string;
     effects?: Effects;
+    /**
+     * Balance slice A — what the favour can be AIMED at (favours.ts). The
+     * player picks one when using it, and that thing visibly goes away:
+     *   'scandal'           any named scandal in play (s.scandals)
+     *   'demand'            any faction's live demand
+     *   'demand:<faction>'  that faction's live demand
+     *   'crisis:<id>'       that crisis chain, if it is running
+     */
+    targets?: string[];
+    /** true = unusable until one of `targets` exists (disabled, with a reason) */
+    needsTarget?: boolean;
+    /** plain words: when this favour is worth spending. Shown in the shop and the rail. */
+    whenUseful?: string;
   };
   /**
    * Deals only. Most deals are permanent — this is the exception: the
@@ -1032,6 +1045,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['scandal', 'crisis:tapes', 'crisis:ledger'],
+      needsTarget: true,
+      whenUseful: 'When a named scandal is on the front page, or the Stairwell Tapes or Free Zone Ledger crisis is running.',
       label: 'Have the quiet word',
       text: 'Nobody prints it. Nobody says why. The editor who had it is now covering the port expansion.',
       effects: {
@@ -1064,6 +1080,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['demand:staff'],
+      whenUseful: 'When the Army is making a demand, or its mood is slipping.',
       label: 'Send the envelope',
       text: 'Tern does not mention it. The morning report from the garrison is noticeably warmer.',
       effects: {
@@ -1101,6 +1119,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['demand:chorus', 'crisis:bread'],
+      whenUseful: 'When the Street is making a demand, or the Bread Riots are running.',
       label: 'Fill in the name',
       text: 'The square is empty by morning. Nobody in the building asks whose name went on the paper.',
       effects: {
@@ -1134,6 +1154,7 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     upside: 'Spend it any time for a genuinely good day in the press. Nobody is paid and nobody is threatened.',
     cost: 9.0,
     use: {
+      whenUseful: 'Before a confidence vote, or after a bad day in the press.',
       label: 'Run the story',
       text: 'It leads at seven and it is true, which is why it works. Even the Chorus runs it.',
       effects: {
@@ -1163,6 +1184,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['demand:chorus', 'scandal'],
+      needsTarget: true,
+      whenUseful: 'When the Street is making a demand, or a named scandal is on the front page.',
       label: 'Have the word',
       text: 'Vel does not mention it publicly. She also does not raise the subject again this week.',
       effects: {
@@ -1199,6 +1223,7 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      whenUseful: 'When money is running short. It pays $9.0B at once.',
       label: 'Play the card',
       text: 'The money arrives within the hour, from an account nobody can quite trace back to Ilvet.',
       effects: {
@@ -1232,6 +1257,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['scandal'],
+      whenUseful: 'Before a confidence vote, or to drown out a named scandal.',
       label: 'Run the segment',
       text: 'Sixty percent of the country watches it. By Thursday, most of them believe it.',
       effects: {
@@ -1263,6 +1290,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['demand:combine', 'crisis:bread'],
+      whenUseful: 'When the Workers are making a demand, or the Bread Riots are running.',
       label: 'Call it in',
       text: 'Hess makes the call. The mines and the port stay open. He does not smile about it.',
       effects: {
@@ -1293,6 +1322,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['scandal', 'crisis:ledger'],
+      needsTarget: true,
+      whenUseful: 'When a named scandal is on the front page, or the Free Zone Ledger crisis is running.',
       label: 'Ask her to look',
       text: 'By morning the file is gone, the index is gone, and the clerk who filed it has been transferred to records in Mavro.',
       effects: {
@@ -1319,6 +1351,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['crisis:referendum'],
+      whenUseful: 'Before a confidence vote, or to calm the Kordiva Referendum.',
       label: 'Ask for the blessing',
       text: 'Vask says a few careful sentences at Sunday service. Both sides of every argument in the country quote him by Monday.',
       effects: {
@@ -1352,6 +1386,8 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['crisis:gas'],
+      whenUseful: 'When foreign pressure is rising, or the Ostrene Gas Cutoff is running.',
       label: 'Call the embassy',
       text: 'A single phone call from Ostrene\'s ambassador, and a problem that was going to be a problem for a week is not.',
       effects: {
@@ -1380,6 +1416,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
       },
     },
     use: {
+      targets: ['demand', 'crisis:ledger'],
+      needsTarget: true,
+      whenUseful: 'When any faction is making a demand, or the Free Zone Ledger crisis is running.',
       label: 'Produce the page',
       text: 'You do not have to say anything. You only have to let them see you have it.',
       effects: {

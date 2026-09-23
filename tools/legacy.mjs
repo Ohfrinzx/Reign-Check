@@ -41,12 +41,12 @@ for (let i = 0; i < 400; i++) {
   const alertOpts = page.locator('.alert-scrim .alert-card .opt:not([disabled])');
   if (await alertOpts.count()) { await alertOpts.last().click(); await page.waitForTimeout(90); continue; }
   if (await page.locator('.alert-scrim .outcome').count()) { await page.locator('.alert-scrim .outcome .btn-primary').click(); await page.waitForTimeout(90); continue; }
-  if (await page.locator('.stage-col .outcome').count()) { await page.locator('.stage-col .outcome .btn-primary').click(); await page.waitForTimeout(90); continue; }
+  if (await page.locator(':is(.stage-col, .sr-stage) .outcome').count()) { await page.locator(':is(.stage-col, .sr-stage) .outcome .btn-primary').click(); await page.waitForTimeout(90); continue; }
   const buy = page.locator('.shop .offer .btn-primary:not([disabled])');
   if (await buy.count()) { await buy.last().click(); await page.waitForTimeout(110); continue; }
   const shopLeave = page.locator('.shop-foot .btn-primary');
   if (await shopLeave.count()) { await shopLeave.click(); await page.waitForTimeout(110); continue; }
-  const opts = page.locator('.stage-col .doc .opt:not([disabled])');
+  const opts = page.locator(':is(.stage-col, .sr-stage) .doc .opt:not([disabled])');
   if (await opts.count()) { await opts.last().click(); await page.waitForTimeout(90); continue; }
   if (await page.locator('.strap-action').count()) { await page.locator('.strap-action').click(); await page.waitForTimeout(110); continue; }
   break;

@@ -87,22 +87,22 @@ for (let step = 0; step < 90; step++) {
     continue;
   }
   // outcome
-  if (await page.locator('.stage-col .outcome').count()) {
+  if (await page.locator(':is(.stage-col, .sr-stage) .outcome').count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-outcome.png`), fullPage: true }); }
-    await page.locator('.stage-col .outcome .btn-primary').click();
+    await page.locator(':is(.stage-col, .sr-stage) .outcome .btn-primary').click();
     await page.waitForTimeout(160);
     continue;
   }
   // card
-  const cardOpts = page.locator('.stage-col .doc .opt:not([disabled])');
+  const cardOpts = page.locator(':is(.stage-col, .sr-stage) .doc .opt:not([disabled])');
   if (await cardOpts.count()) {
     if (shots < 12) { shots++; await page.screenshot({ path: shotPath(`${String(shots).padStart(2,'0')}-card.png`), fullPage: true }); }
-    log.push('CARD: ' + (await page.locator('.stage-col .doc h1').innerText()));
+    log.push('CARD: ' + (await page.locator(':is(.stage-col, .sr-stage) .doc h1').innerText()));
     await cardOpts.nth(0).click();
     await page.waitForTimeout(160);
     continue;
   }
-  log.push('STUCK at step ' + step + ' html-ish: ' + (await page.locator('.stage-col').innerText()).slice(0, 200));
+  log.push('STUCK at step ' + step + ' html-ish: ' + (await page.locator('.stage-col, .sr-stage').first().innerText()).slice(0, 200));
   break;
 }
 

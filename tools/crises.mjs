@@ -44,13 +44,19 @@ try {
   await page.locator('.frontpage').waitFor();
   assert.match(await page.locator('.frontpage').innerText(), /Crisis: The Bread Riots \(stage 1 of 3\)/i);
   await page.locator('.strap-action').click();
-  const card = page.locator('.stage-col .doc.crisis-card');
+  // Balance slice A: the crisis is its own full-screen dark scene.
+  const card = page.locator('.app.situation-room .sr-stage .doc.crisis-card');
   await card.waitFor();
+  assert.equal(await page.locator('.masthead').count(), 0, 'The situation room should replace the ordinary screen');
+  assert.equal(await page.locator('.rail').count(), 0, 'No rail in the situation room');
+  await page.waitForTimeout(500); // styles and the rise-in animation settle first
+  const bg = await page.evaluate(() => getComputedStyle(document.querySelector('.app.situation-room')).backgroundColor);
+  assert.match(bg, /rgb\(7, 5, 5\)/, `Situation room should be dark, got ${bg}`);
   assert.match(await card.locator('.cr-name').innerText(), /BREAD RIOTS/i);
   assert.equal(await card.locator('.cr-track li.now').count(), 1);
   assert.match(await card.locator('.cr-track li.now').innerText(), /It starts/i);
   assert.match(await card.locator('.cr-log').innerText(), /This is where it starts/i);
-  assert.equal(await page.locator('.stage-col .doc .dh').count(), 0, 'Crisis card should not use the lead-story header');
+  assert.equal(await page.locator('.sr-stage .doc .dh').count(), 0, 'Crisis card should not use the lead-story header');
   await page.waitForTimeout(500); // let the card's rise-in animation finish before measuring
   const orders = card.locator('.cr-order-row .opt');
   assert.equal(await orders.count(), 3);
@@ -60,7 +66,12 @@ try {
 
   // keyboard: "3" = say the rise is temporary (makes it worse)
   await page.keyboard.press('3');
-  await page.locator('.stage-col .outcome').waitFor();
+  await page.locator('.sr-stage .outcome').waitFor();
+  assert.match(await page.locator('.sr-stage .outcome .btn-primary').innerText(), /Leave the situation room/i);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: shotPath('X-crisis-outcome.png') });
+  await page.locator('.sr-stage .outcome .btn-primary').click();
+  await page.locator('.masthead').waitFor();
   const after = await saved();
   assert.equal(after.flags['crisis:bread'], -1, 'Order 3 did not make the crisis worse');
 
@@ -74,7 +85,7 @@ try {
     return t;
   `);
   await page.locator('.strap-action').click();
-  const hot = page.locator('.stage-col .doc.crisis-card.stage-2');
+  const hot = page.locator('.sr-stage .doc.crisis-card.stage-2');
   await hot.waitFor();
   assert.match(await hot.locator('h1').innerText(), /BAKERY BURNED/i);
   assert.match(await hot.locator('.cr-track li.now').innerText(), /It spreads/i);

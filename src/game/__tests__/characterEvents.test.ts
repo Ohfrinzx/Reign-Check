@@ -21,6 +21,7 @@ const next = (s: GameState) => prepareDay({ ...s, day: s.day + 1, phase: 'night'
 describe('character-driven events (Phase 3 step 2)', () => {
   it('content: every character has a betrayal and an offer, queued-only, once per run, never ending the run', () => {
     expect(CHARACTER_EVENTS.map((e) => e.character).sort()).toEqual(CHARACTERS.map((c) => c.id).sort());
+    expect(CHARACTER_EVENT_CARDS).toHaveLength(CHARACTERS.length * 3); // betrayal, offer, request
     for (const ev of CHARACTER_EVENTS) {
       expect(ev.warning.length).toBeGreaterThan(10);
       expect(ev.betrayal.id).toBe(betrayalId(ev.character));
@@ -64,18 +65,39 @@ describe('character-driven events (Phase 3 step 2)', () => {
     expect(t.todayDeck).not.toContain(betrayalId('grebs'));
   });
 
-  it('a devoted character brings an offer; one event per day and never two days running', () => {
+  it('a devoted character brings an offer ahead of any request; one event per day, every day', () => {
     const s = morning();
     s.characters.hess.loyalty = DEVOTED_AT + 5;
     s.characters.brask.loyalty = DEVOTED_AT + 5;
     const t = prepareDay(s);
-    const offers = t.todayDeck.filter((id) => id.startsWith('char-offer-'));
-    expect(offers).toHaveLength(1);
-    expect(next(t).todayDeck.filter((id) => id.startsWith('char-'))).toHaveLength(0);
+    const ours = (x: GameState) => x.todayDeck.filter((id) => id.startsWith('char-'));
+    expect(ours(t)).toHaveLength(1);
+    expect(ours(t)[0]).toMatch(/^char-offer-/);
+    // balance slice A (owner request): a private file every day, not every other day
+    const u = next(t);
+    expect(ours(u)).toHaveLength(1);
   });
 
-  it('nothing before day 3, and nothing for characters out of post', () => {
-    const early = morning(2);
+  it('balance slice A: on an ordinary day someone in the middle brings a personal request', () => {
+    const s = morning(2);
+    const t = prepareDay(s);
+    const ids = t.todayDeck.filter((id) => id.startsWith('char-'));
+    expect(ids).toHaveLength(1);
+    expect(ids[0]).toMatch(/^char-request-/);
+    const card = lookupCard(ids[0])!;
+    expect(card.tags).toContain('request');
+    // across a week, the requests rotate through different characters
+    let x = t;
+    const seen = new Set(ids);
+    for (let i = 0; i < 6; i++) {
+      x = next(x);
+      x.todayDeck.filter((id) => id.startsWith('char-')).forEach((id) => seen.add(id));
+    }
+    expect(seen.size).toBe(7);
+  });
+
+  it('nothing on day 1, and nothing for characters out of post', () => {
+    const early = morning(1);
     early.characters.hess.loyalty = 90;
     expect(prepareDay(early).todayDeck.some((id) => id.startsWith('char-'))).toBe(false);
 
@@ -83,6 +105,7 @@ describe('character-driven events (Phase 3 step 2)', () => {
     gone.characters.hess.loyalty = 90;
     gone.characters.hess.inPost = false;
     expect(prepareDay(gone).todayDeck).not.toContain(offerId('hess'));
+    expect(prepareDay(gone).todayDeck).not.toContain('char-request-hess');
   });
 
   it('is reproducible from the same state', () => {

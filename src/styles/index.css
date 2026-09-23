@@ -1147,6 +1147,7 @@ abbr.term{
 }
 .char-card.betrayal .cc-stamp{color:var(--red)}
 .char-card.offer .cc-stamp{color:var(--teal)}
+.char-card.request .cc-stamp{color:var(--mustard)}
 
 .char-card .cc-grid{display:grid;grid-template-columns:172px minmax(0,1fr)}
 .char-card .cc-who{
@@ -1268,3 +1269,97 @@ abbr.term{
   .crisis-card .cr-log{border-left:0;border-top:2px solid var(--ink)}
   .crisis-card .cr-track{margin-left:0}
 }
+
+/* =========================================================================
+   THE SITUATION ROOM (balance slice A) — crisis stages as their own scene.
+   Owner request: "its own full dark screen mode with red accents. Really
+   make it feel like we switched scenes into an underground hidden situation
+   room." The second deliberately dark screen after the Back Room — both
+   were asked for; do not darken anything else without asking. Same token-
+   swap approach as .app.dark: re-declare the tokens on .app, not body.
+   ========================================================================= */
+
+.app.situation-room{
+  --paper:#0e0b0a;
+  --paper-2:#171210;
+  --paper-3:#221a17;
+  --ink:#efe4d2;
+  --ink-soft:#bcae9a;
+  --ash:#8a7c6c;
+  --red:#e3321f;
+  --red-deep:#ff5c46;
+  --teal:#5bb3c0;
+  --mustard:#e0ab3f;
+  --good:#5bb3c0;
+  --ok:#95c464;
+  --warn:#e0ab3f;
+  --bad:#ff5c46;
+  --hair:rgba(239,228,210,.14);
+  --hair-soft:rgba(239,228,210,.09);
+  --shadow:rgba(0,0,0,.65);
+  --dot:rgba(239,228,210,.04);
+
+  grid-template-rows:auto minmax(0,1fr);
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 0%, rgba(227,50,31,.16), transparent 70%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.022) 0 1px, transparent 1px 3px),
+    #070505;
+}
+.sr-top{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:#050404;border-bottom:2px solid var(--red);
+  box-shadow:0 2px 24px rgba(227,50,31,.25);
+}
+.sr-title{display:flex;align-items:center;gap:12px;padding:0 22px}
+.sr-dot{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 10px var(--red);animation:pulse 1.4s infinite}
+.sr-name{font-family:var(--head);font-size:22px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.sr-sub{font-family:var(--mono);font-size:10.5px;color:var(--ash);letter-spacing:.06em;text-transform:uppercase}
+.sr-top .res .r{border-left-color:rgba(239,228,210,.12)}
+.sr-stage{overflow-y:auto;padding:22px 24px 30px}
+
+.situation-room .doc.crisis-card{
+  background:var(--paper);border:1px solid #3b2723;border-left:6px solid var(--red);
+  box-shadow:0 0 0 1px rgba(227,50,31,.18), 0 24px 70px rgba(0,0,0,.7);
+}
+.situation-room .crisis-card .cr-band{
+  background:repeating-linear-gradient(135deg, rgba(227,50,31,.16) 0 6px, transparent 6px 12px), #140d0b;
+  border-bottom:1px solid #3b2723;
+}
+.situation-room .crisis-card .cr-name{color:var(--ink)}
+.situation-room .crisis-card .cr-grid,
+.situation-room .crisis-card .cr-orders{border-color:#3b2723}
+.situation-room .crisis-card .cr-log{border-left-color:#3b2723;background:#0a0807}
+.situation-room .crisis-card .cr-log-h{border-bottom-color:var(--red)}
+.situation-room .crisis-card .cr-orders{border-top:1px solid #3b2723;background:#0a0807}
+.situation-room .crisis-card .opt{border:1px solid #4a302a;background:#130f0d;color:var(--ink)}
+.situation-room .crisis-card .opt:last-child{border-bottom:1px solid #4a302a}
+.situation-room .crisis-card .opt .n{background:var(--red);color:#fff}
+.situation-room .crisis-card .opt:hover:not(:disabled){background:var(--red);color:#fff;border-color:var(--red)}
+.situation-room .crisis-card .opt:hover:not(:disabled) .hint{color:#ffe1da}
+.situation-room .crisis-card p{color:var(--ink)}
+.situation-room .outcome{background:var(--paper);border-color:#3b2723;box-shadow:0 24px 70px rgba(0,0,0,.7)}
+.situation-room .outcome-top{background:#140d0b;border-bottom-color:#3b2723}
+.situation-room .outcome .btn-primary{background:var(--red);border-color:var(--red);color:#fff}
+.situation-room .card-glossary{border-top-color:#3b2723}
+.situation-room .outcome.good{border-left-color:var(--teal)}
+.situation-room .outcome.bad{border-left-color:var(--red)}
+.situation-room .outcome.mixed{border-left-color:var(--mustard)}
+.situation-room .outcome.neutral{border-left-color:var(--ash)}
+
+/* favours (balance slice A): "useful now" vs "keep it for", the use dialog
+   and its receipt. Reuses the demand pop-up frame (.demand-scrim/.demand-pop). */
+.kept.fav.ready{border-left-color:var(--teal)}
+.fav-now{font-family:var(--sans);font-weight:700;font-size:10.5px;color:var(--teal);line-height:1.35;margin-top:4px}
+.fav-when{font-family:var(--sans);font-size:10.5px;color:var(--ash);line-height:1.35;margin-top:4px}
+.fav-block{font-family:var(--mono);font-size:9.5px;color:var(--red);margin-top:4px;line-height:1.35}
+.offer .line.when{color:var(--teal)}
+.fav-pop .dm-banner{background:var(--teal)}
+.fav-targets{border:0;padding:0;margin:10px 0 4px;display:flex;flex-direction:column;gap:6px}
+.fav-targets legend{font-family:var(--black);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:6px}
+.fav-targets label{display:flex;gap:10px;align-items:flex-start;border:2px solid var(--hair);padding:8px 10px;cursor:pointer}
+.fav-targets label.on{border-color:var(--teal);background:var(--paper-2)}
+.fav-targets label b{display:block;font-family:var(--sans);font-size:12.5px}
+.fav-targets label small{display:block;font-family:var(--sans);font-size:11px;color:var(--ink-soft);line-height:1.35}
+.fav-line{font-family:var(--sans);font-weight:700;font-size:13px;color:var(--teal);margin:8px 0 2px}
+.fav-deltas{padding:8px 0 0}

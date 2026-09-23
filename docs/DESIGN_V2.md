@@ -1301,7 +1301,33 @@ due.
 **Measured (not tuned):** ~1 chain per run, in 78–95% of runs, first
 around day 7–12; play style decides which chains you meet.
 
-### Phase 3 step 4 — the balance pass (next; needs a go-ahead)
+### Phase 3 step 4 — the balance phase (in progress, 2026-09-23)
+
+The owner started it with five points and one goal (verbatim in
+`PROJECT_STATUS.md`). Split into three slices, each playtested:
+
+**Slice A — feel and clarity (built, awaiting playtest).**
+- A private file every day from day 2: 13 new "request" cards (one per
+  character) join betrayals and offers; priority betrayal → offer →
+  request. Measured: 96–100% of days.
+- Crisis stages open in their own full-screen dark "situation room" scene
+  (owner: "an underground hidden situation room"), always first in the day.
+  The second dark screen after the Back Room, both owner-requested.
+- Favours are aimed at a named scandal, a demand or a running crisis
+  (`use.targets`), say when they are useful, are disabled with a reason
+  when there is nothing to aim at, and end with a receipt naming what went
+  away.
+
+**Slice B — difficulty (next).** Shuffle option order per run (owner:
+"Both") and rebalance so no option type always wins; money that runs
+short; confidence vote retuned to Hard (careful play survives about half
+the time); more demands; coup pressure that actually rises.
+
+**Slice C — consequences (after B).** Decisions leave marks that unlock,
+lock or change later options and outcomes, shown on the option as
+"Because you…".
+
+The original step-4 list, still the checklist for slice B:
 
 The last piece of Phase 3. Everything above was measured, not tuned:
 1. "One option every time wins": always-first play survives ~90–92%.

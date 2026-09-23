@@ -1,4 +1,5 @@
 import type { CardDef } from '../types';
+import { CHARACTER_REQUESTS } from './characterRequests';
 
 /**
  * PHASE 3 STEP 2 — CHARACTER-DRIVEN EVENTS (content only; the rules that
@@ -1763,8 +1764,12 @@ export const CHARACTER_EVENTS: CharacterEventDef[] = [
   },
 ];
 
-/** Every character-event card, for engine.ts's registries. */
-export const CHARACTER_EVENT_CARDS: CardDef[] = CHARACTER_EVENTS.flatMap((e) => [e.betrayal, e.offer]);
+/** Every character-event card — betrayals, offers and (balance slice A)
+ *  the everyday requests in characterRequests.ts — for engine.ts's registries. */
+export const CHARACTER_EVENT_CARDS: CardDef[] = [
+  ...CHARACTER_EVENTS.flatMap((e) => [e.betrayal, e.offer]),
+  ...CHARACTER_REQUESTS,
+];
 
 export const CHARACTER_EVENT_MAP: Record<string, CharacterEventDef> = Object.fromEntries(
   CHARACTER_EVENTS.map((e) => [e.character, e]),

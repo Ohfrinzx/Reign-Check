@@ -10,6 +10,7 @@ import { fill } from '../../game/text';
 import { currentMandate } from '../../game/content/mandates';
 import { usd } from '../../game/economy';
 import { CutControl, FireControl, ManageRow } from './Manage';
+import { favourBlockReason, favourUsefulNow } from '../../game/favours';
 
 /**
  * THE BACK ROOM — the shop, rendered as the day's last document, plus a
@@ -148,6 +149,12 @@ function Offer({
         <span className="tag">What you get</span>
         {fill(def.upside, s)}
       </div>
+      {def.kind === 'favour' && def.use?.whenUseful && (
+        <div className="line when">
+          <span className="tag">Use it</span>
+          {def.use.whenUseful}
+        </div>
+      )}
       {def.downside ? (
         <div className="line down">
           <span className="tag">The catch</span>
@@ -256,20 +263,31 @@ export function Pocket({
         </div>
       ))}
 
-      {favours.map((def) => (
-        <div className="kept fav" key={def.id}>
-          <div className="n">{def.name}</div>
-          <div className="d">{def.use?.label ?? def.upside}</div>
-          <button
-            className="btn"
-            disabled={!canSpend}
-            onClick={() => onUseFavour(def.id)}
-            title={canSpend ? 'Spend this favour now' : 'Finish the current item first'}
-          >
-            Spend it
-          </button>
-        </div>
-      ))}
+      {favours.map((def) => {
+        // Balance slice A: say plainly what it can be used on right now,
+        // or when to keep it for — and never offer a button that does nothing.
+        const now = favourUsefulNow(s, def.id);
+        const block = favourBlockReason(s, def.id);
+        return (
+          <div className={`kept fav ${now.length ? 'ready' : ''}`} key={def.id}>
+            <div className="n">{def.name}</div>
+            <div className="d">{def.upside}</div>
+            {now.length > 0 ? (
+              <div className="fav-now">Useful now: {now.map((t) => t.label).join(' · ')}</div>
+            ) : (
+              def.use?.whenUseful && <div className="fav-when">Keep it for: {def.use.whenUseful}</div>
+            )}
+            <button
+              className="btn"
+              disabled={!canSpend || !!block}
+              onClick={() => onUseFavour(def.id)}
+            >
+              Use it…
+            </button>
+            {block && canSpend && <div className="fav-block">{block}</div>}
+          </div>
+        );
+      })}
     </div>
   );
 }

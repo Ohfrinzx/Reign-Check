@@ -20,6 +20,7 @@ import { tickDemands } from './demands';
 import { tickCharacterEvents } from './characterEvents';
 import { CHARACTER_EVENT_CARDS } from './content/characterEvents';
 import { tickCrises } from './crises';
+import { spendFavour } from './favours';
 import { CRISIS_CARDS } from './content/crises';
 import type { ShopItemDef } from './content/shop';
 import {
@@ -311,16 +312,18 @@ function dayUpkeep(s: GameState, rng: Rng) {
     if (c.plotting > 60 && c.id === 'sarran') s.hidden.leak = clamp(s.hidden.leak + 1.0);
   }
 
+  // --- crisis chains: start one when a pressure boils over, advance or end
+  // the running one (Phase 3 step 3 — rules in crises.ts, cards in
+  // content/crises.ts). Queued stage cards join today's deck in drawDeck().
+  // This runs BEFORE character events so a crisis stage is always the day's
+  // first card: it opens the day as its own scene (balance slice A).
+  notes.push(...tickCrises(s, rng));
+
   // --- characters act on their own: a warning first, then a betrayal card,
   // or an offer from someone devoted to you (Phase 3 step 2 — rules in
   // characterEvents.ts, cards in content/characterEvents.ts). Queued cards
   // join today's deck in drawDeck(), which runs right after this.
   notes.push(...tickCharacterEvents(s, rng));
-
-  // --- crisis chains: start one when a pressure boils over, advance or end
-  // the running one (Phase 3 step 3 — rules in crises.ts, cards in
-  // content/crises.ts). Queued stage cards join today's deck in drawDeck().
-  notes.push(...tickCrises(s, rng));
 
   // Origin rules begin on the second morning, after the first day in office.
   if (s.day > 1) applyEffects(s, currentMandate(s).daily, rng, 'mandate:daily');
@@ -713,34 +716,11 @@ export function buyShopItem(prev: GameState, itemId: string): GameState {
   return s;
 }
 
-/** Spend a favour you are holding. Available on any day, not only in the shop. */
-export function useFavour(prev: GameState, itemId: string): GameState {
-  const s = clone(prev);
-  if (s.phase === 'ended' || s.phase === 'title') return s;
-  const idx = s.heldFavours.indexOf(itemId);
-  if (idx < 0) return s;
-
-  const def = SHOP_MAP[itemId];
-  if (!def?.use) return s;
-
-  s.heldFavours.splice(idx, 1);
-  const deltas = withRng(s, (rng) => applyEffects(s, def.use!.effects, rng, `favour:${def.id}`));
-
-  s.log.push({
-    day: s.day,
-    kind: 'purchase',
-    title: def.name,
-    text: def.use.text,
-    tone: 'good',
-  });
-  if (s.phase !== 'resolve' && s.phase !== 'alertResolve') s.lastOutcome = {
-    text: def.use.text,
-    tone: 'good',
-    cardTitle: def.name,
-    optionLabel: def.use.label,
-    deltas,
-  };
-  return s;
+/** Spend a favour you are holding. Available on any day, not only in the shop.
+ *  Balance slice A: the real logic (targets, receipt) is in favours.ts; this
+ *  wrapper keeps the old signature for callers that do not pick a target. */
+export function useFavour(prev: GameState, itemId: string, targetKey?: string): GameState {
+  return spendFavour(prev, itemId, targetKey).state;
 }
 
 /**

@@ -317,6 +317,22 @@ function resolveLapse(s: GameState, id: FactionId, def: DemandDef, rng: Rng) {
   raisePatienceTo(s, id, 45, rng, `demand:lapse:${def.id}`);
 }
 
+/**
+ * A faction drops its demand without being paid — used by favours
+ * (favours.ts). Same bookkeeping as meeting it: pop-ups cleared, patience
+ * lifted, a cooldown before the next one.
+ */
+export function withdrawDemand(s: GameState, faction: FactionId, rng: Rng, source: string): string | undefined {
+  const f = s.factions[faction];
+  const def = f?.demand && DEMAND_MAP[f.demand.id];
+  if (!f?.demand || !def) return undefined;
+  f.demand = undefined;
+  clearDemandNotices(s, faction);
+  raisePatienceTo(s, faction, 60, rng, source);
+  s.flags[`demandCooldown:${faction}`] = s.day + COOLDOWN_MET;
+  return def.title;
+}
+
 /* ------------------------------------------------------- player actions */
 
 /** Give the faction what it asked for. Pays the current stage's price. */

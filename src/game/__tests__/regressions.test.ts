@@ -69,6 +69,9 @@ describe('review regressions', () => {
     const s = beginStages(prepareDay(createGame({ seed: 8, mandateId: 'accident' })));
     const favour = SHOP_ITEMS.find((d) => d.kind === 'favour')!;
     s.heldFavours = [favour.id];
+    // Balance slice A: a favour that needs a target (A Quiet Word needs a
+    // scandal) cannot be spent with nothing to aim it at.
+    s.scandals = [{ id: 'sc-test', name: 'The test story', detail: 'x', heat: 40, buried: false, day: 1 }];
     const chosen = chooseOption(s, activeCard(s)!.options[0].id);
     const spent = useFavour(chosen, favour.id);
     expect(spent.lastOutcome).toEqual(chosen.lastOutcome);

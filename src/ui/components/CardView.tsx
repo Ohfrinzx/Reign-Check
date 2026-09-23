@@ -118,7 +118,7 @@ function CharacterCardView({
 }) {
   const actor = CHARACTER_MAP[card.actor!];
   const who = s.characters[actor.id];
-  const kind = card.tags?.includes('betrayal') ? 'betrayal' : 'offer';
+  const kind = card.tags?.includes('betrayal') ? 'betrayal' : card.tags?.includes('request') ? 'request' : 'offer';
   const stand = standing(who?.loyalty ?? 50);
   const glossaryTerms = termsIn([
     fill(card.body, s),
@@ -134,7 +134,7 @@ function CharacterCardView({
       >
         <div className="cc-tab">
           <span>Private file &middot; {actor.name}</span>
-          <span className="cc-stamp">{kind === 'betrayal' ? 'Acted alone' : 'An offer'}</span>
+          <span className="cc-stamp">{kind === 'betrayal' ? 'Acted alone' : kind === 'request' ? 'A request' : 'An offer'}</span>
         </div>
         <div className="cc-grid">
           <aside className="cc-who">
@@ -148,7 +148,11 @@ function CharacterCardView({
           </aside>
           <div className="cc-memo">
             <div className="cc-kicker">
-              {kind === 'betrayal' ? `${actor.name.split(' ')[0]} did this without asking you` : `${actor.name.split(' ')[0]} came to you with this`}
+              {kind === 'betrayal'
+                ? `${actor.name.split(' ')[0]} did this without asking you`
+                : kind === 'request'
+                  ? `${actor.name.split(' ')[0]} asked to see you privately`
+                  : `${actor.name.split(' ')[0]} came to you with this`}
             </div>
             <h1>{card.title}</h1>
             <Prose text={fill(card.body, s)} />
@@ -285,8 +289,8 @@ const CAT_LABEL: Partial<Record<CardCategory, string>> = {
 };
 
 export function OutcomeView({
-  s, onContinue, alert,
-}: { s: GameState; onContinue: () => void; alert?: boolean }) {
+  s, onContinue, alert, continueLabel = 'Continue →',
+}: { s: GameState; onContinue: () => void; alert?: boolean; continueLabel?: string }) {
   const o = s.lastOutcome;
   if (!o) return null;
   const tone = o.tone ?? 'neutral';
@@ -313,7 +317,7 @@ export function OutcomeView({
           </div>
         )}
         <div className="outcome-foot">
-          <button className="btn btn-primary" onClick={onContinue}>Continue →</button>
+          <button className="btn btn-primary" onClick={onContinue}>{continueLabel}</button>
           <span className="note">or press Enter</span>
         </div>
       </div>

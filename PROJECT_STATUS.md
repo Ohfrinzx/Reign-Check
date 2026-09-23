@@ -1,6 +1,75 @@
 # PROJECT STATUS — Reign Check (dev codename: Dictator Sandbox)
 
 
+## ▶ WHERE WE STOPPED — 2026-09-23 (BALANCE PHASE, SLICE A — BUILT, AWAITING PLAYTEST)
+
+**Crisis chains were played; the owner started the balance phase.** Owner,
+verbatim: *"Lets move to the balance phase. 1st thing to address, Private
+files should be apart of the daily events. most runs I don't get one until
+act 2 or later. 2. Crisis screen should be isolated. Similarly to the
+Breaking News alerts. 3. Favors are a good feature. However, though they may
+be doing things in the back end. It never truly feels like it's been used.
+If it's a favor to make something go away for example. It isn't clear if it
+worked. when to use it. Or if you even used it for the thing you wanted to
+use it on. It feels like a very empty button right now. 4. … as of now there
+is no real strategy, I can spam 1 the entire game and still win. This needs
+to be fixed. 5th. … It doesn't seem as if the vote of confidence is much of
+a threat. The difficulty needs to be higher so there is more incentive to
+read and think through decisions. During the balancing stage as well I want
+to make sure that certain decisions can trigger and influence certain
+choice options and outcomes."*
+
+Answers to follow-up questions: private files **every day**; crisis stages
+**full screen, "its own full dark screen mode with red accents… an
+underground hidden situation room"**; option order **shuffled per run AND
+rebalanced** ("Both"); difficulty **Hard** (careful play survives about
+half the time).
+
+**Plan — three playtested slices:** A (feel and clarity: items 1–3), B
+(difficulty: items 4–5), C (consequences: decisions that unlock, lock or
+change later options and outcomes, visibly).
+
+**Measured before starting:** option 1 is the best choice on 45 of 81
+standard cards (on average it gains support and loyalty, and even money);
+always pressing 1 grows the treasury from $44B to $92B over a run and
+passes every confidence vote by +11 to +44 (median +30).
+
+**Slice A, built:**
+- **A private file every day** from day 2 — 13 new "request" cards (one per
+  character: Varkov's medal for a fallen sergeant, Doran's week with her
+  sick mother, Brask publishing the real budget…). Grant for loyalty,
+  refuse and lose some; that later decides offers and betrayals. Measured:
+  a private file on 96–100% of days, the first on day 2.
+- **The situation room** — every crisis stage now opens as its own
+  full-screen dark scene with red accents (pulsing red light, "Situation
+  room · Level B2", the three resources, the crisis card), then its
+  outcome with "Leave the situation room →". It is always the day's first
+  card.
+- **Favours that visibly work** — each favour can be aimed at something
+  you can see: a named scandal, a faction's demand, or a running crisis.
+  The sidebar says "Useful now: <name>" or "Keep it for: <when>"; one with
+  nothing to aim at is disabled with the reason. "Use it…" opens a dialog
+  to pick the target, then a receipt names what went away ("'The
+  stairwell' is gone…", "The Army dropped their demand…", "The Ostrene Gas
+  Cutoff is over…") and what changed. Shop offers for favours now say when
+  to use them.
+- **Save:** no shape change — `SAVE_VERSION` stays 12; runs carry over.
+
+**Verification:** 142/142 tests (7 new in `favours.test.ts`, 2 new/updated
+in `characterEvents.test.ts`), build clean, full browser suite at 1366×700
+with zero page errors, including new `tools/favours.mjs` and the updated
+`tools/crises.mjs` (dark scene checked).
+
+**What is next — slice B (difficulty):** shuffle option order per run and
+rebalance so no single option type wins; make money actually run short;
+retune the confidence vote so careful play survives about half the time;
+raise demand frequency and coup pressure. **Then slice C
+(consequences).**
+
+---
+
+## Previous handoff — historical, superseded by the block above
+
 ## ▶ WHERE WE STOPPED — 2026-09-22, latest (PHASE 3 STEP 3: CRISIS CHAINS — BUILT, AWAITING PLAYTEST)
 
 **Step 2 (character-driven events, plus the Elites rename and the removed
@@ -1303,10 +1372,9 @@ still needs to be explicitly asked for, same as every other item below:
 
 ## 6. Recommended next task
 
-**Current (2026-09-22, latest): get the owner's playtest of Phase 3 step 3
-(crisis chains).** Fix whatever it turns up. Then step 4, the balance pass
-(see the "What is next" list in the block at the top) — the last piece of
-Phase 3. The history below is kept for context.
+**Current (2026-09-23): get the owner's playtest of balance slice A.** Then
+slice B (difficulty), then slice C (consequences) — see the block at the
+top. The history below is kept for context.
 
 **All of Phase 2 (§4.1–§4.5, every step) is built, playtested, and
 OWNER-APPROVED, per the "WHERE WE STOPPED" block at the top. Owner,
