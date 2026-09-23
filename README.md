@@ -38,7 +38,7 @@ npm run dev
 
 Then open http://localhost:5173.
 
-- `1`–`4` choose an option, `Enter` / `Space` continues.
+- `1`–`4` choose the option with that number (the order changes every run), `Enter` / `Space` continues.
 - Your run autosaves to browser storage. Refreshing will not destroy it.
 
 ## What it is
@@ -88,7 +88,7 @@ npm run test:browser
 The browser suite starts Vite and tests at 1366×700. For a custom Chromium
 binary, set `PLAYWRIGHT_EXECUTABLE_PATH`. Screenshots go to the OS temporary
 directory under `reign-check-shots`; set `REIGN_SHOTS` to override it.
-Save version 9 replaces earlier in-progress runs.
+Save version 14 replaces earlier in-progress runs (the cross-run record is kept).
 
 ## Notes
 
@@ -96,8 +96,11 @@ Velmorra, its factions, its ministers, its neighbours and its pigeons are
 entirely fictional. Any resemblance to a real republic is a coincidence the
 Sable Office would like to discuss with you.
 
-See **[PROJECT_STATUS.md](PROJECT_STATUS.md)** for architecture, current
-milestone, known limitations and the development handover.
+**For developers and agents:** start with **[AGENTS.md](AGENTS.md)** (rules,
+workflow, code map), then **[PROJECT_STATUS.md](PROJECT_STATUS.md)** (where
+things stand) and **[docs/SYSTEMS.md](docs/SYSTEMS.md)** (how each system
+works). A mobile web version on GitHub Pages is the next job — see
+**[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**.
 
 ## Commands
 
@@ -106,4 +109,4 @@ milestone, known limitations and the development handover.
 | `npm run dev` | Dev server on :5173 |
 | `npm run build` | Typecheck + production build to `dist/` |
 | `npm test` | Simulation tests: 200 full runs, content integrity, determinism |
-| `npm run test:browser` | Real-browser mandate, playthrough, ending and save checks |
+| `npm run test:browser` | Real-browser checks of every screen at 1366×700 |

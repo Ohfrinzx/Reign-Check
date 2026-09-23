@@ -1,25 +1,13 @@
 # Design V2 — simplification and the roguelike turn
 
-**Current update (2026-09-22): The confidence-vote reveal (§4.1a) is built,
-playtested, and owner-approved.** The owner reported: *"Play tested and
-working."* This approval covers the reveal slice. Phase 3 has not begun;
-its balance pass and other systems still require a separate go-ahead.
-The Phase 2 account below records its earlier completion.
-
-**Current status (2026-09-21, later session): Phase 1 and ALL of Phase 2
-(§4.1–§4.5, every step) are OWNER-APPROVED. Owner, verbatim: "Playtest
-good, ready for next slice. Won't be doing it now. Just update the
-current documentation for the next agent. Nothing more." §4.5
-(meta-progression) — both the cross-run record and real unlock conditions
-with their own UI — is now played and approved alongside everything
-else. This confirms Phase 2 is done; it is NOT a go-ahead to start Phase
-3 — that needs its own explicit instruction.** Each slice still required
-its own feedback before the next started while building — approval of
-step 1 was not itself the go-ahead for step 2; the owner gave that
-go-ahead explicitly, in the same session, after asking what
-meta-progression would be and specifying where its UI should live. See
-`PROJECT_STATUS.md`'s current handoff and `docs/REVIEW_2026_09_21.md`.
-Historical implementation notes below describe earlier checkpoints.
+**Status (2026-09-23): Phases 1–3 are complete and owner-approved; balance
+slice D (factions remember your decisions) is built and awaiting playtest;
+the next job is a mobile web version on GitHub Pages
+(`docs/MOBILE_AND_HOSTING.md`).** This file is the design record: the
+decisions, the evidence behind them and the roadmap (§9, §10). Older
+status notes inside it describe earlier checkpoints and are kept as
+history. **For how the systems work today, see `docs/SYSTEMS.md`**; for
+the rules and workflow, `AGENTS.md`.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -313,7 +301,7 @@ parliament/seat/defection system is a separate gameplay proposal, not implied
 by this animation request.
 
 Retain the light Poster/Broadsheet skin and existing typography by default.
-The dark chamber concept is exploratory only: AGENTS.md §9 reserves the
+The dark chamber concept is exploratory only: AGENTS.md §1 reserves the
 dark screen for the Back Room unless the owner approves another exception.
 
 #### Timing decision
@@ -1052,7 +1040,7 @@ Steps 1–3 (done) answer "too much to track" and "more creative and fitting"
 — the owner has now played that build and confirmed it. Steps 4–7 are the
 roguelike turn: the owner has greenlit the whole layer, but each step should
 still ship and get played on its own before the next one starts, the same
-pattern that got steps 1–3 right. See `CLAUDE.md`'s "PHASE 2" section.
+pattern that got steps 1–3 right. See `docs/archive/SLICE_NOTES.md` for the Phase 2 notes.
 
 ## 7. Open questions — updated
 
@@ -1079,7 +1067,7 @@ Still genuinely open, for whoever picks this up next:
    resolved above by the same playtest note. If either resurfaces during
    Phase 2 playtesting, treat it as new information, not a reopened old
    question — the display layer and glossary system are both easy to extend
-   without redesigning them (see `CLAUDE.md` ground rule 8 and the writing
+   without redesigning them (see `AGENTS.md` ground rule 8 and the writing
    rules).
 2. **Within Phase 2, section 4 leaves a few implementation choices
    unspecified** — these are for whoever builds each slice to decide, not
@@ -1151,7 +1139,7 @@ every phase so far.
 ### Phase 3 — Content & systems depth
 
 Everything here is genuinely deferred (needs an explicit go-ahead per
-`CLAUDE.md`), listed in the order it makes most sense to build:
+`AGENTS.md`), listed in the order it makes most sense to build:
 
 1. **Faction demands as a live mechanic** (Milestone 2 in `PROJECT_STATUS.md`
    §4). Issue dated, formal demands when patience drops, escalating murmur →
@@ -1348,6 +1336,13 @@ reason, or change one's outcome. Every reaction is shown as "Because you …
 "On the record", and the rail lists them. No card file edited: reactions
 are keyed by card and option id. About 5.7 reacting cards per run; careful
 survival 62% → 67%. `SAVE_VERSION` 13→14.
+
+**Slice D — factions remember (built, awaiting playtest).** Owner request
+after slice C: factions should react to decisions, and more blocked
+options. Marks now carry faction feelings (shown under each faction, mood
+drift for 4 mornings), 8 faction demands are triggered by decisions, 14
+memories change how demands can be handled (cheaper / dearer / no bribes),
+and 10 more locks were added. See `docs/SYSTEMS.md` §5 and §8.
 
 The original step-4 list (items 1–4 addressed by slice B; 5 unchanged):
 

@@ -1,9 +1,11 @@
 # Mobile and hosting — handover for the next agent
 
-**Written 2026-09-23, at the end of Phase 3.** Read this after `AGENTS.md`
-(or `CLAUDE.md`), `PROJECT_STATUS.md` and `docs/DESIGN_V2.md` §10. It is the
-brief for the next piece of work. The owner is starting a new agent session
-for it.
+**Written 2026-09-23, at the end of Phase 3; checked again after balance
+slice D.** Read this after `AGENTS.md`, `PROJECT_STATUS.md` and
+`docs/SYSTEMS.md`. It is the brief for the next piece of work. The owner
+is starting a new agent session for it. Slice D (factions remember) added
+memory lines under each faction on the Files rail, which the phone layout
+must show too.
 
 ## 1. What the owner wants, in their words
 
@@ -29,8 +31,8 @@ link. Nobody pays for anything.
 3. **Publishing is automatic.** A GitHub Actions workflow (not written yet —
    see §4) builds and deploys on every push to the default branch,
    `claude/confident-meitner-lc0bgc`. That is the branch every agent
-   already merges into after verification (see the Git section of
-   `AGENTS.md`), so **every approved merge goes live on its own**.
+   already merges into after verification (`AGENTS.md` §10), so **every
+   approved merge goes live on its own**.
 4. **On the phone:** open the link in Safari (iPhone) or Chrome (Android).
    Use **"Add to Home Screen"** so it gets an icon and opens like an app.
 5. **Saves are per device and per browser** (`localStorage`: the run save
@@ -176,7 +178,7 @@ touch, 2×). Screenshots go to `<OS temp>/reign-check-shots/ph-*.png`.
    "or press Enter" is shown on a touch device.
 4. **The whole right rail is hidden below 1080px** (`.rail{display:none}`
    in `src/styles/index.css`). On a phone the player cannot see the
-   **faction bars**, Demands panel, On your desk, the Back Room favours
+   **faction bars and what each faction remembers**, Demands panel, On your desk, the Back Room favours
    panel, the Diary, or On the record. The factions decide the confidence
    vote and hostility since balance slice B, so **this is the most
    important gap**, not a cosmetic one.
@@ -238,6 +240,7 @@ testable piece, then stop for the owner's playtest. Suggested pieces:
   rule 11). This is CSS plus small component changes in `src/ui/` and
   `App.tsx`.
 - No new hover-only information (ground rule 11 / DESIGN_V2 §10).
+- Options still go through `orderedOptions()` (ground rule 12).
 - No `SAVE_VERSION` bump should be needed. Layout is not `GameState`.
 
 **Verification to add:**
