@@ -6,7 +6,7 @@ try {
   await server.listen();
   const scripts = process.argv.slice(2);
   for (const name of scripts.length ? scripts : ['mandates', 'vote', 'demands', 'characters', 'crises', 'favours', 'hostile', 'consequences', 'verify', 'to-ending', 'playthrough']) {
-    if (!['mandates', 'vote', 'demands', 'characters', 'crises', 'favours', 'hostile', 'consequences', 'verify', 'to-ending', 'playthrough', 'alert-shot', 'legacy'].includes(name)) throw new Error(`Unknown check: ${name}`);
+    if (!['mandates', 'vote', 'demands', 'characters', 'crises', 'favours', 'hostile', 'consequences', 'verify', 'to-ending', 'playthrough', 'alert-shot', 'legacy', 'desktop-snap'].includes(name)) throw new Error(`Unknown check: ${name}`);
     await import(`./${name}.mjs`);
   }
 } finally {

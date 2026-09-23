@@ -2,11 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>REIGN CHECK — Office of the Executive Chair</title>
     <meta name="description" content="Reign Check: a card-driven political leadership simulation set in the fictional Republic of Velmorra." />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%2316130f'/%3E%3Ctext x='16' y='23' font-size='19' text-anchor='middle' fill='%23f2e9d5'%3E%E2%98%85%3C/text%3E%3C/svg%3E" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
+    <!-- Home Screen / installed-app settings (docs/MOBILE_AND_HOSTING.md).
+         Paths start with "/" like the fonts link above; Vite rewrites them
+         to "./" at build time, because base is './' in vite.config.ts. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#16130f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Reign Check" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   </head>
   <body>
     <div id="root"></div>
