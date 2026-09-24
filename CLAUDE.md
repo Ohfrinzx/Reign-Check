@@ -17,10 +17,10 @@ Then read, in order:
 
 ## The few things Claude Code sessions must not miss
 
-- **Status (2026-09-23):** Phases 1–3 are done and approved. Balance slice
-  D (factions remember your decisions) and the mobile web version + GitHub
-  Pages deploy are merged and awaiting the owner's playtest
-  (`docs/MOBILE_AND_HOSTING.md` §0). **Every merge into the default branch
+- **Status (2026-09-24):** Phases 1–3 are done and approved. The mobile
+  web version + GitHub Pages deploy is playtested on the owner's phone and
+  approved (`docs/MOBILE_AND_HOSTING.md` §0). Balance slice D (factions
+  remember your decisions) is live; its approval hasn't been stated. **Every merge into the default branch
   now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
   only after `npm test`, `npm run build` and the browser checks pass.

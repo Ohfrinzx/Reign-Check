@@ -47,12 +47,12 @@ anything else without asking.**
   make demands because of your decisions, and handle demands differently
   (cheaper, dearer, no bribes); more blocked options on cards. Details in
   `docs/SYSTEMS.md` §5 and §8.
-- **Mobile web version + free GitHub Pages hosting — built, verified,
-  awaiting the owner's playtest on a real phone.** Every merge into the
+- **Mobile web version + free GitHub Pages hosting — playtested on the
+  owner's phone and approved (2026-09-24):** *"Playtested on my phone, everything works now"*. Every merge into the
   default branch now tests, builds and publishes the game to
   https://ohfrinzx.github.io/Reign-Check/ (`.github/workflows/deploy.yml`).
   At 1080px and narrower the game uses a phone layout (☰ menu, faction
-  strip + Files drawer, bottom action bar); desktop is pixel-identical to
+  strip + Files drawer, compact floating action button); desktop is pixel-identical to
   before. Details: `docs/MOBILE_AND_HOSTING.md` §0.
 - **Later, with the owner's go-ahead:** mini-games (build them mobile-first,
   each with its own look), sound, a coup crisis chain.

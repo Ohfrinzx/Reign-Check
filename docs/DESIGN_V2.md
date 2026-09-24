@@ -1363,7 +1363,8 @@ hosted on GitHub Pages, not Capacitor/native. **Built the same day**
 (awaiting the owner's phone playtest): a compact layout at 1080px and
 narrower — ☰ menu, always-visible ledger, a faction strip that opens the
 rail as a drawer, a fixed bottom action bar — plus the deploy workflow and
-Home Screen manifest; desktop is pixel-identical. As built:
+Home Screen manifest; desktop is pixel-identical. **Playtested on the
+owner's phone and approved 2026-09-24.** As built:
 `docs/MOBILE_AND_HOSTING.md` §0. The brief, status and scope
 are in `docs/MOBILE_AND_HOSTING.md`. The original note below is kept for
 history:

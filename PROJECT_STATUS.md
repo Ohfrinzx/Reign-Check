@@ -6,20 +6,23 @@ one line per step. Full old handovers are in
 `docs/archive/SLICE_NOTES.md`. How the systems work today is in
 `docs/SYSTEMS.md`; the rules and workflow are in `AGENTS.md`.
 
-## Now (2026-09-23)
+## Now (2026-09-24)
 
-**Built, verified and merged, awaiting the owner's playtest on a real
-phone: the mobile web version, hosted free on GitHub Pages.** Owner's
+**PLAYTESTED ON THE OWNER'S PHONE AND APPROVED: the mobile web version,
+hosted free on GitHub Pages.** Owner, verbatim: *"Playtested on my phone, everything works now"*
+(after three fixes from their first phone playtest: an accepted bribe now
+closes the demand pop-up; the bottom button is a compact floating one; one
+Continue on phones — see the log). Owner's
 choices: build it all, then one merge; Home Screen polish; factions as a
 strip + Files drawer; tablets get the phone layout; tests before every
 deploy.
 - **Live link:** https://ohfrinzx.github.io/Reign-Check/ — every merge
   into the default branch now runs the tests, builds and publishes
-  (`.github/workflows/deploy.yml`). The first deploy happens on this merge.
+  (`.github/workflows/deploy.yml`).
 - **Phone layout** (1080px and narrower): ☰ menu, the three resources
   always visible, a faction strip that opens the Files drawer (everything
-  from the desktop rail, faction memories included), a red action bar at
-  the bottom, one-column front page, stacked Back Room, touch-sized
+  from the desktop rail, faction memories included), a compact red action
+  button floating at the bottom, one-column front page, stacked Back Room, touch-sized
   buttons, no keyboard hints on touch screens, a tighter landscape mode.
 - **Home Screen:** icon, name, full-screen launch (`manifest.webmanifest`).
 - **Found and fixed:** the fonts would all have failed on GitHub Pages
@@ -27,8 +30,12 @@ deploy.
   opened and closed its explanation at once.
 - **Desktop is pixel-identical** to before (40 screenshots compared). No
   game logic changed; no save reset (`SAVE_VERSION` stays 14).
-- Slice D (factions remember) is included in this publish; it is still
-  awaiting its own playtest.
+- Slice D (factions remember) is live too; the owner has not yet said
+  whether it is approved as a balance slice.
+
+**Next, each needing the owner's go-ahead:** mini-games (mobile-first, each
+with its own look), sound, a coup crisis chain, the remaining ending
+types.
 
 **Built and merged, awaiting the owner's playtest: balance slice D —
 factions remember your decisions.** The owner asked for it, verbatim: *"I
@@ -57,6 +64,8 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-09-24** — Mobile web version approved on the owner's phone:
+  *"Playtested on my phone, everything works now"*
 - **2026-09-24** — Owner playtest of the phone version: *"everything seems
   to work well for the mobile layout at least through the browser."* Bug
   fixed: an accepted bribe from the demand pop-up left the pop-up open

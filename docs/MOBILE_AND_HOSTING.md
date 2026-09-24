@@ -1,5 +1,8 @@
 # Mobile and hosting — handover for the next agent
 
+> **2026-09-24: PLAYTESTED ON THE OWNER'S PHONE AND APPROVED** — *"Playtested on my phone, everything works now"*
+> (after three fixes from the first phone playtest, in §0).
+>
 > **2026-09-23 (later): BUILT.** The deploy workflow, the Home Screen
 > polish and the phone layout are built and verified; see **§0 As built**
 > right below. The rest of this file is the original brief, kept because
