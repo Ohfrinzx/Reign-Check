@@ -63,6 +63,9 @@ before every deploy**.
   desktop browser shrunk to phone size reports a safe area of 0, so only
   a real iPhone showed it; `tools/phone.mjs` now emulates it (CDP
   `Emulation.setSafeAreaInsetsOverride`, 80px) as the `iphone-safari` size.
+  While it shows, result cards (ordinary and breaking-alert) hide their own
+  Continue, so there is one way on (owner request); `phone.mjs` fails any
+  screen with two visible Continue buttons.
   Scroll areas reserve room for it only while it shows (`.app.has-bar`).
   Screens without it keep their way on in reach: the ending's buttons,
   the vote's button, the situation room's "Leave…", and the Close of Brief

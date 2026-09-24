@@ -46,6 +46,8 @@ async function measure(page, primarySel, safeBottom = 0) {
     const out = {
       overflowX: document.documentElement.scrollWidth - W, offenders: [], primary: null,
       barHeight: bar && getComputedStyle(bar).position === 'fixed' ? Math.round(bar.getBoundingClientRect().height) : 0,
+      continues: [...document.querySelectorAll('button')]
+        .filter((b) => /^Continue/.test(b.textContent.trim()) && b.getBoundingClientRect().height > 0).length,
     };
     for (const el of document.querySelectorAll('body *')) {
       const r = el.getBoundingClientRect();
@@ -97,6 +99,7 @@ try {
       const m = await measure(page, scene.primary, size.safeBottom ?? 0);
       await page.screenshot({ path: shotPath(`ph-${size.tag}-${scene.name}.png`) });
       const where = `${size.tag} ${size.width}×${size.height} / ${scene.name}`;
+      if (m.continues > 1) problems.push(`${where}: ${m.continues} Continue buttons on screen (one is enough)`);
       if (m.barHeight > 56) problems.push(`${where}: the bottom action bar is ${m.barHeight}px tall (keep it compact)`);
       if (m.overflowX > 0) problems.push(`${where}: page ${m.overflowX}px wider than the screen`);
       if (m.offenders.length) problems.push(`${where}: sticks out: ${m.offenders.join(', ')}`);
@@ -179,6 +182,10 @@ try {
   await page.locator('.stage-col .opt:not([disabled])').first().tap();
   await page.locator('.outcome').waitFor();
   assert.equal(await page.locator('.outcome .kbd-hint').isVisible(), false, '"or press Enter" should be hidden on touch');
+  // one Continue on screen, not the floating button plus the card's own
+  const continues = await page.getByRole('button', { name: /^Continue/ }).evaluateAll((els) =>
+    els.filter((e) => e.getBoundingClientRect().height > 0).length);
+  assert.equal(continues, 1, `Expected one visible Continue button on a phone, saw ${continues}`);
   assert.equal(await page.evaluate(() => matchMedia('(hover: none)').matches), true, 'Touch emulation should report no hover');
 
   /* ------------------------------------------- 3. two days, taps only */
