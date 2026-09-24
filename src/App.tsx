@@ -18,6 +18,7 @@ import { SHOP_ITEMS } from './game/content/shop';
 import { Ledger } from './ui/components/Ledger';
 import { Rail } from './ui/components/Rail';
 import { FactionStrip } from './ui/components/FactionStrip';
+import { StrapNote } from './ui/components/StrapNote';
 import { CardView, OutcomeView } from './ui/components/CardView';
 import { TitleScreen, BriefingScreen, NightScreen, EndingScreen } from './ui/screens/Screens';
 import { ShopScreen } from './ui/screens/Shop';
@@ -455,7 +456,7 @@ export default function App() {
         {(game.phase === 'stage' || game.phase === 'resolve') && (
           <span><b>{remaining}</b> item{remaining === 1 ? '' : 's'} left today</span>
         )}
-        <span className="sp">{brief.threatNote}</span>
+        <StrapNote text={brief.threatNote} />
         {/* The primary "next" action lives here too, so it never requires
             scrolling to reach — see .action-bar's note in index.css. */}
         {game.phase === 'briefing' && (

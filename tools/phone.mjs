@@ -54,6 +54,7 @@ async function measure(page, primarySel, safeBottom = 0) {
       if (r.width === 0 || r.height === 0) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.opacity === '0' || el.closest('.sr-only')) continue;
+      if (el.closest('.sp.ticker')) continue; // the news ticker scrolls inside its clipped box on purpose
       if (r.right > W + 1 || r.left < -1) {
         out.offenders.push(`${el.tagName.toLowerCase()}.${[...el.classList].join('.')} [${Math.round(r.left)}→${Math.round(r.right)}]`);
       }
@@ -127,6 +128,27 @@ try {
   page.on('pageerror', (e) => errors.push(e.message));
   const briefing = SCENES.find((s) => s.name === 'briefing');
   await briefing.go(page);
+
+  // the strap note scrolls like a news ticker when it is cut off, and the
+  // status dot blinks (owner request); readers get the text once
+  const ticker = page.locator('.strap .sp.ticker');
+  assert.equal(await ticker.count(), 1, 'The cut-off strap note should scroll as a ticker on a phone');
+  assert.equal(await ticker.locator('.sp-track').evaluate((e) => getComputedStyle(e).animationName), 'ticker');
+  assert.equal(await ticker.locator('.sp-text[aria-hidden="true"]').count(), 1, 'The loop copy should be hidden from screen readers');
+  assert.equal(await page.locator('.strap .threat-dot').evaluate((e) => getComputedStyle(e).animationName), 'pulse', 'The status dot should blink');
+  await page.setViewportSize({ width: 1000, height: 844 }); // still the phone layout, but the note fits
+  await page.waitForTimeout(200);
+  assert.equal(await page.locator('.strap .sp.ticker').count(), 0, 'A note that fits should not scroll');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(200);
+  assert.equal(await page.locator('.strap .sp.ticker').count(), 1, 'Ticker should come back when the note is cut off again');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(200);
+  assert.equal(await page.locator('.strap .sp.ticker').count(), 0, 'No ticker with reduce motion');
+  assert.equal(await page.locator('.strap .threat-dot').evaluate((e) => getComputedStyle(e).animationName), 'none', 'No blinking with reduce motion');
+  const lines = await page.locator('.strap .sp').evaluate((e) => Math.round(e.getBoundingClientRect().height / parseFloat(getComputedStyle(e).lineHeight)));
+  assert.ok(lines >= 2, 'With reduce motion the note should wrap instead of being cut off');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   // masthead: desktop buttons folded away, ☰ visible, ledger fully on screen
   for (const name of ['Brief me', 'Advisors & Deals', 'Menu']) {
@@ -224,4 +246,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(problems, [], `Phone layout problems:\n${problems.join('\n')}`);
-console.log(`PHONE: ${SCENES.length} screens × ${SIZES.length} sizes fit with the primary action on screen; menu, ledger, faction strip, Files drawer, touch hints and a two-day tap-through all OK`);
+console.log(`PHONE: ${SCENES.length} screens × ${SIZES.length} sizes fit with the primary action on screen; strap ticker + live dot, menu, ledger, faction strip, Files drawer, touch hints and a two-day tap-through all OK`);

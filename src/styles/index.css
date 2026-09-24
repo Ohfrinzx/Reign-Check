@@ -1426,6 +1426,7 @@ abbr.term{
 }
 
 @keyframes drawerIn{from{transform:translateX(100%)}to{transform:none}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 @keyframes menuIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 
 @media (max-width:1080px){
@@ -1474,6 +1475,20 @@ abbr.term{
     flex-basis:100%;margin-left:0;order:5;font-size:10.5px;line-height:1.35;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
+  /* News ticker (StrapNote.tsx): when the note is cut off it scrolls, two
+     copies sliding by one copy's width so the loop is seamless; a short
+     pause first so the start can be read, and soft edges (owner request). */
+  .strap .sp.ticker{
+    text-overflow:clip;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(90deg,transparent 0,#000 10px,#000 calc(100% - 28px),transparent);
+  }
+  .strap .sp.ticker .sp-track{display:inline-flex;animation:ticker var(--sp-dur,20s) linear 1.5s infinite;will-change:transform}
+  .strap .sp.ticker .sp-text{flex:none;padding-right:48px}
+  /* the status dot blinks like a "live" light; tense/critical keep their
+     own faster pulse (more specific rules above) */
+  .strap .threat .threat-dot{animation:pulse 1.6s ease-in-out infinite}
+  .strap .threat:not(.watchful):not(.tense):not(.critical) .threat-dot{background:var(--paper)}
   /* A compact floating button, NOT a full-width strip to the screen edge:
      iPhone Safari's toolbar floats over the page and counts as the "safe
      area", so padding a bottom strip by env(safe-area-inset-bottom) made it
@@ -1664,4 +1679,11 @@ abbr.term{
   .strap-action{min-height:44px;padding-top:9px;padding-bottom:9px;bottom:calc(8px + env(safe-area-inset-bottom))}
   .app.has-bar .stage-col,.app.has-bar .alert-scrim{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
   .m-menu{top:48px}
+}
+
+/* Reduce motion on a phone: no ticker (StrapNote does not start it) and no
+   blinking dot — the strap note wraps onto two lines instead. */
+@media (max-width:1080px) and (prefers-reduced-motion:reduce){
+  .strap .sp{white-space:normal;text-overflow:clip;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .strap .threat .threat-dot{animation:none}
 }

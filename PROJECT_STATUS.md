@@ -64,6 +64,9 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-09-24** — Owner request: on a phone the strap's cut-off note now
+  scrolls like a news ticker, and the status dot blinks like a "live"
+  light (both off with reduce motion; desktop unchanged).
 - **2026-09-24** — Mobile web version approved on the owner's phone:
   *"Playtested on my phone, everything works now"*
 - **2026-09-24** — Owner playtest of the phone version: *"everything seems

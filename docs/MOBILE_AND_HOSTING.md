@@ -77,6 +77,14 @@ before every deploy**.
   Advisors & Deals rows stack; cards, results and dialogs full width with
   slimmer margins; touch targets ≥ 44px; "or press Enter" hidden on touch
   screens; Brief me says "in your Files" instead of "on the right".
+- **Strap news ticker + live dot** (owner request, 2026-09-24): when the
+  strap's note ("Nothing urgent on the board…") is cut off on a phone, it
+  scrolls right-to-left like a news ticker (`StrapNote.tsx`: two copies,
+  seamless loop at ~45px/s, 1.5s pause first, faded edges); if it fits it
+  stays still. The status dot on the QUIET/WATCHFUL chip blinks slowly
+  (cream when quiet); TENSE/CRITICAL keep their faster pulse. With "reduce
+  motion" on, neither animates and the note wraps to two lines. Desktop
+  keeps the plain line.
 - **Landscape phones** (short screens) get a one-row masthead with the
   ledger inline, no strap note or mood words, and a slimmer bar.
 - **No game logic changed** (`src/game/` untouched), **no `SAVE_VERSION`
