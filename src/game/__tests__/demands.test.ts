@@ -112,6 +112,8 @@ describe('faction demands (Phase 3 step 1)', () => {
     let taken = 0, refused = 0;
     for (let seed = 1; seed <= 40; seed++) {
       const s = withDemand('concord', 'formal', seed);
+      // the demand's pop-up is open when the bribe is offered
+      s.demandNotices = [{ faction: 'concord', kind: 'issued', day: s.day }];
       const due = s.factions.concord.demand!.dueDay;
       const t = bribeDemand(s, 'concord');
       const d = t.factions.concord.demand!;
@@ -119,9 +121,13 @@ describe('faction demands (Phase 3 step 1)', () => {
         taken++;
         expect(d.dueDay).toBe(due + STAGE_DAYS);
         expect(t.stats.treasury).toBeLessThan(s.stats.treasury);
+        // accepted: dealt with for now, so its pop-up closes (owner bug report)
+        expect(t.demandNotices).toEqual([]);
       } else {
         refused++;
         expect(d.bribeRefused).toBe(true);
+        // refused: the pop-up stays, so the player can still meet the demand
+        expect(t.demandNotices).toHaveLength(1);
         expect(t.stats.treasury).toBe(s.stats.treasury);
         expect(bribeBlockReason(t, 'concord')).toMatch(/refused/);
         expect(bribeDemand(t, 'concord')).toEqual(t);

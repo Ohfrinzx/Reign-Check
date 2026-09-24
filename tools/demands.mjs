@@ -102,6 +102,34 @@ try {
     assert.ok(await page.locator('.demands-panel .dm-act .btn', { hasText: 'Bribe' }).isDisabled());
   }
 
+  /* ---- 4b. a bribe from the POP-UP: taken closes the pop-up (owner bug
+   *  report — it used to stay open until Meet or "Deal with it later");
+   *  refused keeps it open, Bribe disabled, so Meet is still one tap away.
+   *  The saved RNG decides; try RNG states until both outcomes are seen. */
+  const seenPop = { took: false, refused: false };
+  for (let rs = 1; rs <= 20 && !(seenPop.took && seenPop.refused); rs++) {
+    await seed(`s.rngState = ${rs * 7919};
+      s.factions.concord.demand = { id: 'money-tax-holiday', issuedDay: 3, dueDay: 4, severity: 'formal', bribes: 0 };
+      s.demandNotices = [{ faction: 'concord', kind: 'issued', day: 3 }];`);
+    const popB = page.locator('.demand-pop');
+    await popB.waitFor();
+    await popB.locator('.dm-act .btn', { hasText: 'Bribe' }).click();
+    await page.locator('.toast').waitFor();
+    const said = await page.locator('.toast').innerText();
+    if (/took it/i.test(said)) {
+      seenPop.took = true;
+      assert.equal(await page.locator('.demand-pop').count(), 0, 'Accepted bribe should close the demand pop-up');
+      assert.equal((await saved()).demandNotices.length, 0);
+    } else {
+      seenPop.refused = true;
+      assert.match(said, /refused/i);
+      assert.equal(await page.locator('.demand-pop').count(), 1, 'Refused bribe keeps the pop-up so Meet stays available');
+      assert.ok(await page.locator('.demand-pop .dm-act .btn', { hasText: 'Bribe' }).isDisabled());
+    }
+  }
+  assert.ok(seenPop.took, 'Never saw a bribe accepted from the pop-up');
+  assert.ok(seenPop.refused, 'Never saw a bribe refused from the pop-up');
+
   /* ---- 5. an ultimatum that runs out shows what the faction did */
   await seed(`s.factions.chorus.loyalty = 60; s.factions.chorus.demand = { id: 'street-bread-price', issuedDay: 1, dueDay: 2, severity: 'ultimatum', bribes: 0 };`);
   await page.locator('.demand-pop.bad').waitFor();
@@ -117,6 +145,7 @@ try {
   assert.equal(await page.locator('.rail').isVisible(), false);
   await page.locator('.demand-pop').waitFor();
   assert.match(await page.locator('.demand-pop .dm-banner').innerText(), /A REQUEST FROM THE ELITES/i);
+  assert.match(await page.locator('.demand-pop .dm-foot-note').innerText(), /in your Files/, 'Narrow pop-up should point to the Files drawer');
   const meetBox = await page.locator('.demand-pop .dm-act .btn-primary').boundingBox();
   assert.ok(meetBox && meetBox.y + meetBox.height <= 700, 'Meet needs scrolling at 1000px');
   await page.waitForTimeout(400);
@@ -125,7 +154,7 @@ try {
   assert.equal(await page.locator('.demand-scrim').count(), 0);
 
   assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-  console.log('DEMANDS: pop-up, rail, meet, bribe, lapse, no masthead button, narrow pop-up all OK');
+  console.log('DEMANDS: pop-up, rail, meet, bribe (panel + pop-up: taken closes it, refused keeps it), lapse, no masthead button, narrow pop-up all OK');
   console.log('--- ERRORS (0) ---');
 } finally {
   await browser.close();

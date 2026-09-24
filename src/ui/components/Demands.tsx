@@ -10,6 +10,7 @@ import { FACTION_MOVES } from '../../game/content/demands';
 import { CHARACTER_MAP } from '../../game/content/country';
 import { DISPLAY_FACTIONS } from '../../game/display';
 import { usd } from '../../game/economy';
+import { NARROW, useMedia } from '../useMedia';
 
 /**
  * FACTION DEMANDS (Phase 3 step 1) — the UI half. Rules live in
@@ -157,6 +158,8 @@ export function DemandPopup({ s, notice, actions, onDismiss }: {
 }) {
   const label = factionLabel(notice.faction);
   const live = liveDemands(s).find((l) => l.faction === notice.faction);
+  // on a phone the Demands panel is in the Files drawer, not "on the right"
+  const narrow = useMedia(NARROW);
 
   if (notice.kind === 'attemptFailed' || notice.kind === 'punished' || notice.kind === 'hostile') {
     return (
@@ -195,7 +198,7 @@ export function DemandPopup({ s, notice, actions, onDismiss }: {
         </div>
         <div className="dm-foot">
           <button className="btn" onClick={onDismiss} autoFocus>Deal with it later</button>
-          <span className="dm-foot-note">It stays in the Demands panel on the right.</span>
+          <span className="dm-foot-note">{`It stays in the Demands panel ${narrow ? 'in your Files' : 'on the right'}.`}</span>
         </div>
       </div>
     </div>

@@ -113,7 +113,8 @@ so fix this file.
   multiplier) plus that demand's side effects.
 - **Bribe:** pay about a third of the price for 2 more days. The odds are
   shown in words, and a refused bribe can't be retried until the demand
-  escalates.
+  escalates. An accepted bribe (like Meet) closes that demand's pop-up; a
+  refused one leaves it open so Meet is still one tap away.
 - **When an ultimatum runs out** (`resolveLapse()`): the faction may try
   to remove you, with odds from `moveOdds()`, its power, and
   `FACTION_MOVES[f].defence`. A success ends the run, a failure has

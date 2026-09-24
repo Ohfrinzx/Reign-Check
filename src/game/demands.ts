@@ -454,8 +454,10 @@ export function meetDemand(prev: GameState, faction: FactionId): GameState {
 
 /**
  * Offer money for more time. If they accept, you pay and the due day moves
- * back STAGE_DAYS. If they refuse, they keep none of your money, but they
- * are insulted, and you cannot try again until the demand escalates.
+ * back STAGE_DAYS, and the demand's pop-up closes (it is dealt with for now,
+ * same as meeting it). If they refuse, they keep none of your money, but they
+ * are insulted, and you cannot try again until the demand escalates; the
+ * pop-up stays open so you can still meet the demand instead.
  */
 export function bribeDemand(prev: GameState, faction: FactionId): GameState {
   const s = clone(prev);
@@ -471,6 +473,7 @@ export function bribeDemand(prev: GameState, faction: FactionId): GameState {
       applyEffects(s, { stats: { treasury: -cost }, hidden: { corruption: 2 }, regime: { graft: 1 } }, rng, `demand:bribe:${def.id}`);
       d.dueDay += STAGE_DAYS;
       d.bribes += 1;
+      clearDemandNotices(s, faction);
       s.log.push({
         day: s.day, kind: 'decision', title: `Bought time: ${def.title}`,
         text: `Paid $${cost.toFixed(1)}B. The ${factionLabel(faction)} will wait until day ${d.dueDay}.`, tone: 'mixed',

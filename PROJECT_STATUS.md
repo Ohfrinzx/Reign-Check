@@ -57,6 +57,11 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-09-24** — Owner playtest of the phone version: *"everything seems
+  to work well for the mobile layout at least through the browser."* Bug
+  fixed: an accepted bribe from the demand pop-up left the pop-up open
+  (only Meet cleared it). The pop-up's footnote now says "in your Files" on
+  a phone. Unit + browser tests added for both.
 - **2026-09-23** — Mobile web version + GitHub Pages deploy built,
   verified and merged (see "Now"; `docs/MOBILE_AND_HOSTING.md` §0). New
   checks: `tools/phone.mjs` (default suite), `tools/desktop-snap.mjs`,
