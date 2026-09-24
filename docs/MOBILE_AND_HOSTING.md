@@ -53,8 +53,16 @@ before every deploy**.
   drawer** (`Rail.tsx` `open`): factions with their memories, Demands (meet
   / bribe work in it), On your desk, Back Room favours, Diary, On the
   record, Standing costs. Close ✕, a tap outside, or Escape closes it.
-- **Bottom bar:** the strap's primary action ("Begin the day →",
-  "Continue →", "To the Back Room →") is a red bar fixed to the bottom.
+- **Bottom button:** the strap's primary action ("Begin the day →",
+  "Continue →", "To the Back Room →") is a compact red button (48px tall,
+  at most 460px wide, centred) floating just above the bottom of the
+  screen. **It sits ABOVE the bottom safe area, never padded into it:**
+  iPhone Safari's floating toolbar counts as the safe area, and the first
+  version (a full-width bar padded by `env(safe-area-inset-bottom)`) grew
+  to ~126px on the owner's iPhone and turned Safari's toolbar red. A
+  desktop browser shrunk to phone size reports a safe area of 0, so only
+  a real iPhone showed it; `tools/phone.mjs` now emulates it (CDP
+  `Emulation.setSafeAreaInsetsOverride`, 80px) as the `iphone-safari` size.
   Scroll areas reserve room for it only while it shows (`.app.has-bar`).
   Screens without it keep their way on in reach: the ending's buttons,
   the vote's button, the situation room's "Leave…", and the Close of Brief
@@ -78,7 +86,9 @@ glyphs by a sub-pixel, so wording that differs on a phone is built as one
 plain string — see `src/ui/useMedia.ts`.)
 
 **Phone check:** `tools/phone.mjs` (in the default browser suite) runs the
-same 20 screens at 390×844, 360×800, 768×1024 and 844×390 with touch:
+same 20 screens at 390×844, 360×800, 768×1024, 844×390 and 390×844 with
+an iPhone-Safari-sized bottom safe area, with touch (the primary action
+must also clear the safe area, and the bottom button stay ≤ 56px):
 nothing sticks out sideways, the primary action is on screen, not covered
 and ≥ 40px tall; then the menu, ledger, strip, drawer and touch hints; then
 two days played by tapping only.

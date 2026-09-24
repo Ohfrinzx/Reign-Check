@@ -31,13 +31,22 @@ const SIZES = [
   { tag: 'android', width: 360, height: 800 },
   { tag: 'tablet', width: 768, height: 1024 },
   { tag: 'landscape', width: 844, height: 390 },
+  // iPhone Safari: its toolbar floats over the bottom of the page and is
+  // reported as the bottom safe area (roughly 80px here). A desktop browser
+  // shrunk to phone size reports 0, which is how an oversized bottom bar
+  // reached the owner's phone unnoticed (2026-09-24). Emulated through CDP.
+  { tag: 'iphone-safari', width: 390, height: 844, safeBottom: 80 },
 ];
 
-async function measure(page, primarySel) {
-  return page.evaluate((sel) => {
+async function measure(page, primarySel, safeBottom = 0) {
+  return page.evaluate(([sel, safeB]) => {
     const W = screen.width;
-    const H = window.innerHeight;
-    const out = { overflowX: document.documentElement.scrollWidth - W, offenders: [], primary: null };
+    const H = window.innerHeight - safeB; // nothing usable under a floating toolbar
+    const bar = document.querySelector('.strap-action');
+    const out = {
+      overflowX: document.documentElement.scrollWidth - W, offenders: [], primary: null,
+      barHeight: bar && getComputedStyle(bar).position === 'fixed' ? Math.round(bar.getBoundingClientRect().height) : 0,
+    };
     for (const el of document.querySelectorAll('body *')) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
@@ -62,7 +71,7 @@ async function measure(page, primarySel) {
       }
     }
     return out;
-  }, primarySel);
+  }, [primarySel, safeBottom]);
 }
 
 const browser = await launchBrowser();
@@ -74,6 +83,10 @@ try {
       viewport: { width: size.width, height: size.height }, screen: { width: size.width, height: size.height },
       isMobile: true, hasTouch: true, deviceScaleFactor: 2,
     });
+    if (size.safeBottom) {
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Emulation.setSafeAreaInsetsOverride', { insets: { bottom: size.safeBottom, bottomMax: size.safeBottom } });
+    }
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     // PHONE_SCENES=a,b limits part 1 to those scenes (quicker while iterating)
@@ -81,9 +94,10 @@ try {
     for (const scene of SCENES.filter((sc) => !only || only.includes(sc.name))) {
       await scene.go(page);
       await page.waitForTimeout(700); // rise-in / drawer animations
-      const m = await measure(page, scene.primary);
+      const m = await measure(page, scene.primary, size.safeBottom ?? 0);
       await page.screenshot({ path: shotPath(`ph-${size.tag}-${scene.name}.png`) });
       const where = `${size.tag} ${size.width}×${size.height} / ${scene.name}`;
+      if (m.barHeight > 56) problems.push(`${where}: the bottom action bar is ${m.barHeight}px tall (keep it compact)`);
       if (m.overflowX > 0) problems.push(`${where}: page ${m.overflowX}px wider than the screen`);
       if (m.offenders.length) problems.push(`${where}: sticks out: ${m.offenders.join(', ')}`);
       if (scene.primary) {

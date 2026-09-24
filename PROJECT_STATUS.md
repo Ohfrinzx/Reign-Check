@@ -62,6 +62,12 @@ remaining ending types.
   fixed: an accepted bribe from the demand pop-up left the pop-up open
   (only Meet cleared it). The pop-up's footnote now says "in your Files" on
   a phone. Unit + browser tests added for both.
+- **2026-09-24** — Owner screenshot from an iPhone: the red bottom bar was
+  far too big (~126px, Safari's toolbar turned red). Cause: it padded
+  itself by the "safe area", which on iPhone Safari is the floating
+  toolbar; a shrunken desktop browser reports 0, so no test saw it. Now a
+  compact floating button (48px, max 460px wide) above the safe area;
+  `phone.mjs` gained an emulated iPhone-Safari size that fails the old bar.
 - **2026-09-23** — Mobile web version + GitHub Pages deploy built,
   verified and merged (see "Now"; `docs/MOBILE_AND_HOSTING.md` §0). New
   checks: `tools/phone.mjs` (default suite), `tools/desktop-snap.mjs`,

@@ -211,7 +211,7 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
-| `phone.mjs` | the phone layout: 20 screens × 4 sizes (390×844, 360×800, 768×1024, 844×390) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
+| `phone.mjs` | the phone layout: 20 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
 | `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 20 screens at 1366×700 and 1100×700. `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
 | `pages-preview.mjs` (no dev server; run after `npm run build`) | serves `dist/` from `/Reign-Check/` like GitHub Pages: no failed requests, all fonts load, manifest + icons, game starts |
@@ -316,7 +316,11 @@ docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, DESIGN_V2.md,
   after any UI work. Don't wrap existing desktop text in new spans (it
   shifts glyphs); build phone-only wording as one string with `useMedia`.
   Anything new that is gameplay-critical must be reachable on a phone too
-  (in the drawer, the menu, or on the page).
+  (in the drawer, the menu, or on the page). **Never pad a fixed element by
+  `env(safe-area-inset-bottom)` to fill the strip under it** — on iPhone
+  Safari that "safe area" is its floating toolbar (~80px); lift the element
+  above it instead. A shrunken desktop browser reports 0, so only
+  `phone.mjs`'s `iphone-safari` size catches this.
 
 ## 10. Git and verification workflow
 
