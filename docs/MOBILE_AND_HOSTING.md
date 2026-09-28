@@ -84,7 +84,9 @@ before every deploy**.
   stays still. The status dot on the QUIET/WATCHFUL chip blinks slowly
   (cream when quiet); TENSE/CRITICAL keep their faster pulse. With "reduce
   motion" on, neither animates and the note wraps to two lines. Desktop
-  keeps the plain line.
+  keeps the plain line, but the blinking dot is on desktop too (owner
+  request, 2026-09-28 — the one intended desktop change; the desktop
+  snapshot baseline was re-saved after confirming only the dot moved).
 - **Landscape phones** (short screens) get a one-row masthead with the
   ledger inline, no strap note or mood words, and a slimmer bar.
 - **No game logic changed** (`src/game/` untouched), **no `SAVE_VERSION`

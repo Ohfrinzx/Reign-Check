@@ -64,6 +64,8 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-09-28** — The blinking "live" status dot is on desktop too (owner
+  request). Desktop pictures compared first: only the 7×7px dot changed.
 - **2026-09-24** — Owner request: on a phone the strap's cut-off note now
   scrolls like a news ticker, and the status dot blinks like a "live"
   light (both off with reduce motion; desktop unchanged).
