@@ -5,9 +5,11 @@
 
 ## 1. Where it stands
 
-**Slice 1 is built (2026-10-01), waiting for the owner's playtest:** the
-mini-game system, **Hold the Palace** (coups) and **The 7pm Bulletin**
-(the daily game). How it works, with the numbers: `docs/SYSTEMS.md` §12.
+**Slice 1 approved (2026-10-01):** the mini-game system, **Hold the
+Palace** (coups), **The 7pm Bulletin** and the opening title card.
+**Slice 2 built, waiting for the owner's playtest:** **Bread Lines**,
+**The Last Kilometre**, **Shred the Ledger**. How it works, with the
+numbers: `docs/SYSTEMS.md` §12.
 
 **Before the next slice:** ask the owner which games come next (the list
 in §3), build them as a slice, stop for a playtest. Don't build several
@@ -38,24 +40,37 @@ Their answers to the design questions:
 | Coup stakes | **Both, by severity**: an officers' plot (pressure) = a heavy hit; the Army's real strike (ultimatum ran out) = the run ends if lost |
 | Coup trigger | **High pressure, once per act** (plus the Army's ultimatum) |
 
+After slice 1 (2026-10-01):
+- **The transition:** the hard cut was *"really abrupt"*. Chosen: a
+  title card before each game, own style per game (no extra warning card).
+- **Direction for new games:** *"I want careful play to be rewarding. Yes,
+  they should have some strategy to them and skill it shouldn't be 100%
+  pass every time either. … the goal of the mini games is to add more
+  content into the game and make it not feel as if the users are just
+  reading and clicking buttons."* 2–3 games built on reading are fine (the
+  Bulletin is one); the rest should be skill/action with pictures. The
+  story and how-to screens keep their text.
+- **Balance target:** careful play about 60% (reached: 59%).
+- **Slice 2 games chosen:** Bread Lines, The Last Kilometre, Shred the
+  Ledger.
+
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).
 
 ## 3. The idea list (proposed to the owner; not yet chosen)
 
-Built: **#1 Hold the Palace**, **#2 The 7pm Bulletin**. Still open, each
-with its story hook / trigger:
+Built: **#1 Hold the Palace**, **#2 The 7pm Bulletin**, **#3 Shred the
+Ledger**, **#8 Bread Lines**, **#10 The Last Kilometre**. Still open (the
+reading-heavy ones — #4, #5, #7, #11 — only if the owner wants another
+reading game):
 
 | # | Name | What you do | Hook / trigger |
 |---|---|---|---|
-| 3 | Shred the Ledger | Swipe documents: shred or keep, before the auditors reach the door | the Free Zone Ledger crisis |
 | 4 | Count the Votes | Phone ministers before a Council vote; read each one's tell | before a confidence vote; the Elites turning |
 | 5 | Who Was in the Stairwell? | Logic puzzle: four suspects, Sable files, one liar | the Stairwell Tapes |
 | 6 | Budget Night | Split a fixed budget; each faction has a minimum | debt; Workers/Elites demands |
 | 7 | The Ambassador's Table | Haggle with Ostrene's ambassador; know when to stop | the Ostrene gas cutoff |
-| 8 | Bread Lines | Send negotiators or police to flare-ups on a city map | Bread Riots; the Street turning hostile |
 | 9 | Find the Mole | Watch who meets whom, name the leaker | Security turning hostile; a betrayal warning |
-| 10 | The Last Kilometre | Timing: walk the Dovra Day parade, wave/duck/stop | a daily one |
 | 11 | Balcony Speech | Build a speech line by line as the crowd reacts | a Street or Workers demand |
 | 12 | The Pigeon Run | Steer a racing pigeon with a secret message past Drovnan hawks | Drovna, the Hadem border |
 

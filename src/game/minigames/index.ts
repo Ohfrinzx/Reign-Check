@@ -1,6 +1,6 @@
 import type { GameState, Rng } from '../types';
 import { hashString, makeRng } from '../rng';
-import { DAILY_MINIGAMES, MG_CARD } from '../content/minigames';
+import { DAILY_MINIGAMES, MG_CARD, eventMinigame } from '../content/minigames';
 
 /**
  * PHASE 5 — MINI-GAMES: when they appear. No React, no DOM (ground rule 11).
@@ -12,7 +12,9 @@ import { DAILY_MINIGAMES, MG_CARD } from '../content/minigames';
  * tests and the balance probe can play past it with chooseOption().
  *
  *   - DAILY. From DAILY_FROM_DAY, one of the day's drawn cards is replaced by
- *     a daily mini-game, at a random point in the day. Never a card that an
+ *     a daily mini-game, at a random point in the day. An event can pick
+ *     which one (content/minigames.ts eventMinigame()): the Bread Riots or
+ *     a hostile Street → Bread Lines; the Free Zone Ledger → Shred. Never a card that an
  *     earlier decision queued (crisis stages, private files, follow-ups).
  *     A day that already has a triggered mini-game gets no daily one.
  *   - THE ARMY'S STRIKE. When the Army's ultimatum runs out and it moves
@@ -88,7 +90,9 @@ export function placeDailyMinigame(s: GameState, deck: string[], queuedCount: nu
   const pool = DAILY_MINIGAMES.length > 1
     ? DAILY_MINIGAMES.filter((_, i) => i + 1 !== yesterday)
     : DAILY_MINIGAMES;
-  const id = rng.pick(pool);
+  // an event (the Bread Riots, a hostile Street, the Ledger crisis) picks
+  // its own game; otherwise any daily game but yesterday's
+  const id = eventMinigame(s) ?? rng.pick(pool);
   s.flags.mgDailyLast = DAILY_MINIGAMES.indexOf(id) + 1;
   const out = [...deck];
   const free = out.map((_, i) => i).filter((i) => i >= queuedCount);

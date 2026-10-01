@@ -4,12 +4,27 @@ import { minigameIntro, MG_CARD } from '../../game/content/minigames';
 import { minigameSeed, STRIKE_ODDS_FLAG } from '../../game/minigames';
 import { bulletinSetup } from '../../game/minigames/bulletin';
 import { palaceDifficulty, palaceSetup, GATES } from '../../game/minigames/palace';
+import { breadDifficulty, breadSetup } from '../../game/minigames/breadlines';
+import { paradeDifficulty, paradeSetup, COMPOSURE } from '../../game/minigames/parade';
+import { shredDifficulty, shredSetup } from '../../game/minigames/shred';
 import { hasMark } from '../../game/consequences';
 import { Ledger } from '../components/Ledger';
 import { OutcomeView } from '../components/CardView';
 import { useMedia } from '../useMedia';
 import { PalaceGame } from './PalaceGame';
 import { BulletinGame } from './BulletinGame';
+import { BreadLinesGame } from './BreadLinesGame';
+import { ParadeGame } from './ParadeGame';
+import { ShredGame } from './ShredGame';
+
+/** Per game: the start button, what giving up says, and the result stamps. */
+const WORDS: Record<string, { go: string; quit: string; won: string; lost: string }> = {
+  palace: { go: 'Take command →', quit: 'You left the command room', won: 'Palace held', lost: 'The Palace fell' },
+  bulletin: { go: 'Go live →', quit: 'You walked out of the studio', won: 'Clean bulletin', lost: 'It aired' },
+  breadlines: { go: 'Send the teams →', quit: 'You left the city to it', won: 'The city held', lost: 'Sarnica burns' },
+  parade: { go: 'Start walking →', quit: 'You got back in the car', won: 'You made it', lost: 'Back in the car' },
+  shred: { go: 'Start shredding →', quit: 'You opened the door', won: 'Nothing found', lost: 'Caught' },
+};
 
 /**
  * PHASE 5 — the full-screen frame every mini-game plays in (App.tsx early
@@ -72,6 +87,13 @@ export function MinigameScreen({
     };
   }, [key, card.id, s, seed]);
 
+  const bread = useMemo(() => (key === 'breadlines' ? breadSetup(seed, breadDifficulty(s.act)) : null), [key, s.act, seed]);
+  const parade = useMemo(() => (key === 'parade'
+    ? { setup: paradeSetup(seed, paradeDifficulty(s.act)), composure: COMPOSURE + (hasMark(s, 'walked-dovra') ? 1 : 0) }
+    : null), [key, s, seed]);
+  const shred = useMemo(() => (key === 'shred' ? shredSetup(seed, shredDifficulty(s.act)) : null), [key, s.act, seed]);
+  const words = WORDS[key];
+
   const intro = minigameIntro(s, card.id, bulletin
     ? { spikes: bulletin.spikes, spikeNote: bulletin.spikeNote, stories: bulletin.stories.length }
     : undefined);
@@ -96,7 +118,7 @@ export function MinigameScreen({
   const finish = (e: MinigameEnd) => { setEnd(e); setStep('done'); setConfirmQuit(false); };
   const giveUp = () => finish({
     won: false, score: 0,
-    headline: key === 'palace' ? 'You left the command room' : 'You walked out of the studio',
+    headline: words.quit,
     detail: 'Giving up counts as a loss.',
   });
 
@@ -176,7 +198,7 @@ export function MinigameScreen({
           <footer className="mg-foot">
             <button className="btn" onClick={() => setStep('story')}>← Back</button>
             <button className="btn btn-primary" onClick={() => setStep('play')}>
-              {key === 'palace' ? 'Take command →' : 'Go live →'}
+              {words.go}
             </button>
           </footer>
         </>
@@ -184,12 +206,15 @@ export function MinigameScreen({
         <main className="mg-body mg-play">
           {palace && <PalaceGame setup={palace.setup} gates={palace.gates} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {bulletin && <BulletinGame setup={bulletin} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {bread && <BreadLinesGame setup={bread} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {parade && <ParadeGame setup={parade.setup} composure={parade.composure} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {shred && <ShredGame setup={shred} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
         </main>
       ) : (
         <>
           <main className="mg-body">
             <section className={`mg-sheet mg-end ${end?.won ? 'won' : 'lost'}`}>
-              <div className="mg-stamp">{end?.won ? (key === 'palace' ? 'Palace held' : 'Clean bulletin') : (key === 'palace' ? 'The Palace fell' : 'It aired')}</div>
+              <div className="mg-stamp">{end?.won ? words.won : words.lost}</div>
               <h2>{end?.headline}</h2>
               <p>{end?.detail}</p>
             </section>

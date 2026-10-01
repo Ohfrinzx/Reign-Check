@@ -21,9 +21,9 @@ Then read, in order:
 
 - **Status (2026-10-01):** Phases 1–3, balance slice D (factions remember
   your decisions) and the mobile web version + GitHub Pages deploy are all
-  approved. **Mini-games slice 1** (the system, Hold the Palace, The 7pm
-  Bulletin) is built and waiting for the owner's playtest
-  (`docs/MINIGAMES.md`). Ask before designing the next games. **Every
+  approved. **Mini-games slice 1** is approved; **slice 2** (Bread Lines, The Last
+  Kilometre, Shred the Ledger) is built and waiting for the owner's
+  playtest (`docs/MINIGAMES.md`). Ask before designing the next games. **Every
   merge into the default branch now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
   only after `npm test`, `npm run build` and the browser checks pass.

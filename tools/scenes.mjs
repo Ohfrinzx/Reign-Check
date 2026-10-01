@@ -144,8 +144,8 @@ export async function openFiles(page) {
 }
 
 /** Phase 5: open a mini-game in practice mode (fixed seed) and go to `step`. */
-async function practice(page, game, step) {
-  await page.goto(`${BASE}?practice=${game}&seed=7`, { waitUntil: 'networkidle' });
+async function practice(page, game, step, extra = '') {
+  await page.goto(`${BASE}?practice=${game}&seed=7${extra}`, { waitUntil: 'networkidle' });
   // the opening title card plays first, then fades away over the story
   await page.locator('.mg-story').waitFor();
   await page.locator('.mg-veil').waitFor({ state: 'detached' });
@@ -244,6 +244,10 @@ export const SCENES = [
     await p.locator('.pz-cell').nth(5 * 5 + 2).click(); // select Guard unit 2
   } },
   { name: 'mg-bulletin', primary: '.bt-run', go: async (p) => { await practice(p, 'bulletin', 'play'); } },
+  // the real-time games with their clock frozen (&freeze), so the picture is the same every time
+  { name: 'mg-bread', primary: null, go: async (p) => { await practice(p, 'bread', 'play', '&freeze'); } },
+  { name: 'mg-parade', primary: '.pd-btn.wave', go: async (p) => { await practice(p, 'parade', 'play', '&freeze'); } },
+  { name: 'mg-shred', primary: null, go: async (p) => { await practice(p, 'shred', 'play', '&freeze'); } },
   { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {
     await seed(p, 'preEnding'); await closeDemandPops(p);

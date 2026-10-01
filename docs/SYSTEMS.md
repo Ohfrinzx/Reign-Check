@@ -9,8 +9,8 @@ what the code does now, not how it got there; the history lives in
 `docs/archive/`. If a number here disagrees with the code, the code wins,
 so fix this file.
 
-**Last checked against the code:** 2026-10-01 (mini-games slice 1). At
-that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
+**Last checked against the code:** 2026-10-01 (mini-games slice 2). At
+that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
 
 ---
 
@@ -283,14 +283,15 @@ that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
 
   | Policy | Survives |
   |---|---|
-  | Careful | 46% (59% before mini-games) |
-  | Random | 1% |
-  | Always first | 1% |
-  | Always last | 4% |
+  | Careful | 59% |
+  | Random | 3% |
+  | Always first | 2% |
+  | Always last | 3% |
 
   The probe plays mini-games as a result: `careful` wins 70% of them
-  (`MINIGAME_SKILL`), the others half. The drop from 59% comes mostly
-  from one card a day becoming a mini-game.
+  (`MINIGAME_SKILL`), the others half. Owner: careful play should be
+  rewarding (~60%); mini-game win rewards were sized to get there (slice
+  1 alone had dropped it to 46%).
 
 - **The owner's target is "Hard"**, where careful human play survives
   about half the time.
@@ -318,13 +319,20 @@ that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
   layout comes from `minigameSeed()` (run seed + card + day), so nothing
   extra is saved and `SAVE_VERSION` did not change.
 - **Owner's rules for results:** a loss costs Legitimacy and the loyalty
-  of the faction the game is about; a win gives a small reward. Results
-  can leave a mark (the factions remember them, §8).
+  of the faction the game is about; a win is a reward worth chasing
+  (careful play ~60%). A daily win: Legitimacy +5, a stat bonus, +2 with
+  the game's faction and **+0.5 with every faction** (that last part
+  matters most: the vote leans on loyalty). A daily loss: Legitimacy −4
+  or −5, the faction −4, and the game's pressure up. Results can leave a
+  mark (the factions remember them, §8).
 - **When they appear:**
   - **Daily:** from day 2 (`DAILY_FROM_DAY`), one drawn card is replaced by
-    a daily game (`DAILY_MINIGAMES`), at a random point in the day; never a
-    queued card. Picked by a hash of seed and day, not the run's RNG.
-    With one daily game so far, it is always The 7pm Bulletin.
+    a daily game (`DAILY_MINIGAMES`: the Bulletin, Bread Lines, The Last
+    Kilometre, Shred the Ledger), at a random point in the day; never a
+    queued card and never yesterday's game. Picked by a hash of seed and
+    day, not the run's RNG. **Events pick the game** (`eventMinigame()`):
+    the Bread Riots or a hostile Street → Bread Lines; the Free Zone
+    Ledger crisis → Shred the Ledger.
   - **An officers' plot:** from day 3, when hidden coup pressure reaches
     `PLOT_AT` (52, the front page's "The army is talking"), Hold the
     Palace comes that morning, **once per act**. Losing is a heavy hit,
@@ -342,7 +350,7 @@ that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
   stopped or dawn comes. Difficulty by act (plot) or by the Army's odds
   (strike). A greedy bot wins about 90% (act 1), 73% (act 2), 64% (act 3)
   and 40–64% (strike); doing nothing always loses. Results: plot won →
-  coup pressure −30, Army power −10, Legitimacy +3; plot lost →
+  coup pressure −30, Army power −10, Legitimacy +5; plot lost →
   Legitimacy −8, Grip stats down, Army loyalty −6; strike won → the
   failed-coup effects + Legitimacy +3; strike lost → the coup ending.
 - **The 7pm Bulletin** (`bulletin.ts`; bright TV studio). 8/9/10 stories
@@ -352,9 +360,44 @@ that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
   the meaning). Each story has a clock (5 / 4.5 / 4 s; ×1.5 with Reduce
   Motion); spike it or run it (swipe, buttons, ← →). An untouched story
   airs. Spikes = the damaging stories (+1 with `bought-news`, −1 with
-  `threatened-loz`). Win with at most 2 mistakes. Won → Legitimacy +3,
-  support +2, Street +3, scandal pressure −5; lost → Legitimacy −4,
-  support −2, Street −4, scandal +5.
-- **Practice:** `?practice=palace|strike|bulletin` (optional `&seed=`,
-  `&act=`) opens one game on its own, never saved — for playtesting the
-  rare coup games. The browser tools use it too.
+  `threatened-loz`). Win with at most 2 mistakes. Won → Legitimacy +5,
+  support +3, scandal pressure −6, Street +2, every faction +0.5; lost →
+  Legitimacy −4, support −2, Street −4, scandal +5. (The Bulletin is the
+  one reading game; owner: "2–3 games with mainly reading is fine", the
+  rest should not feel like more reading.)
+- **Bread Lines** (`breadlines.ts`; a sunlit street plan, Street).
+  Real time (45 s), simulated in 100 ms steps. Seven districts flare up on
+  a schedule; anger climbs (6.5 / 8 / 8.5 a second by act); at 100 a
+  district burns; more than one burnt district loses. Two negotiator
+  teams (2 s to arrive, then talk anger down; the district stays calm
+  14 s) and two police squads (instant, but the district flares again 7 s
+  later from 42 and 1.5× faster; only 5–6 baton charges a game). A
+  human-paced bot (talk if there is time, police if hot) wins about 100 /
+  80 / 73% by act; talking only fails from act 2; doing nothing always
+  loses. Won: Legitimacy +5, stability +4, unrest −10; lost: −4, −4, +6.
+- **The Last Kilometre** (`parade.ts`; a festive avenue in perspective,
+  Workers). A rhythm game: 18 / 22 / 26 items come down the road; press
+  the one right move as each crosses the line (±320 ms; ±150 perfect):
+  egg → DUCK, child with flowers → STOP, cheering crowd → WAVE, protest
+  sign → nothing. A wrong, early or missed move, or a flinch at a sign,
+  costs one of 3 composure (4 with the `walked-dovra` mark). Simulated
+  walkers with timing spread σ 90/130/170 ms win 95/89/62% (act 1) down to
+  83/71/38% (act 3). Won: Legitimacy +5, support +4; lost: −4, −3.
+- **Shred the Ledger** (`shred.ts`; a dark walnut desk, Elites). 5–6
+  piles of 6–9 papers; tap every paper with the red square Ilvet stamp
+  before the auditors' footsteps reach the door (4.2 / 5.4 / 6.2 s a
+  pile). Shredding a clean paper jams the shredder for 1.2 s; a dirty one
+  left is evidence; more than 2 mistakes loses. Tricks: act 2 a crossed-out
+  red stamp (VOID, clean); act 3 also a pale red stamp (dirty) and a round
+  red seal (clean). Simulated players win about 95 / 69 / 59% (average)
+  and 69 / 51 / 32% (slow, easily fooled). Won: Legitimacy +5, scandal
+  −10; lost: Legitimacy −5, scandal +8.
+- **Input:** real-time games act on pointer-down (a tap never also lands
+  as a click on whatever appears under the finger next); keys too (Bread
+  Lines 1–7 then T/P, Parade ← ↑ →, Shred Enter on a focused paper). The
+  clock (`useClock`) stops while "Give up?" asks and never jumps more than
+  100 ms a frame, so a locked phone pauses the game.
+- **Practice:** `?practice=palace|strike|bulletin|bread|parade|shred`
+  (optional `&seed=`, `&act=`) opens one game on its own, never saved —
+  for playtesting. The browser tools use it too (`&freeze` stops the
+  real-time clock for still pictures).

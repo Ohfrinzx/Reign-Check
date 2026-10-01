@@ -20,6 +20,11 @@ import { BASE, closeDemandPops } from './scenes.mjs';
  *   5. Reduce Motion: the calm look, and the searchlight is off.
  *   6. The opening title card: the game's name and a line of what is going
  *      on, gone by itself in about 2-3 s; a tap skips it.
+ *   7. Slice 2, played for real: Bread Lines (talk and police sent by
+ *      tapping the map; a team is used up, a district calms), The Last
+ *      Kilometre won by pressing the right move on time (keys on desktop,
+ *      taps on a phone), Shred the Ledger won by tapping the red-stamped
+ *      papers (and a clean one jams the shredder).
  */
 
 const errors = [];
@@ -202,8 +207,17 @@ try {
       const st = await import('/src/game/state.ts');
       const en = await import('/src/game/engine.ts');
       const { saveGame } = await import('/src/game/save.ts');
-      let s = en.prepareDay(st.createGame({ seed: 4, leaderName: 'Adrin Vo', mandateId: 'accident' }));
-      // day 1 has no daily game; play to day 2's mini-game
+      // day 1 has no daily game; play to day 2's mini-game, on a run whose
+      // day 2 game is the Bulletin (four daily games share the days now)
+      let s;
+      for (let seed = 4; seed < 80; seed++) {
+        s = playToGame(seed);
+        if (s.current?.cardId === 'mg-bulletin') break;
+      }
+      saveGame(s);
+      return { day: s.day, card: s.current.cardId, stage: s.stageIndex, deck: s.todayDeck.length, legit: s.stats.legitimacy };
+      function playToGame(seed) {
+      let s = en.prepareDay(st.createGame({ seed, leaderName: 'Adrin Vo', mandateId: 'accident' }));
       for (let i = 0; i < 400 && !(s.phase === 'stage' && en.activeCard(s)?.minigame); i++) {
         if (s.phase === 'briefing') s = en.beginStages(s);
         else if (s.phase === 'stage' || s.phase === 'alert') {
@@ -214,8 +228,8 @@ try {
         else if (s.phase === 'night') s = en.openShop(s);
         else if (s.phase === 'shop') s = en.leaveShop(s);
       }
-      saveGame(s);
-      return { day: s.day, card: s.current.cardId, stage: s.stageIndex, deck: s.todayDeck.length, legit: s.stats.legitimacy };
+      return s;
+      }
     });
     assert.equal(before.day, 2, 'The first daily mini-game comes on day 2');
     assert.equal(before.card, 'mg-bulletin');
@@ -327,6 +341,104 @@ try {
     await page.close();
   }
 
+  /* ----------------------------------------------- 7. slice 2 games */
+  {
+    // Bread Lines: tap a flaring district, send a team
+    const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'bread', 5);
+    await page.locator('.bl-d.flaring').first().waitFor({ timeout: 8000 });
+    await page.locator('.bl-d.flaring').first().click();
+    await page.locator('.bl-menu').waitFor();
+    await page.locator('.bl-talk').click();
+    assert.match(await page.locator('.bl-chip.talk').innerText(), /1/, 'A negotiating team is out');
+    assert.ok(await page.locator('.bl-d.talking').count(), 'The district is being talked down');
+    await page.locator('.bl-d.calm').first().waitFor({ timeout: 12000 });
+    // the police: instant, and one baton charge is used
+    await page.locator('.bl-d.flaring').first().waitFor({ timeout: 10000 });
+    const before = await page.locator('.baton:not(.used)').count();
+    await page.locator('.bl-d.flaring').first().click();
+    await page.locator('.bl-police').click();
+    assert.equal(await page.locator('.baton:not(.used)').count(), before - 1, 'A baton charge is spent');
+    await page.screenshot({ path: shotPath('MG-bread-1366.png') });
+    // play on with the simple strategy until the evening
+    for (let i = 0; i < 120 && !(await page.locator('.mg-end').count()); i++) {
+      const d = page.locator('.bl-d.flaring').first();
+      if (await d.count()) {
+        await d.click().catch(() => {});
+        const talk = page.locator('.bl-talk:not([disabled])');
+        const pol = page.locator('.bl-police:not([disabled])');
+        if (await talk.count()) await talk.click().catch(() => {});
+        else if (await pol.count()) await pol.click().catch(() => {});
+      }
+      await page.waitForTimeout(400);
+    }
+    await page.locator('.mg-end').waitFor({ timeout: 20000 });
+    await page.close();
+  }
+  for (const vp of [{ width: 1366, height: 700, touch: false }, { width: 390, height: 844, touch: true }]) {
+    // The Last Kilometre: press the right move as each item crosses the line
+    const page = await browser.newPage({
+      viewport: { width: vp.width, height: vp.height },
+      ...(vp.touch ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}),
+    });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'parade', 5);
+    // the clock starts with the game; the page presses on time by itself
+    await page.evaluate(async (touch) => {
+      const { practiceGame } = await import('/src/ui/minigames/practice.ts');
+      const { minigameSeed } = await import('/src/game/minigames/index.ts');
+      const P = await import('/src/game/minigames/parade.ts');
+      const s = practiceGame(location.search);
+      const setup = P.paradeSetup(minigameSeed(s, s.current.cardId), P.paradeDifficulty(s.act));
+      const t0 = performance.now();
+      const key = { duck: 'ArrowLeft', wave: 'ArrowUp', stop: 'ArrowRight' };
+      for (const it of setup.items) {
+        const a = P.ANSWER[it.kind];
+        if (!a) continue;
+        setTimeout(() => {
+          if (touch) document.querySelector(`.pd-btn.${a}`).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+          else window.dispatchEvent(new KeyboardEvent('keydown', { key: key[a] }));
+        }, it.t - (performance.now() - t0));
+      }
+    }, vp.touch);
+    await page.waitForTimeout(4000);
+    await page.screenshot({ path: shotPath(`MG-parade-${vp.width}.png`) });
+    await page.locator('.mg-end').waitFor({ timeout: 60000 });
+    assert.ok(await page.locator('.mg-end.won').count(), `Pressing on time should finish the walk (${vp.width}px)`);
+    await page.close();
+  }
+  {
+    // a real tap on a move button is ONE press (not a press plus a click)
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'parade', 5);
+    await page.locator('.pd-btn.duck').tap(); // nothing on the line yet: one "too early"
+    await page.waitForTimeout(200);
+    assert.equal(await page.locator('.rosette.lost').count(), 1, 'One tap should cost exactly one composure');
+    await page.close();
+  }
+  {
+    // Shred the Ledger: tap the red-stamped papers, pile after pile
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'shred', 5);
+    await page.waitForTimeout(500);
+    const clean = page.locator('.sh-paper:not(:has(.ilvet)):not(.gone)').first();
+    await clean.tap();
+    assert.ok(await page.locator('.sh-shredder.jam').count(), 'A clean paper jams the shredder');
+    await page.waitForTimeout(1300);
+    for (let i = 0; i < 80 && !(await page.locator('.mg-end').count()); i++) {
+      const dirty = page.locator('.sh-paper:has(.ilvet:not(.void)):not(.gone):not([disabled])').first();
+      if (await dirty.count()) await dirty.tap().catch(() => {});
+      await page.waitForTimeout(250);
+      if (i === 3) await page.screenshot({ path: shotPath('MG-shred-390.png') });
+    }
+    await page.locator('.mg-end').waitFor({ timeout: 20000 });
+    assert.ok(await page.locator('.mg-end.won').count(), `Shredding every red-stamped paper (one jam) wins: ${await page.locator('.mg-end').innerText()}`);
+    await page.close();
+  }
+
   /* ---------------------------------------------- 5. reduce motion */
   {
     const page = await browser.newPage({ viewport: { width: 1366, height: 700 }, reducedMotion: 'reduce' });
@@ -340,4 +452,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-console.log('MINIGAMES: Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');
+console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre won on time (desktop keys + phone taps); Shred won by tapping red stamps, a clean paper jams; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');

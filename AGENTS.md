@@ -55,16 +55,16 @@ anything else without asking.**
   At 1080px and narrower the game uses a phone layout (☰ menu, faction
   strip + Files drawer, compact floating action button); desktop is pixel-identical to
   before. Details: `docs/MOBILE_AND_HOSTING.md` §0.
-- **Mini-games (Phase 5), slice 1 — built, waiting for the owner's
-  playtest (2026-10-01):** the mini-game system (a daily game replaces one
-  card a day from day 2; coups trigger their own), **Hold the Palace**
-  (the coup game) and **The 7pm Bulletin** (the daily game). Owner's
-  decisions and the idea list: `docs/MINIGAMES.md`. How it works:
-  `docs/SYSTEMS.md` §12. Next slices add more games, each with the owner's
-  go-ahead.
+- **Mini-games (Phase 5):** slice 1 (the system, **Hold the Palace**,
+  **The 7pm Bulletin**, the opening title card) **approved 2026-10-01**.
+  **Slice 2 — built, waiting for the owner's playtest:** **Bread Lines**,
+  **The Last Kilometre**, **Shred the Ledger** (low-reading, skill games),
+  events picking the daily game, and bigger win rewards (careful play
+  ~60%). Owner's decisions and the idea list: `docs/MINIGAMES.md`. How it
+  works: `docs/SYSTEMS.md` §12.
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
-- `SAVE_VERSION` is **14**. Tests: **183**, all passing.
+- `SAVE_VERSION` is **14**. Tests: **195**, all passing.
 
 ## 3. How work is done here
 
@@ -195,7 +195,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 183 tests: content integrity, 200 full
+npm test           # vitest, 195 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -218,16 +218,16 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `favours.mjs` | aimed favours, disabled-with-reason, receipt |
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
-| `minigames.mjs` | Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
+| `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
-| `phone.mjs` | the phone layout: 25 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
+| `phone.mjs` | the phone layout: 28 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
-| `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 25 screens at 1366×700 and 1100×700. `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
+| `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 28 screens at 1366×700 and 1100×700. `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
 | `pages-preview.mjs` (no dev server; run after `npm run build`) | serves `dist/` from `/Reign-Check/` like GitHub Pages: no failed requests, all fonts load, manifest + icons, game starts |
 | `phone-audit.mjs` | the original measuring tool (screenshots + numbers), superseded by `phone.mjs` |
 
-`tools/scenes.mjs` reaches each of those 25 screens from a fixed seed (the
-five mini-game ones through practice mode); both
+`tools/scenes.mjs` reaches each of those 28 screens from a fixed seed (the
+mini-game ones through practice mode; the real-time ones with `&freeze`); both
 `phone.mjs` and `desktop-snap.mjs` use it. `tools/make-icons.mjs` redraws
 the Home Screen icons in `public/icons/`.
 
@@ -244,7 +244,7 @@ Screenshots go to `<OS temp>/reign-check-shots/` (`REIGN_SHOTS` overrides).
   `.opt` buttons). A tool that drives days must call `passMinigame(page)`
   from `tools/browser.mjs` (it gives the game up and goes on). Engine-side
   scripts can just `chooseOption(s, 'won' | 'lost')`. To open one game
-  directly: `?practice=palace|strike|bulletin&seed=N`.
+  directly: `?practice=palace|strike|bulletin|bread|parade|shred&seed=N`.
 - The Back Room has no `.strap-action`; leave with `.shop-foot .btn-primary`.
 - Cards are under `:is(.stage-col, .sr-stage)` (the situation room is
   separate).
@@ -274,8 +274,9 @@ src/game/            pure logic, no React/DOM, fully testable
   characterEvents.ts private files (betrayal / offer / request)
   crises.ts          crisis chains
   minigames/         Phase 5 mini-games: index.ts (when they appear: daily
-                     slot, officers' plot, the Army's strike), palace.ts and
-                     bulletin.ts (each game's rules, pure)
+                     slot, officers' plot, the Army's strike), and each
+                     game's rules, pure: palace, bulletin, breadlines,
+                     parade, shred
   favours.ts         aimed favours and their receipts
   shop.ts            the Back Room: stock, prices, caps, timed deals
   meta.ts            cross-run record and unlocks (own save key/version)
@@ -292,8 +293,9 @@ src/ui/
   components/        CardView (3 card layouts + OptionText), Rail (also the
                      phone Files drawer), Ledger, Demands (pop-up + panel),
                      FavourDialog, Prose, FactionStrip (phone only)
-  minigames/         MinigameScreen (the full-screen frame: story → how to
-                     play → game → result), PalaceGame, BulletinGame,
+  minigames/         MinigameScreen (the full-screen frame: title card →
+                     story → how to play → game → result), one component
+                     per game, useClock (the real-time games' clock),
                      practice.ts (the ?practice= link)
   useMedia.ts        media-query hook for the few words that differ on a phone
   screens/           Screens (title, front page, night, ending), Vote, Shop,

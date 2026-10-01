@@ -448,7 +448,10 @@ export interface CardDef {
 /** Phase 5: the mini-games built so far (rules in src/game/minigames/). */
 export type MinigameKey =
   | 'palace'
-  | 'bulletin';
+  | 'bulletin'
+  | 'breadlines'
+  | 'parade'
+  | 'shred';
 
 /* ----------------------------------------------------------------- alerts */
 

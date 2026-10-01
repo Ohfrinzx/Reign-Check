@@ -8,25 +8,30 @@ one line per step. Full old handovers are in
 
 ## Now (2026-10-01)
 
-**MINI-GAMES SLICE 1 — BUILT, WAITING FOR THE OWNER'S PLAYTEST.** Owner,
-verbatim: *"we are ready to begin the mini game implementation. This should
-be one of the core features of the game and a new mini game should appear
-daily. … If the user fails the mini game it should hurt their reputation.
-Certain events should also trigger specific mini games such as a coup …"*
-and *"all games should have smooth and unique animations"*. Their answers
-to the design questions are in `docs/MINIGAMES.md` §2.
-- **Daily:** from day 2, one of the day's cards is a mini-game (for now
-  always **The 7pm Bulletin**: spike the damaging stories before Channel
-  Seven goes live; the stories come from your own run).
-- **Coups:** **Hold the Palace**, a turn-based night map. An officers' plot
-  (high coup pressure, at most once per act) is a heavy hit if lost; the
-  Army's real strike (its ultimatum ran out) ends the run if lost.
-- Full screen: story → how to play → game → result. No skip; Give up = a
-  loss; a reload restarts the same game. Loss: Legitimacy + that faction.
-- No save reset (`SAVE_VERSION` stays 14). Balance: careful play survives
-  46% (was 59%). Tests 183.
-- Playtest link for the coup: `…/Reign-Check/?practice=palace` (or
-  `strike`, `bulletin`) — practice, nothing saved.
+**MINI-GAMES SLICE 2 — BUILT, WAITING FOR THE OWNER'S PLAYTEST.** Slice 1
+approved: *"besides that all works and we can move onto the next"*. Owner,
+for slice 2: careful play should be rewarding (about 60%), games need
+strategy and skill but not a 100% pass, and *"the goal of the mini games is
+to add more content into the game and make it not feel as if the users are
+just reading and clicking buttons"* (2–3 reading games are fine; the
+story and how-to screens keep their text).
+- **Three new daily games, little reading:** **Bread Lines** (real-time
+  city map: talk or police each flare-up), **The Last Kilometre** (rhythm:
+  duck / wave / stop as things reach you), **Shred the Ledger** (tap the
+  red-stamped papers before the auditors arrive). Each has its own look,
+  title card and animations.
+- **Daily games now rotate** (never the same two days running), and
+  **events pick the game**: the Bread Riots or a hostile Street → Bread
+  Lines; the Free Zone Ledger → Shred.
+- **Bigger win rewards:** careful play survives 59% (was 46% after slice 1).
+- **Bug found and fixed while testing:** on a phone, the tap that finished
+  a pile of papers also landed as a click on the next pile's paper.
+- No save reset (`SAVE_VERSION` 14). Tests 195.
+- Practice links: `…/Reign-Check/?practice=bread`, `parade`, `shred`.
+
+**Mini-games slice 1 (approved 2026-10-01):** the system (a daily game
+from day 2; coups trigger Hold the Palace), The 7pm Bulletin, and the
+opening title card.
 
 **Balance slice D (factions remember your decisions) is approved:**
 *"Slice D Approved."*
@@ -82,6 +87,11 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-01** — Mini-games slice 1 approved (*"all works and we can
+  move onto the next"*). Slice 2 built: Bread Lines, The Last Kilometre,
+  Shred the Ledger; event-picked daily games; win rewards raised (careful
+  59%). Owner's direction: low-reading, skill-based games.
 
 - **2026-10-01** — Owner: the cut into a mini-game was *"really abrupt"*.
   Chose a transition only (no warning card), own style per game: each game
