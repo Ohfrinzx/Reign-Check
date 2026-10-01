@@ -1,53 +1,69 @@
 # Mini-games — brief for the next agent
 
-**Written 2026-10-01.** Phase 5 starts here. Read this after `AGENTS.md`,
+**Written 2026-10-01; slice 1 built the same day.** Phase 5. Read this after `AGENTS.md`,
 `PROJECT_STATUS.md` and `docs/SYSTEMS.md`.
 
-## 1. Start by talking to the owner
+## 1. Where it stands
 
-**The owner has their own ideas for the mini-games and will talk them
-through with you.** This file does not design any mini-game, on purpose.
-Before writing code:
+**Slice 1 is built (2026-10-01), waiting for the owner's playtest:** the
+mini-game system, **Hold the Palace** (coups) and **The 7pm Bulletin**
+(the daily game). How it works, with the numbers: `docs/SYSTEMS.md` §12.
 
-1. Ask the owner what they have in mind: which mini-game first, what the
-   player does, what it affects, how often it appears.
-2. Write back a short plan in plain words: what the player sees, what they
-   do, what changes in the game. Ask about anything unclear.
-3. Build one mini-game as a slice, then stop for the owner's playtest
-   (`AGENTS.md` §3). Don't build several at once.
+**Before the next slice:** ask the owner which games come next (the list
+in §3), build them as a slice, stop for a playtest. Don't build several
+slices at once. Don't fill gaps in the owner's description with your own
+design. Ask.
 
-Don't fill gaps in the owner's description with your own design. Ask.
+## 2. What the owner has decided
 
-## 2. What the owner has already said
+From their request (2026-10-01): mini-games are **a core feature**; **a new
+one appears daily**, woven into the cards (you get a card or a mini-game);
+each is **unique and tied into the story**; it is **basically full screen**,
+opening with **story context, then instructions**; **failing hurts your
+reputation**; **events trigger specific games** (a coup or a faction trying
+to take over); **"all games should have smooth and unique animations"**.
 
-- **Variety:** *"I want there to be some variety between the cards and
-  mini-games when we add them to reduce visual and gameplay redundancy."*
-  Each mini-game gets **its own look**, distinct from the three card
-  layouts that exist (the lead story, the private file, the situation
-  room).
-- **Mobile-first:** mini-games were deliberately left until after the phone
-  layout, so each is designed once for both a phone and a desktop. The owner
-  plays on an iPhone (Safari and the Home Screen app).
-- **Earlier notes** (from Milestone 1, not confirmed by the owner since):
-  "start with Budget Allocation and Cabinet Negotiation". Treat that as a
-  suggestion to raise, not a decision.
+Their answers to the design questions:
 
-## 3. What already exists in the code
+| Question | Owner's choice |
+|---|---|
+| What a loss hurts | **Legitimacy + the faction the game is about** (shown in the result; the factions remember it) |
+| How the daily game fits | **Replaces one card** a day (from day 2), at a random point |
+| Winning | **A small reward**; a coup game won also ends the threat |
+| First slice | **The system + Hold the Palace (coup) + one daily game** |
+| Daily game | **#2 The 7pm Bulletin** |
+| Look | **Each its own, some dark** (Palace dark, Bulletin a bright studio) |
+| Timers | **A mix**: some timed, some calm puzzles; Reduce Motion slows timers |
+| Cheating | **Reload = the same game, no skip; Give up = a loss** |
+| Coup stakes | **Both, by severity**: an officers' plot (pressure) = a heavy hit; the Army's real strike (ultimatum ran out) = the run ends if lost |
+| Coup trigger | **High pressure, once per act** (plus the Army's ultimatum) |
 
-Nothing is built yet, but a few hooks were reserved in Milestone 1. Use them
-or replace them, whatever fits the owner's design:
+Earlier notes still stand: variety (each game its own look, distinct from
+the three card layouts) and mobile-first (the owner plays on an iPhone).
 
-- `types.ts`: `CardDef.minigame?: MinigameKey`, with nine placeholder keys
-  (`budget`, `cabinet`, `intel`, `diplomacy`, `media`, `crisis`, `address`,
-  `bargain`, `loyalty`). Nothing reads them yet.
-- `types.ts`: a `'minigame'` value in `Phase` and in `CardCategory`
-  (`CardView.tsx` labels that category "Special"). The engine never enters
-  that phase today.
-- How a card reaches the player: `engine.ts` `drawDeck()` (weighted draw
-  plus `s.queued`), `openCurrent()`, `chooseOption()`. Special card types
-  are picked out by **tag** in `CardView.tsx` (`character-event`,
-  `crisis-chain`). The situation room is a fullscreen early return in
-  `App.tsx` (look at it if a mini-game needs its own scene).
+## 3. The idea list (proposed to the owner; not yet chosen)
+
+Built: **#1 Hold the Palace**, **#2 The 7pm Bulletin**. Still open, each
+with its story hook / trigger:
+
+| # | Name | What you do | Hook / trigger |
+|---|---|---|---|
+| 3 | Shred the Ledger | Swipe documents: shred or keep, before the auditors reach the door | the Free Zone Ledger crisis |
+| 4 | Count the Votes | Phone ministers before a Council vote; read each one's tell | before a confidence vote; the Elites turning |
+| 5 | Who Was in the Stairwell? | Logic puzzle: four suspects, Sable files, one liar | the Stairwell Tapes |
+| 6 | Budget Night | Split a fixed budget; each faction has a minimum | debt; Workers/Elites demands |
+| 7 | The Ambassador's Table | Haggle with Ostrene's ambassador; know when to stop | the Ostrene gas cutoff |
+| 8 | Bread Lines | Send negotiators or police to flare-ups on a city map | Bread Riots; the Street turning hostile |
+| 9 | Find the Mole | Watch who meets whom, name the leaker | Security turning hostile; a betrayal warning |
+| 10 | The Last Kilometre | Timing: walk the Dovra Day parade, wave/duck/stop | a daily one |
+| 11 | Balcony Speech | Build a speech line by line as the crowd reacts | a Street or Workers demand |
+| 12 | The Pigeon Run | Steer a racing pigeon with a secret message past Drovnan hawks | Drovna, the Hadem border |
+
+Adding a game: rules in `src/game/minigames/<game>.ts` (pure), a card with
+`won`/`lost` and its intro in `content/minigames.ts`, a `MinigameKey`, a
+screen in `src/ui/minigames/`, its look in the MINI-GAMES block of
+`index.css`, a practice name in `practice.ts`, tests, and scenes. A daily
+game also goes in `DAILY_MINIGAMES` (then days stop repeating yesterday's).
 
 ## 4. Rules a mini-game must follow
 

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { launchBrowser, shotPath } from './browser.mjs';
+import { launchBrowser, shotPath, passMinigame } from './browser.mjs';
 import { BASE, SCENES, closeDemandPops } from './scenes.mjs';
 
 /**
@@ -216,6 +216,7 @@ try {
   const startDay = await page.evaluate(() => JSON.parse(localStorage.getItem('dictator-sandbox:save:v1')).day);
   for (let i = 0; i < 80 && days < 2; i++) {
     await closeDemandPops(page);
+    if (await passMinigame(page, { tap: true })) continue;
     const leave = page.locator('.shop-foot .btn-primary');
     const bar = page.locator('.strap-action');
     const vote = page.locator('.vote-screen');

@@ -21,9 +21,10 @@ Then read, in order:
 
 - **Status (2026-10-01):** Phases 1–3, balance slice D (factions remember
   your decisions) and the mobile web version + GitHub Pages deploy are all
-  approved. **Next: mini-games** (`docs/MINIGAMES.md`). The owner has ideas
-  and will talk them through. Ask before designing. **Every merge into the default branch
-  now publishes the live site.**
+  approved. **Mini-games slice 1** (the system, Hold the Palace, The 7pm
+  Bulletin) is built and waiting for the owner's playtest
+  (`docs/MINIGAMES.md`). Ask before designing the next games. **Every
+  merge into the default branch now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
   only after `npm test`, `npm run build` and the browser checks pass.
   Announce the merge before and after** (`AGENTS.md` §10). No pull request

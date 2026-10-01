@@ -3,7 +3,7 @@
 // survives a full page reload (it lives in its own localStorage key,
 // separate from save.ts's). Requires `npm run dev` on :5173.
 import assert from 'node:assert/strict';
-import { launchBrowser, shotPath } from './browser.mjs';
+import { launchBrowser, shotPath, passMinigame } from './browser.mjs';
 const browser = await launchBrowser();
 const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
 const errs = [];
@@ -32,6 +32,8 @@ for (let i = 0; i < 400; i++) {
     await page.waitForTimeout(110);
     continue;
   }
+  // Phase 5: a mini-game takes the whole screen; give it up and go on.
+  if (await passMinigame(page)) continue;
   // Phase 3 faction demands: a pop-up covers the day until it is closed.
   if (await page.locator('.demand-pop').count()) {
     await page.locator('.demand-pop .dm-foot .btn').first().click();

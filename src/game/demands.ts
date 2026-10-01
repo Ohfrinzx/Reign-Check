@@ -6,6 +6,7 @@ import { becauseText, hasMark, markFlag, meetMultiplier, noBribeBecause } from '
 import type { DemandDef, FactionMoveDef } from './content/demands';
 import { DISPLAY_FACTIONS, isHostile } from './display';
 import { forcedEnding } from './content/endings';
+import { queueArmyStrike } from './minigames';
 
 /**
  * PHASE 3 STEP 1 — FACTION DEMANDS. No React, no DOM (ground rule 11).
@@ -330,7 +331,16 @@ function resolveLapse(s: GameState, id: FactionId, def: DemandDef, rng: Rng) {
   const { attempt, success } = moveOdds(s, id);
   const tries = rng.chance(attempt);
   if (tries) {
-    if (id === 'staff') s.stat.coupAttempts += 1;
+    if (id === 'staff') {
+      // Phase 5: the army's coup is no longer a dice roll. It is played as
+      // Hold the Palace this morning (minigames/index.ts); losing it ends
+      // the run, winning it applies the failed-coup effects.
+      s.stat.coupAttempts += 1;
+      queueArmyStrike(s, success);
+      s.log.push({ day: s.day, kind: 'consequence', title: 'The army is moving on the Palace', text: 'The ultimatum ran out at midnight. Columns from the capital garrison are on the move.', tone: 'bad' });
+      raisePatienceTo(s, id, 45, rng, `demand:lapse:${def.id}`);
+      return;
+    }
     if (rng.chance(success)) {
       const ending = forcedEnding(s, move.endingId);
       if (ending) {

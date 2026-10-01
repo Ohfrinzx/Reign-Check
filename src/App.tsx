@@ -4,8 +4,10 @@ import { ACT_LENGTH, createGame, dayInAct, NUM_ACTS } from './game/state';
 import {
   prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert,
   activeCard, orderedOptions, STAGE_META, openShop, buyShopItem, leaveShop, fireAdvisor, cutDeal,
-  completeConfidenceVote,
+  completeConfidenceVote, finishMinigame,
 } from './game/engine';
+import { MinigameScreen } from './ui/minigames/MinigameScreen';
+import { practiceGame } from './ui/minigames/practice';
 import { buildBriefing } from './game/briefing';
 import { COUNTRY } from './game/content/country';
 import { saveGame, loadGame, deleteSave } from './game/save';
@@ -61,6 +63,10 @@ export default function App() {
   const toastTimer = useRef<number | undefined>(undefined);
   const [legacy, setLegacy] = useState<MetaProgress>(() => ({ version: 1, runs: [] }));
   const recordedEndingRef = useRef<GameState['ending'] | undefined>(undefined);
+  // Phase 5: `?practice=bulletin|palace|strike` opens one mini-game on its
+  // own, for playtesting the rare ones. A throwaway state: never saved, never
+  // recorded, and it does not touch the run in progress.
+  const [practice, setPractice] = useState<GameState | null>(() => practiceGame(window.location.search));
 
   /* ---- detect an existing save on mount */
   useEffect(() => {
@@ -186,6 +192,16 @@ export default function App() {
     });
   }, []);
 
+  /* ---- Phase 5: a mini-game ended; its result resolves the card */
+  const doFinishMinigame = useCallback((won: boolean, score: number) => {
+    setGame((g) => {
+      if (!g) return g;
+      const next = finishMinigame(g, won, score);
+      setFlash(next.lastOutcome?.deltas ?? {});
+      return next;
+    });
+  }, []);
+
   const doCompleteVote = useCallback(() => {
     setGame((g) => g ? completeConfidenceVote(g) : g);
   }, []);
@@ -293,6 +309,7 @@ export default function App() {
       }
       if ((game.phase === 'stage' || game.phase === 'alert') && /^[1-9]$/.test(e.key)) {
         const card = activeCard(game);
+        if (card?.minigame) return; // a mini-game has its own keys
         const opt = card ? orderedOptions(game, card)[Number(e.key) - 1] : undefined;
         if (opt && (!opt.enabled || opt.enabled(game))) {
           e.preventDefault();
@@ -311,6 +328,27 @@ export default function App() {
   }, [screen, game, doChoose, doContinue, doBuy, showIntro, showManage, popupOpen, favourOpen, menuOpen, filesOpen]);
 
   /* ---------------------------------------------------------------- render */
+
+  if (practice) {
+    const pc = activeCard(practice);
+    const leave = () => {
+      setPractice(null);
+      window.history.replaceState(null, '', window.location.pathname);
+    };
+    if (pc?.minigame && (practice.phase === 'stage' || practice.phase === 'resolve')) {
+      return (
+        <MinigameScreen
+          key={`practice:${pc.id}`}
+          s={practice}
+          card={pc}
+          practice
+          onFinish={(won, score) => setPractice((p) => (p ? finishMinigame(p, won, score) : p))}
+          onContinue={leave}
+          continueLabel="Back to the title →"
+        />
+      );
+    }
+  }
 
   if (screen === 'title' || !game) {
     return (
@@ -366,6 +404,24 @@ export default function App() {
   // three resources stay visible. The card and its outcome both play here,
   // then "Leave the situation room" returns to the ordinary day.
   const current = game.current ? activeCard(game) : undefined;
+
+  // Phase 5: a mini-game is its own full-screen scene too — story, how to
+  // play, the game, then its result (ui/minigames/MinigameScreen.tsx).
+  if (current?.minigame && (game.phase === 'stage' || game.phase === 'resolve')) {
+    return (
+      <>
+        <MinigameScreen
+          key={`${game.day}:${current.id}`}
+          s={game}
+          card={current}
+          onFinish={doFinishMinigame}
+          onContinue={doContinue}
+        />
+        {toast && <div className="toast">{toast}</div>}
+      </>
+    );
+  }
+
   if (current?.tags?.includes('crisis-chain') && (game.phase === 'stage' || game.phase === 'resolve')) {
     return (
       <div className="app situation-room">

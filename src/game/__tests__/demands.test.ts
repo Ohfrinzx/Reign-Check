@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../state';
-import { prepareDay } from '../engine';
+import { beginStages, continueAfterResolve, finishMinigame, prepareDay } from '../engine';
 import {
   ISSUE_BELOW, MAX_LIVE, STAGE_DAYS, bribeBlockReason, bribeDemand, dismissDemandNotice,
   liveDemands, meetBlockReason, meetCost, meetDemand, moveOdds,
@@ -150,21 +150,24 @@ describe('faction demands (Phase 3 step 1)', () => {
   });
 
   it('a lapsed ultimatum from a hostile, strong faction can remove you — or fail — depending on the roll, reproducibly', () => {
+    // Security still rolls the dice. (The army's move is a mini-game since
+    // Phase 5 — see the next test.)
     const results: string[] = [];
     for (let seed = 1; seed <= 40; seed++) {
-      const s = withDemand('staff', 'ultimatum', seed);
+      const s = withDemand('sable', 'ultimatum', seed);
       s.phase = 'night';
-      s.factions.staff.loyalty = 5;
-      s.factions.staff.power = 100;
-      s.factions.staff.patience = 5;
       s.factions.sable.loyalty = 5;
-      s.stats.security = 5;
-      s.factions.staff.demand!.dueDay = s.day - 1;
+      s.factions.sable.power = 100;
+      s.factions.sable.patience = 5;
+      s.factions.staff.loyalty = 5;
+      s.stats.power = 5;
+      s.stats.information = 5;
+      s.factions.sable.demand!.dueDay = s.day - 1;
       const t = prepareDay(s);
       const again = prepareDay(s);
       expect(again.ending?.id).toBe(t.ending?.id);
       if (t.ending) {
-        expect(t.ending.id).toBe('coup');
+        expect(t.ending.id).toBe('sable-removal');
         expect(t.phase).toBe('ended');
         results.push('removed');
       } else {
@@ -174,6 +177,35 @@ describe('faction demands (Phase 3 step 1)', () => {
     }
     expect(results).toContain('removed');
     expect(results).toContain('survived');
+  });
+
+  it('the army\'s lapsed ultimatum is played as Hold the Palace: lose and the coup ends the run, win and it fails', () => {
+    const s = withDemand('staff', 'ultimatum', 3);
+    s.phase = 'night';
+    s.factions.staff.loyalty = 5;
+    s.factions.staff.power = 100;
+    s.factions.staff.patience = 5;
+    s.factions.staff.demand!.dueDay = s.day - 1;
+    const t = prepareDay(s);
+    expect(t.ending).toBeUndefined();
+    expect(t.factions.staff.demand).toBeUndefined();
+    expect(t.stat.coupAttempts).toBe(1);
+    expect(t.todayDeck[0]).toBe('mg-palace-strike');
+    expect(t.flags.mgStrikeOdds).toBeGreaterThan(0);
+    // the day's other cards: no daily mini-game on top of the strike
+    expect(t.todayDeck.filter((id) => id.startsWith('mg-')).length).toBe(1);
+
+    const open = beginStages(t);
+    expect(open.current?.cardId).toBe('mg-palace-strike');
+    const lost = finishMinigame(open, false, 20);
+    expect(lost.ending?.id).toBe('coup');
+    expect(lost.phase).toBe('resolve'); // the result is shown first
+    expect(continueAfterResolve(lost).phase).toBe('ended');
+
+    const won = finishMinigame(open, true, 80);
+    expect(won.ending).toBeUndefined();
+    expect(won.factions.staff.power).toBeLessThan(open.factions.staff.power);
+    expect(continueAfterResolve(won).phase).not.toBe('ended');
   });
 
   it('dismissing a pop-up removes only that notice, not the demand', () => {

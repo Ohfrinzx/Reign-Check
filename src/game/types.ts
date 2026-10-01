@@ -439,20 +439,16 @@ export interface CardDef {
   /** minimum day */
   minDay?: number;
   options: CardOption[];
-  /** minigame key — when set, the card opens an interaction instead of options */
+  /** minigame key — when set, the card opens a full-screen mini-game instead
+   *  of showing its options; the game picks `won` or `lost` when it ends
+   *  (content/minigames.ts, engine.ts finishMinigame()) */
   minigame?: MinigameKey;
 }
 
+/** Phase 5: the mini-games built so far (rules in src/game/minigames/). */
 export type MinigameKey =
-  | 'budget'
-  | 'cabinet'
-  | 'intel'
-  | 'diplomacy'
-  | 'media'
-  | 'crisis'
-  | 'address'
-  | 'bargain'
-  | 'loyalty';
+  | 'palace'
+  | 'bulletin';
 
 /* ----------------------------------------------------------------- alerts */
 

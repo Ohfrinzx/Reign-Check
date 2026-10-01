@@ -23,6 +23,9 @@ import { tickCrises } from './crises';
 import { spendFavour } from './favours';
 import { shownOptions, marksSetBy, becauseText, hasMark, markFlag, tickFactionMemory } from './consequences';
 import { CRISIS_CARDS } from './content/crises';
+import { MINIGAME_CARDS } from './content/minigames';
+import { placeDailyMinigame, tickMinigames, SCORE_FLAG } from './minigames';
+import { forcedEnding } from './content/endings';
 import type { ShopItemDef } from './content/shop';
 import {
   buyLimit, canCutNow, canFireNow, capBlockReason, cutCostOf, dailyFromOwned, fireCostOf,
@@ -32,7 +35,7 @@ import {
 
 /* ------------------------------------------------------------- registries */
 
-const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS, ...CRISIS_CARDS];
+const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS, ...CRISIS_CARDS, ...MINIGAME_CARDS];
 export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...CARD_MAP,
   ...Object.fromEntries(MANDATE_CARDS.map((c) => [c.id, c])),
@@ -41,6 +44,7 @@ export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...Object.fromEntries(FOLLOWUPS.map((c) => [c.id, c])),
   ...Object.fromEntries(CHARACTER_EVENT_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CRISIS_CARDS.map((c) => [c.id, c])),
+  ...Object.fromEntries(MINIGAME_CARDS.map((c) => [c.id, c])),
 };
 
 /**
@@ -155,7 +159,10 @@ function drawDeck(s: GameState, rng: Rng): string[] {
 
   // 3. if the world is so quiet nothing qualifies, shorten the day
   if (deck.length < s.agenda.length) s.agenda = s.agenda.slice(0, Math.max(1, deck.length));
-  return deck;
+
+  // 4. Phase 5: one of the drawn cards becomes today's mini-game
+  // (minigames/index.ts). Queued cards at the front are never replaced.
+  return placeDailyMinigame(s, deck, due.length);
 }
 
 /* -------------------------------------------------- start-of-day upkeep */
@@ -355,6 +362,10 @@ function dayUpkeep(s: GameState, rng: Rng) {
   // first card: it opens the day as its own scene (balance slice A).
   notes.push(...tickCrises(s, rng));
 
+  // --- officers who have waited long enough move on the Palace: the coup
+  // mini-game (Phase 5 — rules in minigames/index.ts)
+  notes.push(...tickMinigames(s, rng));
+
   // --- characters act on their own: a warning first, then a betrayal card,
   // or an offer from someone devoted to you (Phase 3 step 2 — rules in
   // characterEvents.ts, cards in content/characterEvents.ts). Queued cards
@@ -485,6 +496,19 @@ export function chooseOption(prev: GameState, optionId: string): GameState {
     marked.push(becauseText(s, m).replace(/^Because you /, 'You '));
   }
 
+  // A result can end the run outright (`effects.ending`, e.g. losing the
+  // Army's coup mini-game). The result is shown first; Continue ends it.
+  if (s.flags.__forceEnding && !s.ending) {
+    const key = Object.keys(s.flags).find((k) => k.startsWith('__ending:') && s.flags[k]);
+    const ending = key ? forcedEnding(s, key.slice('__ending:'.length)) : undefined;
+    s.flags.__forceEnding = 0;
+    if (key) s.flags[key] = 0;
+    if (ending) {
+      s.ending = ending;
+      s.log.push({ day: s.day, kind: 'system', title: ending.title, text: ending.epitaph, tone: 'bad' });
+    }
+  }
+
   s.stat.decisions += 1;
   if (s.current.isAlert) s.stat.alertsSurvived += 1;
 
@@ -561,11 +585,27 @@ function rollAlert(s: GameState, rng: Rng): AlertDef | undefined {
   return rng.weighted(pool, (a) => alertWeight(s, a));
 }
 
+/**
+ * Phase 5: a mini-game ended. Records how well it went (0..100, for the
+ * result text) and resolves the card with its `won` or `lost` option, so the
+ * result goes through chooseOption() and applyEffects() like any decision.
+ */
+export function finishMinigame(prev: GameState, won: boolean, score?: number): GameState {
+  const def = prev.current ? lookupCard(prev.current.cardId) : undefined;
+  if (prev.phase !== 'stage' || !def?.minigame) return prev;
+  const s = clone(prev);
+  if (score !== undefined) {
+    withRng(s, (rng) => applyEffects(s, { flags: { [SCORE_FLAG]: Math.round(score) } }, rng, `minigame:${def.id}`));
+  }
+  return chooseOption(s, won ? 'won' : 'lost');
+}
+
 /** Continue after a normal decision: maybe an interruption, otherwise the next stage. */
 export function continueAfterResolve(prev: GameState): GameState {
   const s = clone(prev);
   if (s.phase !== 'resolve') return s;
   s.lastOutcome = undefined;
+  if (s.ending) { s.phase = 'ended'; s.current = undefined; return s; }
 
   const alert = withRng(s, (rng) => rollAlert(s, rng));
   if (alert) {
@@ -587,6 +627,7 @@ export function continueAfterAlert(prev: GameState): GameState {
   const s = clone(prev);
   if (s.phase !== 'alertResolve') return s;
   s.lastOutcome = undefined;
+  if (s.ending) { s.phase = 'ended'; s.current = undefined; return s; }
   return nextStage(s);
 }
 

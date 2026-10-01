@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { launchBrowser, shotPath } from './browser.mjs';
+import { launchBrowser, shotPath, passMinigame } from './browser.mjs';
 const browser = await launchBrowser();
 const errs = [];
 const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
@@ -33,9 +33,10 @@ await page.waitForSelector('.frontpage');
 await page.waitForTimeout(400);
 await page.screenshot({ path: shotPath('P-briefing.png'), fullPage: false });
 
-let cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0, votes = 0, demandPops = 0, demandsMet = 0;
+let minigames = 0, cards = 0, alerts = 0, days = 0, priced = 0, shops = 0, shopBuys = 0, votes = 0, demandPops = 0, demandsMet = 0;
 for (let i = 0; i < 600; i++) {
   if (await page.locator('.ending-title').count()) break;
+  if (await passMinigame(page)) { minigames++; continue; }
   if (await page.locator('.vote-screen').count()) {
     votes++;
     if (votes === 1) await page.screenshot({ path: shotPath('P-vote-counting.png') });
@@ -90,7 +91,7 @@ for (let i = 0; i < 600; i++) {
   } else break;
   await page.waitForTimeout(45);
 }
-notes.push(`days=${days} cards=${cards} alerts=${alerts} votes=${votes} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys} demandPopups=${demandPops} demandsMet=${demandsMet}`);
+notes.push(`days=${days} minigames=${minigames} cards=${cards} alerts=${alerts} votes=${votes} priced=${priced} shopsVisited=${shops} shopPurchases=${shopBuys} demandPopups=${demandPops} demandsMet=${demandsMet}`);
 
 if (await page.locator('.ending-title').count()) {
   notes.push('ENDING: ' + await page.locator('.ending-title').innerText());

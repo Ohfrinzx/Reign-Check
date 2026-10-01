@@ -8,11 +8,25 @@ one line per step. Full old handovers are in
 
 ## Now (2026-10-01)
 
-**Next job: mini-games (Phase 5). The owner gave the go-ahead** (*"Ready to
-begin mini game implementation"*) **and has ideas they will talk through
-with the agent doing it.** Brief: `docs/MINIGAMES.md`. It covers what
-exists, the rules, testing and shipping, and deliberately no game design.
-Nothing is built yet.
+**MINI-GAMES SLICE 1 — BUILT, WAITING FOR THE OWNER'S PLAYTEST.** Owner,
+verbatim: *"we are ready to begin the mini game implementation. This should
+be one of the core features of the game and a new mini game should appear
+daily. … If the user fails the mini game it should hurt their reputation.
+Certain events should also trigger specific mini games such as a coup …"*
+and *"all games should have smooth and unique animations"*. Their answers
+to the design questions are in `docs/MINIGAMES.md` §2.
+- **Daily:** from day 2, one of the day's cards is a mini-game (for now
+  always **The 7pm Bulletin**: spike the damaging stories before Channel
+  Seven goes live; the stories come from your own run).
+- **Coups:** **Hold the Palace**, a turn-based night map. An officers' plot
+  (high coup pressure, at most once per act) is a heavy hit if lost; the
+  Army's real strike (its ultimatum ran out) ends the run if lost.
+- Full screen: story → how to play → game → result. No skip; Give up = a
+  loss; a reload restarts the same game. Loss: Legitimacy + that faction.
+- No save reset (`SAVE_VERSION` stays 14). Balance: careful play survives
+  46% (was 59%). Tests 183.
+- Playtest link for the coup: `…/Reign-Check/?practice=palace` (or
+  `strike`, `bulletin`) — practice, nothing saved.
 
 **Balance slice D (factions remember your decisions) is approved:**
 *"Slice D Approved."*
@@ -68,6 +82,13 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-01** — Mini-games slice 1 built: the mini-game system, Hold
+  the Palace (coups), The 7pm Bulletin (daily). Owner chose: Legitimacy +
+  faction on a loss, replaces one card a day, small win reward, system +
+  coup + one daily game first, own look per game (some dark), timers in
+  some games, no skip, coup loss ends the run only for the Army's real
+  strike, plot once per act at high pressure.
 
 - **2026-10-01** — Slice D approved: *"Slice D Approved."* Mini-games
   green-lit; brief written (`docs/MINIGAMES.md`), design left to the owner.

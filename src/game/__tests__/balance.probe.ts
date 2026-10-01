@@ -15,7 +15,12 @@ import type { GameState } from '../types';
  *             bars, and the pressures the front page warns about); the rest
  *             of the time it misjudges. The owner's "Hard" target is that
  *             this kind of play survives about half the time.
+ *
+ * Mini-games (Phase 5) are not a choice between options: the probe plays
+ * them as a result. `careful` wins MINIGAME_SKILL of the time; the other
+ * policies win half the time.
  */
+export const MINIGAME_SKILL = 0.7;
 export type ProbePolicy = 'random' | 'first' | 'last' | 'careful';
 
 /** How good the position looks from what the player can see. */
@@ -43,6 +48,10 @@ export function probe(n: number, policy: ProbePolicy) {
       if (s.phase === 'briefing') s = beginStages(s);
       else if (s.phase === 'stage' || s.phase === 'alert') {
         const c = activeCard(s)!;
+        if (c.minigame) {
+          s = chooseOption(s, rng.chance(policy === 'careful' ? MINIGAME_SKILL : 0.5) ? 'won' : 'lost');
+          continue;
+        }
         const usable = orderedOptions(s, c).filter((o) => !o.enabled || o.enabled(s));
         const opts = usable.length ? usable : orderedOptions(s, c);
         let id = opts[policy === 'first' ? 0 : policy === 'last' ? opts.length - 1 : rng.int(opts.length)].id;

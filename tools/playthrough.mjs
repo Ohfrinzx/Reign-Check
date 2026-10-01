@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { launchBrowser, shotPath } from './browser.mjs';
+import { launchBrowser, shotPath, passMinigame } from './browser.mjs';
 
 const errors = [];
 const browser = await launchBrowser();
@@ -39,6 +39,8 @@ for (let step = 0; step < 90; step++) {
     await page.waitForTimeout(200);
     continue;
   }
+  // Phase 5: a mini-game takes the whole screen; give it up and go on.
+  if (await passMinigame(page)) continue;
   // Phase 3 faction demands: a pop-up covers the day until it is closed.
   if (await page.locator('.demand-pop').count()) {
     await page.locator('.demand-pop .dm-foot .btn').first().click();

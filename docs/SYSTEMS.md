@@ -9,8 +9,8 @@ what the code does now, not how it got there; the history lives in
 `docs/archive/`. If a number here disagrees with the code, the code wins,
 so fix this file.
 
-**Last checked against the code:** 2026-09-23. At that point there were
-165 unit tests, `SAVE_VERSION` 14, and a clean build.
+**Last checked against the code:** 2026-10-01 (mini-games slice 1). At
+that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
 
 ---
 
@@ -38,10 +38,13 @@ so fix this file.
   12. **demands** (`tickDemands`);
   13. character plotting;
   14. **crises** (`tickCrises`);
-  15. **character events** (`tickCharacterEvents`);
-  16. the mandate's daily rule.
+  15. **mini-game triggers** (`tickMinigames`: an officers' plot, §12);
+  16. **character events** (`tickCharacterEvents`);
+  17. the mandate's daily rule.
 
-  Queued cards (crisis stage, private file) come first in the day's deck.
+  Queued cards (crisis stage, a triggered mini-game, private file) come
+  first in the day's deck. Then, from day 2, one of the drawn cards is
+  replaced by the daily mini-game (§12).
 - **Mandates** (`content/mandates.ts`): six starts. Four are always open
   (`stairwell`, `landslide`, `handover`, `accident`); two unlock through
   meta-progression (`clean-hands`, `pay-deal`). Each changes the starting
@@ -119,6 +122,10 @@ so fix this file.
   to remove you, with odds from `moveOdds()`, its power, and
   `FACTION_MOVES[f].defence`. A success ends the run, a failure has
   effects, and if it doesn't try it punishes you instead.
+  - **The Army is different (Phase 5):** if it tries, there is no dice
+    roll. Its coup is played that morning as **Hold the Palace** (§12).
+    Its success odds set how many columns come. Lose and the run ends in
+    a coup; win and the failed-coup effects apply.
 - **Patience** drains 2.2 a day for a faction below loyalty 40.
 
 **Hostility** (`demands.ts tickHostility()`, words in
@@ -152,7 +159,7 @@ so fix this file.
   faction's demands cheaper (×0.6) or dearer (×1.5), or rules out bribes.
   - The reason shows in the demand ("CHEAPER / DEARER · Because you …")
     and under a disabled Bribe button.
-  - There are 14 of them.
+  - There are 17 of them (3 from mini-game results).
 - **Other factions' opinions:** `effects.ts RELATION_SPILL` (0.25) —
   gaining loyalty with one faction costs its rivals.
 - **Fading goodwill:** loyalty above 60 slides back a little every morning
@@ -200,8 +207,9 @@ so fix this file.
 ## 8. Consequences: decisions that come back
 
 - **Where:** `consequences.ts`, words in `content/consequences.ts`.
-- **Marks:** 24 of them (`MARKS`), each left by specific options (`setBy`
-  lists the card id and option id).
+- **Marks:** 27 of them (`MARKS`), each left by specific options (`setBy`
+  lists the card id and option id). Three come from mini-game results
+  (`held-palace`, `palace-fell`, `bulletin-aired`).
   - Stored as the flag `mark:<id>`, holding the day it was made, and set
     in `engine.ts chooseOption()` through `applyEffects()`.
   - The result screen says "ON THE RECORD: You … (day N). This will come
@@ -275,12 +283,76 @@ so fix this file.
 
   | Policy | Survives |
   |---|---|
-  | Careful | 59% |
-  | Random | 3% |
-  | Always first | 3% |
-  | Always last | 3% |
+  | Careful | 46% (59% before mini-games) |
+  | Random | 1% |
+  | Always first | 1% |
+  | Always last | 4% |
+
+  The probe plays mini-games as a result: `careful` wins 70% of them
+  (`MINIGAME_SKILL`), the others half. The drop from 59% comes mostly
+  from one card a day becoming a mini-game.
 
 - **The owner's target is "Hard"**, where careful human play survives
   about half the time.
 - **Most runs end at the confidence vote.**
 - **Re-run the probe after any change to numbers, and report what moved.**
+
+## 12. Mini-games (Phase 5)
+
+- **Where:** rules in `src/game/minigames/` (`palace.ts`, `bulletin.ts`;
+  when they appear in `index.ts`); words and results in
+  `content/minigames.ts`; screens in `src/ui/minigames/`.
+- **A mini-game is a card** with a `minigame` key and two options, `won`
+  and `lost`. The player never sees them as buttons: the full-screen game
+  picks one when it ends (`engine.ts finishMinigame()`, which also stores
+  how well it went, 0–100, in `flags.mgScore` for the result text). So
+  every effect goes through `applyEffects()`, and the tests and the probe
+  play past a mini-game with `chooseOption()`.
+- **The screen** (`MinigameScreen.tsx`, an `App.tsx` early return): the
+  story (built from the run), how to play (with what winning and losing
+  mean), the game, a result stamp, then the card's outcome. The three
+  resources stay visible. There is no skip; **Give up** asks first and
+  counts as a loss. **A reload restarts the same game** at its story: the
+  layout comes from `minigameSeed()` (run seed + card + day), so nothing
+  extra is saved and `SAVE_VERSION` did not change.
+- **Owner's rules for results:** a loss costs Legitimacy and the loyalty
+  of the faction the game is about; a win gives a small reward. Results
+  can leave a mark (the factions remember them, §8).
+- **When they appear:**
+  - **Daily:** from day 2 (`DAILY_FROM_DAY`), one drawn card is replaced by
+    a daily game (`DAILY_MINIGAMES`), at a random point in the day; never a
+    queued card. Picked by a hash of seed and day, not the run's RNG.
+    With one daily game so far, it is always The 7pm Bulletin.
+  - **An officers' plot:** from day 3, when hidden coup pressure reaches
+    `PLOT_AT` (52, the front page's "The army is talking"), Hold the
+    Palace comes that morning, **once per act**. Losing is a heavy hit,
+    not the end. Measured: about 8% of careful runs see one.
+  - **The Army's strike:** its lapsed ultimatum (§5). Losing ends the run.
+  - A day with a triggered game gets no daily one.
+- **Hold the Palace** (`palace.ts`; dark night map). A 5×6 grid of the old
+  town, the Palace gates below it. Rebel columns enter at the top on a
+  schedule (flares warn one turn ahead) and move a block a turn (trucks
+  two). Three Guard units, **one order a turn** (move one block, diagonals
+  too, never above the cordon; moving onto a column attacks it: ordinary
+  columns surrender, armoured ones need two attacks). Columns swerve round
+  a roadblock or stop. The gates take one column (two with the
+  `vetted-garrison` mark); the next breaks them. Win when every column is
+  stopped or dawn comes. Difficulty by act (plot) or by the Army's odds
+  (strike). A greedy bot wins about 90% (act 1), 73% (act 2), 64% (act 3)
+  and 40–64% (strike); doing nothing always loses. Results: plot won →
+  coup pressure −30, Army power −10, Legitimacy +3; plot lost →
+  Legitimacy −8, Grip stats down, Army loyalty −6; strike won → the
+  failed-coup effects + Legitimacy +3; strike lost → the coup ending.
+- **The 7pm Bulletin** (`bulletin.ts`; bright TV studio). 8/9/10 stories
+  (by act), about half damaging, built from the run: your hottest
+  scandals, decisions from the last two days, the pressures the front
+  page warns about, plus fillers and "twists" (the second line changes
+  the meaning). Each story has a clock (5 / 4.5 / 4 s; ×1.5 with Reduce
+  Motion); spike it or run it (swipe, buttons, ← →). An untouched story
+  airs. Spikes = the damaging stories (+1 with `bought-news`, −1 with
+  `threatened-loz`). Win with at most 2 mistakes. Won → Legitimacy +3,
+  support +2, Street +3, scandal pressure −5; lost → Legitimacy −4,
+  support −2, Street −4, scandal +5.
+- **Practice:** `?practice=palace|strike|bulletin` (optional `&seed=`,
+  `&act=`) opens one game on its own, never saved — for playtesting the
+  rare coup games. The browser tools use it too.

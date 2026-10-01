@@ -202,6 +202,28 @@ export const MARKS: MarkDef[] = [
     setBy: [{ card: 'garrison-rotation', option: 'vet' }],
     factions: { staff: -2, sable: 1 },
   },
+  /* ---- Phase 5: mini-game results the factions remember */
+  {
+    id: 'held-palace',
+    because: 'held the Palace against the officers who came for it',
+    setBy: [
+      { card: 'mg-palace-plot', option: 'won' },
+      { card: 'mg-palace-strike', option: 'won' },
+    ],
+    factions: { staff: -2, sable: 1, chorus: 1 },
+  },
+  {
+    id: 'palace-fell',
+    because: 'let the officers take Palace Square and dictate terms',
+    setBy: [{ card: 'mg-palace-plot', option: 'lost' }],
+    factions: { staff: 1, sable: -1, chorus: -1 },
+  },
+  {
+    id: 'bulletin-aired',
+    because: 'let Channel Seven air the stories you tried to bury',
+    setBy: [{ card: 'mg-bulletin', option: 'lost' }],
+    factions: { chorus: -1 },
+  },
   {
     id: 'let-aureth-audit',
     because: 'let Aureth audit the army\'s books',
@@ -947,4 +969,8 @@ export const DEMAND_REACTIONS: DemandReactionDef[] = [
   { mark: 'honoured-ilic', faction: 'staff', kind: 'cheaper', text: 'Varkov remembers who gave Ilić his medal.' },
   { mark: 'let-aureth-audit', faction: 'staff', kind: 'no-bribe', text: 'the officers will not take money from the government that let Aureth count theirs.' },
   { mark: 'vetted-garrison', faction: 'staff', kind: 'dearer', text: 'the officers remember being vetted like suspects.' },
+  /* Phase 5: mini-game results */
+  { mark: 'held-palace', faction: 'sable', kind: 'cheaper', text: 'Security stood with you the night the officers came, and asks for less.' },
+  { mark: 'palace-fell', faction: 'staff', kind: 'dearer', text: 'the officers know they can push you now.' },
+  { mark: 'bulletin-aired', faction: 'chorus', kind: 'dearer', text: 'the Street saw on the news what you tried to hide.' },
 ];

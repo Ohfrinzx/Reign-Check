@@ -100,6 +100,11 @@ async function seed(page, recipe) {
         s.heldFavours = ['quiet-word', 'adamek-card', 'ilvet-ledger'];
         return s;
       },
+      // Phase 5: a lost mini-game's result, inside the mini-game's own screen.
+      minigameResult: () => {
+        const s = playUntil(fresh(), (x) => x.phase === 'stage' && !!en.activeCard(x)?.minigame);
+        return en.finishMinigame(s, false, 30);
+      },
       // The step before the run ends (a finished run cannot be resumed).
       preEnding: () => {
         let s = fresh(7);
@@ -136,6 +141,17 @@ export async function openFiles(page) {
   if (await page.locator('.rail').isVisible()) return;
   await page.locator('.m-files-btn').click();
   await page.locator('.rail.open').waitFor();
+}
+
+/** Phase 5: open a mini-game in practice mode (fixed seed) and go to `step`. */
+async function practice(page, game, step) {
+  await page.goto(`${BASE}?practice=${game}&seed=7`, { waitUntil: 'networkidle' });
+  const next = page.locator('.mg-foot .btn-primary');
+  if (step === 'story') return;
+  await next.click();
+  if (step === 'howto') return;
+  await next.click();
+  await page.locator('.mg-play').waitFor();
 }
 
 /** Press the screen's "go on" control, whichever one it has. */
@@ -217,6 +233,15 @@ export const SCENES = [
     await p.locator('.rail .kept.fav', { hasText: 'A Quiet Word' }).locator('.btn').click();
     await p.locator('.fav-pop').waitFor();
   } },
+  // Phase 5 mini-games (new screens: added to the checks, not compared)
+  { name: 'mg-story', primary: '.mg-foot .btn-primary', go: async (p) => { await practice(p, 'palace', 'story'); } },
+  { name: 'mg-howto', primary: '.mg-foot .btn-primary', go: async (p) => { await practice(p, 'bulletin', 'howto'); } },
+  { name: 'mg-palace', primary: '.pz-hold', go: async (p) => {
+    await practice(p, 'palace', 'play');
+    await p.locator('.pz-cell').nth(5 * 5 + 2).click(); // select Guard unit 2
+  } },
+  { name: 'mg-bulletin', primary: '.bt-run', go: async (p) => { await practice(p, 'bulletin', 'play'); } },
+  { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {
     await seed(p, 'preEnding'); await closeDemandPops(p);
     for (let i = 0; i < 4 && !(await p.locator('.ending-sheet').count()); i++) {
