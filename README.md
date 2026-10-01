@@ -114,7 +114,8 @@ Sable Office would like to discuss with you.
 workflow, code map), then **[PROJECT_STATUS.md](PROJECT_STATUS.md)** (where
 things stand) and **[docs/SYSTEMS.md](docs/SYSTEMS.md)** (how each system
 works). The phone layout and GitHub Pages hosting are described in
-**[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**.
+**[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**; the brief for
+the mini-games (next) is **[docs/MINIGAMES.md](docs/MINIGAMES.md)**.
 
 ## Commands
 

@@ -6,7 +6,16 @@ one line per step. Full old handovers are in
 `docs/archive/SLICE_NOTES.md`. How the systems work today is in
 `docs/SYSTEMS.md`; the rules and workflow are in `AGENTS.md`.
 
-## Now (2026-09-24)
+## Now (2026-10-01)
+
+**Next job: mini-games (Phase 5). The owner gave the go-ahead** (*"Ready to
+begin mini game implementation"*) **and has ideas they will talk through
+with the agent doing it.** Brief: `docs/MINIGAMES.md`. It covers what
+exists, the rules, testing and shipping, and deliberately no game design.
+Nothing is built yet.
+
+**Balance slice D (factions remember your decisions) is approved:**
+*"Slice D Approved."*
 
 **PLAYTESTED ON THE OWNER'S PHONE AND APPROVED: the mobile web version,
 hosted free on GitHub Pages.** Owner, verbatim: *"Playtested on my phone, everything works now"*
@@ -30,15 +39,11 @@ deploy.
   opened and closed its explanation at once.
 - **Desktop is pixel-identical** to before (40 screenshots compared). No
   game logic changed; no save reset (`SAVE_VERSION` stays 14).
-- Slice D (factions remember) is live too; the owner has not yet said
-  whether it is approved as a balance slice.
+**Later, each needing the owner's go-ahead:** sound, a coup crisis chain,
+the remaining ending types.
 
-**Next, each needing the owner's go-ahead:** mini-games (mobile-first, each
-with its own look), sound, a coup crisis chain, the remaining ending
-types.
-
-**Built and merged, awaiting the owner's playtest: balance slice D —
-factions remember your decisions.** The owner asked for it, verbatim: *"I
+**Balance slice D — factions remember your decisions (approved
+2026-10-01).** The owner asked for it, verbatim: *"I
 do want to update the consequences so factions react to my decisions as
 well. That's a key part of gameplay I would say. add a few more blocked
 options I don't believe I have even seen one during testing."* They chose
@@ -64,6 +69,8 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-10-01** — Slice D approved: *"Slice D Approved."* Mini-games
+  green-lit; brief written (`docs/MINIGAMES.md`), design left to the owner.
 - **2026-09-28** — The blinking "live" status dot is on desktop too (owner
   request). Desktop pictures compared first: only the 7×7px dot changed.
 - **2026-09-24** — Owner request: on a phone the strap's cut-off note now

@@ -1,9 +1,9 @@
 # Design V2 — simplification and the roguelike turn
 
-**Status (2026-09-23): Phases 1–3 are complete and owner-approved; balance
-slice D (factions remember your decisions) is built and awaiting playtest;
-the next job is a mobile web version on GitHub Pages
-(`docs/MOBILE_AND_HOSTING.md`).** This file is the design record: the
+**Status (2026-10-01): Phases 1–3, balance slice D (factions remember your
+decisions) and the mobile web version on GitHub Pages
+(`docs/MOBILE_AND_HOSTING.md`) are complete and owner-approved. The next
+job is mini-games (`docs/MINIGAMES.md`).** This file is the design record: the
 decisions, the evidence behind them and the roadmap (§9, §10). Older
 status notes inside it describe earlier checkpoints and are kept as
 history. **For how the systems work today, see `docs/SYSTEMS.md`**; for
@@ -1337,7 +1337,7 @@ reason, or change one's outcome. Every reaction is shown as "Because you …
 are keyed by card and option id. About 5.7 reacting cards per run; careful
 survival 62% → 67%. `SAVE_VERSION` 13→14.
 
-**Slice D — factions remember (built, awaiting playtest).** Owner request
+**Slice D — factions remember (approved 2026-10-01).** Owner request
 after slice C: factions should react to decisions, and more blocked
 options. Marks now carry faction feelings (shown under each faction, mood
 drift for 4 mornings), 8 faction demands are triggered by decisions, 14
@@ -1375,9 +1375,9 @@ when it's actually picked up.
 
 ### Phase 5 — Remaining nice-to-haves
 
-Lowest priority, no dependencies forcing an order: mini-games (Milestone 5 —
-`MinigameKey`/`CardDef.minigame` already exist as the hook; start with
-Budget Allocation and Cabinet Negotiation), sound, assassination/election-
+Lowest priority, no dependencies forcing an order: mini-games (**started
+2026-10-01**; the owner is designing them with the agent — brief in
+`docs/MINIGAMES.md`; `MinigameKey`/`CardDef.minigame` exist as hooks), sound, assassination/election-
 defeat/constitutional-removal endings, run history/legacy across runs (note
 this likely folds into Phase 2's meta-progression, §4.5, rather than being
 built twice).

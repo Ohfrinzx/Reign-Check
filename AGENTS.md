@@ -13,7 +13,8 @@ the code map, change it here.
 3. `docs/SYSTEMS.md` — how every game system works now, with the numbers.
 4. For the phone layout and GitHub Pages hosting: `docs/MOBILE_AND_HOSTING.md`
    (§0 is what was built).
-5. `docs/DESIGN_V2.md` before UI or design work — the design record.
+5. For mini-games (the next job): `docs/MINIGAMES.md`.
+6. `docs/DESIGN_V2.md` before UI or design work — the design record.
 
 `docs/archive/` holds old handovers and slice notes. It is history, not
 instructions; parts of it are out of date.
@@ -42,8 +43,8 @@ anything else without asking.**
   and Poster/Broadsheet look; the roguelike layer (acts, confidence vote,
   Back Room shop, mandates, run deck, meta-progression); faction demands,
   character events, crisis chains; and the balance phase (slices A–C).
-- **Balance slice D — factions remember your decisions — is built, merged
-  and awaiting the owner's playtest.** Factions show what they remember,
+- **Balance slice D — factions remember your decisions — approved
+  (2026-10-01):** *"Slice D Approved."* Factions show what they remember,
   make demands because of your decisions, and handle demands differently
   (cheaper, dearer, no bribes); more blocked options on cards. Details in
   `docs/SYSTEMS.md` §5 and §8.
@@ -54,8 +55,11 @@ anything else without asking.**
   At 1080px and narrower the game uses a phone layout (☰ menu, faction
   strip + Files drawer, compact floating action button); desktop is pixel-identical to
   before. Details: `docs/MOBILE_AND_HOSTING.md` §0.
-- **Later, with the owner's go-ahead:** mini-games (build them mobile-first,
-  each with its own look), sound, a coup crisis chain.
+- **Next: mini-games (Phase 5) — the owner has given the go-ahead and will
+  describe their ideas to the agent doing it.** Brief: `docs/MINIGAMES.md`.
+  Nothing is built yet.
+- **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
+  remaining ending types.
 - `SAVE_VERSION` is **14**. Tests: **165**, all passing.
 
 ## 3. How work is done here
@@ -284,7 +288,7 @@ public/              fonts/ (relative URLs — required under /Reign-Check/),
                      icons/ + manifest.webmanifest (Home Screen)
 .github/workflows/   deploy.yml — test, build, publish to GitHub Pages
 tools/               Playwright browser checks (§7)
-docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, DESIGN_V2.md,
+docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, MINIGAMES.md, DESIGN_V2.md,
                      mockups/ (design exploration), archive/ (history)
 ```
 
