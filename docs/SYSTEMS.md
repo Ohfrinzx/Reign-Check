@@ -308,8 +308,10 @@ that point there were 183 unit tests, `SAVE_VERSION` 14, and a clean build.
   how well it went, 0–100, in `flags.mgScore` for the result text). So
   every effect goes through `applyEffects()`, and the tests and the probe
   play past a mini-game with `chooseOption()`.
-- **The screen** (`MinigameScreen.tsx`, an `App.tsx` early return): the
-  story (built from the run), how to play (with what winning and losing
+- **The screen** (`MinigameScreen.tsx`, an `App.tsx` early return): a
+  short title card first ("Mini-game", the name, one line of what is
+  happening; ~2–2.5 s, its own style per game, tap or Enter skips — owner:
+  the hard cut was "really abrupt"), then the story (built from the run), how to play (with what winning and losing
   mean), the game, a result stamp, then the card's outcome. The three
   resources stay visible. There is no skip; **Give up** asks first and
   counts as a loss. **A reload restarts the same game** at its story: the

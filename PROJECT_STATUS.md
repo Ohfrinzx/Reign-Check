@@ -83,6 +83,11 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-10-01** — Owner: the cut into a mini-game was *"really abrupt"*.
+  Chose a transition only (no warning card), own style per game: each game
+  now opens with a title card (Palace: lights go down + siren pulse;
+  Bulletin: a TV switching on), then cross-fades into the story.
+
 - **2026-10-01** — Mini-games slice 1 built: the mini-game system, Hold
   the Palace (coups), The 7pm Bulletin (daily). Owner chose: Legitimacy +
   faction on a loss, replaces one card a day, small win reward, system +
