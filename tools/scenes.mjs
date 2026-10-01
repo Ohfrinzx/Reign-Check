@@ -146,6 +146,9 @@ export async function openFiles(page) {
 /** Phase 5: open a mini-game in practice mode (fixed seed) and go to `step`. */
 async function practice(page, game, step) {
   await page.goto(`${BASE}?practice=${game}&seed=7`, { waitUntil: 'networkidle' });
+  // the opening title card plays first, then fades away over the story
+  await page.locator('.mg-story').waitFor();
+  await page.locator('.mg-veil').waitFor({ state: 'detached' });
   const next = page.locator('.mg-foot .btn-primary');
   if (step === 'story') return;
   await next.click();

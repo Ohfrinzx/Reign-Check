@@ -18,6 +18,8 @@ import { BASE, closeDemandPops } from './scenes.mjs';
  *      counts as a loss, the result costs Legitimacy, and the day goes on.
  *   4. The Army's strike: losing it ends the run (the result shows first).
  *   5. Reduce Motion: the calm look, and the searchlight is off.
+ *   6. The opening title card: the game's name and a line of what is going
+ *      on, gone by itself in about 2-3 s; a tap skips it.
  */
 
 const errors = [];
@@ -220,7 +222,17 @@ try {
     await page.reload({ waitUntil: 'networkidle' });
     await page.getByRole('button', { name: /^Continue — Day/ }).click();
     await closeDemandPops(page);
+    // a title card says what is happening before the game's story
+    await page.locator('.mg-veil.in .mg-veil-title').waitFor();
+    assert.match(await page.locator('.mg-veil-title').innerText(), /^the 7pm bulletin$/i);
+    assert.match(await page.locator('.mg-veil-kicker').innerText(), /mini-game/i);
+    assert.ok((await page.locator('.mg-veil-teaser').innerText()).length > 10, 'The title card says what is going on');
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: shotPath('MG-veil-bulletin.png') });
+    const t0 = Date.now();
     await page.locator('.app.mg-full.mg-bulletin .mg-story').waitFor();
+    await page.locator('.mg-veil').waitFor({ state: 'detached' });
+    assert.ok(Date.now() - t0 < 3200, 'The title card leaves by itself');
     assert.ok(await page.locator('.mg-top .res').count(), 'The three resources stay visible in a mini-game');
     await page.screenshot({ path: shotPath('MG-run-story.png') });
     await page.keyboard.press('1'); // number keys choose options on cards, never here
@@ -296,6 +308,22 @@ try {
     await page.locator('.mg-result-body .outcome-foot .btn-primary').click();
     await page.locator('.ending-sheet').waitFor();
     assert.match(await page.locator('.ending-title').innerText(), /.+/);
+    await page.close();
+  }
+
+  /* ------------------------------------------ 6. the title card skips */
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await page.goto(`${BASE}?practice=palace&seed=7`, { waitUntil: 'networkidle' });
+    await page.locator('.mg-veil.in').waitFor();
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: shotPath('MG-veil-palace-390.png') });
+    const t0 = Date.now();
+    await page.locator('.mg-veil').tap();
+    await page.locator('.mg-story').waitFor();
+    assert.ok(Date.now() - t0 < 900, 'A tap skips the title card');
+    await page.locator('.mg-veil').waitFor({ state: 'detached' });
     await page.close();
   }
 

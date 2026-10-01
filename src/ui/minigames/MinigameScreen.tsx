@@ -15,6 +15,9 @@ import { BulletinGame } from './BulletinGame';
  * PHASE 5 — the full-screen frame every mini-game plays in (App.tsx early
  * return, like the situation room). Four steps, owner's brief:
  *   story → how to play → the game → the result (then the engine's outcome).
+ * It opens with a short title card (the "veil"), so a player who did not
+ * expect a mini-game sees what is happening: each game has its own hand-off
+ * (owner: the old hard cut was "really abrupt"). Tap or Enter skips it.
  * The game's layout comes from minigameSeed(), so a reload restarts the SAME
  * game; there is no skip, and "Give up" counts as a loss (owner's choice).
  * Each game has its own look: `.mg-<key>` on the frame.
@@ -41,6 +44,21 @@ export function MinigameScreen({
   const [step, setStep] = useState<Step>(s.phase === 'resolve' ? 'done' : 'story');
   const [end, setEnd] = useState<MinigameEnd | null>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
+  // The opening title card: 'in' while it plays, 'out' while it fades away
+  // over the story, then gone. Not shown when returning to a result.
+  const [veil, setVeil] = useState<'in' | 'out' | null>(s.phase === 'resolve' ? null : 'in');
+  const liftVeil = () => setVeil((v) => (v === 'in' ? 'out' : v));
+  useEffect(() => {
+    if (veil === 'in') {
+      // long enough to read: the Bulletin's TV has to switch on first
+      const t = window.setTimeout(liftVeil, reduced ? 1400 : key === 'bulletin' ? 2400 : 2100);
+      return () => window.clearTimeout(t);
+    }
+    if (veil === 'out') {
+      const t = window.setTimeout(() => setVeil(null), reduced ? 250 : 550);
+      return () => window.clearTimeout(t);
+    }
+  }, [veil, reduced, key]);
 
   const seed = minigameSeed(s, card.id);
   const bulletin = useMemo(() => (key === 'bulletin' ? bulletinSetup(s, seed) : null), [key, s, seed]);
@@ -66,13 +84,14 @@ export function MinigameScreen({
       if ((e.target as HTMLElement)?.closest('button')) return;
       if (s.phase === 'resolve') return; // App's own Enter handler continues the day
       e.preventDefault();
+      if (veil === 'in') { liftVeil(); return; } // skip the title card
       if (step === 'story') setStep('howto');
       else if (step === 'howto') setStep('play');
       else if (step === 'done' && end) onFinish(end.won, end.score);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [step, end, onFinish, s.phase]);
+  }, [step, end, onFinish, s.phase, veil]);
 
   const finish = (e: MinigameEnd) => { setEnd(e); setStep('done'); setConfirmQuit(false); };
   const giveUp = () => finish({
@@ -103,10 +122,27 @@ export function MinigameScreen({
         </div>
       )}
 
+      {veil && (
+        <div
+          className={`mg-veil mg-veil-${key} ${veil}`}
+          onClick={liftVeil}
+          role="presentation"
+        >
+          <div className="mg-veil-fx" aria-hidden="true" />
+          <div className="mg-veil-card">
+            <div className="mg-veil-kicker">{practice ? 'Practice · mini-game' : 'Mini-game'}</div>
+            <div className="mg-veil-title">{intro.title}</div>
+            <div className="mg-veil-teaser">{intro.teaser}</div>
+          </div>
+        </div>
+      )}
+
       {s.phase === 'resolve' ? (
         <main className="mg-body mg-result-body">
           <OutcomeView s={s} onContinue={onContinue} continueLabel={continueLabel} />
         </main>
+      ) : veil === 'in' ? (
+        <main className="mg-body" />
       ) : step === 'story' ? (
         <>
           <main className="mg-body">

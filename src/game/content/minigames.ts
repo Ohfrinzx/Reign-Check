@@ -180,6 +180,8 @@ export interface MinigameIntro {
   /** small label over the title, e.g. "Channel Seven · 18:40" */
   kicker: string;
   title: string;
+  /** one line for the title card that opens the game (the transition) */
+  teaser: string;
   /** the story so far, in short paragraphs */
   story: string[];
   /** how to play, one step per line */
@@ -196,6 +198,7 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
     return {
       kicker: `Channel Seven · Day ${s.day} · 18:40`,
       title: 'The 7pm Bulletin',
+      teaser: 'Channel Seven goes live at seven. You decide what airs.',
       story: [
         'Channel Seven\'s 7pm news reaches six adults in ten. What it says tonight, the country believes by Thursday.',
         lead
@@ -223,6 +226,7 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
   return {
     kicker: `Palace Guard command · Day ${s.day} · 03:00`,
     title: strike ? 'The Army Moves' : 'Hold the Palace',
+    teaser: strike ? 'The army is coming for the Palace. Hold it, or it is over.' : 'Troops are moving on the Palace. You take command.',
     story: strike
       ? [
         'The army\'s ultimatum ran out at midnight. You did not meet it.',
