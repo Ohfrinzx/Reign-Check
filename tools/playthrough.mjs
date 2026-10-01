@@ -122,8 +122,9 @@ if (hasContinue) {
   // vote are fullscreen with no masthead, so a run saved in one of them
   // resumes there — all count as a successful resume. (This run is not
   // seeded, so where it stops varies; the situation room was missing here
-  // until a run happened to stop mid-crisis.)
-  const resumed = await page.locator('.masthead .mid .lbl, .shop, .sr-stage .doc, .vote-screen').count() > 0;
+  // until a run happened to stop mid-crisis.) A mini-game is a fullscreen
+  // scene too (Phase 5): it resumes at its title card or story.
+  const resumed = await page.locator('.masthead .mid .lbl, .shop, .sr-stage .doc, .vote-screen, .mg-full').count() > 0;
   log.push('RESUMED OK: ' + (resumed ? 'yes' : 'no'));
   resumedOk = resumed;
   await page.screenshot({ path: shotPath('98-resumed.png'), fullPage: true });

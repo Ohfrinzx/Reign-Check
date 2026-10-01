@@ -2108,7 +2108,7 @@ abbr.term{
   background:#f9edd6;border:3px solid #8a3b1d;border-radius:6px;overflow:hidden;
   box-shadow:0 14px 34px rgba(90,36,16,.22), inset 0 0 50px rgba(138,59,29,.12);
 }
-.bl-river{position:absolute;left:-10%;right:-10%;top:58%;height:9%;background:#9cc6d8;transform:rotate(-8deg);opacity:.7}
+.bl-river{position:absolute;left:0;right:0;top:58%;height:9%;background:#9cc6d8;transform:skewY(-8deg);opacity:.7}
 .bl-streets{position:absolute;inset:0;
   background:repeating-linear-gradient(90deg, transparent 0 46px, rgba(138,59,29,.13) 46px 49px),
     repeating-linear-gradient(0deg, transparent 0 46px, rgba(138,59,29,.13) 46px 49px)}
