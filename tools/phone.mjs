@@ -8,7 +8,8 @@ import { BASE, SCENES, closeDemandPops } from './scenes.mjs';
  * (360×800), tablet (768×1024) and landscape phone (844×390) sizes.
  *
  * Part 1, every screen in tools/scenes.mjs at every size:
- *   - nothing sticks out sideways: the page is no wider than the DEVICE
+ *   - nothing sticks out sideways (inside a mini-game stage marked
+ *     data-clip, only the stage itself is measured): the page is no wider than the DEVICE
  *     (screen.width — with mobile emulation innerWidth silently widens to
  *     fit too-wide content), and no visible element reaches past either
  *     edge (inner scroll areas clip overflow, so the page width alone
@@ -55,6 +56,10 @@ async function measure(page, primarySel, safeBottom = 0) {
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.opacity === '0' || el.closest('.sr-only')) continue;
       if (el.closest('.sp.ticker')) continue; // the news ticker scrolls inside its clipped box on purpose
+      // a mini-game stage marked data-clip clips what moves inside it on
+      // purpose (a street wider than its frame, papers sliding onto a belt);
+      // the stage itself is still measured, only what is inside it is not
+      if (el.parentElement?.closest('[data-clip]')) continue;
       if (r.right > W + 1 || r.left < -1) {
         out.offenders.push(`${el.tagName.toLowerCase()}.${[...el.classList].join('.')} [${Math.round(r.left)}→${Math.round(r.right)}]`);
       }

@@ -100,7 +100,7 @@ export function BreadLinesGame({ setup, reduced, paused, onEnd }: {
         </div>
       </div>
 
-      <div className="bl-map" onClick={() => setSel(null)}>
+      <div className="bl-map" data-clip onClick={() => setSel(null)}>
         <div className="bl-river" aria-hidden="true" />
         <div className="bl-streets" aria-hidden="true" />
         <div className="bl-hq" aria-hidden="true" style={{ left: `${HQ.x}%`, top: '96%' }}>★</div>

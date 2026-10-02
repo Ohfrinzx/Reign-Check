@@ -307,7 +307,7 @@ export function ParadeGame({ setup, composure, reduced, paused, onEnd }: {
 
   return (
     <div className="pd">
-      <div className={`pd-street${hurt ? ' oops' : ''}${handPose === 'duck' ? ' ducking' : ''}`}>
+      <div className={`pd-street${hurt ? ' oops' : ''}${handPose === 'duck' ? ' ducking' : ''}`} data-clip>
         <div className="pd-world" style={{ ['--walk' as string]: walked }}>
           <Street phase={reduced ? 0 : (now / 2600) % 1} />
         </div>

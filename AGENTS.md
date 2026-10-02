@@ -348,7 +348,9 @@ docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, MINIGAMES.md, DESIGN_V2.
   `env(safe-area-inset-bottom)` to fill the strip under it** — on iPhone
   Safari that "safe area" is its floating toolbar (~80px); lift the element
   above it instead. A shrunken desktop browser reports 0, so only
-  `phone.mjs`'s `iphone-safari` size catches this. The strap note is a
+  `phone.mjs`'s `iphone-safari` size catches this. A mini-game stage that
+  clips moving things on purpose carries `data-clip` (phone.mjs then
+  measures the stage, not what is inside it). The strap note is a
   news ticker on phones (`StrapNote.tsx`); `phone.mjs` ignores the ticker's
   deliberately clipped text in its "sticks out" check.
 

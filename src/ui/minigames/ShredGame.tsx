@@ -103,7 +103,7 @@ export function ShredGame({ setup, reduced, paused, onEnd }: {
         </span>
       </div>
 
-      <div className="sh-desk">
+      <div className="sh-desk" data-clip>
         <div className="sh-lamp" aria-hidden="true" />
         <div className={`sh-box${boxHit ? ' hit' : ''}`} aria-label="The auditors' box">
           <span className="sh-glass" aria-hidden="true" />
