@@ -392,7 +392,7 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
         'Your security detail hates it. The cameras love it. Most of the crowd is friendly. Most.',
       ],
       howTo: [
-        'Things come down the road towards you. Make the right move just as each one reaches the line.',
+        'Things come out of the crowd towards you. A ring closes around each one: make the right move as the ring closes.',
         'Egg → DUCK. Child with flowers → STOP. Cheering crowd → WAVE.',
         'Protest sign → do nothing. React to it and the cameras catch you.',
         `A wrong move, a move at the wrong moment, or a miss costs one composure. You have ${walked ? 4 : 3}.`,
@@ -407,23 +407,26 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
   }
   if (cardId === MG_CARD.shred) {
     const crisis = s.crisis?.id === 'ledger';
+    const allowed = s.act >= 3 ? 2 : 1;
     return {
       kicker: `Your office · Day ${s.day} · 16:20`,
       title: 'Shred the Ledger',
-      teaser: 'The auditors are in the building. Some papers cannot be on your desk.',
+      teaser: 'The auditors are in your office. Some papers must never reach them.',
       story: [
         crisis
-          ? 'The Free Zone Ledger has brought the auditors to your floor. They are walking down the corridor now.'
-          : 'The Aureth Union sent auditors, and the Finance Ministry let them in. They are walking down the corridor now.',
-        'Some of the papers on your desk came from the Ilvet Free Zone. They carry its red stamp. They need to be confetti before the door opens.',
+          ? 'The Free Zone Ledger has brought the auditors to your floor. Everything on your desk is going into their box.'
+          : 'The Aureth Union sent auditors, and the Finance Ministry let them in. Everything on your desk is going into their box.',
+        'Some of those papers came from the Ilvet Free Zone. They carry its red stamp. They need to be confetti before they get there.',
       ],
       howTo: [
-        'A pile of papers lands on the desk. Tap every paper with the red square Ilvet stamp: it goes in the shredder.',
-        'Everything else stays: blue seals, plain papers. Shredding a clean paper jams the shredder for a moment, and it counts as a mistake.',
-        'When the footsteps reach the door, any red-stamped paper still on the desk is evidence.',
-        s.act >= 2 ? 'Watch for tricks: a red stamp crossed out (VOID) is clean.' : 'Later on there will be tricks. Look at the stamp, not just the colour.',
-        ...(s.act >= 3 ? ['A pale red stamp is still dirty. A round red seal is not the Ilvet stamp: keep it.'] : []),
-        'More than two mistakes and you lose.',
+        'Papers ride two belts towards the auditors\' box. Tap a paper with the red square stamp to shred it before it gets there.',
+        'Everything else must reach the box: blue seals, plain papers. Shredding a clean paper jams the shredder for a moment.',
+        'Some papers come face-down. Tap once to turn one over, again to shred it.',
+        'Tricks: a red stamp crossed out (VOID) is clean.'
+          + (s.act >= 2 ? ' A round red seal is not the square stamp: let it go.' : '')
+          + (s.act >= 3 ? ' A pale red stamp is still dirty.' : ''),
+        'The belts speed up wave by wave.',
+        `A red-stamped paper in the box, or a jam, is a mistake. ${allowed === 1 ? 'One is allowed' : 'Two are allowed'}; one more and you lose.`,
       ],
       stakes: {
         win: 'Win: Legitimacy goes up, every faction warms a little (the Elites most), and scandal pressure falls.',

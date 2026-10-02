@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Paper, PaperKind, ShredSetup, ShredState } from '../../game/minigames/shred';
 import {
-  currentPile, isDirty, MISTAKES_ALLOWED, shredPaper, shredScore, shredStart, shredTick, shredTimeLeft,
+  currentWave, isDirty, isFaceUp, LANES, onBelt, PAPER_W, paperX, shredScore, shredStart, shredTick, tapPaper,
 } from '../../game/minigames/shred';
 import type { MinigameEnd } from './MinigameScreen';
 import { useClock } from './useClock';
 
 /**
  * SHRED THE LEDGER — the desk. Rules in game/minigames/shred.ts; this runs
- * the clock and turns taps into papers fed to the shredder.
+ * the clock and turns taps into flips and shreds.
  *
- * Look: a dark walnut desk under a lamp, white papers scattered on it, a
- * steel shredder at the bottom. A tapped paper flies into the slot and comes
- * out as ribbons; a clean one jams it (it shakes, a red light). Along the
- * top, the auditors' footsteps cross the corridor towards the door. The
- * stamps are drawn, not written: red square = shred.
+ * Look: a dark walnut desk under a lamp. Two rubber conveyor belts carry
+ * papers left to right into the auditors' box (a grey crate with a
+ * magnifying glass). A tapped paper drops into the shredder below and comes
+ * out as ribbons; a clean one jams it (it shakes, a red light). Face-down
+ * papers show a manila back with a "?" until you turn them over. The stamps
+ * are drawn, not written: red square = shred.
  */
 
 function Stamp({ kind }: { kind: PaperKind }) {
@@ -33,84 +34,118 @@ function Stamp({ kind }: { kind: PaperKind }) {
   }
 }
 
-function PaperCard({ p, gone, jammed, onTap }: { p: Paper; gone: boolean; jammed: boolean; onTap: () => void }) {
-  return (
-    <button
-      type="button"
-      className={`sh-paper${gone ? ` gone${isDirty(p.kind) ? '' : ' wrong'}` : ''}`}
-      style={{ left: `${p.x}%`, top: `${p.y}%`, ['--rot' as string]: `${p.rot}deg` }}
-      disabled={gone || jammed}
-      // pointer-down, not click: a tap that finishes a pile must not land as a
-      // click on the next pile's paper under the finger. Keys: Enter/Space.
-      onPointerDown={(e) => { e.preventDefault(); onTap(); }}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onTap(); } }}
-      aria-label={`Paper ${p.id}`}
-    >
-      <span className="sh-lines" aria-hidden="true"><i /><i /><i /><i /><i /></span>
-      <Stamp kind={p.kind} />
-    </button>
-  );
-}
+/** A paper leaving the belt: into the shredder, or into the box. */
+interface Ghost { key: string; p: Paper; x: number; how: 'shred' | 'jam' | 'box' | 'evidence' }
 
 export function ShredGame({ setup, reduced, paused, onEnd }: {
   setup: ShredSetup; reduced: boolean; paused: boolean; onEnd: (e: MinigameEnd) => void;
 }) {
-  const [st, setSt] = useState<ShredState>(() => shredStart(setup, 0));
+  const [st, setSt] = useState<ShredState>(() => shredStart(setup));
   const now = useClock(!paused && !st.over);
   const nowRef = useRef(0);
   nowRef.current = now;
   const ended = useRef(false);
+  const [ghosts, setGhosts] = useState<Ghost[]>([]);
+  const prevFate = useRef<Record<string, string>>({});
 
   useEffect(() => { setSt((s) => shredTick(s, now)); }, [now]);
+
+  // every paper that just left the belt gets a short exit animation
+  useEffect(() => {
+    const fresh: Ghost[] = [];
+    for (const p of setup.papers) {
+      const f = st.fate[p.id];
+      if (!f || prevFate.current[p.id]) continue;
+      prevFate.current[p.id] = f;
+      const how = f === 'shredded' ? 'shred' : f === 'jammed' ? 'jam' : f === 'evidence' ? 'evidence' : 'box';
+      fresh.push({ key: `${p.id}-${how}`, p, x: Math.min(100 - PAPER_W / 2, paperX(p, nowRef.current)), how });
+    }
+    if (!fresh.length) return;
+    setGhosts((g) => [...g, ...fresh]);
+    window.setTimeout(() => setGhosts((g) => g.filter((x) => !fresh.includes(x))), 650);
+  }, [st.fate, setup.papers]);
 
   useEffect(() => {
     if (!st.over || ended.current) return;
     ended.current = true;
     const won = st.over === 'won';
+    const allowed = setup.d.allowed;
     const t = window.setTimeout(() => onEnd({
       won,
       score: shredScore(st),
       headline: won
         ? (st.evidence + st.jams === 0 ? 'Not a scrap left for them.' : 'They found a jammed shredder and nothing else.')
         : 'The auditors have the papers.',
-      detail: `${st.evidence} paper${st.evidence === 1 ? '' : 's'} left as evidence, ${st.jams} jam${st.jams === 1 ? '' : 's'}. You were allowed ${MISTAKES_ALLOWED} mistakes.`,
+      detail: `${st.evidence} paper${st.evidence === 1 ? '' : 's'} reached the box, ${st.jams} jam${st.jams === 1 ? '' : 's'}. You were allowed ${allowed} mistake${allowed === 1 ? '' : 's'}.`,
     }), reduced ? 300 : 900);
     return () => window.clearTimeout(t);
-  }, [st, onEnd, reduced]);
+  }, [st, setup.d.allowed, onEnd, reduced]);
 
   const tap = (id: string) => {
     if (paused) return;
-    setSt((s) => shredPaper(s, id, nowRef.current));
+    setSt((s) => tapPaper(s, id, nowRef.current));
   };
 
-  const pile = currentPile(st);
-  const left = shredTimeLeft(st, now);
-  const walk = 1 - left / st.setup.d.pileMs;
+  const belt = onBelt(st, now);
   const jammed = now < st.jamUntil;
   const mistakes = st.evidence + st.jams;
+  const left = setup.papers.filter((p) => !st.fate[p.id]).length;
+  const boxHit = st.last?.kind === 'evidence' && now - st.last.at < 700;
+  const beltSpeed = belt[0]?.crossMs ?? setup.d.crossMs[0];
 
   return (
     <div className="sh">
-      <div className="sh-corridor" aria-label="The auditors are coming">
-        <span className="sh-door" aria-hidden="true" />
-        <span className="sh-feet" aria-hidden="true" style={{ left: `${Math.min(1, walk) * 88}%` }}>
-          <i /><i />
-        </span>
-      </div>
       <div className="sh-hud">
-        <span className="sh-pile">Pile <b>{Math.min(st.pile + 1, st.setup.piles.length)}</b> / {st.setup.piles.length}</span>
-        <span className={`sh-mistakes${mistakes >= MISTAKES_ALLOWED ? ' warn' : ''}`}>
-          {Array.from({ length: MISTAKES_ALLOWED + 1 }, (_, i) => <i key={i} className={i < mistakes ? 'x' : ''} />)}
+        <span className="sh-pile">Wave <b>{currentWave(st, now)}</b> / {setup.d.waves}</span>
+        <span className="sh-left"><b>{left}</b> papers</span>
+        <span className={`sh-mistakes${mistakes >= setup.d.allowed ? ' warn' : ''}`} aria-label={`${mistakes} mistakes, ${setup.d.allowed} allowed`}>
+          {Array.from({ length: setup.d.allowed + 1 }, (_, i) => <i key={i} className={i < mistakes ? 'x' : ''} />)}
         </span>
       </div>
 
-      <div className={`sh-desk${st.last?.kind === 'evidence' && now - st.last.at < 700 ? ' caught' : ''}`}>
+      <div className="sh-desk">
         <div className="sh-lamp" aria-hidden="true" />
-        <div className="sh-pilezone" key={st.pile}>
-          {pile.map((p) => (
-            <PaperCard key={p.id} p={p} gone={st.shredded.includes(p.id)} jammed={jammed || paused || !!st.over} onTap={() => tap(p.id)} />
-          ))}
+        <div className={`sh-box${boxHit ? ' hit' : ''}`} aria-label="The auditors' box">
+          <span className="sh-glass" aria-hidden="true" />
         </div>
+        {Array.from({ length: LANES }, (_, lane) => (
+          <div key={lane} className="sh-belt" style={{ top: `${8 + lane * 46}%` }}>
+            <span
+              className="sh-rollers"
+              aria-hidden="true"
+              style={{ animationDuration: `${beltSpeed / 10}ms`, animationPlayState: paused || st.over ? 'paused' : 'running' }}
+            />
+            {belt.filter((p) => p.lane === lane).map((p) => {
+              const up = isFaceUp(st, p);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`sh-paper${up ? '' : ' down'}${st.flipped.includes(p.id) ? ' flipped' : ''}${isDirty(p.kind) && paperX(p, now) > 70 && up ? ' late' : ''}`}
+                  style={{ left: `${paperX(p, now)}%`, width: `${PAPER_W}%`, ['--rot' as string]: `${p.rot}deg` }}
+                  disabled={paused || !!st.over}
+                  // pointer-down, not click: a tap must never also land on the next paper
+                  onPointerDown={(e) => { e.preventDefault(); tap(p.id); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(p.id); } }}
+                  aria-label={up ? `Paper ${p.id}` : `Face-down paper ${p.id}: tap to turn it over`}
+                >
+                  {up ? (
+                    <>
+                      <span className="sh-lines" aria-hidden="true"><i /><i /><i /><i /></span>
+                      <Stamp kind={p.kind} />
+                    </>
+                  ) : <span className="sh-back" aria-hidden="true">?</span>}
+                </button>
+              );
+            })}
+            {ghosts.filter((g) => g.p.lane === lane).map((g) => (
+              <span key={g.key} className={`sh-paper ghost ${g.how}`} style={{ left: `${g.x}%`, width: `${PAPER_W}%`, ['--rot' as string]: `${g.p.rot}deg` }} aria-hidden="true">
+                <span className="sh-lines"><i /><i /><i /><i /></span>
+                <Stamp kind={g.p.kind} />
+              </span>
+            ))}
+          </div>
+        ))}
       </div>
 
       <div className={`sh-shredder${jammed ? ' jam' : ''}${st.last?.kind === 'shred' && now - st.last.at < 400 ? ' chew' : ''}`}>

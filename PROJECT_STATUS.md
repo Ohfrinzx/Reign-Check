@@ -17,13 +17,17 @@ just reading and clicking buttons"* (2–3 reading games are fine; the
 story and how-to screens keep their text).
 - **Three new daily games, little reading:** **Bread Lines** (real-time
   city map: talk or police each flare-up), **The Last Kilometre** (rhythm:
-  duck / wave / stop as things reach you), **Shred the Ledger** (tap the
-  red-stamped papers before the auditors arrive). Each has its own look,
+  duck / wave / stop as things come out of the crowd), **Shred the Ledger**
+  (shred the red-stamped papers on the belts before they reach the
+  auditors' box). Each has its own look,
   title card and animations.
 - **Daily games now rotate** (never the same two days running), and
   **events pick the game**: the Bread Riots or a hostile Street → Bread
   Lines; the Free Zone Ledger → Shred.
 - **Bigger win rewards:** careful play survives 59% (was 46% after slice 1).
+- **After the owner's playtest (2026-10-02):** The Last Kilometre got a new
+  look (a first-person street); Shred the Ledger got conveyor belts and
+  face-down papers (harder, still fair).
 - **Bug found and fixed while testing:** on a phone, the tap that finished
   a pile of papers also landed as a click on the next pile's paper.
 - No save reset (`SAVE_VERSION` 14). Tests 195.
@@ -87,6 +91,15 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-02** — Owner playtest of slice 2: The Last Kilometre's idea is
+  fine but *"the overall look and design sucks"*; Shred the Ledger is *"to
+  easy"* — make it tougher, but *"not in the way that even if you do
+  everything right you automatically lose"*. Chosen and built: a polished
+  first-person street for the Kilometre (illustrated avenue, animated
+  crowd, items thrown from the crowd, a closing timing ring, the Chair's
+  hands); conveyor belts and face-down papers for Shred (average player
+  95% → 82% in act 1, a slower careful player still wins most).
 
 - **2026-10-01** — Mini-games slice 1 approved (*"all works and we can
   move onto the next"*). Slice 2 built: Bread Lines, The Last Kilometre,

@@ -54,24 +54,37 @@ function walk(act: number, sigma: number, seed: number): boolean {
   return s.over === 'won';
 }
 
-/** A shredder who looks at each paper, then taps; fooled by tricks `fool` of the time. */
-function shred(act: number, tapMs: number, seed: number, fool: number): SH.ShredState {
+/**
+ * A shredder who can look at one paper at a time (scan ms), taps in tap ms,
+ * mistaps a moving paper now and then, and is fooled by tricks `fool` of
+ * the time. Deals with the paper nearest the box first.
+ */
+function shred(act: number, seed: number, scan: number, tap: number, fool: number): SH.ShredState {
   const r = makeRng(seed * 13 + 3);
-  let s = SH.shredStart(SH.shredSetup(seed, SH.shredDifficulty(act)), 0);
-  while (!s.over) {
-    const pile = s.pile;
-    let now = s.pileAt + 500;
-    for (const p of SH.currentPile(s)) {
-      now += tapMs * 0.6;
+  const miss = 0.06 + (tap - 220) / 1000;
+  let s = SH.shredStart(SH.shredSetup(seed, SH.shredDifficulty(act)));
+  const seen = new Set<string>();
+  const verdict: Record<string, boolean> = {};
+  let busyUntil = 0;
+  for (let now = 0; now <= s.setup.endMs + 500 && !s.over; now += 20) {
+    s = SH.shredTick(s, now);
+    if (s.over || now < busyUntil) continue;
+    const belt = SH.onBelt(s, now).filter((x) => SH.paperX(x, now) > 2).sort((a, b) => SH.paperX(b, now) - SH.paperX(a, now));
+    const p = belt.find((x) => !SH.isFaceUp(s, x) || !seen.has(x.id) || verdict[x.id]);
+    if (!p) continue;
+    if (!SH.isFaceUp(s, p)) { if (!r.chance(miss)) s = SH.tapPaper(s, p.id, now); busyUntil = now + tap; continue; }
+    if (!seen.has(p.id)) {
+      seen.add(p.id);
       const err = ['void', 'faded', 'redseal'].includes(p.kind) ? fool : 0.015;
-      if (SH.isDirty(p.kind) === r.chance(err)) continue;
-      now = Math.max(now + tapMs, s.jamUntil);
-      s = SH.shredTick(s, now);
-      if (s.over || s.pile !== pile) break;
-      s = SH.shredPaper(s, p.id, now);
-      if (s.over || s.pile !== pile) break;
+      verdict[p.id] = SH.isDirty(p.kind) !== r.chance(err);
+      busyUntil = now + scan;
+      continue;
     }
-    if (!s.over && s.pile === pile) s = SH.shredTick(s, s.pileAt + s.setup.d.pileMs + 1);
+    if (now < s.jamUntil) continue;
+    busyUntil = now + tap;
+    if (r.chance(miss)) continue;
+    s = SH.tapPaper(s, p.id, now);
+    verdict[p.id] = false;
   }
   return s;
 }
@@ -170,46 +183,59 @@ describe('The Last Kilometre (rules)', () => {
 });
 
 describe('Shred the Ledger (rules)', () => {
-  it('the same seed gives the same piles; every pile has dirty papers; tricks only from act 2', () => {
+  it('the same seed gives the same belts; papers on one belt never overlap; tricks from act 1', () => {
     for (const act of [1, 2, 3]) {
       const a = SH.shredSetup(5, SH.shredDifficulty(act));
       expect(a).toEqual(SH.shredSetup(5, SH.shredDifficulty(act)));
-      for (const pile of a.piles) expect(pile.filter((p) => SH.isDirty(p.kind)).length).toBeGreaterThanOrEqual(2);
-      const kinds = new Set(a.piles.flat().map((p) => p.kind));
-      if (act === 1) expect([...kinds].every((k) => ['dirty', 'clean', 'plain'].includes(k))).toBe(true);
+      for (let lane = 0; lane < SH.LANES; lane++) {
+        const ps = a.papers.filter((p) => p.lane === lane);
+        for (let i = 1; i < ps.length; i++) {
+          // when the next paper enters, the one before has moved more than a paper's width on
+          expect(SH.paperX(ps[i - 1], ps[i].enterAt)).toBeGreaterThan(0);
+        }
+      }
+      expect(a.papers.some((p) => p.faceDown)).toBe(true);
+      expect(a.papers.some((p) => p.kind === 'void')).toBe(true);
     }
   });
 
-  it('shredding a clean paper jams the shredder; dirty papers left at the door are evidence; the last dirty one ends the pile early', () => {
-    const setup = SH.shredSetup(5, SH.shredDifficulty(1));
-    let s = SH.shredStart(setup, 0);
-    const pile = SH.currentPile(s);
-    const clean = pile.find((p) => !SH.isDirty(p.kind))!;
-    s = SH.shredPaper(s, clean.id, 100);
-    expect(s.jams).toBe(1);
-    const dirty = pile.filter((p) => SH.isDirty(p.kind));
-    expect(SH.shredPaper(s, dirty[0].id, 500)).toBe(s); // still jammed
-    for (const d of dirty) s = SH.shredPaper(s, d.id, 2000);
-    expect(s.pile).toBe(1);
-    expect(s.evidence).toBe(0);
-    // the next pile: do nothing until the auditors arrive
-    s = SH.shredTick(s, s.pileAt + setup.d.pileMs + 1);
-    expect(s.evidence).toBeGreaterThan(0);
+  it('a face-down paper turns over first; a dirty one shreds; a clean one jams; a dirty one in the box is evidence', () => {
+    const d = { ...SH.shredDifficulty(1), allowed: 5 };
+    const papers: SH.Paper[] = [
+      { id: 'a', kind: 'dirty', lane: 0, enterAt: 0, crossMs: 4000, faceDown: true, wave: 0, rot: 0 },
+      { id: 'b', kind: 'clean', lane: 1, enterAt: 0, crossMs: 4000, faceDown: false, wave: 0, rot: 0 },
+      { id: 'c', kind: 'dirty', lane: 0, enterAt: 1500, crossMs: 4000, faceDown: false, wave: 0, rot: 0 },
+    ];
+    let s = SH.shredStart({ papers, d, endMs: 6000 });
+    s = SH.tapPaper(s, 'a', 500);
+    expect(s.flipped).toEqual(['a']);
+    expect(s.fate.a).toBeUndefined();
+    s = SH.tapPaper(s, 'b', 600);
+    expect(s.fate.b).toBe('jammed');
+    expect(SH.tapPaper(s, 'a', 900)).toBe(s); // jammed: nothing goes in
+    s = SH.tapPaper(s, 'a', 2000);
+    expect(s.fate.a).toBe('shredded');
+    s = SH.shredTick(s, 6000); // c reached the box
+    expect(s.fate.c).toBe('evidence');
+    expect(s.evidence).toBe(1);
+    expect(s.over).toBe('won'); // 2 mistakes, 5 allowed
   });
 
-  it('doing nothing loses; an average shredder usually wins, less often later', () => {
-    const rate = (act: number, tap: number, fool: number) => {
-      let w = 0; for (let i = 0; i < 120; i++) if (shred(act, tap, i, fool).over === 'won') w++;
+  it('doing nothing loses; it is harder than the old piles but a careful player usually wins, less often later', () => {
+    const rate = (act: number, scan: number, tap: number, fool: number) => {
+      let w = 0; for (let i = 0; i < 120; i++) if (shred(act, i, scan, tap, fool).over === 'won') w++;
       return w / 120;
     };
     for (const act of [1, 2, 3]) {
-      let s = SH.shredStart(SH.shredSetup(1, SH.shredDifficulty(act)), 0);
-      for (let now = 0; !s.over; now += 500) s = SH.shredTick(s, now);
+      let s = SH.shredStart(SH.shredSetup(1, SH.shredDifficulty(act)));
+      for (let now = 0; !s.over; now += 100) s = SH.shredTick(s, now);
       expect(s.over).toBe('lost');
     }
-    expect(rate(1, 380, 0.12)).toBeGreaterThan(0.85);
-    expect(rate(3, 380, 0.12)).toBeLessThan(rate(1, 380, 0.12));
-    expect(rate(3, 380, 0.12)).toBeGreaterThan(0.4);
+    const avg1 = rate(1, 220, 290, 0.12);
+    expect(avg1).toBeGreaterThan(0.7);
+    expect(avg1).toBeLessThan(0.92); // the old version: 95%
+    expect(rate(3, 220, 290, 0.12)).toBeLessThan(avg1);
+    expect(rate(1, 300, 380, 0.18)).toBeGreaterThan(0.5); // a slower player still has a real chance
   });
 });
 

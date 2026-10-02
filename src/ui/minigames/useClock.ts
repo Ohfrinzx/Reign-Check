@@ -5,13 +5,15 @@ import { useEffect, useRef, useState } from 'react';
  * every animation frame while `running`. It stops while "Give up?" asks,
  * and a frame never adds more than 100 ms, so a phone that locks or a tab
  * in the background pauses the game instead of skipping ahead.
- * `?freeze` in the URL keeps it at 0 (the browser checks take still,
- * repeatable pictures of the game screens that way).
+ * `?freeze` in the URL holds it still (at 0, or at `?freeze=<ms>`): the
+ * browser checks take still, repeatable pictures of the game screens.
  */
-const FROZEN = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('freeze');
+const Q = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : undefined;
+const FROZEN = !!Q?.has('freeze');
+const FROZEN_AT = Number(Q?.get('freeze')) || 0;
 
 export function useClock(running: boolean): number {
-  const [now, setNow] = useState(0);
+  const [now, setNow] = useState(FROZEN ? FROZEN_AT : 0);
   const acc = useRef(0);
   useEffect(() => {
     if (!running || FROZEN) return;

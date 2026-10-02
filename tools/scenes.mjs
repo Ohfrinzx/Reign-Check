@@ -246,8 +246,8 @@ export const SCENES = [
   { name: 'mg-bulletin', primary: '.bt-run', go: async (p) => { await practice(p, 'bulletin', 'play'); } },
   // the real-time games with their clock frozen (&freeze), so the picture is the same every time
   { name: 'mg-bread', primary: null, go: async (p) => { await practice(p, 'bread', 'play', '&freeze'); } },
-  { name: 'mg-parade', primary: '.pd-btn.wave', go: async (p) => { await practice(p, 'parade', 'play', '&freeze'); } },
-  { name: 'mg-shred', primary: null, go: async (p) => { await practice(p, 'shred', 'play', '&freeze'); } },
+  { name: 'mg-parade', primary: '.pd-btn.wave', go: async (p) => { await practice(p, 'parade', 'play', '&freeze=2600'); } },
+  { name: 'mg-shred', primary: null, go: async (p) => { await practice(p, 'shred', 'play', '&freeze=2600'); } },
   { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {
     await seed(p, 'preEnding'); await closeDemandPops(p);

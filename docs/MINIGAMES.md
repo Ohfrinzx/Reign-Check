@@ -53,6 +53,12 @@ After slice 1 (2026-10-01):
 - **Balance target:** careful play about 60% (reached: 59%).
 - **Slice 2 games chosen:** Bread Lines, The Last Kilometre, Shred the
   Ledger.
+- **After the slice 2 playtest (2026-10-02):** the Kilometre's look was
+  redone as a polished first-person street (owner's pick over a
+  side-scroller or top-down view); Shred got conveyor belts and face-down
+  papers (owner's picks; not chosen: changing rules per pile, tighter
+  limits alone). Rule for difficulty: never a game you lose while doing
+  everything right.
 
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).

@@ -419,23 +419,46 @@ try {
     await page.close();
   }
   {
-    // Shred the Ledger: tap the red-stamped papers, pile after pile
+    // Shred the Ledger (conveyor belts): a clean paper jams the shredder
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
     page.on('pageerror', (e) => errors.push(e.message));
-    await openPractice(page, 'shred', 5);
-    await page.waitForTimeout(500);
-    const clean = page.locator('.sh-paper:not(:has(.ilvet)):not(.gone)').first();
-    await clean.tap();
+    await openPractice(page, 'shred', 5, 3);
+    // papers never stop moving: pick one well on the belt, tap where it is now, with a real touch
+    const pick = async (sel) => {
+      const h = await page.waitForFunction((s) => [...document.querySelectorAll(s)]
+        .find((b) => parseFloat(b.style.left) > 10 && parseFloat(b.style.left) < 55)?.getAttribute('aria-label'), sel, { timeout: 15000 });
+      return page.locator(`button.sh-paper[aria-label="${await h.jsonValue()}"]`);
+    };
+    const tapAt = async (loc) => { const b = await loc.boundingBox(); await page.touchscreen.tap(b.x + b.width / 2, b.y + b.height / 2); };
+    const clean = await pick('button.sh-paper:not(.down):not(:has(.ilvet:not(.void)))');
+    await tapAt(clean);
     assert.ok(await page.locator('.sh-shredder.jam').count(), 'A clean paper jams the shredder');
-    await page.waitForTimeout(1300);
-    for (let i = 0; i < 80 && !(await page.locator('.mg-end').count()); i++) {
-      const dirty = page.locator('.sh-paper:has(.ilvet:not(.void)):not(.gone):not([disabled])').first();
-      if (await dirty.count()) await dirty.tap().catch(() => {});
-      await page.waitForTimeout(250);
-      if (i === 3) await page.screenshot({ path: shotPath('MG-shred-390.png') });
-    }
-    await page.locator('.mg-end').waitFor({ timeout: 20000 });
-    assert.ok(await page.locator('.mg-end.won').count(), `Shredding every red-stamped paper (one jam) wins: ${await page.locator('.mg-end').innerText()}`);
+    // a face-down paper turns over on the first tap
+    const down = await pick('button.sh-paper.down');
+    const id = await down.getAttribute('aria-label');
+    await tapAt(down);
+    assert.equal(await page.locator(`button.sh-paper.down[aria-label="${id}"]`).count(), 0, 'The first tap turns a face-down paper over');
+    await page.close();
+  }
+  {
+    // ...and a quick, careful player wins: the paper nearest the box first,
+    // turn it over if it is face-down, shred it if it has the red square stamp
+    const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'shred', 5, 1);
+    await page.evaluate(() => {
+      const t = setInterval(() => {
+        if (document.querySelector('.mg-end')) { clearInterval(t); return; }
+        const papers = [...document.querySelectorAll('button.sh-paper')]
+          .filter((b) => b.classList.contains('down') || b.querySelector('.ilvet:not(.void)'))
+          .sort((a, b) => parseFloat(b.style.left) - parseFloat(a.style.left));
+        papers[0]?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+      }, 140);
+    });
+    await page.waitForTimeout(3000);
+    await page.screenshot({ path: shotPath('MG-shred-1366.png') });
+    await page.locator('.mg-end').waitFor({ timeout: 60000 });
+    assert.ok(await page.locator('.mg-end.won').count(), `A quick, careful player wins: ${await page.locator('.mg-end').innerText()}`);
     await page.close();
   }
 
@@ -452,4 +475,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre won on time (desktop keys + phone taps); Shred won by tapping red stamps, a clean paper jams; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');
+console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre won on time (desktop keys + phone taps); Shred (belts) won by a quick careful player, a clean paper jams, a face-down paper turns over; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');

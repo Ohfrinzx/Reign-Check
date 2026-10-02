@@ -375,23 +375,36 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   human-paced bot (talk if there is time, police if hot) wins about 100 /
   80 / 73% by act; talking only fails from act 2; doing nothing always
   loses. Won: Legitimacy +5, stability +4, unrest −10; lost: −4, −4, +6.
-- **The Last Kilometre** (`parade.ts`; a festive avenue in perspective,
-  Workers). A rhythm game: 18 / 22 / 26 items come down the road; press
-  the one right move as each crosses the line (±320 ms; ±150 perfect):
-  egg → DUCK, child with flowers → STOP, cheering crowd → WAVE, protest
-  sign → nothing. A wrong, early or missed move, or a flinch at a sign,
-  costs one of 3 composure (4 with the `walked-dovra` mark). Simulated
-  walkers with timing spread σ 90/130/170 ms win 95/89/62% (act 1) down to
-  83/71/38% (act 3). Won: Legitimacy +5, support +4; lost: −4, −3.
-- **Shred the Ledger** (`shred.ts`; a dark walnut desk, Elites). 5–6
-  piles of 6–9 papers; tap every paper with the red square Ilvet stamp
-  before the auditors' footsteps reach the door (4.2 / 5.4 / 6.2 s a
-  pile). Shredding a clean paper jams the shredder for 1.2 s; a dirty one
-  left is evidence; more than 2 mistakes loses. Tricks: act 2 a crossed-out
-  red stamp (VOID, clean); act 3 also a pale red stamp (dirty) and a round
-  red seal (clean). Simulated players win about 95 / 69 / 59% (average)
-  and 69 / 51 / 32% (slow, easily fooled). Won: Legitimacy +5, scandal
-  −10; lost: Legitimacy −5, scandal +8.
+- **The Last Kilometre** (`parade.ts`; seen through the Chair's eyes:
+  an illustrated avenue with facades, flags, bunting and an animated crowd
+  behind barriers; the Chair's hands at the bottom do each move; Workers).
+  A rhythm game: 18 / 22 / 26 items come out of the crowd (eggs thrown in
+  an arc, a child with flowers, cheering groups, protest signs); a ring
+  closes around each one — press the one right move as it closes
+  (±320 ms; ±150 perfect): egg → DUCK, child with flowers → STOP,
+  cheering crowd → WAVE, protest sign → nothing. A wrong, early or missed
+  move, or a flinch at a sign, costs one of 3 composure (4 with the
+  `walked-dovra` mark). Simulated walkers with timing spread σ 90/130/170 ms
+  win 95/89/62% (act 1) down to 83/71/38% (act 3). Won: Legitimacy +5,
+  support +4; lost: −4, −3. (Owner 2026-10-02: the idea stays, the first
+  look did not; the first-person street is the redesign.)
+- **Shred the Ledger** (`shred.ts`; a dark walnut desk, Elites). Papers
+  ride two conveyor belts into the auditors' box, in 3 waves that speed up
+  (a paper crosses in 4.8 s → 3.5 s). Tap a paper with the red square
+  Ilvet stamp to shred it before it reaches the box; everything else must
+  reach the box. Some papers arrive **face-down** (30–40%): the first tap
+  turns one over, the second shreds it. Shredding a clean paper jams the
+  shredder for 1.2 s (the belts keep moving); a dirty paper in the box is
+  evidence. Mistakes allowed: 1 (acts 1–2), 2 (act 3). Tricks: VOID (a
+  crossed-out red stamp, clean) from act 1, a round red seal (clean) from
+  act 2, a pale red stamp (dirty) in act 3. Owner 2026-10-02: the static
+  piles were "too easy"; harder but never a game you lose while doing
+  everything right — so the belts stay at a speed a slower player can keep
+  up with, and the challenge is attention. Simulated players (one paper at
+  a time, the odd mistap): fast / average / slow win about 88 / 82 / 67%
+  (act 1), 84 / 81 / 47% (act 2), 85 / 74 / 31% (act 3); the old piles
+  gave the average player 95% in act 1. Won: Legitimacy +5, scandal −10;
+  lost: Legitimacy −5, scandal +8.
 - **Input:** real-time games act on pointer-down (a tap never also lands
   as a click on whatever appears under the finger next); keys too (Bread
   Lines 1–7 then T/P, Parade ← ↑ →, Shred Enter on a focused paper). The
@@ -399,5 +412,5 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   100 ms a frame, so a locked phone pauses the game.
 - **Practice:** `?practice=palace|strike|bulletin|bread|parade|shred`
   (optional `&seed=`, `&act=`) opens one game on its own, never saved —
-  for playtesting. The browser tools use it too (`&freeze` stops the
-  real-time clock for still pictures).
+  for playtesting. The browser tools use it too (`&freeze` or
+  `&freeze=<ms>` holds the real-time clock still for pictures).

@@ -2166,48 +2166,91 @@ abbr.term{
 .mg-parade .mg-light{background:#ffd56b;box-shadow:0 0 12px #ffd56b}
 .mg-parade .btn-primary{background:#cc2b1d;border-color:#cc2b1d;color:#fff}
 
-.pd{display:flex;flex-direction:column;gap:10px;width:100%;max-width:520px}
-.pd-hud{display:flex;align-items:center;gap:14px}
-.pd-composure{display:flex;gap:6px}
-.rosette{display:block;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle, #fff 0 22%, #cc2b1d 24% 48%, #fff 50% 60%, #2a6fd6 62%);box-shadow:0 2px 4px rgba(0,0,0,.2);transition:transform .3s, opacity .3s, filter .3s}
-.rosette.lost{opacity:.25;filter:grayscale(1);transform:scale(.7) rotate(-30deg)}
-.pd-route{position:relative;flex:1;height:8px;border-radius:4px;background:var(--paper-3)}
-.pd-route-fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#cc2b1d}
-.pd-route-me{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #cc2b1d;transform:translate(-50%,-50%)}
-
-.pd-street{position:relative;height:min(52vh, 430px);overflow:hidden;border-radius:6px;border:3px solid #2a1712;background:#ffe9a8}
+.pd{display:flex;flex-direction:column;gap:10px;width:100%;max-width:560px}
+.pd-street{position:relative;height:min(58vh, 470px);overflow:hidden;border-radius:10px;border:3px solid #2a1712;background:#d7eef9;
+  box-shadow:0 16px 36px rgba(42,23,18,.28)}
 .pd-street.oops{animation:mgShake .4s cubic-bezier(.36,.07,.19,.97) both}
-.pd-sky{position:absolute;left:0;right:0;top:0;height:22%;background:linear-gradient(#8fd0f2,#d8f0fb)}
-.pd-bunting{position:absolute;left:0;right:0;top:6%;height:26px;
-  background:linear-gradient(135deg, #cc2b1d 25%, transparent 25%) 0 0/30px 26px repeat-x,
-    linear-gradient(225deg, #fff 25%, transparent 25%) 15px 0/30px 26px repeat-x;
-  animation:mgSway 2.4s ease-in-out infinite alternate}
-@keyframes mgSway{from{transform:translateY(0)}to{transform:translateY(3px)}}
-.pd-road{position:absolute;left:0;right:0;top:22%;bottom:0;background:#b9a78c;clip-path:polygon(44% 0,56% 0,100% 100%,0 100%)}
-.pd-dash{position:absolute;left:49%;width:2%;top:0;bottom:0;
-  background:repeating-linear-gradient(#fff 0 18px, transparent 18px 44px);animation:mgRoad .6s linear infinite}
-@keyframes mgRoad{from{background-position:0 0}to{background-position:0 44px}}
-.pd-line{position:absolute;left:0;right:0;top:76%;height:4px;background:#f2b33d;box-shadow:0 0 12px #f2b33d}
-.pd-window{position:absolute;left:0;right:0;top:76%;transform:translateY(-50%);background:rgba(242,179,61,.16);pointer-events:none}
-.pd-item{position:absolute;left:50%;width:84px;height:84px;will-change:transform,top}
-.pd-item svg{width:100%;height:100%;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+/* the street sways gently as you walk, and dips when you duck */
+.pd-world{position:absolute;inset:-4% -4% 0;animation:mgWalk 1.1s ease-in-out infinite alternate;transition:transform .18s ease-out}
+.pd-street.ducking .pd-world{transform:translateY(7%) scale(1.04)}
+@keyframes mgWalk{from{translate:0 0;rotate:-.4deg}to{translate:0 .6%;rotate:.4deg}}
+.pd-scene{width:100%;height:100%;display:block}
+.pd-sun{fill:#fff3b0;filter:drop-shadow(0 0 2px #ffd56b)}
+.pd-clouds ellipse{fill:#fff;opacity:.85}
+.pd-clouds{animation:mgClouds 40s linear infinite}
+@keyframes mgClouds{from{transform:translateX(-6px)}to{transform:translateX(6px)}}
+.pd-skyline{fill:#8c9fb5}
+.pd-walk{fill:#d9cdb7}
+.pd-facade{stroke:#5c3a24;stroke-width:.2}
+.pd-win{fill:#2c4a6b;stroke:#f6efe0;stroke-width:.25}
+.pd-win.lit{fill:#ffe9a3}
+.pd-shop{fill:#3a2a22}
+.pd-awning{fill:#15525c}
+.pd-dash2{fill:#f4efe4}
+.pd-barrier{fill:none;stroke:#f2b33d;stroke-width:.9;stroke-dasharray:2.2 1.1}
+.pd-person{animation:mgBob .7s ease-in-out infinite alternate}
+.pd-person.b1{animation-delay:-.2s}.pd-person.b2{animation-delay:-.45s;animation-duration:.6s}.pd-person.b3{animation-delay:-.1s;animation-duration:.85s}
+@keyframes mgBob{from{translate:0 0}to{translate:0 -.8px}}
+.pd-arm{animation:mgArm .45s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0% 100%}
+@keyframes mgArm{from{rotate:-12deg}to{rotate:14deg}}
+
+.pd-hud{position:absolute;left:10px;right:10px;top:8px;display:flex;align-items:center;gap:10px;z-index:3;
+  padding:6px 10px;border-radius:20px;background:rgba(255,248,236,.82);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pd-composure{display:flex;gap:5px}
+.rosette{display:block;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle, #fff 0 22%, #cc2b1d 24% 48%, #fff 50% 60%, #2a6fd6 62%);box-shadow:0 2px 4px rgba(0,0,0,.2);transition:transform .3s, opacity .3s, filter .3s}
+.rosette.lost{opacity:.25;filter:grayscale(1);transform:scale(.7) rotate(-30deg)}
+.pd-route{position:relative;flex:1;height:6px;border-radius:3px;background:#ead6ad}
+.pd-route-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#cc2b1d}
+.pd-route-me{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #cc2b1d;transform:translate(-50%,-50%)}
+.pd-route-end{position:absolute;right:-4px;top:50%;transform:translate(50%,-50%);font-size:13px;color:#c8890f}
+
+.pd-item{position:absolute;width:84px;height:84px;z-index:2;will-change:transform,left,top}
+.pd-item svg{width:100%;height:100%;filter:drop-shadow(0 6px 5px rgba(0,0,0,.3))}
 .pd-item.done{transition:opacity .25s}
 .pd-item.done.perfect,.pd-item.done.good,.pd-item.done.ignored{opacity:0}
 .pd-item.done.miss.egg svg,.pd-item.done.wrong.egg svg{animation:mgSplat .35s forwards}
 @keyframes mgSplat{to{transform:scale(1.6,0.5);opacity:.4}}
-.pd-say{position:absolute;left:50%;top:58%;transform:translateX(-50%);font-family:var(--head);font-size:28px;text-transform:uppercase;letter-spacing:.04em;
+/* the timing ring: it closes onto the item at the moment to act */
+.pd-ring{position:absolute;left:50%;top:50%;width:104%;height:104%;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 2px rgba(42,23,18,.35), inset 0 0 0 2px rgba(42,23,18,.2);pointer-events:none}
+.pd-ring.now{border-color:#ffd56b;box-shadow:0 0 14px #ffd56b, 0 0 0 2px rgba(42,23,18,.35)}
+.pd-ring.sign{border-style:dashed;border-color:rgba(255,255,255,.6)}
+.pd-splat{position:absolute;left:50%;top:44%;width:60%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:4;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%, #ffd35a 0 14%, #fff7e0 15% 34%, transparent 36%),
+    radial-gradient(circle at 30% 35%, #fff7e0 0 9%, transparent 10%), radial-gradient(circle at 72% 62%, #fff7e0 0 8%, transparent 9%),
+    radial-gradient(circle at 64% 28%, #fff7e0 0 6%, transparent 7%);
+  animation:mgSplatScreen .65s ease-out forwards}
+@keyframes mgSplatScreen{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-30%) scale(1)}}
+.pd-say{position:absolute;left:50%;top:40%;transform:translateX(-50%);z-index:4;font-family:var(--head);font-size:30px;text-transform:uppercase;letter-spacing:.04em;
   color:#fff;-webkit-text-stroke:1px #2a1712;text-shadow:0 3px 0 #2a1712;animation:mgSay .65s ease-out forwards;pointer-events:none;white-space:nowrap}
 .pd-say.perfect{color:#ffd56b}
 .pd-say.wrong,.pd-say.miss,.pd-say.flinched,.pd-say.early{color:#ff6b5c}
 @keyframes mgSay{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}25%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-26px) scale(1)}}
-.pd-moves{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.pd-btn{display:flex;flex-direction:column;align-items:center;gap:2px;min-height:76px;padding:8px;border-radius:10px;font-size:12px;
-  border-width:3px;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .08s, background .12s}
-.pd-btn svg{width:32px;height:32px}
-.pd-btn.duck{background:#fff;color:#2a1712;border-color:#2a1712}
-.pd-btn.wave{background:#2a6fd6;color:#fff;border-color:#2a6fd6}
-.pd-btn.stop{background:#cc2b1d;color:#fff;border-color:#cc2b1d}
-.pd-btn.hit{transform:scale(.92)}
+
+/* the Chair's hands at the bottom of the screen */
+.pd-hands{position:absolute;left:0;right:0;bottom:-6%;height:30%;z-index:3;pointer-events:none}
+.pd-hand{position:absolute;bottom:0;height:100%;aspect-ratio:60/96;transition:transform .16s cubic-bezier(.3,1.4,.5,1)}
+.pd-hand svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
+.pd-hand.l{left:14%;transform:scaleX(-1) rotate(10deg) translateY(42%)}
+.pd-hand.r{right:14%;transform:rotate(10deg) translateY(42%)}
+/* wave: the right hand comes up and waves */
+.pd-hands.wave .pd-hand.r{transform:rotate(-6deg) translateY(-4%);animation:mgWave .38s ease-in-out}
+/* stop: both palms up and forward, to take the flowers */
+.pd-hands.stop .pd-hand.l{transform:scaleX(-1) rotate(-6deg) translate(30%, -8%)}
+.pd-hands.stop .pd-hand.r{transform:rotate(-6deg) translate(-30%, -8%)}
+/* duck: hands drop out of sight as the view dips */
+.pd-hands.duck .pd-hand.l{transform:scaleX(-1) rotate(24deg) translateY(75%)}
+.pd-hands.duck .pd-hand.r{transform:rotate(24deg) translateY(75%)}
+@keyframes mgWave{0%,100%{rotate:0deg}30%{rotate:-14deg}70%{rotate:12deg}}
+
+.pd-moves{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pd-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:74px;padding:8px;border-radius:40px;font-size:12px;
+  border:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .08s, filter .12s;
+  box-shadow:0 5px 0 rgba(42,23,18,.35), 0 8px 16px rgba(42,23,18,.2)}
+.pd-btn svg{width:30px;height:30px}
+.pd-btn.duck{background:linear-gradient(#fff,#efe6d6);color:#2a1712}
+.pd-btn.wave{background:linear-gradient(#4b8ff0,#2a6fd6);color:#fff}
+.pd-btn.stop{background:linear-gradient(#e2473a,#c02a1d);color:#fff}
+.pd-btn.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(42,23,18,.35), 0 3px 8px rgba(42,23,18,.2)}
 
 /* -------------------------------------------------------- SHRED THE LEDGER */
 
@@ -2223,44 +2266,61 @@ abbr.term{
 .mg-shred .outcome{background:#1f160f;border-color:#3b2b1e}
 .mg-shred .outcome-top{background:#160f0a;border-bottom-color:#3b2b1e}
 
-.sh{display:flex;flex-direction:column;gap:8px;width:100%;max-width:560px}
-.sh-corridor{position:relative;height:30px;border-radius:15px;background:linear-gradient(90deg,#241a12,#3a2a1c);border:1px solid #4a3725;overflow:hidden}
-.sh-door{position:absolute;right:6px;top:3px;bottom:3px;width:16px;border-radius:2px;background:#6b4a2b;box-shadow:inset -3px 0 0 #4a321d}
-.sh-feet{position:absolute;top:50%;transform:translateY(-50%);display:flex;gap:4px;transition:left .12s linear}
-.sh-feet i{display:block;width:9px;height:15px;border-radius:5px 5px 3px 3px;background:#e3262f;animation:mgStep .5s steps(1) infinite}
-.sh-feet i:last-child{animation-delay:.25s;margin-top:6px}
-@keyframes mgStep{50%{opacity:.35}}
-.sh-hud{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em}
+.sh{display:flex;flex-direction:column;gap:8px;width:100%;max-width:640px}
+.sh-hud{display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em}
 .sh-hud b{font-family:var(--head);font-size:22px;color:var(--ink);font-weight:400}
+.sh-left{margin-left:auto}
 .sh-mistakes{display:flex;gap:5px}
-.sh-mistakes i{display:block;width:16px;height:16px;border-radius:3px;border:2px solid #6b5640}
-.sh-mistakes i.x{background:#e3262f;border-color:#e3262f}
+.sh-mistakes i{display:block;width:16px;height:16px;border-radius:3px;border:2px solid #6b5640;transition:background .2s}
+.sh-mistakes i.x{background:#e3262f;border-color:#e3262f;animation:mgPop .25s cubic-bezier(.2,1.3,.4,1)}
 .sh-mistakes.warn i:not(.x){border-color:#e3262f;animation:pulse 1s infinite}
 
-.sh-desk{position:relative;width:100%;aspect-ratio:1/0.8;max-height:calc(100vh - 330px);margin:0 auto;border-radius:8px;overflow:hidden;
+/* the desk and its two conveyor belts, running into the auditors' box */
+.sh-desk{position:relative;width:100%;aspect-ratio:1/0.62;max-height:calc(100vh - 300px);margin:0 auto;border-radius:8px;overflow:hidden;
   background:repeating-linear-gradient(97deg, #4a2f1b 0 14px, #55361f 14px 22px, #4f321d 22px 40px), #4a2f1b;
   box-shadow:inset 0 0 60px rgba(0,0,0,.6), 0 14px 30px rgba(0,0,0,.5)}
-.sh-desk.caught{animation:mgCaught .7s ease-out}
-@keyframes mgCaught{0%{box-shadow:inset 0 0 0 6px #e3262f, 0 14px 30px rgba(0,0,0,.5)}100%{box-shadow:inset 0 0 60px rgba(0,0,0,.6), 0 14px 30px rgba(0,0,0,.5)}}
-.sh-lamp{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 50% 35%, rgba(255,220,150,.28), transparent 70%);pointer-events:none}
-.sh-pilezone{position:absolute;inset:4%}
+.sh-lamp{position:absolute;inset:0;background:radial-gradient(ellipse 60% 70% at 45% 35%, rgba(255,220,150,.26), transparent 70%);pointer-events:none}
+.sh-belt{position:absolute;left:0;right:15%;height:38%;
+  background:linear-gradient(#2b2b2e,#1d1d20);border-top:3px solid #4b4b52;border-bottom:3px solid #0d0d0f;
+  box-shadow:0 6px 12px rgba(0,0,0,.45)}
+.sh-rollers{position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg, transparent 0 22px, rgba(255,255,255,.07) 22px 24px);
+  animation-name:mgBelt;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes mgBelt{from{background-position:0 0}to{background-position:24px 0}}
+.sh-box{position:absolute;right:0;top:4%;bottom:4%;width:15%;border-radius:4px 0 0 4px;
+  background:linear-gradient(90deg,#5c5f66,#7b7f87);border:2px solid #3b3d42;border-right:0;box-shadow:inset 6px 0 14px rgba(0,0,0,.45);
+  display:grid;place-items:center}
+.sh-glass{width:34%;aspect-ratio:1;border-radius:50%;border:4px solid #d9dce1;position:relative}
+.sh-glass::after{content:'';position:absolute;right:-48%;bottom:-48%;width:50%;height:12%;background:#d9dce1;transform:rotate(45deg);transform-origin:left}
+.sh-box.hit{animation:mgBoxHit .7s ease-out}
+@keyframes mgBoxHit{0%{background:linear-gradient(90deg,#e3262f,#ff6b5c);transform:translateX(-4px)}100%{transform:none}}
+
 .sh-paper{
-  position:absolute;width:28%;height:29%;padding:4% 3.5%;border:0;border-radius:2px;cursor:pointer;
+  position:absolute;top:8%;bottom:8%;padding:5% 3%;border:0;border-radius:2px;cursor:pointer;
   background:#fbf7ee;box-shadow:0 3px 8px rgba(0,0,0,.45);transform:rotate(var(--rot));
-  animation:mgDropPaper .45s cubic-bezier(.2,1.2,.4,1) both;touch-action:manipulation;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;overflow:hidden;
   transition:transform .12s;
 }
-.sh-paper:nth-child(2n){animation-delay:.05s}.sh-paper:nth-child(3n){animation-delay:.1s}
-.sh-paper:not(:disabled):active{transform:rotate(var(--rot)) scale(.95)}
-.sh-paper.gone{animation:mgToShredder .4s cubic-bezier(.5,0,.8,.5) forwards;pointer-events:none}
-.sh-paper.gone.wrong{animation:mgWrongPaper .5s ease forwards}
-@keyframes mgDropPaper{from{opacity:0;transform:translateY(-40px) rotate(calc(var(--rot) * 3)) scale(1.1)}to{opacity:1;transform:rotate(var(--rot))}}
-@keyframes mgToShredder{to{transform:translate(0, 260%) rotate(0deg) scale(.4);opacity:0}}
-@keyframes mgWrongPaper{40%{transform:rotate(var(--rot)) scale(1.06);box-shadow:0 0 0 4px #e3262f}to{transform:translate(0,260%) scale(.4);opacity:0}}
-.sh-lines{display:flex;flex-direction:column;gap:8%;width:55%;height:100%}
+.sh-paper:not(:disabled):active{transform:rotate(var(--rot)) scale(.94)}
+.sh-paper.late{box-shadow:0 0 0 3px rgba(227,38,47,.65), 0 3px 8px rgba(0,0,0,.45)}
+/* face-down: a manila back with a question mark; turning over is a flip */
+.sh-paper.down{background:repeating-linear-gradient(45deg, #c9a46a 0 6px, #bf9a5f 6px 12px);display:grid;place-items:center}
+.sh-back{font-family:var(--head);font-size:clamp(18px,4.5vw,30px);color:#6b4a22;text-shadow:0 1px 0 rgba(255,255,255,.3)}
+.sh-paper.flipped{animation:mgFlip .28s ease-out}
+@keyframes mgFlip{from{transform:rotate(var(--rot)) rotateY(90deg)}to{transform:rotate(var(--rot)) rotateY(0)}}
+/* leaving the belt */
+.sh-paper.ghost{pointer-events:none}
+.sh-paper.ghost.shred{animation:mgToShredder .45s cubic-bezier(.5,0,.8,.5) forwards}
+.sh-paper.ghost.jam{animation:mgWrongPaper .55s ease forwards}
+.sh-paper.ghost.box{animation:mgToBox .35s ease-in forwards}
+.sh-paper.ghost.evidence{animation:mgToBox .35s ease-in forwards;box-shadow:0 0 0 4px #e3262f}
+@keyframes mgToShredder{to{transform:translate(20%, 230%) rotate(0deg) scale(.45);opacity:0}}
+@keyframes mgWrongPaper{40%{transform:rotate(var(--rot)) scale(1.08);box-shadow:0 0 0 4px #e3262f}to{transform:translate(20%,230%) scale(.45);opacity:0}}
+@keyframes mgToBox{to{transform:translateX(80%) scale(.8);opacity:0}}
+.sh-lines{display:flex;flex-direction:column;gap:10%;width:52%;height:100%}
 .sh-lines i{display:block;height:7%;border-radius:2px;background:#d8d0c0}
 .sh-lines i:nth-child(1){width:70%;background:#bdb3a0}.sh-lines i:nth-child(3){width:85%}.sh-lines i:nth-child(5){width:55%}
-.sh-stamp{position:absolute;right:8%;bottom:10%;height:52%;aspect-ratio:1;display:grid;place-items:center}
+.sh-stamp{position:absolute;right:7%;bottom:10%;height:56%;aspect-ratio:1;display:grid;place-items:center}
 .sh-stamp.ilvet{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:4px solid #d2202a;border-radius:3px;transform:rotate(-12deg)}
 .sh-stamp.ilvet b{display:block;width:56%;height:4px;background:#d2202a;border-radius:1px}
 .sh-stamp.ilvet.faded{opacity:.4}
@@ -2303,12 +2363,13 @@ abbr.term{
   .mg-veil-breadlines,.mg-veil-parade,.mg-veil-shred{animation:fadeIn .3s both}
   .mg-veil-breadlines .mg-veil-fx,.mg-veil-parade .mg-veil-fx{animation:none}
   .mg-veil-shred .mg-veil-fx{animation:none;opacity:1}
-  .bl-d .core,.bl-d.burning .core,.flame.lit,.pd-bunting,.pd-dash,.sh-feet i,.bl-menu{animation:none}
+  .bl-d .core,.bl-d.burning .core,.flame.lit,.bl-menu,.pd-world,.pd-person,.pd-arm,.pd-clouds,.pd-hands.wave .pd-hand.r{animation:none}
+  .pd-hand{transition:none}
   .bl-trail{display:none}
   .pd-street.oops,.sh-shredder.jam,.sh-shredder.chew,.sh-desk.caught{animation:none}
   .pd-say{animation:fadeOut .65s forwards}
-  .sh-paper{animation:fadeIn .2s both}
-  .sh-paper.gone,.sh-paper.gone.wrong{animation:fadeOut .2s forwards}
+  .sh-rollers,.sh-paper.flipped,.sh-box.hit{animation:none}
+  .sh-paper.ghost.shred,.sh-paper.ghost.jam,.sh-paper.ghost.box,.sh-paper.ghost.evidence{animation:fadeOut .2s forwards}
 }
 
 /* ------------------------------------------ phones and tablets (≤1080px) */
@@ -2326,7 +2387,7 @@ abbr.term{
   .bt-desk{min-height:210px}
   .bl-map{max-height:calc(100vh - 330px)}
   .bl-hud{flex-wrap:wrap;gap:6px 10px}
-  .pd-street{height:max(280px, min(calc(100vh - 380px), 560px))}
+  .pd-street{height:max(300px, min(calc(100vh - 360px), 600px))}
   .sh-desk{max-height:calc(100vh - 360px)}
 }
 /* Landscape phones: the map on the left, the clock and orders on its right,
@@ -2357,24 +2418,23 @@ abbr.term{
   .bt-story p{font-size:14px}
   .bt-actions{margin-top:16px}
   .bt-actions .btn{min-height:44px}
+  .sh{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 150px;grid-template-rows:auto 1fr;gap:6px 12px}
+  .sh-hud{grid-column:1 / -1}
+  .sh-desk{width:auto;height:calc(100vh - 140px);max-height:none;aspect-ratio:1/0.62;justify-self:center}
+  .sh-shredder{align-self:center;height:52px}
   .bl{max-width:none;flex-direction:row;flex-wrap:wrap;justify-content:center}
   .bl-hud{width:100%}
   .bl-map{width:auto;height:calc(100vh - 150px);max-height:none;aspect-ratio:1/0.92}
   .bl-help{display:none}
-  .pd{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 150px;grid-template-rows:auto 1fr;gap:6px 12px}
-  .pd-hud{grid-column:1 / -1}
-  .pd-street{height:calc(100vh - 150px)}
+  .pd{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:6px 12px}
+  .pd-street{height:calc(100vh - 110px)}
   .pd-moves{grid-template-columns:1fr;align-content:center}
-  .pd-btn{min-height:52px;flex-direction:row;justify-content:center}
+  .pd-btn{min-height:52px;flex-direction:row;justify-content:center;border-radius:26px}
   .pd-btn svg{width:24px;height:24px}
-  .sh{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 170px;grid-template-rows:auto auto 1fr;gap:6px 12px}
-  .sh-corridor,.sh-hud{grid-column:1 / -1}
-  .sh-desk{width:auto;height:calc(100vh - 170px);max-height:none;aspect-ratio:1/0.8;justify-self:center}
-  .sh-shredder{align-self:center;height:52px}
 }
 
 /* mini-games on a narrow phone: a taller map and desk */
 @media (max-width:620px){
   .bl-map{aspect-ratio:1/1.2}
-  .sh-desk{aspect-ratio:1/1.05}
+  .sh-desk{aspect-ratio:1/0.9}
 }
