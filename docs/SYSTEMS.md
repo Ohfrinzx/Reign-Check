@@ -283,10 +283,10 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
 
   | Policy | Survives |
   |---|---|
-  | Careful | 59% |
-  | Random | 3% |
+  | Careful | 63% |
+  | Random | 4% |
   | Always first | 2% |
-  | Always last | 3% |
+  | Always last | 1% |
 
   The probe plays mini-games as a result: `careful` wins 70% of them
   (`MINIGAME_SKILL`), the others half. Owner: careful play should be
@@ -327,9 +327,10 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   mark (the factions remember them, §8).
 - **When they appear:**
   - **Daily:** from day 2 (`DAILY_FROM_DAY`), one drawn card is replaced by
-    a daily game (`DAILY_MINIGAMES`: the Bulletin, Bread Lines, The Last
-    Kilometre, Shred the Ledger), at a random point in the day; never a
-    queued card and never yesterday's game. Picked by a hash of seed and
+    a daily game (`DAILY_MINIGAMES`: the Bulletin, Bread Lines, Shred the
+    Ledger), at a random point in the day; never a
+    queued card and never yesterday's game. Never on an act's first day
+    (that day opens with The Last Kilometre). Picked by a hash of seed and
     day, not the run's RNG. **Events pick the game** (`eventMinigame()`):
     the Bread Riots or a hostile Street → Bread Lines; the Free Zone
     Ledger crisis → Shred the Ledger.
@@ -375,42 +376,49 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   human-paced bot (talk if there is time, police if hot) wins about 100 /
   80 / 73% by act; talking only fails from act 2; doing nothing always
   loses. Won: Legitimacy +5, stability +4, unrest −10; lost: −4, −4, +6.
-- **The Last Kilometre** (`parade.ts`; seen through the Chair's eyes:
-  an illustrated avenue with facades, flags, bunting and an animated crowd
-  behind barriers; the Chair's hands at the bottom do each move; Workers).
-  A rhythm game: 18 / 22 / 26 items come out of the crowd (eggs thrown in
-  an arc, a child with flowers, cheering groups, protest signs); a ring
-  closes around each one — press the one right move as it closes
-  (±320 ms; ±150 perfect): egg → DUCK, child with flowers → STOP,
-  cheering crowd → WAVE, protest sign → nothing. A wrong, early or missed
-  move, or a flinch at a sign, costs one of 3 composure (4 with the
-  `walked-dovra` mark). Simulated walkers with timing spread σ 90/130/170 ms
-  win 95/89/62% (act 1) down to 83/71/38% (act 3). Won: Legitimacy +5,
-  support +4; lost: −4, −3. (Owner 2026-10-02: the idea stays, the first
-  look did not; the first-person street is the redesign.)
+- **The Last Kilometre: Walk in the Weather** (`weather.ts`; the act
+  opener; a flat side view of a rainy avenue; Workers). Played first thing
+  on the first day of every act (days 1, 7, 13), instead of that day's
+  daily game (`ACT_OPENER`; owner: "like it's a new year", harder each
+  act). The Chair walks the Dovra Day kilometre under an umbrella; gusts
+  push it over (leaves blow in from that side 0.65 s before); hold ← or →
+  to push back. Upright (within 20°): dry. Leaning: soaking, more the
+  further it leans. Past 58° it turns inside out: +22 soak and 0.7 s with
+  no grip. Reach the steps (30–40 s) before the soak meter fills.
+  Drizzle → wind → storm (with lightning) by act; half a level worse while
+  scandal pressure is 50+ (the weather shows how honest the government
+  is); the `walked-dovra` mark widens the dry zone by 4°. A gust is never
+  much stronger than the player's push, so it is always holdable.
+  Simulated walkers (reaction 150 ms watching the leaves / 230 / 350 ms):
+  100 / 100 / 73% (act 1), 100 / 100 / 7% (act 2), 97 / 58 / 0% (act 3);
+  doing nothing always loses. **Sets the tone:** won → Legitimacy +7,
+  support +4, every faction +1.5, Workers +2; lost → Legitimacy −7, support
+  −4, every faction −1, Workers −3. (It replaced a rhythm game of the same
+  name, whose look the owner did not like twice; the card id
+  `mg-parade` was kept so saves still find it.)
 - **Shred the Ledger** (`shred.ts`; a dark walnut desk, Elites). Papers
   ride two conveyor belts into the auditors' box, in 3 waves that speed up
   (a paper crosses in 4.8 s → 3.5 s). Tap a paper with the red square
   Ilvet stamp to shred it before it reaches the box; everything else must
-  reach the box. Some papers arrive **face-down** (30–40%): the first tap
+  reach the box. Some papers arrive **face-down** (42–48%): the first tap
   turns one over, the second shreds it. Shredding a clean paper jams the
   shredder for 1.2 s (the belts keep moving); a dirty paper in the box is
-  evidence. Mistakes allowed: 1 (acts 1–2), 2 (act 3). Tricks: VOID (a
-  crossed-out red stamp, clean) from act 1, a round red seal (clean) from
-  act 2, a pale red stamp (dirty) in act 3. Owner 2026-10-02: the static
-  piles were "too easy"; harder but never a game you lose while doing
-  everything right — so the belts stay at a speed a slower player can keep
-  up with, and the challenge is attention. Simulated players (one paper at
-  a time, the odd mistap): fast / average / slow win about 88 / 82 / 67%
-  (act 1), 84 / 81 / 47% (act 2), 85 / 74 / 31% (act 3); the old piles
-  gave the average player 95% in act 1. Won: Legitimacy +5, scandal −10;
+  evidence. One mistake allowed. All tricks from act 1: VOID (a crossed-out
+  red stamp, clean), a round red seal (clean), a pale red stamp (dirty).
+  A paper crosses in 3.8 s → 2.6 s; act 3 has four waves. History: static
+  piles were "too easy" (owner 2026-10-02), then the first belts were
+  "still way too easy" (2026-10-03), so the bar is now set for a quick
+  player. Simulated players (one paper at a time, the odd mistap; expert /
+  fast / average): 79 / 63 / 40% (act 1), 81 / 63 / 35% (act 2), 78 / 52 /
+  22% (act 3). A slow player now loses most games; every paper is still
+  reachable and doing nothing always loses. Won: Legitimacy +5, scandal −10;
   lost: Legitimacy −5, scandal +8.
 - **Input:** real-time games act on pointer-down (a tap never also lands
   as a click on whatever appears under the finger next); keys too (Bread
-  Lines 1–7 then T/P, Parade ← ↑ →, Shred Enter on a focused paper). The
+  Lines 1–7 then T/P, the Kilometre ← → held, Shred Enter on a focused paper). The
   clock (`useClock`) stops while "Give up?" asks and never jumps more than
   100 ms a frame, so a locked phone pauses the game.
-- **Practice:** `?practice=palace|strike|bulletin|bread|parade|shred`
+- **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred`
   (optional `&seed=`, `&act=`) opens one game on its own, never saved —
   for playtesting. The browser tools use it too (`&freeze` or
   `&freeze=<ms>` holds the real-time clock still for pictures).

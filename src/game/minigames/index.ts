@@ -1,6 +1,7 @@
 import type { GameState, Rng } from '../types';
 import { hashString, makeRng } from '../rng';
-import { DAILY_MINIGAMES, MG_CARD, eventMinigame } from '../content/minigames';
+import { ACT_OPENER, DAILY_MINIGAMES, MG_CARD, eventMinigame } from '../content/minigames';
+import { dayInAct } from '../state';
 
 /**
  * PHASE 5 — MINI-GAMES: when they appear. No React, no DOM (ground rule 11).
@@ -11,6 +12,9 @@ import { DAILY_MINIGAMES, MG_CARD, eventMinigame } from '../content/minigames';
  * every effect goes through applyEffects() like any other decision, and the
  * tests and the balance probe can play past it with chooseOption().
  *
+ *   - ACT OPENER. The first day of every act (days 1, 7, 13) opens with The
+ *     Last Kilometre (Walk in the Weather), before any other card; one drawn
+ *     card makes room. That day has no daily game.
  *   - DAILY. From DAILY_FROM_DAY, one of the day's drawn cards is replaced by
  *     a daily mini-game, at a random point in the day. An event can pick
  *     which one (content/minigames.ts eventMinigame()): the Bread Riots or
@@ -83,8 +87,18 @@ export function tickMinigames(s: GameState, _rng: Rng): string[] {
  * never replaced. Returns the deck to use.
  */
 export function placeDailyMinigame(s: GameState, deck: string[], queuedCount: number): string[] {
-  if (s.day < DAILY_FROM_DAY || !DAILY_MINIGAMES.length) return deck;
+  // the first day of an act opens with The Last Kilometre, first thing —
+  // even when a coup game is also queued (the act still opens with it)
+  if (dayInAct(s) === 1) {
+    if (deck.includes(ACT_OPENER)) return deck;
+    const out = [...deck];
+    const free = out.map((_, i) => i).filter((i) => i >= queuedCount);
+    if (free.length) out.splice(free[free.length - 1], 1);
+    else s.agenda = [...s.agenda, s.agenda[s.agenda.length - 1] ?? 'afternoon'];
+    return [ACT_OPENER, ...out];
+  }
   if (deck.some(isMinigameCard)) return deck;
+  if (s.day < DAILY_FROM_DAY || !DAILY_MINIGAMES.length) return deck;
   const rng = makeRng(hashString(`${s.seed}:daily-minigame:${s.day}`));
   const yesterday = s.flags.mgDailyLast;
   const pool = DAILY_MINIGAMES.length > 1

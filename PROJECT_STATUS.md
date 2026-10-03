@@ -25,13 +25,14 @@ story and how-to screens keep their text).
   **events pick the game**: the Bread Riots or a hostile Street → Bread
   Lines; the Free Zone Ledger → Shred.
 - **Bigger win rewards:** careful play survives 59% (was 46% after slice 1).
-- **After the owner's playtest (2026-10-02):** The Last Kilometre got a new
-  look (a first-person street); Shred the Ledger got conveyor belts and
-  face-down papers (harder, still fair).
+- **After the owner's playtests (2026-10-02/03):** The Last Kilometre is
+  now **Walk in the Weather**, the act opener (first thing on days 1, 7 and
+  13, harder each act, bigger stakes); Shred the Ledger runs on conveyor
+  belts with face-down papers and is much harder.
 - **Bug found and fixed while testing:** on a phone, the tap that finished
   a pile of papers also landed as a click on the next pile's paper.
 - No save reset (`SAVE_VERSION` 14). Tests 195.
-- Practice links: `…/Reign-Check/?practice=bread`, `parade`, `shred`.
+- Practice links: `…/Reign-Check/?practice=bread`, `kilometre`, `shred`.
 
 **Mini-games slice 1 (approved 2026-10-01):** the system (a daily game
 from day 2; coups trigger Hold the Palace), The 7pm Bulletin, and the
@@ -91,6 +92,15 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-03** — Owner: still did not like the Kilometre (*"drop the 3d
+  version"*): *"Build a different game completely to replace this
+  activity … something that gets increasingly harder and is played at the
+  very start of every act like its a new year"*; chose **Walk in the
+  Weather** (umbrella against gusts; drizzle → wind → storm) with stakes
+  that set the tone for the act. Also *"The shred game is still way to
+  easy"*: belts faster, more face-down papers, all tricks from act 1, one
+  mistake allowed (average player 82% → 40% in act 1). Careful play 63%.
 
 - **2026-10-02** — Owner playtest of slice 2: The Last Kilometre's idea is
   fine but *"the overall look and design sucks"*; Shred the Ledger is *"to

@@ -19,13 +19,19 @@ export const MG_CARD = {
   palacePlot: 'mg-palace-plot',
   palaceStrike: 'mg-palace-strike',
   breadlines: 'mg-breadlines',
-  parade: 'mg-parade',
+  /** The Last Kilometre: the act-opening walk (the id is kept from the
+   *  earlier rhythm game it replaced, so saves still find the card) */
+  kilometre: 'mg-parade',
   shred: 'mg-shred',
 } as const;
 
 /** The games that can be today's daily one. A day never repeats yesterday's
  *  when there is more than one. */
-export const DAILY_MINIGAMES: string[] = [MG_CARD.bulletin, MG_CARD.breadlines, MG_CARD.parade, MG_CARD.shred];
+export const DAILY_MINIGAMES: string[] = [MG_CARD.bulletin, MG_CARD.breadlines, MG_CARD.shred];
+
+/** Played first thing on the first day of every act (owner: "like it's a
+ *  new year"), getting harder each act. Replaces that day's daily game. */
+export const ACT_OPENER = MG_CARD.kilometre;
 
 /**
  * Events steer the daily game (owner: "certain events should trigger
@@ -83,15 +89,16 @@ const BREAD_LOST: Effects = {
   factions: { chorus: { loyalty: -4 } },
 };
 
-/* ------------------------------------------------------ the last kilometre */
+/* ------------------------------------------------------ the last kilometre
+ * Owner: it opens the act, so it "sets the tone": bigger than a daily game. */
 
-const PARADE_WON: Effects = {
-  stats: { legitimacy: 5, support: 4 },
-  factions: { all: { loyalty: 0.5 }, combine: { loyalty: 2 } },
+const KILOMETRE_WON: Effects = {
+  stats: { legitimacy: 7, support: 4 },
+  factions: { all: { loyalty: 1.5 }, combine: { loyalty: 2 } },
 };
-const PARADE_LOST: Effects = {
-  stats: { legitimacy: -4, support: -3 },
-  factions: { combine: { loyalty: -4 } },
+const KILOMETRE_LOST: Effects = {
+  stats: { legitimacy: -7, support: -4 },
+  factions: { all: { loyalty: -1 }, combine: { loyalty: -3 } },
 };
 
 /* ------------------------------------------------------ shred the ledger */
@@ -259,35 +266,35 @@ export const MINIGAME_CARDS: CardDef[] = [
     ],
   },
   {
-    id: MG_CARD.parade,
+    id: MG_CARD.kilometre,
     title: 'The Last Kilometre',
     category: 'minigame',
-    tags: ['minigame'],
+    tags: ['minigame', 'act-opener'],
     faction: 'combine',
-    minigame: 'parade',
+    minigame: 'weather',
     base: 0,
-    body: 'You walk the last kilometre on foot, through the crowd, with the cameras running.',
+    body: 'The new year of your term opens the old way: the last kilometre on foot, in whatever weather there is.',
     options: [
       {
         id: 'won',
-        label: 'You walked the whole kilometre.',
-        hint: 'Legitimacy and support go up, every faction warms a little, the Workers most.',
+        label: 'You walked it, and stayed dry.',
+        hint: 'A strong start: Legitimacy and support up, every faction warms (the Workers most).',
         outcome: (s): CardOutcome => ({
           text: (score(s) ?? 0) >= 85
-            ? 'You did not put a foot wrong. The picture on tonight\'s news is you crouching to take a child\'s flowers, and nobody remembers the egg.'
-            : 'A wobble or two, but you finished on foot and on time. The crowd at the end was bigger than the crowd at the start.',
+            ? 'You reached the Palace steps with a dry collar and a straight umbrella. Half the country decided that the weather had made up its mind about you, and that it approved.\n\nThe act starts with the wind at your back.'
+            : 'It was a wet kilometre and a wild one, but you finished it on foot and under the umbrella. The crowd at the steps cheered the umbrella as much as you.',
           tone: 'good',
-          effects: PARADE_WON,
+          effects: KILOMETRE_WON,
         }),
       },
       {
         id: 'lost',
-        label: 'You did not finish the walk.',
-        hint: 'Legitimacy, support and the Workers go down.',
+        label: 'You arrived soaked through.',
+        hint: 'A bad start: Legitimacy and support down, every faction cools (the Workers most).',
         outcome: {
-          text: 'The security detail put you in the car with four hundred metres to go. Every camera caught it.\n\nThe Workers who came out to see you went home talking about the car.',
+          text: 'You reached the Palace steps soaked to the skin, holding what was left of an umbrella. Every camera got it.\n\nIn Velmorra the weather on Dovra Day says what heaven thinks of the government. The country has seen what it thinks.',
           tone: 'bad',
-          effects: PARADE_LOST,
+          effects: KILOMETRE_LOST,
         },
       },
     ],
@@ -347,11 +354,6 @@ export interface MinigameIntro {
   because?: string;
 }
 
-/** Where today's walk is: a different place on different days. */
-const WALKS = [
-  'the Gorsk mine gates', 'the Mavro docks', 'the new tram line in Sarnica', 'the Kordiva grain market', 'the Hadem border crossing',
-];
-
 export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: number; spikeNote?: string; stories?: number }): MinigameIntro {
   if (cardId === MG_CARD.breadlines) {
     const crisis = s.crisis?.id === 'bread';
@@ -380,34 +382,42 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
       ...(crisis ? { because: 'Today\'s game comes from the Bread Riots, which are still going on.' } : {}),
     };
   }
-  if (cardId === MG_CARD.parade) {
-    const where = WALKS[(s.day + s.seed) % WALKS.length];
-    const walked = hasMark(s, 'walked-dovra');
+  if (cardId === MG_CARD.kilometre) {
+    const stormy = s.hidden.scandal >= 50;
+    const walkedBefore = hasMark(s, 'walked-dovra');
+    const weather = s.act <= 1 ? 'drizzle' : s.act === 2 ? 'a hard wind' : 'a storm';
     return {
-      kicker: `Walkabout · Day ${s.day} · ${where}`,
+      kicker: `Dovra Day · Act ${s.act} · ${weather}`,
       title: 'The Last Kilometre',
-      teaser: `One kilometre on foot at ${where}. Every camera is on you.`,
+      teaser: s.act <= 1 ? 'Your first walk. In whatever weather there is.' : s.act === 2 ? 'A new year of your term. The wind is up.' : 'The last year of your term. A storm is coming in.',
       story: [
-        `Today you walk the last kilometre to ${where} on foot, through the crowd, the way the head of state does on Dovra Day.`,
-        'Your security detail hates it. The cameras love it. Most of the crowd is friendly. Most.',
+        s.act <= 1
+          ? 'Every new year of a term opens the same way: the head of state walks the last kilometre to the Palace steps on foot, in whatever weather there is.'
+          : `A new year of your term opens the old way: the last kilometre to the Palace steps, on foot. Today it is ${weather}.`,
+        'Velmorrans believe the weather in the capital shows how honest the government is. Arrive dry, and the country takes it as a sign. Arrive soaked, and so does everyone else.',
       ],
       howTo: [
-        'Things come out of the crowd towards you. A ring closes around each one: make the right move as the ring closes.',
-        'Egg → DUCK. Child with flowers → STOP. Cheering crowd → WAVE.',
-        'Protest sign → do nothing. React to it and the cameras catch you.',
-        `A wrong move, a move at the wrong moment, or a miss costs one composure. You have ${walked ? 4 : 3}.`,
-        'Tap the three buttons, or use the keys ← (duck), ↑ (wave) and → (stop).',
+        'Gusts push your umbrella over. Hold LEFT or RIGHT to push it back upright.',
+        'Leaves blowing across the screen warn you a gust is coming, and from which side.',
+        'Upright: you stay dry. Leaning: the rain gets in, more the further it leans.',
+        'Lean too far and the umbrella turns inside out: a soaking, and a moment before you can hold it again.',
+        'Reach the Palace steps before the soak meter fills. On a keyboard: ← and →.',
+        'It gets harder every act.',
       ],
       stakes: {
-        win: 'Win: Legitimacy and support go up, and every faction warms a little, the Workers most.',
-        lose: 'Lose: Legitimacy, support and the Workers\' loyalty drop.',
+        win: 'Win: a strong start to the act. Legitimacy and support go up, and every faction warms (the Workers most).',
+        lose: 'Lose: a bad start. Legitimacy and support drop, and every faction cools.',
       },
-      ...(walked ? { because: `The crowd gives you one more chance. ${becauseText(s, 'walked-dovra')}.` } : {}),
+      ...(stormy
+        ? { because: 'The sky is darker than it should be: your scandals are piling up, and the weather knows it.' }
+        : walkedBefore
+          ? { because: `The crowd forgives a little wobble. ${becauseText(s, 'walked-dovra')}.` }
+          : {}),
     };
   }
   if (cardId === MG_CARD.shred) {
     const crisis = s.crisis?.id === 'ledger';
-    const allowed = s.act >= 3 ? 2 : 1;
+
     return {
       kicker: `Your office · Day ${s.day} · 16:20`,
       title: 'Shred the Ledger',
@@ -422,11 +432,9 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
         'Papers ride two belts towards the auditors\' box. Tap a paper with the red square stamp to shred it before it gets there.',
         'Everything else must reach the box: blue seals, plain papers. Shredding a clean paper jams the shredder for a moment.',
         'Some papers come face-down. Tap once to turn one over, again to shred it.',
-        'Tricks: a red stamp crossed out (VOID) is clean.'
-          + (s.act >= 2 ? ' A round red seal is not the square stamp: let it go.' : '')
-          + (s.act >= 3 ? ' A pale red stamp is still dirty.' : ''),
+        'Tricks: a red stamp crossed out (VOID) is clean. A round red seal is not the square stamp: let it go. A pale red stamp is still dirty.',
         'The belts speed up wave by wave.',
-        `A red-stamped paper in the box, or a jam, is a mistake. ${allowed === 1 ? 'One is allowed' : 'Two are allowed'}; one more and you lose.`,
+        'A red-stamped paper in the box, or a jam, is a mistake. One is allowed; a second and you lose.',
       ],
       stakes: {
         win: 'Win: Legitimacy goes up, every faction warms a little (the Elites most), and scandal pressure falls.',

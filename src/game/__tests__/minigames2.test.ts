@@ -3,13 +3,14 @@ import { createGame } from '../state';
 import { prepareDay } from '../engine';
 import { makeRng } from '../rng';
 import * as B from '../minigames/breadlines';
-import * as PR from '../minigames/parade';
+import * as W from '../minigames/weather';
 import * as SH from '../minigames/shred';
 import { isMinigameCard } from '../minigames';
-import { MG_CARD, DAILY_MINIGAMES, eventMinigame } from '../content/minigames';
+import { MG_CARD, DAILY_MINIGAMES, ACT_OPENER, eventMinigame } from '../content/minigames';
+import { PLOT_AT } from '../minigames';
 import type { GameState } from '../types';
 
-/** Mini-games slice 2: Bread Lines, The Last Kilometre, Shred the Ledger. */
+/** Mini-games slice 2: Bread Lines, The Last Kilometre (Walk in the Weather), Shred the Ledger. */
 
 type Pol = 'idle' | 'mixed' | 'talk';
 /** A person: one order every 0.7 s. Talk where there is time, police when it is hot. */
@@ -35,23 +36,25 @@ const breadRate = (act: number, pol: Pol) => {
   return w / 100;
 };
 
-const gauss = (r: ReturnType<typeof makeRng>) => Math.sqrt(-2 * Math.log(1 - r.next())) * Math.cos(2 * Math.PI * r.next());
-/** A walker whose timing spreads by sigma ms. */
-function walk(act: number, sigma: number, seed: number): boolean {
-  const r = makeRng(seed * 7 + 1);
-  let s = PR.paradeStart(PR.paradeSetup(seed, PR.paradeDifficulty(act)));
-  const presses: { at: number; a: PR.ParadeAction }[] = [];
-  for (const it of s.setup.items) {
-    const ans = PR.ANSWER[it.kind];
-    if (!ans) { if (r.chance(0.15)) presses.push({ at: it.t + gauss(r) * sigma, a: 'wave' }); continue; }
-    presses.push({ at: it.t + gauss(r) * sigma, a: r.chance(0.04) ? (ans === 'duck' ? 'wave' : 'duck') : ans });
+/** A walker who reacts `delay` ms late, pushes back past `dead` degrees, and (if `watch`) pre-pushes when the leaves blow in. */
+function walk(act: number, seed: number, delay: number, dead: number, watch: boolean, scandal = 0): W.WeatherState {
+  let s = W.weatherStart(W.weatherSetup(seed, W.weatherDifficulty(act, scandal)));
+  const hist: { t: number; a: number; v: number }[] = [];
+  let u: -1 | 0 | 1 = 0;
+  while (!s.over) {
+    hist.push({ t: s.t, a: s.angle, v: s.speed });
+    if (s.t % 100 === 0) {
+      const seen = hist.find((h) => h.t >= s.t - delay) ?? hist[0];
+      const e = seen.a + 0.3 * seen.v;
+      u = e > dead ? -1 : e < -dead ? 1 : 0;
+      if (watch && u === 0) {
+        const g = W.gustsComing(s.setup, s.t - delay).find((x) => x.at > s.t - delay && x.at - (s.t - delay) < 250);
+        if (g) u = g.dir === 1 ? -1 : 1;
+      }
+    }
+    s = W.weatherTick(s, W.STEP_MS, u);
   }
-  presses.sort((a, b) => a.at - b.at);
-  for (let now = 0, i = 0; now < s.setup.endMs + 1000 && !s.over; now += 16) {
-    while (i < presses.length && presses[i].at <= now) { s = PR.paradePress(s, presses[i].a, presses[i].at); i++; }
-    s = PR.paradeTick(s, now);
-  }
-  return s.over === 'won';
+  return s;
 }
 
 /**
@@ -134,51 +137,51 @@ describe('Bread Lines (rules)', () => {
   });
 });
 
-describe('The Last Kilometre (rules)', () => {
-  it('the right move at the right moment; a sign wants nothing', () => {
-    const setup: PR.ParadeSetup = {
-      items: [{ id: 'a', kind: 'egg', t: 1000 }, { id: 'b', kind: 'sign', t: 2000 }, { id: 'c', kind: 'cheer', t: 3000 }, { id: 'd', kind: 'flowers', t: 4000 }],
-      d: PR.paradeDifficulty(1), endMs: 4500,
-    };
-    let s = PR.paradeStart(setup);
-    s = PR.paradePress(s, 'duck', 1050);
-    expect(s.judged.a).toBe('perfect');
-    s = PR.paradeTick(s, 2400);
-    expect(s.judged.b).toBe('ignored');
-    s = PR.paradePress(s, 'duck', 3000);
-    expect(s.judged.c).toBe('wrong');
-    expect(s.composure).toBe(PR.COMPOSURE - 1);
-    s = PR.paradePress(s, 'stop', 4250);
-    expect(s.judged.d).toBe('good');
-    expect(s.over).toBe('won');
+describe('The Last Kilometre: Walk in the Weather (rules)', () => {
+  it('the same seed and the same hands give the same walk', () => {
+    const d = W.weatherDifficulty(2);
+    expect(W.weatherSetup(3, d)).toEqual(W.weatherSetup(3, d));
+    let a = W.weatherStart(W.weatherSetup(3, d)), b = W.weatherStart(W.weatherSetup(3, d));
+    for (let i = 0; i < 100; i++) { a = W.weatherTick(a, 100, i % 3 === 0 ? 1 : -1); b = W.weatherTick(b, 100, i % 3 === 0 ? 1 : -1); }
+    expect(a).toEqual(b);
   });
 
-  it('flinching at a sign, or pressing with nothing there, costs composure; three costs and the walk is over', () => {
-    const setup: PR.ParadeSetup = { items: [{ id: 'a', kind: 'sign', t: 1000 }, { id: 'b', kind: 'egg', t: 5000 }], d: PR.paradeDifficulty(1), endMs: 5500 };
-    let s = PR.paradeStart(setup);
-    s = PR.paradePress(s, 'wave', 1000);
-    expect(s.judged.a).toBe('flinched');
-    s = PR.paradePress(s, 'duck', 3000);
-    expect(s.last?.verdict).toBe('early');
-    s = PR.paradeTick(s, 6000);
-    expect(s.over).toBe('lost');
+  it('a gust pushes the umbrella over; holding the other way brings it back; too far and it turns inside out', () => {
+    const d = { ...W.weatherDifficulty(1), sway: 0, durationMs: 60000 };
+    const setup: W.WeatherSetup = { gusts: [{ at: 0, ms: 3000, force: 230, dir: 1 }], d, swayPhase: 0 };
+    const pushed = W.weatherTick(W.weatherStart(setup), 600, 0);
+    expect(pushed.angle).toBeGreaterThan(0);
+    const held = W.weatherTick(W.weatherStart(setup), 600, -1);
+    expect(held.angle).toBeLessThan(pushed.angle); // pushed back the other way
+    const gone = W.weatherTick(W.weatherStart(setup), 2500, 0);
+    expect(gone.flips).toBeGreaterThan(0);
+    expect(gone.soak).toBeGreaterThan(0);
   });
 
-  it('doing nothing loses; a steady walker usually wins, less often later', () => {
-    const idle = (act: number) => {
-      let s = PR.paradeStart(PR.paradeSetup(3, PR.paradeDifficulty(act)));
-      for (let now = 0; !s.over && now < 60000; now += 100) s = PR.paradeTick(s, now);
-      return s.over;
+  it('upright keeps you dry; a gust is never stronger than you can hold; doing nothing always loses', () => {
+    const calm = W.weatherTick(W.weatherStart({ gusts: [], d: { ...W.weatherDifficulty(1), sway: 0 }, swayPhase: 0 }), 5000, 0);
+    expect(calm.soak).toBe(0);
+    for (const act of [1, 2, 3]) {
+      const d = W.weatherDifficulty(act, 80);
+      expect(d.gustForce[1]).toBeLessThan(W.PUSH * 1.2);
+      let s = W.weatherStart(W.weatherSetup(act, W.weatherDifficulty(act)));
+      while (!s.over) s = W.weatherTick(s, 500, 0);
+      expect(s.over).toBe('lost');
+    }
+  });
+
+  it('harder every act, and worse while scandals pile up', () => {
+    const rate = (act: number, delay: number, scandal = 0) => {
+      let w = 0; for (let i = 0; i < 80; i++) if (walk(act, i, delay, 5, false, scandal).over === 'won') w++;
+      return w / 80;
     };
-    for (const act of [1, 2, 3]) expect(idle(act)).toBe('lost');
-    const rate = (act: number, sigma: number) => {
-      let w = 0; for (let i = 0; i < 120; i++) if (walk(act, sigma, i)) w++;
-      return w / 120;
-    };
-    expect(rate(1, 90)).toBeGreaterThan(0.85);
-    expect(rate(3, 130)).toBeLessThan(rate(1, 130));
-    expect(rate(3, 170)).toBeLessThan(0.6);
-    expect(PR.paradeSetup(4, PR.paradeDifficulty(1)).items.slice(0, 3).map((x) => x.kind)).toEqual(['cheer', 'egg', 'flowers']);
+    expect(rate(1, 230)).toBeGreaterThan(0.9);
+    expect(rate(3, 230)).toBeLessThan(rate(1, 230));
+    expect(rate(3, 230)).toBeGreaterThan(0.3);
+    expect(W.weatherDifficulty(2, 60).severity).toBeGreaterThan(W.weatherDifficulty(2, 10).severity);
+    // a good walker who watches the leaves beats the storm most of the time
+    let good = 0; for (let i = 0; i < 60; i++) if (walk(3, i, 150, 4, true).over === 'won') good++;
+    expect(good / 60).toBeGreaterThan(0.85);
   });
 });
 
@@ -195,7 +198,7 @@ describe('Shred the Ledger (rules)', () => {
         }
       }
       expect(a.papers.some((p) => p.faceDown)).toBe(true);
-      expect(a.papers.some((p) => p.kind === 'void')).toBe(true);
+      expect(a.papers.some((p) => p.kind === 'void' || p.kind === 'redseal')).toBe(true);
     }
   });
 
@@ -221,7 +224,7 @@ describe('Shred the Ledger (rules)', () => {
     expect(s.over).toBe('won'); // 2 mistakes, 5 allowed
   });
 
-  it('doing nothing loses; it is harder than the old piles but a careful player usually wins, less often later', () => {
+  it('doing nothing loses; a quick player wins most of the time, an average one less than half; act 3 is hardest', () => {
     const rate = (act: number, scan: number, tap: number, fool: number) => {
       let w = 0; for (let i = 0; i < 120; i++) if (shred(act, i, scan, tap, fool).over === 'won') w++;
       return w / 120;
@@ -231,11 +234,11 @@ describe('Shred the Ledger (rules)', () => {
       for (let now = 0; !s.over; now += 100) s = SH.shredTick(s, now);
       expect(s.over).toBe('lost');
     }
-    const avg1 = rate(1, 220, 290, 0.12);
-    expect(avg1).toBeGreaterThan(0.7);
-    expect(avg1).toBeLessThan(0.92); // the old version: 95%
+    const expert1 = rate(1, 120, 170, 0.04), avg1 = rate(1, 220, 290, 0.12);
+    expect(expert1).toBeGreaterThan(0.65); // still winnable
+    expect(avg1).toBeLessThan(0.6); // owner: "way too easy" at 82%
+    expect(avg1).toBeLessThan(expert1);
     expect(rate(3, 220, 290, 0.12)).toBeLessThan(avg1);
-    expect(rate(1, 300, 380, 0.18)).toBeGreaterThan(0.5); // a slower player still has a real chance
   });
 });
 
@@ -280,5 +283,23 @@ describe('daily games and events (slice 2)', () => {
     const day = prepareDay(t);
     expect(day.crisis?.id).toBe('bread');
     expect(day.todayDeck).toContain(MG_CARD.breadlines);
+  });
+  it('every act opens with The Last Kilometre, first thing, instead of the daily game', () => {
+    for (const day of [1, 7, 13]) {
+      const s = prepareDay(morning(day, 31));
+      expect(s.todayDeck[0], `day ${day}`).toBe(ACT_OPENER);
+      expect(s.todayDeck.filter(isMinigameCard)).toEqual([ACT_OPENER]);
+      expect(s.todayDeck.length).toBe(s.agenda.length);
+    }
+    for (const day of [2, 8, 14]) expect(prepareDay(morning(day, 31)).todayDeck).not.toContain(ACT_OPENER);
+    expect(DAILY_MINIGAMES).not.toContain(ACT_OPENER);
+  });
+
+  it('a coup on the first day of an act still lets the act open with the walk', () => {
+    const s = morning(7, 31);
+    s.hidden.coup = PLOT_AT + 5;
+    const t = prepareDay(s);
+    expect(t.todayDeck[0]).toBe(ACT_OPENER);
+    expect(t.todayDeck).toContain(MG_CARD.palacePlot);
   });
 });

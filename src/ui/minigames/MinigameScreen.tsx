@@ -5,7 +5,7 @@ import { minigameSeed, STRIKE_ODDS_FLAG } from '../../game/minigames';
 import { bulletinSetup } from '../../game/minigames/bulletin';
 import { palaceDifficulty, palaceSetup, GATES } from '../../game/minigames/palace';
 import { breadDifficulty, breadSetup } from '../../game/minigames/breadlines';
-import { paradeDifficulty, paradeSetup, COMPOSURE } from '../../game/minigames/parade';
+import { weatherDifficulty, weatherSetup } from '../../game/minigames/weather';
 import { shredDifficulty, shredSetup } from '../../game/minigames/shred';
 import { hasMark } from '../../game/consequences';
 import { Ledger } from '../components/Ledger';
@@ -14,7 +14,7 @@ import { useMedia } from '../useMedia';
 import { PalaceGame } from './PalaceGame';
 import { BulletinGame } from './BulletinGame';
 import { BreadLinesGame } from './BreadLinesGame';
-import { ParadeGame } from './ParadeGame';
+import { WeatherGame } from './WeatherGame';
 import { ShredGame } from './ShredGame';
 
 /** Per game: the start button, what giving up says, and the result stamps. */
@@ -22,7 +22,7 @@ const WORDS: Record<string, { go: string; quit: string; won: string; lost: strin
   palace: { go: 'Take command →', quit: 'You left the command room', won: 'Palace held', lost: 'The Palace fell' },
   bulletin: { go: 'Go live →', quit: 'You walked out of the studio', won: 'Clean bulletin', lost: 'It aired' },
   breadlines: { go: 'Send the teams →', quit: 'You left the city to it', won: 'The city held', lost: 'Sarnica burns' },
-  parade: { go: 'Start walking →', quit: 'You got back in the car', won: 'You made it', lost: 'Back in the car' },
+  weather: { go: 'Start walking →', quit: 'You got back in the car', won: 'Dry at the steps', lost: 'Soaked through' },
   shred: { go: 'Start shredding →', quit: 'You opened the door', won: 'Nothing found', lost: 'Caught' },
 };
 
@@ -88,8 +88,9 @@ export function MinigameScreen({
   }, [key, card.id, s, seed]);
 
   const bread = useMemo(() => (key === 'breadlines' ? breadSetup(seed, breadDifficulty(s.act)) : null), [key, s.act, seed]);
-  const parade = useMemo(() => (key === 'parade'
-    ? { setup: paradeSetup(seed, paradeDifficulty(s.act)), composure: COMPOSURE + (hasMark(s, 'walked-dovra') ? 1 : 0) }
+  const weather = useMemo(() => (key === 'weather'
+    // worse weather while scandals pile up; the crowd forgives a Chair who walked Dovra Day in the rain
+    ? { setup: weatherSetup(seed, weatherDifficulty(s.act, s.hidden.scandal)), dryBonus: hasMark(s, 'walked-dovra') ? 4 : 0 }
     : null), [key, s, seed]);
   const shred = useMemo(() => (key === 'shred' ? shredSetup(seed, shredDifficulty(s.act)) : null), [key, s.act, seed]);
   const words = WORDS[key];
@@ -207,7 +208,7 @@ export function MinigameScreen({
           {palace && <PalaceGame setup={palace.setup} gates={palace.gates} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {bulletin && <BulletinGame setup={bulletin} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {bread && <BreadLinesGame setup={bread} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
-          {parade && <ParadeGame setup={parade.setup} composure={parade.composure} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {weather && <WeatherGame setup={weather.setup} dryBonus={weather.dryBonus} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {shred && <ShredGame setup={shred} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
         </main>
       ) : (

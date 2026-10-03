@@ -13,10 +13,10 @@ import { makeRng } from '../rng';
  *     keep moving). It counts as a mistake.
  *   - Some papers arrive FACE-DOWN: the first tap turns one over (free),
  *     the second shreds it. Checking costs time, so you choose.
- *   - The belts speed up wave by wave. Tricks: a crossed-out red stamp
- *     (VOID — clean) from act 1, a round red seal (clean) from act 2, a pale
- *     red stamp (still dirty) in act 3.
- * Win with at most `allowed` mistakes (one in acts 1-2, two in act 3). Everything is reachable in
+ *   - The belts speed up wave by wave. Tricks from act 1: a crossed-out red
+ *     stamp (VOID — clean), a round red seal (clean), a pale red stamp
+ *     (still dirty).
+ * Win with at most `allowed` mistakes (one). Everything is reachable in
  * time by a player who keeps up: the difficulty is speed and attention,
  * never an impossible pile. Shapes and colours, not reading.
  *
@@ -60,16 +60,16 @@ export interface ShredDifficulty {
 }
 
 export function shredDifficulty(act: number): ShredDifficulty {
-  // Calibrated with simulated players who look at one paper at a time and
-  // sometimes mistap a moving paper (fast / average / slow): about
-  // 88 / 82 / 67% in act 1, 84 / 81 / 47% in act 2, 85 / 75 / 30% in act 3.
-  // The old static piles: an average player won 95% in act 1 ("too easy").
-  // The speed stays where a slower player can keep up; the challenge is
-  // attention: face-down papers, tricks from act 1, one mistake allowed in
-  // acts 1-2. Doing nothing always loses.
-  if (act <= 1) return { waves: 3, perWave: 8, crossMs: [4800, 3700], gapMs: [480, 820], faceDown: 0.3, tricks: ['void'], trickShare: 0.3, allowed: 1 };
-  if (act === 2) return { waves: 3, perWave: 9, crossMs: [4900, 3700], gapMs: [460, 800], faceDown: 0.35, tricks: ['void', 'redseal'], trickShare: 0.35, allowed: 1 };
-  return { waves: 3, perWave: 9, crossMs: [4700, 3500], gapMs: [440, 770], faceDown: 0.4, tricks: ['void', 'faded', 'redseal'], trickShare: 0.45, allowed: 2 };
+  // Owner (2026-10-03): still "way too easy" after the belts went in, so the
+  // bar is now set for a quick player. Calibrated with simulated players who
+  // look at one paper at a time and sometimes mistap a moving paper
+  // (expert / fast / average): about 79 / 63 / 40% in act 1, 81 / 63 / 35%
+  // in act 2 (more face-down papers), 78 / 52 / 22% in act 3 (four waves). A slow player now loses
+  // most walks: the price of a real challenge. Every paper is still
+  // reachable; doing nothing always loses.
+  if (act <= 1) return { waves: 3, perWave: 10, crossMs: [3800, 2850], gapMs: [400, 690], faceDown: 0.42, tricks: ['void', 'redseal', 'faded'], trickShare: 0.38, allowed: 1 };
+  if (act === 2) return { waves: 3, perWave: 10, crossMs: [3600, 2700], gapMs: [370, 650], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.4, allowed: 1 };
+  return { waves: 4, perWave: 9, crossMs: [3700, 2600], gapMs: [360, 640], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.45, allowed: 1 };
 }
 
 export interface Paper {

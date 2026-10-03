@@ -200,9 +200,9 @@ describe('mini-games in the run', () => {
     for (const id of DAILY_MINIGAMES) expect(isMinigameCard(id)).toBe(true);
   });
 
-  it('daily: from day 2 one drawn card becomes a mini-game; the day keeps its length; never on day 1', () => {
+  it('daily: from day 2 one drawn card becomes a mini-game; the day keeps its length; day 1 has only the act opener', () => {
     const d1 = prepareDay(morning(1));
-    expect(d1.todayDeck.some(isMinigameCard)).toBe(false);
+    expect(d1.todayDeck.filter(isMinigameCard)).toEqual([MG_CARD.kilometre]);
     for (let seed = 1; seed <= 30; seed++) {
       const s = prepareDay(morning(DAILY_FROM_DAY + (seed % 10), seed));
       if (s.phase !== 'briefing') continue;
@@ -253,7 +253,9 @@ describe('mini-games in the run', () => {
   });
 
   it('finishMinigame does nothing on an ordinary card; the same game comes back after a reload', () => {
-    const s = beginStages(prepareDay(morning(1)));
+    const day = prepareDay(morning(2));
+    day.todayDeck = day.todayDeck.filter((id) => !isMinigameCard(id));
+    const s = beginStages(day);
     const card = activeCard(s)!;
     expect(card.minigame).toBeUndefined();
     expect(finishMinigame(s, true, 50)).toBe(s);

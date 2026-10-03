@@ -2039,22 +2039,18 @@ abbr.term{
 @keyframes mgUnroll{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 @keyframes mgEmbers{from{opacity:.55;transform:translateY(0)}to{opacity:1;transform:translateY(-12px)}}
 
-/* The Last Kilometre: the bunting drops, confetti, a sunny sky */
-.mg-veil-parade{background:linear-gradient(#ffd56b,#fff3cf 70%);color:#7a1d16;animation:fadeIn .3s both}
-.mg-veil-parade .mg-veil-fx{
-  background:
-    linear-gradient(135deg, #cc2b1d 25%, transparent 25%) 0 0/40px 34px repeat-x,
-    linear-gradient(225deg, #fff 25%, transparent 25%) 20px 0/40px 34px repeat-x,
-    radial-gradient(circle, #cc2b1d 0 3px, transparent 4px) 0 0/58px 61px,
-    radial-gradient(circle, #2a6fd6 0 3px, transparent 4px) 23px 31px/67px 53px;
-  animation:mgBunting .7s cubic-bezier(.2,1.3,.4,1) both, mgConfetti 3s .7s linear infinite;
-  /* confetti falls in the top of the screen only, clear of the title */
-  -webkit-mask:linear-gradient(#000 0 22%, transparent 40%);mask:linear-gradient(#000 0 22%, transparent 40%);
+/* The Last Kilometre: grey rain sweeps in, a flash of lightning */
+.mg-veil-weather{background:#3c4a5c;color:#eef2f6;animation:mgOvercast .6s ease-in both}
+.mg-veil-weather .mg-veil-fx{
+  background:repeating-linear-gradient(105deg, transparent 0 9px, rgba(230,240,255,.35) 9px 10px, transparent 10px 22px) 0 0/44px 60px;
+  animation:mgRainVeil .3s linear infinite, mgBolt 1.8s .6s steps(1) 1;
 }
-.mg-veil-parade .mg-veil-kicker{color:#cc2b1d}
-.mg-veil-parade .mg-veil-title{color:#cc2b1d;animation:mgSlamIn .5s .4s cubic-bezier(.2,1.3,.4,1) forwards}
-@keyframes mgBunting{from{transform:translateY(-110%)}to{transform:none}}
-@keyframes mgConfetti{to{background-position:0 0,20px 0,0 120px,23px 160px}}
+.mg-veil-weather .mg-veil-kicker{color:#8fb3d9}
+.mg-veil-weather .mg-veil-title{color:#fff;animation:mgUp .55s .35s cubic-bezier(.2,.9,.25,1) forwards}
+.mg-veil-weather .mg-veil-teaser{color:#c7d1dd}
+@keyframes mgOvercast{from{background:#f2e9d5}to{background:#3c4a5c}}
+@keyframes mgRainVeil{to{background-position:-10px 60px}}
+@keyframes mgBolt{0%{background-color:transparent}8%{background-color:rgba(255,255,255,.7)}12%{background-color:transparent}18%{background-color:rgba(255,255,255,.4)}22%,100%{background-color:transparent}}
 
 /* Shred the Ledger: dark office, the desk lamp clicks on */
 .mg-veil-shred{background:#0d0906;color:#f3ead8;animation:fadeIn .2s both}
@@ -2155,102 +2151,115 @@ abbr.term{
 @keyframes mgPop{from{opacity:0;scale:.6}to{opacity:1;scale:1}}
 .bl-help{font-family:var(--sans);font-size:13px;color:var(--ink-soft);text-align:center;min-height:1.4em}
 
-/* ------------------------------------------------------ THE LAST KILOMETRE */
+/* ------------------------------------------- THE LAST KILOMETRE: THE WEATHER
+   The act opener (owner 2026-10-03: a new game, a flat 2D side view). A rainy
+   avenue scrolls past in layers; the Chair walks in the middle under a big
+   black umbrella that tips with the wind; a dial above shows how far it can
+   lean. Drizzle (act 1), wind (2), storm with lightning (3). */
 
-.app.mg-parade{
-  --paper:#fdf6e9; --paper-2:#f6e8cc; --paper-3:#ead6ad; --ink:#2a1712; --ink-soft:#5c4237; --ash:#8a7468;
-  --red:#cc2b1d; --teal:#2a6fd6; --good:#2a6fd6; --hair:rgba(42,23,18,.16); --mg-bar:#a3221a;
-  background:linear-gradient(#ffe08a, #fdf6e9 45%);
+.app.mg-weather{
+  --paper:#eef2f6; --paper-2:#dde4ec; --paper-3:#c7d1dd; --ink:#16202c; --ink-soft:#3f4d5e; --ash:#6d7b8c;
+  --red:#cc2b1d; --teal:#2a6fd6; --good:#2a6fd6; --hair:rgba(22,32,44,.16); --mg-bar:#2a3646;
+  background:linear-gradient(#cfd8e3, #eef2f6 40%);
 }
-.mg-parade .mg-top{border-bottom:4px solid #fff;box-shadow:0 2px 0 #cc2b1d}
-.mg-parade .mg-light{background:#ffd56b;box-shadow:0 0 12px #ffd56b}
-.mg-parade .btn-primary{background:#cc2b1d;border-color:#cc2b1d;color:#fff}
+.mg-weather .mg-top{border-bottom:3px solid #8fb3d9}
+.mg-weather .mg-light{background:#8fb3d9;box-shadow:0 0 12px #8fb3d9}
+.mg-weather .btn-primary{background:#2a3646;border-color:#2a3646;color:#fff}
 
-.pd{display:flex;flex-direction:column;gap:10px;width:100%;max-width:560px}
-.pd-street{position:relative;height:min(58vh, 470px);overflow:hidden;border-radius:10px;border:3px solid #2a1712;background:#d7eef9;
-  box-shadow:0 16px 36px rgba(42,23,18,.28)}
-.pd-street.oops{animation:mgShake .4s cubic-bezier(.36,.07,.19,.97) both}
-/* the street sways gently as you walk, and dips when you duck */
-.pd-world{position:absolute;inset:-4% -4% 0;animation:mgWalk 1.1s ease-in-out infinite alternate;transition:transform .18s ease-out}
-.pd-street.ducking .pd-world{transform:translateY(7%) scale(1.04)}
-@keyframes mgWalk{from{translate:0 0;rotate:-.4deg}to{translate:0 .6%;rotate:.4deg}}
-.pd-scene{width:100%;height:100%;display:block}
-.pd-sun{fill:#fff3b0;filter:drop-shadow(0 0 2px #ffd56b)}
-.pd-clouds ellipse{fill:#fff;opacity:.85}
-.pd-clouds{animation:mgClouds 40s linear infinite}
-@keyframes mgClouds{from{transform:translateX(-6px)}to{transform:translateX(6px)}}
-.pd-skyline{fill:#8c9fb5}
-.pd-walk{fill:#d9cdb7}
-.pd-facade{stroke:#5c3a24;stroke-width:.2}
-.pd-win{fill:#2c4a6b;stroke:#f6efe0;stroke-width:.25}
-.pd-win.lit{fill:#ffe9a3}
-.pd-shop{fill:#3a2a22}
-.pd-awning{fill:#15525c}
-.pd-dash2{fill:#f4efe4}
-.pd-barrier{fill:none;stroke:#f2b33d;stroke-width:.9;stroke-dasharray:2.2 1.1}
-.pd-person{animation:mgBob .7s ease-in-out infinite alternate}
-.pd-person.b1{animation-delay:-.2s}.pd-person.b2{animation-delay:-.45s;animation-duration:.6s}.pd-person.b3{animation-delay:-.1s;animation-duration:.85s}
-@keyframes mgBob{from{translate:0 0}to{translate:0 -.8px}}
-.pd-arm{animation:mgArm .45s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:0% 100%}
-@keyframes mgArm{from{rotate:-12deg}to{rotate:14deg}}
+.wx{display:flex;flex-direction:column;gap:10px;width:100%;max-width:600px}
+.wx-hud{display:flex;align-items:center;gap:14px}
+.wx-soak{display:flex;align-items:center;gap:8px;flex:0 0 40%}
+.wx-drop{position:relative;width:20px;height:20px;flex:none;margin:4px 2px 0;border-radius:0 50% 50% 50%;transform:rotate(45deg);
+  border:2px solid #2a6fd6;overflow:hidden;background:#fff}
+.wx-drop i{position:absolute;left:-30%;right:-30%;bottom:-30%;background:#2a6fd6;transform:rotate(-45deg);transform-origin:50% 100%;transition:height .2s}
+.wx-soakbar{flex:1;height:8px;border-radius:4px;background:var(--paper-3);overflow:hidden}
+.wx-soakbar i{display:block;height:100%;background:linear-gradient(90deg,#8fb3d9,#2a6fd6 60%,#16437e);transition:width .2s}
+.wx-route{position:relative;flex:1;height:8px;border-radius:4px;background:var(--paper-3)}
+.wx-route-fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:#cc2b1d}
+.wx-steps{position:absolute;right:-6px;top:50%;width:16px;height:14px;transform:translateY(-50%);
+  background:linear-gradient(#cc2b1d 0 0) 0 100%/100% 33% no-repeat, linear-gradient(#cc2b1d 0 0) 3px 50%/10px 33% no-repeat, linear-gradient(#cc2b1d 0 0) 6px 0/4px 33% no-repeat}
 
-.pd-hud{position:absolute;left:10px;right:10px;top:8px;display:flex;align-items:center;gap:10px;z-index:3;
-  padding:6px 10px;border-radius:20px;background:rgba(255,248,236,.82);box-shadow:0 2px 8px rgba(0,0,0,.15)}
-.pd-composure{display:flex;gap:5px}
-.rosette{display:block;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle, #fff 0 22%, #cc2b1d 24% 48%, #fff 50% 60%, #2a6fd6 62%);box-shadow:0 2px 4px rgba(0,0,0,.2);transition:transform .3s, opacity .3s, filter .3s}
-.rosette.lost{opacity:.25;filter:grayscale(1);transform:scale(.7) rotate(-30deg)}
-.pd-route{position:relative;flex:1;height:6px;border-radius:3px;background:#ead6ad}
-.pd-route-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:#cc2b1d}
-.pd-route-me{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid #cc2b1d;transform:translate(-50%,-50%)}
-.pd-route-end{position:absolute;right:-4px;top:50%;transform:translate(50%,-50%);font-size:13px;color:#c8890f}
+.wx-stage{position:relative;height:min(56vh, 440px);overflow:hidden;border-radius:10px;border:3px solid #16202c;
+  box-shadow:0 16px 36px rgba(22,32,44,.3);background:#7f93a8}
+.wx-stage.flash::after{content:'';position:absolute;inset:0;background:#fff;opacity:.75;z-index:6;animation:mgFlash .2s ease-out forwards}
+.wx-stage.soaked{animation:mgShake .45s cubic-bezier(.36,.07,.19,.97) both}
+.wx-sky{position:absolute;inset:0 0 40%;background:linear-gradient(#5d7088,#a9b8c8)}
+.sev2 .wx-sky{background:linear-gradient(#4b5b70,#8d9cad)}
+.sev3 .wx-sky{background:linear-gradient(#27303c,#5f6c7b)}
+.wx-palace{position:absolute;left:50%;bottom:44%;width:150px;height:90px;transform-origin:50% 100%;
+  background:
+    radial-gradient(ellipse 30% 45% at 50% 40%, #6c7a8a 98%, transparent 100%) 0 0/100% 70% no-repeat,
+    linear-gradient(#6c7a8a 0 0) 50% 100%/80% 55% no-repeat,
+    linear-gradient(#6c7a8a 0 0) 50% 0/4px 25% no-repeat}
+/* buildings far and near, a crowd under umbrellas, the pavement — all scroll left as you walk */
+.wx-far{position:absolute;left:0;right:0;bottom:40%;height:34%;opacity:.75;
+  background:
+    linear-gradient(#556578 0 0) 0 100%/42px 70% no-repeat,
+    linear-gradient(#5e6f83 0 0) 46px 100%/38px 52% no-repeat,
+    linear-gradient(#52627a 0 0) 88px 100%/48px 84% no-repeat,
+    linear-gradient(#5b6b80 0 0) 140px 100%/34px 60% no-repeat;
+  background-size:42px 70%, 38px 52%, 48px 84%, 34px 60%;background-repeat:repeat-x;background-position-y:100%}
+.wx-near{position:absolute;left:0;right:0;bottom:30%;height:48%;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(255,233,160,.55) 8px 16px, transparent 16px 24px) 0 20%/96px 14% repeat-x,
+    repeating-linear-gradient(90deg, transparent 0 8px, rgba(41,60,84,.9) 8px 16px, transparent 16px 24px) 0 50%/96px 14% repeat-x,
+    linear-gradient(90deg, #8a5a44 0 46%, #b98b5e 46% 50%, #6f7f68 50% 96%, #2a3646 96%) 0 0/192px 100% repeat-x;
+  filter:saturate(.75) brightness(.85)}
+.wx-crowd{position:absolute;left:0;right:0;bottom:24%;height:16%;
+  background:
+    radial-gradient(ellipse 22px 12px at 22px 12px, #2a3646 96%, transparent 100%) 0 0/70px 100% repeat-x,
+    radial-gradient(ellipse 18px 10px at 18px 10px, #cc2b1d 96%, transparent 100%) 35px 6px/90px 100% repeat-x,
+    radial-gradient(ellipse 20px 11px at 20px 11px, #c8890f 96%, transparent 100%) 58px 3px/110px 100% repeat-x,
+    linear-gradient(#3b4757,#2a3646) 0 70%/100% 60% no-repeat}
+.wx-ground{position:absolute;left:0;right:0;bottom:0;height:26%;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 2px, transparent 2px 60px),
+    linear-gradient(#6b6f73,#55595e)}
+.wx-ground::after{content:'';position:absolute;left:0;right:0;top:30%;height:24%;background:linear-gradient(90deg, transparent 10%, rgba(180,205,230,.35) 25% 45%, transparent 60%);opacity:.6}
+.wx-rain{position:absolute;inset:-20% -30%;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(90deg, transparent 0 11px, rgba(230,240,255,.55) 11px 12px, transparent 12px 23px, rgba(230,240,255,.35) 23px 24px) 0 0/48px 70px;
+  -webkit-mask:repeating-linear-gradient(transparent 0 18px, #000 18px 34px, transparent 34px 70px);mask:repeating-linear-gradient(transparent 0 18px, #000 18px 34px, transparent 34px 70px);
+  transform:rotate(var(--slant));transition:transform .5s ease;animation:mgRain .35s linear infinite}
+.sev3 .wx-rain{animation-duration:.22s}
+@keyframes mgRain{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:0 70px;mask-position:0 70px}}
 
-.pd-item{position:absolute;width:84px;height:84px;z-index:2;will-change:transform,left,top}
-.pd-item svg{width:100%;height:100%;filter:drop-shadow(0 6px 5px rgba(0,0,0,.3))}
-.pd-item.done{transition:opacity .25s}
-.pd-item.done.perfect,.pd-item.done.good,.pd-item.done.ignored{opacity:0}
-.pd-item.done.miss.egg svg,.pd-item.done.wrong.egg svg{animation:mgSplat .35s forwards}
-@keyframes mgSplat{to{transform:scale(1.6,0.5);opacity:.4}}
-/* the timing ring: it closes onto the item at the moment to act */
-.pd-ring{position:absolute;left:50%;top:50%;width:104%;height:104%;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 2px rgba(42,23,18,.35), inset 0 0 0 2px rgba(42,23,18,.2);pointer-events:none}
-.pd-ring.now{border-color:#ffd56b;box-shadow:0 0 14px #ffd56b, 0 0 0 2px rgba(42,23,18,.35)}
-.pd-ring.sign{border-style:dashed;border-color:rgba(255,255,255,.6)}
-.pd-splat{position:absolute;left:50%;top:44%;width:60%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:4;pointer-events:none;
-  background:radial-gradient(circle at 50% 50%, #ffd35a 0 14%, #fff7e0 15% 34%, transparent 36%),
-    radial-gradient(circle at 30% 35%, #fff7e0 0 9%, transparent 10%), radial-gradient(circle at 72% 62%, #fff7e0 0 8%, transparent 9%),
-    radial-gradient(circle at 64% 28%, #fff7e0 0 6%, transparent 7%);
-  animation:mgSplatScreen .65s ease-out forwards}
-@keyframes mgSplatScreen{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}100%{opacity:0;transform:translate(-50%,-30%) scale(1)}}
-.pd-say{position:absolute;left:50%;top:40%;transform:translateX(-50%);z-index:4;font-family:var(--head);font-size:30px;text-transform:uppercase;letter-spacing:.04em;
-  color:#fff;-webkit-text-stroke:1px #2a1712;text-shadow:0 3px 0 #2a1712;animation:mgSay .65s ease-out forwards;pointer-events:none;white-space:nowrap}
-.pd-say.perfect{color:#ffd56b}
-.pd-say.wrong,.pd-say.miss,.pd-say.flinched,.pd-say.early{color:#ff6b5c}
-@keyframes mgSay{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}25%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-26px) scale(1)}}
+.wx-leaves{position:absolute;top:18%;bottom:30%;width:100%;z-index:4;pointer-events:none}
+.wx-leaves i{position:absolute;width:16px;height:10px;border-radius:0 80% 0 80%;background:#c8890f;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.wx-leaves i:nth-child(2){background:#a2501f;top:30%}.wx-leaves i:nth-child(3){top:55%;background:#d9a52b}
+.wx-leaves i:nth-child(4){top:12%;background:#8b5a1b}.wx-leaves i:nth-child(5){top:72%;background:#c8890f}
+.wx-leaves.from-left i{left:-20px;animation:mgLeafR .9s ease-in forwards}
+.wx-leaves.from-right i{right:-20px;animation:mgLeafL .9s ease-in forwards}
+.wx-leaves i:nth-child(2){animation-delay:.08s}.wx-leaves i:nth-child(3){animation-delay:.15s}.wx-leaves i:nth-child(4){animation-delay:.05s}.wx-leaves i:nth-child(5){animation-delay:.2s}
+@keyframes mgLeafR{to{transform:translate(min(70vw,560px), 30px) rotate(540deg)}}
+@keyframes mgLeafL{to{transform:translate(max(-70vw,-560px), 30px) rotate(-540deg)}}
 
-/* the Chair's hands at the bottom of the screen */
-.pd-hands{position:absolute;left:0;right:0;bottom:-6%;height:30%;z-index:3;pointer-events:none}
-.pd-hand{position:absolute;bottom:0;height:100%;aspect-ratio:60/96;transition:transform .16s cubic-bezier(.3,1.4,.5,1)}
-.pd-hand svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.3))}
-.pd-hand.l{left:14%;transform:scaleX(-1) rotate(10deg) translateY(42%)}
-.pd-hand.r{right:14%;transform:rotate(10deg) translateY(42%)}
-/* wave: the right hand comes up and waves */
-.pd-hands.wave .pd-hand.r{transform:rotate(-6deg) translateY(-4%);animation:mgWave .38s ease-in-out}
-/* stop: both palms up and forward, to take the flowers */
-.pd-hands.stop .pd-hand.l{transform:scaleX(-1) rotate(-6deg) translate(30%, -8%)}
-.pd-hands.stop .pd-hand.r{transform:rotate(-6deg) translate(-30%, -8%)}
-/* duck: hands drop out of sight as the view dips */
-.pd-hands.duck .pd-hand.l{transform:scaleX(-1) rotate(24deg) translateY(75%)}
-.pd-hands.duck .pd-hand.r{transform:rotate(24deg) translateY(75%)}
-@keyframes mgWave{0%,100%{rotate:0deg}30%{rotate:-14deg}70%{rotate:12deg}}
+.wx-gauge{position:absolute;left:50%;top:6%;width:120px;height:60px;transform:translateX(-50%);z-index:5;overflow:hidden}
+.wx-gauge::before{content:'';position:absolute;left:0;top:0;width:120px;height:120px;border-radius:50%;
+  background:conic-gradient(from -90deg, #cc2b1d 0deg, #f2b33d calc(90deg - var(--safe)), #2f9e6a calc(90deg - var(--safe)) calc(90deg + var(--safe)), #f2b33d calc(90deg + var(--safe)), #cc2b1d 180deg, transparent 180deg);
+  -webkit-mask:radial-gradient(circle, transparent 62%, #000 64%);mask:radial-gradient(circle, transparent 62%, #000 64%);opacity:.9}
+.wx-gauge .needle{position:absolute;left:58px;bottom:0;width:4px;height:54px;border-radius:2px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.5);transform-origin:50% 100%;transition:transform .05s linear}
+.wx-chair{position:absolute;left:50%;bottom:8%;width:120px;height:250px;transform:translateX(-50%);z-index:4}
+.wx-umbrella{position:absolute;left:0;bottom:92px;width:120px;height:120px;transform-origin:50% 95%;transition:transform .05s linear}
+.wx-umbrella svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
+.wx-umbrella .canopy{fill:#16202c}
+.wx-umbrella .canopy-inv{fill:#16202c;opacity:0}
+.wx-umbrella svg.inside-out .canopy{opacity:0}
+.wx-umbrella svg.inside-out .canopy-inv{opacity:1;animation:mgInvert .3s ease-out}
+.wx-umbrella .pole{stroke:#3a2a1c;stroke-width:4;stroke-linecap:round}
+@keyframes mgInvert{from{transform:scaleY(.3);transform-origin:50% 40%}to{transform:none}}
+.wx-body{position:absolute;left:30px;bottom:0;width:60px;height:110px}
+.wx-body .leg{transform-box:fill-box;transform-origin:50% 0;animation:mgStride .7s ease-in-out infinite alternate}
+.wx-body .leg.r{animation-delay:-.7s}
+@keyframes mgStride{from{transform:rotate(14deg)}to{transform:rotate(-14deg)}}
+.wx-say{position:absolute;left:50%;top:38%;transform:translateX(-50%);z-index:6;font-family:var(--head);font-size:30px;text-transform:uppercase;
+  color:#fff;-webkit-text-stroke:1px #16202c;text-shadow:0 3px 0 #16202c;animation:mgSay .7s ease-out forwards;white-space:nowrap;pointer-events:none}
 
-.pd-moves{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.pd-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:74px;padding:8px;border-radius:40px;font-size:12px;
-  border:0;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .08s, filter .12s;
-  box-shadow:0 5px 0 rgba(42,23,18,.35), 0 8px 16px rgba(42,23,18,.2)}
-.pd-btn svg{width:30px;height:30px}
-.pd-btn.duck{background:linear-gradient(#fff,#efe6d6);color:#2a1712}
-.pd-btn.wave{background:linear-gradient(#4b8ff0,#2a6fd6);color:#fff}
-.pd-btn.stop{background:linear-gradient(#e2473a,#c02a1d);color:#fff}
-.pd-btn.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(42,23,18,.35), 0 3px 8px rgba(42,23,18,.2)}
+.wx-controls{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px}
+.wx-btn{min-height:76px;font-size:28px;border:0;border-radius:40px;background:linear-gradient(#3b4b60,#2a3646);color:#fff;
+  box-shadow:0 5px 0 #121a24, 0 8px 16px rgba(22,32,44,.25);touch-action:none;user-select:none;-webkit-user-select:none;transition:transform .08s}
+.wx-btn.on{transform:translateY(4px);box-shadow:0 1px 0 #121a24, 0 3px 8px rgba(22,32,44,.25);background:linear-gradient(#2a6fd6,#1f57ad)}
+.wx-tilt{font-family:var(--black);font-size:12px;letter-spacing:.12em;text-transform:uppercase;min-width:7em;text-align:center}
+.wx-tilt.dry{color:#2f9e6a}.wx-tilt.wet{color:#c8890f}.wx-tilt.danger{color:#cc2b1d;animation:pulse .5s infinite}
 
 /* -------------------------------------------------------- SHRED THE LEDGER */
 
@@ -2360,14 +2369,15 @@ abbr.term{
   .mg-veil-bulletin .mg-veil-fx{transform:none;animation:none}
   .mg-veil-kicker,.mg-veil-title,.mg-veil-teaser{animation:fadeIn .3s .1s forwards !important;transform:none;filter:none}
   .mg-veil.out{animation:fadeOut .25s forwards}
-  .mg-veil-breadlines,.mg-veil-parade,.mg-veil-shred{animation:fadeIn .3s both}
-  .mg-veil-breadlines .mg-veil-fx,.mg-veil-parade .mg-veil-fx{animation:none}
+  .mg-veil-breadlines,.mg-veil-weather,.mg-veil-shred{animation:fadeIn .3s both}
+  .mg-veil-breadlines .mg-veil-fx,.mg-veil-weather .mg-veil-fx{animation:none}
   .mg-veil-shred .mg-veil-fx{animation:none;opacity:1}
-  .bl-d .core,.bl-d.burning .core,.flame.lit,.bl-menu,.pd-world,.pd-person,.pd-arm,.pd-clouds,.pd-hands.wave .pd-hand.r{animation:none}
-  .pd-hand{transition:none}
+  .bl-d .core,.bl-d.burning .core,.flame.lit,.bl-menu,.wx-rain,.wx-body .leg,.wx-tilt.danger{animation:none}
+  .wx-leaves i{animation-duration:.01s}
+  .wx-stage.soaked{animation:none}
   .bl-trail{display:none}
-  .pd-street.oops,.sh-shredder.jam,.sh-shredder.chew,.sh-desk.caught{animation:none}
-  .pd-say{animation:fadeOut .65s forwards}
+  .sh-shredder.jam,.sh-shredder.chew,.sh-desk.caught{animation:none}
+  .wx-say{animation:fadeOut .65s forwards}
   .sh-rollers,.sh-paper.flipped,.sh-box.hit{animation:none}
   .sh-paper.ghost.shred,.sh-paper.ghost.jam,.sh-paper.ghost.box,.sh-paper.ghost.evidence{animation:fadeOut .2s forwards}
 }
@@ -2387,7 +2397,7 @@ abbr.term{
   .bt-desk{min-height:210px}
   .bl-map{max-height:calc(100vh - 330px)}
   .bl-hud{flex-wrap:wrap;gap:6px 10px}
-  .pd-street{height:max(300px, min(calc(100vh - 360px), 600px))}
+  .wx-stage{height:max(300px, min(calc(100vh - 320px), 620px))}
   .sh-desk{max-height:calc(100vh - 360px)}
 }
 /* Landscape phones: the map on the left, the clock and orders on its right,
@@ -2426,11 +2436,12 @@ abbr.term{
   .bl-hud{width:100%}
   .bl-map{width:auto;height:calc(100vh - 150px);max-height:none;aspect-ratio:1/0.92}
   .bl-help{display:none}
-  .pd{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:6px 12px}
-  .pd-street{height:calc(100vh - 110px)}
-  .pd-moves{grid-template-columns:1fr;align-content:center}
-  .pd-btn{min-height:52px;flex-direction:row;justify-content:center;border-radius:26px}
-  .pd-btn svg{width:24px;height:24px}
+  .wx{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 140px;grid-template-rows:auto 1fr;gap:6px 12px}
+  .wx-hud{grid-column:1 / -1}
+  .wx-stage{height:calc(100vh - 140px)}
+  .wx-controls{grid-template-columns:1fr;grid-template-rows:1fr auto 1fr}
+  .wx-btn{min-height:56px}
+  .wx-chair{transform:translateX(-50%) scale(.75);transform-origin:50% 100%}
 }
 
 /* mini-games on a narrow phone: a taller map and desk */

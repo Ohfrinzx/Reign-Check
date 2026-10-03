@@ -59,6 +59,11 @@ After slice 1 (2026-10-01):
   papers (owner's picks; not chosen: changing rules per pile, tighter
   limits alone). Rule for difficulty: never a game you lose while doing
   everything right.
+- **2026-10-03:** the Kilometre is replaced by a new game for the same
+  activity, **Walk in the Weather**, played at the start of every act and
+  harder each act, with stakes that set the tone for the act (owner's
+  picks over a lane runner and a pigeon game). Shred was "still way too
+  easy": tuned for a quick player now.
 
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).

@@ -67,7 +67,14 @@ async function seed(page, recipe) {
     };
 
     const recipes = {
-      briefing: () => fresh(),
+      // a day without a mini-game, so "Begin the day" opens on a card (day 1
+      // opens with The Last Kilometre, which has its own scenes)
+      briefing: () => {
+        const s = fresh();
+        s.todayDeck = s.todayDeck.filter((id) => !id.startsWith('mg-'));
+        s.agenda = s.agenda.slice(0, s.todayDeck.length);
+        return s;
+      },
       privateFile: () => playUntil(fresh(), (s) => s.phase === 'stage' && tagged(s, 'character-event')),
       alert: () => playUntil(fresh(), (s) => s.phase === 'alert'),
       night: () => playUntil(fresh(), (s) => s.phase === 'night'),
@@ -246,7 +253,7 @@ export const SCENES = [
   { name: 'mg-bulletin', primary: '.bt-run', go: async (p) => { await practice(p, 'bulletin', 'play'); } },
   // the real-time games with their clock frozen (&freeze), so the picture is the same every time
   { name: 'mg-bread', primary: null, go: async (p) => { await practice(p, 'bread', 'play', '&freeze'); } },
-  { name: 'mg-parade', primary: '.pd-btn.wave', go: async (p) => { await practice(p, 'parade', 'play', '&freeze=2600'); } },
+  { name: 'mg-kilometre', primary: '.wx-btn', go: async (p) => { await practice(p, 'kilometre', 'play', '&freeze=2600'); } },
   { name: 'mg-shred', primary: null, go: async (p) => { await practice(p, 'shred', 'play', '&freeze=2600'); } },
   { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {

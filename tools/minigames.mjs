@@ -218,7 +218,7 @@ try {
       return { day: s.day, card: s.current.cardId, stage: s.stageIndex, deck: s.todayDeck.length, legit: s.stats.legitimacy };
       function playToGame(seed) {
       let s = en.prepareDay(st.createGame({ seed, leaderName: 'Adrin Vo', mandateId: 'accident' }));
-      for (let i = 0; i < 400 && !(s.phase === 'stage' && en.activeCard(s)?.minigame); i++) {
+      for (let i = 0; i < 400 && !(s.day >= 2 && s.phase === 'stage' && en.activeCard(s)?.minigame); i++) {
         if (s.phase === 'briefing') s = en.beginStages(s);
         else if (s.phase === 'stage' || s.phase === 'alert') {
           const o = en.orderedOptions(s, en.activeCard(s)).find((x) => x.because?.kind !== 'lock' && (!x.enabled || x.enabled(s)));
@@ -376,46 +376,48 @@ try {
     await page.locator('.mg-end').waitFor({ timeout: 20000 });
     await page.close();
   }
-  for (const vp of [{ width: 1366, height: 700, touch: false }, { width: 390, height: 844, touch: true }]) {
-    // The Last Kilometre: press the right move as each item crosses the line
-    const page = await browser.newPage({
-      viewport: { width: vp.width, height: vp.height },
-      ...(vp.touch ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}),
-    });
+  {
+    // The Last Kilometre (Walk in the Weather): a steady hand reaches the
+    // steps — the page reads the dial and holds ← or → like a player would
+    const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
     page.on('pageerror', (e) => errors.push(e.message));
-    await openPractice(page, 'parade', 5);
-    // the clock starts with the game; the page presses on time by itself
-    await page.evaluate(async (touch) => {
-      const { practiceGame } = await import('/src/ui/minigames/practice.ts');
-      const { minigameSeed } = await import('/src/game/minigames/index.ts');
-      const P = await import('/src/game/minigames/parade.ts');
-      const s = practiceGame(location.search);
-      const setup = P.paradeSetup(minigameSeed(s, s.current.cardId), P.paradeDifficulty(s.act));
-      const t0 = performance.now();
-      const key = { duck: 'ArrowLeft', wave: 'ArrowUp', stop: 'ArrowRight' };
-      for (const it of setup.items) {
-        const a = P.ANSWER[it.kind];
-        if (!a) continue;
-        setTimeout(() => {
-          if (touch) document.querySelector(`.pd-btn.${a}`).dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
-          else window.dispatchEvent(new KeyboardEvent('keydown', { key: key[a] }));
-        }, it.t - (performance.now() - t0));
-      }
-    }, vp.touch);
+    await openPractice(page, 'kilometre', 5, 1);
+    await page.evaluate(() => {
+      let held = 0;
+      const press = (dir) => {
+        if (dir === held) return;
+        if (held) window.dispatchEvent(new KeyboardEvent('keyup', { key: held < 0 ? 'ArrowLeft' : 'ArrowRight' }));
+        if (dir) window.dispatchEvent(new KeyboardEvent('keydown', { key: dir < 0 ? 'ArrowLeft' : 'ArrowRight' }));
+        held = dir;
+      };
+      const t = setInterval(() => {
+        if (document.querySelector('.mg-end')) { press(0); clearInterval(t); return; }
+        const n = document.querySelector('.wx-gauge .needle');
+        const deg = n ? parseFloat((n.style.transform.match(/-?[\d.]+/) ?? ['0'])[0]) : 0;
+        press(deg > 8 ? -1 : deg < -8 ? 1 : 0);
+      }, 80);
+    });
     await page.waitForTimeout(4000);
-    await page.screenshot({ path: shotPath(`MG-parade-${vp.width}.png`) });
+    await page.screenshot({ path: shotPath('MG-kilometre-1366.png') });
     await page.locator('.mg-end').waitFor({ timeout: 60000 });
-    assert.ok(await page.locator('.mg-end.won').count(), `Pressing on time should finish the walk (${vp.width}px)`);
+    assert.ok(await page.locator('.mg-end.won').count(), `A steady hand reaches the steps: ${await page.locator('.mg-end').innerText()}`);
     await page.close();
   }
   {
-    // a real tap on a move button is ONE press (not a press plus a click)
+    // on a phone the ◀ ▶ buttons work while a finger is held on them
     const page = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
     page.on('pageerror', (e) => errors.push(e.message));
-    await openPractice(page, 'parade', 5);
-    await page.locator('.pd-btn.duck').tap(); // nothing on the line yet: one "too early"
-    await page.waitForTimeout(200);
-    assert.equal(await page.locator('.rosette.lost').count(), 1, 'One tap should cost exactly one composure');
+    await openPractice(page, 'kilometre', 5, 1);
+    const right = page.locator('.wx-btn').last();
+    const b = await right.boundingBox();
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: b.x + b.width / 2, y: b.y + b.height / 2 }] });
+    await page.waitForTimeout(250);
+    assert.ok(await page.locator('.wx-btn.on').count(), 'Holding ▶ pushes the umbrella');
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await page.waitForTimeout(150);
+    assert.equal(await page.locator('.wx-btn.on').count(), 0, 'Letting go stops pushing');
+    await page.screenshot({ path: shotPath('MG-kilometre-390.png') });
     await page.close();
   }
   {
@@ -475,4 +477,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre won on time (desktop keys + phone taps); Shred (belts) won by a quick careful player, a clean paper jams, a face-down paper turns over; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');
+console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre (weather) walked to the steps by reading the dial, ◀ ▶ held on a phone; Shred (belts) won by a quick careful player, a clean paper jams, a face-down paper turns over; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');

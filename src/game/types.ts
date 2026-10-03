@@ -450,7 +450,7 @@ export type MinigameKey =
   | 'palace'
   | 'bulletin'
   | 'breadlines'
-  | 'parade'
+  | 'weather'
   | 'shred';
 
 /* ----------------------------------------------------------------- alerts */

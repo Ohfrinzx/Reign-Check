@@ -61,10 +61,13 @@ anything else without asking.**
   **The Last Kilometre**, **Shred the Ledger** (low-reading, skill games),
   events picking the daily game, and bigger win rewards (careful play
   ~60%). Owner's decisions and the idea list: `docs/MINIGAMES.md`. How it
-  works: `docs/SYSTEMS.md` §12.
+  works: `docs/SYSTEMS.md` §12. After the owner's playtests: The Last
+  Kilometre became **Walk in the Weather**, the act opener (first thing on
+  days 1, 7, 13); Shred the Ledger moved to conveyor belts and was made
+  much harder.
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
-- `SAVE_VERSION` is **14**. Tests: **195**, all passing.
+- `SAVE_VERSION` is **14**. Tests: **198**, all passing.
 
 ## 3. How work is done here
 
@@ -195,7 +198,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 195 tests: content integrity, 200 full
+npm test           # vitest, 198 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -244,7 +247,10 @@ Screenshots go to `<OS temp>/reign-check-shots/` (`REIGN_SHOTS` overrides).
   `.opt` buttons). A tool that drives days must call `passMinigame(page)`
   from `tools/browser.mjs` (it gives the game up and goes on). Engine-side
   scripts can just `chooseOption(s, 'won' | 'lost')`. To open one game
-  directly: `?practice=palace|strike|bulletin|bread|parade|shred&seed=N`.
+  directly: `?practice=palace|strike|bulletin|bread|kilometre|shred&seed=N`.
+  **Every act's first day opens with The Last Kilometre** before any card;
+  `scenes.mjs`'s `briefing` recipe removes mini-games from its day so its
+  card scenes still show a card.
 - The Back Room has no `.strap-action`; leave with `.shop-foot .btn-primary`.
 - Cards are under `:is(.stage-col, .sr-stage)` (the situation room is
   separate).
@@ -276,7 +282,7 @@ src/game/            pure logic, no React/DOM, fully testable
   minigames/         Phase 5 mini-games: index.ts (when they appear: daily
                      slot, officers' plot, the Army's strike), and each
                      game's rules, pure: palace, bulletin, breadlines,
-                     parade, shred
+                     weather (the Kilometre), shred
   favours.ts         aimed favours and their receipts
   shop.ts            the Back Room: stock, prices, caps, timed deals
   meta.ts            cross-run record and unlocks (own save key/version)
