@@ -63,7 +63,9 @@ After slice 1 (2026-10-01):
   activity, **Walk in the Weather**, played at the start of every act and
   harder each act, with stakes that set the tone for the act (owner's
   picks over a lane runner and a pigeon game). Shred was "still way too
-  easy": tuned for a quick player now.
+  easy": tuned for a quick player, then made *"2-3 times as fast"*
+  (owner, 2026-10-03; the alternative they named was a fundamentally
+  harder game from scratch).
 
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).

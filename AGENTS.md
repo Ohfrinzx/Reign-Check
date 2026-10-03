@@ -63,8 +63,8 @@ anything else without asking.**
   ~60%). Owner's decisions and the idea list: `docs/MINIGAMES.md`. How it
   works: `docs/SYSTEMS.md` §12. After the owner's playtests: The Last
   Kilometre became **Walk in the Weather**, the act opener (first thing on
-  days 1, 7, 13); Shred the Ledger moved to conveyor belts and was made
-  much harder.
+  days 1, 7, 13); Shred the Ledger moved to conveyor belts and is now
+  2–3× as fast (an expert's game).
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
 - `SAVE_VERSION` is **14**. Tests: **198**, all passing.

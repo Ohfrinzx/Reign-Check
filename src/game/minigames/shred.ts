@@ -59,17 +59,31 @@ export interface ShredDifficulty {
   allowed: number;
 }
 
-export function shredDifficulty(act: number): ShredDifficulty {
-  // Owner (2026-10-03): still "way too easy" after the belts went in, so the
-  // bar is now set for a quick player. Calibrated with simulated players who
-  // look at one paper at a time and sometimes mistap a moving paper
-  // (expert / fast / average): about 79 / 63 / 40% in act 1, 81 / 63 / 35%
-  // in act 2 (more face-down papers), 78 / 52 / 22% in act 3 (four waves). A slow player now loses
-  // most walks: the price of a real challenge. Every paper is still
-  // reachable; doing nothing always loses.
+/** Owner (2026-10-03, after the third round): "2-3 times as fast". */
+export const SHRED_SPEED: Record<number, number> = { 1: 2, 2: 2.5, 3: 3 };
+
+/** The base settings before the speed-up (the previous, "still too easy" tuning). */
+function shredBase(act: number): ShredDifficulty {
   if (act <= 1) return { waves: 3, perWave: 10, crossMs: [3800, 2850], gapMs: [400, 690], faceDown: 0.42, tricks: ['void', 'redseal', 'faded'], trickShare: 0.38, allowed: 1 };
   if (act === 2) return { waves: 3, perWave: 10, crossMs: [3600, 2700], gapMs: [370, 650], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.4, allowed: 1 };
   return { waves: 4, perWave: 9, crossMs: [3700, 2600], gapMs: [360, 640], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.45, allowed: 1 };
+}
+
+export function shredDifficulty(act: number): ShredDifficulty {
+  // History: static piles "too easy" (2026-10-02); belts "still way too
+  // easy"; tuned for a quick player, then "2-3 times as fast" (2026-10-03).
+  // Belts and papers now come 2x / 2.5x / 3x as fast as that tuning, with
+  // more waves so a game still lasts about as long. This is an expert's
+  // game now: see docs/SYSTEMS.md §12 for the measured win rates.
+  const a = Math.min(3, Math.max(1, act));
+  const b = shredBase(a);
+  const k = SHRED_SPEED[a];
+  return {
+    ...b,
+    waves: Math.round(b.waves * Math.min(k, 2)),
+    crossMs: [Math.round(b.crossMs[0] / k), Math.round(b.crossMs[1] / k)],
+    gapMs: [Math.round(b.gapMs[0] / k), Math.round(b.gapMs[1] / k)],
+  };
 }
 
 export interface Paper {

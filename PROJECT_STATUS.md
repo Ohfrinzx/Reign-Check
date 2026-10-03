@@ -28,7 +28,8 @@ story and how-to screens keep their text).
 - **After the owner's playtests (2026-10-02/03):** The Last Kilometre is
   now **Walk in the Weather**, the act opener (first thing on days 1, 7 and
   13, harder each act, bigger stakes); Shred the Ledger runs on conveyor
-  belts with face-down papers and is much harder.
+  belts with face-down papers, now 2× / 2.5× / 3× as fast by act (only a
+  very quick player wins).
 - **Bug found and fixed while testing:** on a phone, the tap that finished
   a pile of papers also landed as a click on the next pile's paper.
 - No save reset (`SAVE_VERSION` 14). Tests 195.
@@ -92,6 +93,13 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-03** — Owner: Shred *"2-3 times as fast … That or we need a
+  fundamentally harder game. Like from scratch"*. Built the speed-up:
+  belts and papers 2× / 2.5× / 3× as fast in acts 1 / 2 / 3, twice the
+  waves. Simulated expert 79% → 38% (act 1), 0% in acts 2–3; a very quick
+  player 69 / 56 / 52%. If this is still wrong, the next step is a new
+  game from scratch.
 
 - **2026-10-03** — Owner: still did not like the Kilometre (*"drop the 3d
   version"*): *"Build a different game completely to replace this

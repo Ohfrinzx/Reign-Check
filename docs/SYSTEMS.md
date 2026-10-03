@@ -397,22 +397,25 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   name, whose look the owner did not like twice; the card id
   `mg-parade` was kept so saves still find it.)
 - **Shred the Ledger** (`shred.ts`; a dark walnut desk, Elites). Papers
-  ride two conveyor belts into the auditors' box, in 3 waves that speed up
-  (a paper crosses in 4.8 s → 3.5 s). Tap a paper with the red square
-  Ilvet stamp to shred it before it reaches the box; everything else must
-  reach the box. Some papers arrive **face-down** (42–48%): the first tap
-  turns one over, the second shreds it. Shredding a clean paper jams the
-  shredder for 1.2 s (the belts keep moving); a dirty paper in the box is
-  evidence. One mistake allowed. All tricks from act 1: VOID (a crossed-out
-  red stamp, clean), a round red seal (clean), a pale red stamp (dirty).
-  A paper crosses in 3.8 s → 2.6 s; act 3 has four waves. History: static
-  piles were "too easy" (owner 2026-10-02), then the first belts were
-  "still way too easy" (2026-10-03), so the bar is now set for a quick
-  player. Simulated players (one paper at a time, the odd mistap; expert /
-  fast / average): 79 / 63 / 40% (act 1), 81 / 63 / 35% (act 2), 78 / 52 /
-  22% (act 3). A slow player now loses most games; every paper is still
-  reachable and doing nothing always loses. Won: Legitimacy +5, scandal −10;
-  lost: Legitimacy −5, scandal +8.
+  ride two conveyor belts into the auditors' box, in waves that speed up.
+  Tap a paper with the red square Ilvet stamp to shred it before it
+  reaches the box; everything else must reach the box. Some papers arrive
+  **face-down** (42–48%): the first tap turns one over, the second shreds
+  it. Shredding a clean paper jams the shredder for 1.2 s (the belts keep
+  moving); a dirty paper in the box is evidence. One mistake allowed. All
+  tricks from act 1: VOID (a crossed-out red stamp, clean), a round red
+  seal (clean), a pale red stamp (dirty). Speed (`SHRED_SPEED`, owner
+  2026-10-03: *"2-3 times as fast"*): 2× / 2.5× / 3× the previous tuning
+  in acts 1 / 2 / 3, with twice the waves so a game lasts about as long.
+  A paper crosses in 1.9 → 1.4 s (act 1, 6 waves), 1.4 → 1.1 s (act 2,
+  6 waves), 1.2 → 0.9 s (act 3, 8 waves). History: static piles were "too
+  easy" (2026-10-02); the first belts "still way too easy"; a quick
+  player's tuning (simulated expert 79%) was then sped up 2–3×.
+  Simulated players (one paper at a time, the odd mistap; very quick
+  70–100 ms / expert / fast / average): 69 / 38 / 2 / 0% (act 1),
+  56 / 0 / 0 / 0% (act 2), 52 / 0 / 0 / 0% (act 3). Only a very quick
+  player wins now; every paper is still reachable and doing nothing always
+  loses. Won: Legitimacy +5, scandal −10; lost: Legitimacy −5, scandal +8.
 - **Input:** real-time games act on pointer-down (a tap never also lands
   as a click on whatever appears under the finger next); keys too (Bread
   Lines 1–7 then T/P, the Kilometre ← → held, Shred Enter on a focused paper). The

@@ -224,21 +224,20 @@ describe('Shred the Ledger (rules)', () => {
     expect(s.over).toBe('won'); // 2 mistakes, 5 allowed
   });
 
-  it('doing nothing loses; a quick player wins most of the time, an average one less than half; act 3 is hardest', () => {
+  it('2-3x as fast (owner): only a very quick player wins, but every act can still be won; doing nothing loses', () => {
     const rate = (act: number, scan: number, tap: number, fool: number) => {
-      let w = 0; for (let i = 0; i < 120; i++) if (shred(act, i, scan, tap, fool).over === 'won') w++;
-      return w / 120;
+      let w = 0; for (let i = 0; i < 100; i++) if (shred(act, i, scan, tap, fool).over === 'won') w++;
+      return w / 100;
     };
     for (const act of [1, 2, 3]) {
       let s = SH.shredStart(SH.shredSetup(1, SH.shredDifficulty(act)));
       for (let now = 0; !s.over; now += 100) s = SH.shredTick(s, now);
       expect(s.over).toBe('lost');
+      // a very quick player (looks in 70 ms, taps in 100 ms) still wins about half the time
+      expect(rate(act, 70, 100, 0.02), `act ${act}`).toBeGreaterThan(0.35);
     }
-    const expert1 = rate(1, 120, 170, 0.04), avg1 = rate(1, 220, 290, 0.12);
-    expect(expert1).toBeGreaterThan(0.65); // still winnable
-    expect(avg1).toBeLessThan(0.6); // owner: "way too easy" at 82%
-    expect(avg1).toBeLessThan(expert1);
-    expect(rate(3, 220, 290, 0.12)).toBeLessThan(avg1);
+    expect(rate(1, 220, 290, 0.12)).toBeLessThan(0.1); // an average player: no chance
+    expect(SH.shredDifficulty(3).crossMs[1]).toBeLessThan(SH.shredDifficulty(1).crossMs[1]);
   });
 });
 

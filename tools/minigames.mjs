@@ -443,7 +443,7 @@ try {
     await page.close();
   }
   {
-    // ...and a quick, careful player wins: the paper nearest the box first,
+    // ...and a very quick, careful player wins: the paper nearest the box first,
     // turn it over if it is face-down, shred it if it has the red square stamp
     const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
     page.on('pageerror', (e) => errors.push(e.message));
@@ -455,7 +455,7 @@ try {
           .filter((b) => b.classList.contains('down') || b.querySelector('.ilvet:not(.void)'))
           .sort((a, b) => parseFloat(b.style.left) - parseFloat(a.style.left));
         papers[0]?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
-      }, 140);
+      }, 45); // the belts run 2x as fast in act 1: a very quick player
     });
     await page.waitForTimeout(3000);
     await page.screenshot({ path: shotPath('MG-shred-1366.png') });
