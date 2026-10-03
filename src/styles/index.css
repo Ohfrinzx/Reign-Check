@@ -2216,10 +2216,15 @@ abbr.term{
     repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 2px, transparent 2px 60px),
     linear-gradient(#6b6f73,#55595e)}
 .wx-ground::after{content:'';position:absolute;left:0;right:0;top:30%;height:24%;background:linear-gradient(90deg, transparent 10%, rgba(180,205,230,.35) 25% 45%, transparent 60%);opacity:.6}
-.wx-rain{position:absolute;inset:-20% -30%;pointer-events:none;z-index:3;
-  background:repeating-linear-gradient(90deg, transparent 0 11px, rgba(230,240,255,.55) 11px 12px, transparent 12px 23px, rgba(230,240,255,.35) 23px 24px) 0 0/48px 70px;
-  -webkit-mask:repeating-linear-gradient(transparent 0 18px, #000 18px 34px, transparent 34px 70px);mask:repeating-linear-gradient(transparent 0 18px, #000 18px 34px, transparent 34px 70px);
-  transform:rotate(var(--slant));transition:transform .5s ease;animation:mgRain .35s linear infinite}
+/* the slant is drawn into the streaks (an animatable angle), not a rotated
+   layer: a rotated, oversized layer inside the rounded stage rasterised a
+   few pixels differently from run to run (desktop-snap caught it) */
+@property --slant{syntax:'<angle>';inherits:false;initial-value:0deg}
+.wx-rain{position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(calc(90deg + var(--slant)), transparent 0 11px, rgba(230,240,255,.55) 11px 12px, transparent 12px 23px, rgba(230,240,255,.35) 23px 24px);
+  -webkit-mask:repeating-linear-gradient(var(--slant), transparent 0 18px, #000 18px 34px, transparent 34px 70px) 0 0/100% 70px;
+  mask:repeating-linear-gradient(var(--slant), transparent 0 18px, #000 18px 34px, transparent 34px 70px) 0 0/100% 70px;
+  transition:--slant .5s ease;animation:mgRain .35s linear infinite}
 .sev3 .wx-rain{animation-duration:.22s}
 @keyframes mgRain{from{-webkit-mask-position:0 0;mask-position:0 0}to{-webkit-mask-position:0 70px;mask-position:0 70px}}
 
@@ -2237,9 +2242,9 @@ abbr.term{
 .wx-gauge::before{content:'';position:absolute;left:0;top:0;width:120px;height:120px;border-radius:50%;
   background:conic-gradient(from -90deg, #cc2b1d 0deg, #f2b33d calc(90deg - var(--safe)), #2f9e6a calc(90deg - var(--safe)) calc(90deg + var(--safe)), #f2b33d calc(90deg + var(--safe)), #cc2b1d 180deg, transparent 180deg);
   -webkit-mask:radial-gradient(circle, transparent 62%, #000 64%);mask:radial-gradient(circle, transparent 62%, #000 64%);opacity:.9}
-.wx-gauge .needle{position:absolute;left:58px;bottom:0;width:4px;height:54px;border-radius:2px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.5);transform-origin:50% 100%;transition:transform .05s linear}
+.wx-gauge .needle{position:absolute;left:58px;bottom:0;width:4px;height:54px;border-radius:2px;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.5);transform-origin:50% 100%}
 .wx-chair{position:absolute;left:50%;bottom:8%;width:120px;height:250px;transform:translateX(-50%);z-index:4}
-.wx-umbrella{position:absolute;left:0;bottom:92px;width:120px;height:120px;transform-origin:50% 95%;transition:transform .05s linear}
+.wx-umbrella{position:absolute;left:0;bottom:92px;width:120px;height:120px;transform-origin:50% 95%}
 .wx-umbrella svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 6px rgba(0,0,0,.35))}
 .wx-umbrella .canopy{fill:#16202c}
 .wx-umbrella .canopy-inv{fill:#16202c;opacity:0}
