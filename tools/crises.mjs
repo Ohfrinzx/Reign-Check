@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { launchBrowser, shotPath } from './browser.mjs';
+import { launchBrowser, shotPath, passMinigame } from './browser.mjs';
 
 /**
  * Phase 3 step 3 — crisis chains, in a real browser at 1366×700: when a
@@ -88,6 +88,9 @@ try {
     return t;
   `);
   await page.locator('.strap-action').click();
+  // day 7 opens act 2 with The Last Kilometre; the crisis stage comes next
+  await page.locator('.mg-full').waitFor();
+  await passMinigame(page);
   const hot = page.locator('.sr-stage .doc.crisis-card.stage-2');
   await hot.waitFor();
   assert.match(await hot.locator('h1').innerText(), /BAKERY BURNED/i);
