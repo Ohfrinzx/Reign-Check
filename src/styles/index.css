@@ -2179,7 +2179,7 @@ abbr.term{
 .wx-steps{position:absolute;right:-6px;top:50%;width:16px;height:14px;transform:translateY(-50%);
   background:linear-gradient(#cc2b1d 0 0) 0 100%/100% 33% no-repeat, linear-gradient(#cc2b1d 0 0) 3px 50%/10px 33% no-repeat, linear-gradient(#cc2b1d 0 0) 6px 0/4px 33% no-repeat}
 
-.wx-stage{position:relative;height:min(56vh, 440px);overflow:hidden;border-radius:10px;border:3px solid #16202c;
+.wx-stage{position:relative;height:min(56vh, 440px);overflow:hidden;border-radius:10px;border:3px solid #16202c;isolation:isolate;will-change:transform;
   box-shadow:0 16px 36px rgba(22,32,44,.3);background:#7f93a8}
 .wx-stage.flash::after{content:'';position:absolute;inset:0;background:#fff;opacity:.75;z-index:6;animation:mgFlash .2s ease-out forwards}
 .wx-stage.soaked{animation:mgShake .45s cubic-bezier(.36,.07,.19,.97) both}
