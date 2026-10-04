@@ -65,7 +65,8 @@ After slice 1 (2026-10-01):
   picks over a lane runner and a pigeon game). Shred was "still way too
   easy": tuned for a quick player, then made *"2-3 times as fast"*
   (owner, 2026-10-03; the alternative they named was a fundamentally
-  harder game from scratch).
+  harder game from scratch). 2026-10-04: act 1's 2× game became the top
+  difficulty (act 3); acts 1–2 ramp up to it.
 
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).

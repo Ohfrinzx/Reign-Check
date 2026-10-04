@@ -64,7 +64,7 @@ anything else without asking.**
   works: `docs/SYSTEMS.md` §12. After the owner's playtests: The Last
   Kilometre became **Walk in the Weather**, the act opener (first thing on
   days 1, 7, 13); Shred the Ledger moved to conveyor belts and is now
-  2–3× as fast (an expert's game).
+  much faster (act 3 is the 2× game; acts 1–2 ramp up to it).
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
 - `SAVE_VERSION` is **14**. Tests: **198**, all passing.

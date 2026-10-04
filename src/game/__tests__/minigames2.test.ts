@@ -224,7 +224,7 @@ describe('Shred the Ledger (rules)', () => {
     expect(s.over).toBe('won'); // 2 mistakes, 5 allowed
   });
 
-  it('2-3x as fast (owner): only a very quick player wins, but every act can still be won; doing nothing loses', () => {
+  it('act 3 is the 2x game (owner: "the first level is really what the top difficulty should be"); acts 1-2 ramp up to it; doing nothing loses', () => {
     const rate = (act: number, scan: number, tap: number, fool: number) => {
       let w = 0; for (let i = 0; i < 100; i++) if (shred(act, i, scan, tap, fool).over === 'won') w++;
       return w / 100;
@@ -233,11 +233,15 @@ describe('Shred the Ledger (rules)', () => {
       let s = SH.shredStart(SH.shredSetup(1, SH.shredDifficulty(act)));
       for (let now = 0; !s.over; now += 100) s = SH.shredTick(s, now);
       expect(s.over).toBe('lost');
-      // a very quick player (looks in 70 ms, taps in 100 ms) still wins about half the time
-      expect(rate(act, 70, 100, 0.02), `act ${act}`).toBeGreaterThan(0.35);
+      // a very quick player (looks in 70 ms, taps in 100 ms) wins most games in every act
+      expect(rate(act, 70, 100, 0.02), `act ${act}`).toBeGreaterThan(0.55);
     }
-    expect(rate(1, 220, 290, 0.12)).toBeLessThan(0.1); // an average player: no chance
-    expect(SH.shredDifficulty(3).crossMs[1]).toBeLessThan(SH.shredDifficulty(1).crossMs[1]);
+    // act 3 is exactly 2x the old act 1 tuning (a paper crosses in 1.9 s → 1.4 s)
+    expect(SH.shredDifficulty(3).crossMs).toEqual([1900, 1425]);
+    // an expert wins act 1 more often than act 3, and still has a chance in act 3
+    expect(rate(1, 130, 170, 0.05)).toBeGreaterThan(rate(3, 130, 170, 0.05));
+    expect(rate(3, 130, 170, 0.05)).toBeGreaterThan(0.15);
+    expect(rate(1, 220, 290, 0.12)).toBeLessThan(0.1); // an average player: little chance
   });
 });
 

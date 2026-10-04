@@ -404,17 +404,18 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   it. Shredding a clean paper jams the shredder for 1.2 s (the belts keep
   moving); a dirty paper in the box is evidence. One mistake allowed. All
   tricks from act 1: VOID (a crossed-out red stamp, clean), a round red
-  seal (clean), a pale red stamp (dirty). Speed (`SHRED_SPEED`, owner
-  2026-10-03: *"2-3 times as fast"*): 2× / 2.5× / 3× the previous tuning
-  in acts 1 / 2 / 3, with twice the waves so a game lasts about as long.
-  A paper crosses in 1.9 → 1.4 s (act 1, 6 waves), 1.4 → 1.1 s (act 2,
-  6 waves), 1.2 → 0.9 s (act 3, 8 waves). History: static piles were "too
-  easy" (2026-10-02); the first belts "still way too easy"; a quick
-  player's tuning (simulated expert 79%) was then sped up 2–3×.
-  Simulated players (one paper at a time, the odd mistap; very quick
-  70–100 ms / expert / fast / average): 69 / 38 / 2 / 0% (act 1),
-  56 / 0 / 0 / 0% (act 2), 52 / 0 / 0 / 0% (act 3). Only a very quick
-  player wins now; every paper is still reachable and doing nothing always
+  seal (clean), a pale red stamp (dirty). Speed (`SHRED_SPEED`):
+  1.4× / 1.7× / 2× the previous tuning in acts 1 / 2 / 3, with more waves
+  so a game lasts about as long. A paper crosses in 2.7 → 2.0 s (act 1,
+  4 waves), 2.2 → 1.7 s (act 2, 5 waves), 1.9 → 1.4 s (act 3, 6 waves).
+  History: static piles were "too easy" (2026-10-02); the first belts
+  "still way too easy"; a quick player's tuning was then made *"2-3 times
+  as fast"* (2026-10-03); after playing it the owner set act 1's 2× as
+  the top difficulty (*"The first level is really what the top difficulty
+  should be"*, 2026-10-04). Simulated players (one paper at a time, the
+  odd mistap; very quick 70–100 ms / expert / fast / average):
+  82 / 61 / 42 / 2% (act 1), 76 / 50 / 15 / 0% (act 2), 68 / 30 / 0 / 0%
+  (act 3). Every paper is still reachable and doing nothing always
   loses. Won: Legitimacy +5, scandal −10; lost: Legitimacy −5, scandal +8.
 - **Input:** real-time games act on pointer-down (a tap never also lands
   as a click on whatever appears under the finger next); keys too (Bread

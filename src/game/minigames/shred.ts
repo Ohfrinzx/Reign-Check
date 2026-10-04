@@ -59,28 +59,31 @@ export interface ShredDifficulty {
   allowed: number;
 }
 
-/** Owner (2026-10-03, after the third round): "2-3 times as fast". */
-export const SHRED_SPEED: Record<number, number> = { 1: 2, 2: 2.5, 3: 3 };
+/**
+ * How much faster than the "still too easy" tuning, by act. Owner
+ * (2026-10-03): "2-3 times as fast"; then (2026-10-04), after 2x in act 1:
+ * "The first level is really what the top difficulty should be". So act 3
+ * is that 2x game, and acts 1 and 2 ramp up to it.
+ */
+export const SHRED_SPEED: Record<number, number> = { 1: 1.4, 2: 1.7, 3: 2 };
 
-/** The base settings before the speed-up (the previous, "still too easy" tuning). */
-function shredBase(act: number): ShredDifficulty {
-  if (act <= 1) return { waves: 3, perWave: 10, crossMs: [3800, 2850], gapMs: [400, 690], faceDown: 0.42, tricks: ['void', 'redseal', 'faded'], trickShare: 0.38, allowed: 1 };
-  if (act === 2) return { waves: 3, perWave: 10, crossMs: [3600, 2700], gapMs: [370, 650], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.4, allowed: 1 };
-  return { waves: 4, perWave: 9, crossMs: [3700, 2600], gapMs: [360, 640], faceDown: 0.48, tricks: ['void', 'redseal', 'faded'], trickShare: 0.45, allowed: 1 };
-}
+/** The settings before the speed-up (the previous, "still too easy" tuning). */
+const SHRED_BASE: ShredDifficulty = {
+  waves: 3, perWave: 10, crossMs: [3800, 2850], gapMs: [400, 690],
+  faceDown: 0.42, tricks: ['void', 'redseal', 'faded'], trickShare: 0.38, allowed: 1,
+};
 
 export function shredDifficulty(act: number): ShredDifficulty {
   // History: static piles "too easy" (2026-10-02); belts "still way too
-  // easy"; tuned for a quick player, then "2-3 times as fast" (2026-10-03).
-  // Belts and papers now come 2x / 2.5x / 3x as fast as that tuning, with
-  // more waves so a game still lasts about as long. This is an expert's
-  // game now: see docs/SYSTEMS.md §12 for the measured win rates.
-  const a = Math.min(3, Math.max(1, act));
-  const b = shredBase(a);
-  const k = SHRED_SPEED[a];
+  // easy"; tuned for a quick player, then "2-3 times as fast" (2026-10-03);
+  // then act 1's 2x became the top (2026-10-04). Belts and papers come
+  // faster by act, with more waves so a game lasts about as long. See
+  // docs/SYSTEMS.md §12 for the measured win rates.
+  const k = SHRED_SPEED[Math.min(3, Math.max(1, act))];
+  const b = SHRED_BASE;
   return {
     ...b,
-    waves: Math.round(b.waves * Math.min(k, 2)),
+    waves: Math.round(b.waves * k),
     crossMs: [Math.round(b.crossMs[0] / k), Math.round(b.crossMs[1] / k)],
     gapMs: [Math.round(b.gapMs[0] / k), Math.round(b.gapMs[1] / k)],
   };
