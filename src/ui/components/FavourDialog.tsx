@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import type { GameState, StatKey } from '../../game/types';
+import type { GameState } from '../../game/types';
 import { SHOP_MAP } from '../../game/content/shop';
 import { favourBlockReason, favourTargets } from '../../game/favours';
 import type { FavourResult } from '../../game/favours';
-import { STAT_META } from '../../game/stats';
+import { DeltaPills } from './DeltaPills';
 import { fill } from '../../game/text';
 
 /**
@@ -39,16 +39,7 @@ export function FavourDialog({
             <>
               <p className="dm-ask">{fill(receipt.text, s)}</p>
               {receipt.lines.map((l) => <div className="fav-line" key={l}>✓ {l}</div>)}
-              {Object.keys(receipt.deltas).length > 0 && (
-                <div className="deltas fav-deltas">
-                  {Object.entries(receipt.deltas).map(([k, v]) => (
-                    <span key={k} className={`delta-pill ${(v as number) > 0 ? 'pos' : 'neg'}`}>
-                      {(k === 'treasury' ? 'MONEY' : STAT_META[k as StatKey]?.label.toUpperCase() ?? k.toUpperCase())}{' '}
-                      {(v as number) > 0 ? '+' : '−'}{Math.abs(v as number).toFixed(1)}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <DeltaPills deltas={receipt.deltas} className="fav-deltas" />
             </>
           ) : (
             <>

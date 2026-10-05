@@ -3,6 +3,7 @@ import { CHARACTER_MAP, FACTIONS } from '../../game/content/country';
 import { fill } from '../../game/text';
 import { termsIn } from '../../game/glossary';
 import { Prose, Glossed } from './Prose';
+import { DeltaPills } from './DeltaPills';
 import { crisisOfCard, STAGE_NAMES } from '../../game/content/crises';
 import type { CrisisDef } from '../../game/content/crises';
 import { crisisMood } from '../../game/crises';
@@ -327,19 +328,7 @@ export function OutcomeView({
             ))}
           </div>
         )}
-        {Object.keys(o.deltas).length > 0 && (
-          <div className="deltas">
-            {Object.entries(o.deltas).map(([k, v], i) => (
-              <span
-                key={k}
-                className={`delta-pill ${(v as number) > 0 ? 'pos' : 'neg'}`}
-                style={{ animationDelay: `${i * 40}ms` }}
-              >
-                {k.toUpperCase()} {(v as number) > 0 ? '+' : '−'}{Math.abs(v as number).toFixed(1)}
-              </span>
-            ))}
-          </div>
-        )}
+        <DeltaPills deltas={o.deltas} animate />
         <div className="outcome-foot">
           <button className="btn btn-primary" onClick={onContinue}>{continueLabel}</button>
           <span className="note kbd-hint">or press Enter</span>

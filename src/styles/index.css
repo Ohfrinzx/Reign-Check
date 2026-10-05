@@ -428,6 +428,16 @@ abbr.term{
 @keyframes pillIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
 .delta-pill.pos{color:var(--teal)}
 .delta-pill.neg{color:var(--red)}
+/* which top number a pill moves, and the tap-open list of what they mean */
+.delta-pill .into{opacity:.72;font-weight:400}
+.deltas-why{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--ink);
+  background:none;border:0;padding:4px 2px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;
+}
+.deltas-guide{flex-basis:100%;font-size:13.5px;line-height:1.5;border-top:1px solid var(--ash);padding-top:8px}
+.deltas-guide p{margin:0 0 7px}
+.deltas-guide .feeds{color:var(--ash)}
+.ledger-note{font-size:12.5px;line-height:1.45;color:var(--ink-soft);margin:8px 0 0}
 
 .outcome-foot{padding:0 22px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .outcome-foot .note{font-family:var(--mono);font-size:10.5px;color:var(--ash)}
@@ -1562,6 +1572,7 @@ abbr.term{
   /* ---- touch targets: at least ~44px */
   .btn{min-height:44px}
   .seg-btn{min-height:44px}
+  .deltas-why{min-height:44px;padding:0 4px}
   .opt{min-height:52px}
   .dm-head{min-height:44px}
 

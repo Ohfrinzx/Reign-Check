@@ -9,8 +9,9 @@ what the code does now, not how it got there; the history lives in
 `docs/archive/`. If a number here disagrees with the code, the code wins,
 so fix this file.
 
-**Last checked against the code:** 2026-10-01 (mini-games slice 2). At
-that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
+**Last checked against the code:** 2026-10-05 (the numbers explained in
+the game). At that point there were 201 unit tests, `SAVE_VERSION` 14, and
+a clean build.
 
 ---
 
@@ -69,6 +70,36 @@ that point there were 195 unit tests, `SAVE_VERSION` 14, and a clean build.
   | Street | `chorus` |
 
   Civil Service (`grey`) and the Provinces are simulated but not shown.
+- **What the three are made of** (`GRIP_PARTS`, `LEGITIMACY_PARTS`, the
+  same constants `computeResources()` uses):
+  - **Grip** = Power 45%, Security 25%, Military 15%, Information 15%.
+  - **Legitimacy** = Legitimacy 50%, Support 35%, Stability 15%.
+  - **Money** = the treasury. The Economy sets most of the daily income.
+  - **Elite** feeds none of the three (it matters for the Elites' ending
+    and their attempt to replace you).
+- **The ten numbers are explained in the game** (owner, 2026-10-05: "No
+  where is it explained in my game what information means or what it
+  effects"). One source, `display.ts STAT_GUIDE` / `statGuide()`: each
+  stat's player name (`STAT_PLAYER_LABEL`), what it feeds, and what it
+  does, high and low. Used by:
+  - **result pills** (`DeltaPills.tsx`, on card results and favour
+    receipts): "INFORMATION +7.0 → GRIP" (no arrow on Legitimacy and Money,
+    which are top numbers, or on Elite), and a **What do these mean?**
+    button that opens one line per pill (a button, not hover);
+  - **Brief me**: a section "The numbers under the three", one card each;
+  - the **night summary**: the same names, plus a line saying what Grip
+    and Legitimacy are made of;
+  - the **Grip / Legitimacy / Money explanations** in the top bar
+    ("Made of: …").
+  If a rule behind one of these words changes (upkeep drift in
+  `engine.ts`, `briefing.ts`, `effects.ts` coupling, endings,
+  `FACTION_MOVES` defences), change `STAT_DOES` in `display.ts` too.
+- **What Information does**, as an example of the detail: 15% of Grip;
+  the lower it is, the faster leaked papers pile up (they become scandals
+  and leak emergencies), and high Information dries them up; below 35 the
+  front page drops the milder warnings; below 30 Support gains are cut by
+  a quarter; above 72 the front page says you know what is happening; it
+  is one of three things that protect you if Security tries to remove you.
 - **Faction mood words** come from loyalty. The bottom mood (loyalty below
   `HOSTILE_BELOW`, 20) means **hostile**.
 - **Hidden pressures are never shown as numbers**, only as warnings in

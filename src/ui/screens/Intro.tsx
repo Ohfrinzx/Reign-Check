@@ -1,6 +1,6 @@
 import { COUNTRY, CHARACTERS } from '../../game/content/country';
 import type { GameState } from '../../game/types';
-import { computeResources, DISPLAY_FACTIONS } from '../../game/display';
+import { computeResources, DISPLAY_FACTIONS, STAT_GUIDE } from '../../game/display';
 import { FACTIONS } from '../../game/content/country';
 import { currentMandate } from '../../game/content/mandates';
 import { HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
@@ -73,6 +73,23 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
             does what you tell it. <b>Legitimacy</b> is whether people accept you are supposed to have this job
             at all. Both run 0 to 100. If either one hits zero, the game usually ends badly within days.
           </p>
+        </Section>
+
+        <Section title="The numbers under the three">
+          <p>
+            When you make a decision, the result lists the smaller numbers it moved, such as
+            {' '}<b>INFORMATION +15 → GRIP</b>. The arrow says which of the three numbers above it feeds.
+            Tap <b>What do these mean?</b> under any result to see this list for just those numbers.
+          </p>
+          <div className="intro-grid">
+            {STAT_GUIDE.map((g) => (
+              <div className="intro-card" key={g.key}>
+                <div className="intro-card-head">{g.label}</div>
+                <div className="intro-role">Feeds: {g.feedsText}</div>
+                <p>{g.does}</p>
+              </div>
+            ))}
+          </div>
         </Section>
 
         <Section title="How you lose">

@@ -67,7 +67,12 @@ anything else without asking.**
   much faster (act 3 is the 2× game; acts 1–2 ramp up to it).
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
-- `SAVE_VERSION` is **14**. Tests: **198**, all passing.
+- **The ten numbers explained in the game (2026-10-05) — built, waiting
+  for the owner's look:** result pills say which top number they feed
+  ("→ GRIP") with a **What do these mean?** button; Brief me lists all ten;
+  the night summary and the Grip/Legitimacy explanations say what those
+  are made of. `docs/SYSTEMS.md` §2.
+- `SAVE_VERSION` is **14**. Tests: **201**, all passing.
 
 ## 3. How work is done here
 
@@ -198,7 +203,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 198 tests: content integrity, 200 full
+npm test           # vitest, 201 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -222,6 +227,7 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
 | `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
+| `stat-guide.mjs` | the numbers explained: result pills say what they feed (→ GRIP), "What do these mean?" opens/closes, Brief me's ten cards, night summary names + note, the Grip tip's parts (desktop + phone) |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
 | `phone.mjs` | the phone layout: 28 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
@@ -272,7 +278,8 @@ src/game/            pure logic, no React/DOM, fully testable
   engine.ts          day loop, upkeep order, deck draw, alerts, endings,
                      orderedOptions() (shuffle + consequences)
   effects.ts         applyEffects(): the single mutation entry point
-  display.ts         what the player sees: 3 resources, 5 factions, moods
+  display.ts         what the player sees: 3 resources, 5 factions, moods,
+                     and STAT_GUIDE (what each of the 10 numbers does)
   briefing.ts        hidden state → plain-language front page and desk cards
   economy.ts         the daily budget
   demands.ts         faction demands, hostility, faction moves
@@ -296,7 +303,8 @@ src/game/            pure logic, no React/DOM, fully testable
                      characterRequests, crises, shop, minigames (the cards,
                      story intros and how-to-play)
 src/ui/
-  components/        CardView (3 card layouts + OptionText), Rail (also the
+  components/        CardView (3 card layouts + OptionText), DeltaPills
+                     (result pills + "What do these mean?"), Rail (also the
                      phone Files drawer), Ledger, Demands (pop-up + panel),
                      FavourDialog, Prose, FactionStrip (phone only)
   minigames/         MinigameScreen (the full-screen frame: title card →
