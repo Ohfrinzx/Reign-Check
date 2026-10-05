@@ -158,7 +158,7 @@ export function bulletinSetup(s: GameState, seed: number): BulletinSetup {
   if (hasMark(s, 'bought-news')) { spikes += 1; spikeNote = `Loz will pull one extra story. ${becauseText(s, 'bought-news')}.`; }
   else if (hasMark(s, 'threatened-loz')) { spikes -= 1; spikeNote = `Loz will pull one story fewer. ${becauseText(s, 'threatened-loz')}.`; }
 
-  return { stories, spikes, seconds: s.act <= 1 ? 5 : s.act === 2 ? 4.5 : 4, ...(spikeNote ? { spikeNote } : {}) };
+  return { stories, spikes, seconds: s.act <= 1 ? 7 : s.act === 2 ? 6.5 : 6, ...(spikeNote ? { spikeNote } : {}) };
 }
 
 /** Judge a finished bulletin. `calls[i]` is the call on story i (null = it aired). */

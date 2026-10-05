@@ -21,6 +21,10 @@ pills, in Brief me, and in the Grip/Legitimacy explanations.
   not INFO; MILITARY, not ARMY) and says what Grip and Legitimacy are made
   of. Tapping **Grip** or **Legitimacy** at the top lists their parts.
 - No game rules or numbers changed; no save reset (`SAVE_VERSION` 14).
+- **The 7pm Bulletin is slower to read** (owner: *"The 7pm bulletin time
+  runs to fast per story. Players don't have enough time to read the
+  story"*): each story now stays up 7 / 6.5 / 6 s by act (was 5 / 4.5 /
+  4), and its clock starts only after the story has slid in.
 
 **Mini-games slice 2** (below) is still waiting for the owner's playtest.
 
@@ -111,6 +115,10 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-05** — Owner: the Bulletin's stories go by too fast to read.
+  Owner chose 7 / 6.5 / 6 s by act (was 5 / 4.5 / 4) and a clock that
+  starts after the slide-in.
 
 - **2026-10-05** — Owner: Information (and the other numbers on result
   pills) is never explained in the game. Built: pills say what they feed,

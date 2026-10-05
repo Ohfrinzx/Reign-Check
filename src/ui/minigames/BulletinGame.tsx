@@ -15,6 +15,11 @@ import type { MinigameEnd } from './MinigameScreen';
  */
 
 const EXIT_MS = 340;
+/** The story's slide-in (btIn, .42s; the Reduce Motion fade is .2s). Its
+ *  clock waits for it, so the full time is spent with the story readable
+ *  (owner: "Players don't have enough time to read the story"). */
+const IN_MS = 420;
+const IN_MS_REDUCED = 200;
 const SWIPE_AT = 70;
 
 type Exit = { call: BulletinCall; correct: boolean } | null;
@@ -30,7 +35,8 @@ export function BulletinGame({ setup, reduced, paused, onEnd }: {
   const idx = calls.length;
   const story = setup.stories[idx];
   const seconds = setup.seconds * (reduced ? 1.5 : 1);
-  const remaining = useRef(seconds * 1000);
+  const lead = reduced ? IN_MS_REDUCED : IN_MS;
+  const remaining = useRef(lead + seconds * 1000);
   const startedAt = useRef(0);
   const ended = useRef(false);
 
@@ -50,7 +56,7 @@ export function BulletinGame({ setup, reduced, paused, onEnd }: {
   }, [exit, story, left, reduced]);
 
   // Each story's clock. It pauses while "Give up?" is asking.
-  useEffect(() => { remaining.current = seconds * 1000; }, [idx, seconds]);
+  useEffect(() => { remaining.current = lead + seconds * 1000; }, [idx, seconds, lead]);
   useEffect(() => {
     if (!story || exit || paused) return;
     startedAt.current = performance.now();
@@ -153,7 +159,7 @@ export function BulletinGame({ setup, reduced, paused, onEnd }: {
             <div className="bt-timer" aria-hidden="true">
               <span
                 className="bt-fill"
-                style={{ animationDuration: `${seconds}s`, animationPlayState: paused || exit ? 'paused' : 'running' }}
+                style={{ animationDuration: `${seconds}s`, animationDelay: `${lead}ms`, animationPlayState: paused || exit ? 'paused' : 'running' }}
               />
             </div>
             <span className="bt-stamp spike" aria-hidden="true">Spiked</span>

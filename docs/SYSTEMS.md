@@ -389,8 +389,9 @@ a clean build.
   (by act), about half damaging, built from the run: your hottest
   scandals, decisions from the last two days, the pressures the front
   page warns about, plus fillers and "twists" (the second line changes
-  the meaning). Each story has a clock (5 / 4.5 / 4 s; ×1.5 with Reduce
-  Motion); spike it or run it (swipe, buttons, ← →). An untouched story
+  the meaning). Each story has a clock (7 / 6.5 / 6 s by act; ×1.5 with Reduce
+  Motion), which starts only once the story has slid in (owner,
+  2026-10-05: not enough time to read; was 5 / 4.5 / 4 s); spike it or run it (swipe, buttons, ← →). An untouched story
   airs. Spikes = the damaging stories (+1 with `bought-news`, −1 with
   `threatened-loz`). Win with at most 2 mistakes. Won → Legitimacy +5,
   support +3, scandal pressure −6, Street +2, every faction +0.5; lost →

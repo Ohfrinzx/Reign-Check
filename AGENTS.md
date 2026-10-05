@@ -71,7 +71,8 @@ anything else without asking.**
   for the owner's look:** result pills say which top number they feed
   ("→ GRIP") with a **What do these mean?** button; Brief me lists all ten;
   the night summary and the Grip/Legitimacy explanations say what those
-  are made of. `docs/SYSTEMS.md` §2.
+  are made of. `docs/SYSTEMS.md` §2. Also: the 7pm Bulletin gives 7 / 6.5
+  / 6 s per story (was 5 / 4.5 / 4), counted after the slide-in.
 - `SAVE_VERSION` is **14**. Tests: **201**, all passing.
 
 ## 3. How work is done here
