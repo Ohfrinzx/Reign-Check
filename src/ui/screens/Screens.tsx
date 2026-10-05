@@ -1,6 +1,7 @@
 import type { GameState, StatKey } from '../../game/types';
 import { COUNTRY } from '../../game/content/country';
 import { STAT_ORDER, money } from '../../game/stats';
+import { GRIP_PARTS, LEGITIMACY_PARTS, STAT_PLAYER_LABEL } from '../../game/display';
 import { buildBriefing, dateLine } from '../../game/briefing';
 import { ACT_LENGTH, dayInAct, HONORIFICS, NUM_ACTS, isActEndDay } from '../../game/state';
 import { usd, usdFlow, computeBudget } from '../../game/economy';
@@ -271,6 +272,9 @@ export function NightScreen({ s }: { s: GameState }) {
               );
             })}
           </div>
+          <p className="ledger-note">
+            Grip is made of {GRIP_PARTS.map(([k]) => STAT_PLAYER_LABEL[k]).join(', ')}. Legitimacy is made of {LEGITIMACY_PARTS.map(([k]) => STAT_PLAYER_LABEL[k]).join(', ')}. The Economy sets your daily income. What each number does: see Brief me.
+          </p>
 
           {day && day.headlines.length > 0 && (
             <>
@@ -325,10 +329,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-const STAT_LABEL: Record<StatKey, string> = {
-  power: 'POWER', legitimacy: 'LEGIT', support: 'PUBLIC', treasury: 'CASH', economy: 'ECON',
-  elite: 'ELITE', military: 'ARMY', security: 'SEC', stability: 'STABLE', information: 'INFO',
-};
+// The same names as the result pills and Brief me (display.ts), so one
+// number has one name everywhere.
+const STAT_LABEL = Object.fromEntries(
+  Object.entries(STAT_PLAYER_LABEL).map(([k, v]) => [k, v.toUpperCase()]),
+) as Record<StatKey, string>;
 
 /* ------------------------------------------------------------ ENDING */
 

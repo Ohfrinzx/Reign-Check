@@ -6,7 +6,29 @@ one line per step. Full old handovers are in
 `docs/archive/SLICE_NOTES.md`. How the systems work today is in
 `docs/SYSTEMS.md`; the rules and workflow are in `AGENTS.md`.
 
-## Now (2026-10-01)
+## Now (2026-10-05)
+
+**THE NUMBERS EXPLAINED IN THE GAME — BUILT, WAITING FOR THE OWNER'S
+LOOK.** Owner: *"No where is it explained in my game what information
+means or what it effects … decisions will still show Information +15."*
+Owner chose: explain all eight hidden-but-shown numbers, on the result
+pills, in Brief me, and in the Grip/Legitimacy explanations.
+- Result pills now say which top number they move: "INFORMATION +7.0 →
+  GRIP". **What do these mean?** under the pills opens one plain line per
+  number (what it feeds, what it does high and low).
+- **Brief me** has a new section, "The numbers under the three": all ten.
+- The **night summary** uses the same names as the pills (INFORMATION,
+  not INFO; MILITARY, not ARMY) and says what Grip and Legitimacy are made
+  of. Tapping **Grip** or **Legitimacy** at the top lists their parts.
+- No game rules or numbers changed; no save reset (`SAVE_VERSION` 14).
+- **The 7pm Bulletin is slower to read** (owner: *"The 7pm bulletin time
+  runs to fast per story. Players don't have enough time to read the
+  story"*): each story now stays up 7 / 6.5 / 6 s by act (was 5 / 4.5 /
+  4), and its clock starts only after the story has slid in.
+
+**Mini-games slice 2** (below) is still waiting for the owner's playtest.
+
+## Mini-games slice 2 (2026-10-01)
 
 **MINI-GAMES SLICE 2 — BUILT, WAITING FOR THE OWNER'S PLAYTEST.** Slice 1
 approved: *"besides that all works and we can move onto the next"*. Owner,
@@ -93,6 +115,15 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-05** — Owner: the Bulletin's stories go by too fast to read.
+  Owner chose 7 / 6.5 / 6 s by act (was 5 / 4.5 / 4) and a clock that
+  starts after the slide-in.
+
+- **2026-10-05** — Owner: Information (and the other numbers on result
+  pills) is never explained in the game. Built: pills say what they feed,
+  a "What do these mean?" list, a Brief me section, matching names on the
+  night summary, Grip/Legitimacy parts in the top bar. No rules changed.
 
 - **2026-10-04** — Owner, after playing the 2× Shred: *"The first level
   is really what the top difficulty should be"*. Act 3 is now that game;

@@ -165,10 +165,13 @@ try {
     for (let i = 0; i < key.length; i++) { await page.locator('.bt-run').click(); await page.waitForTimeout(420); }
     await page.locator('.mg-end.lost').waitFor();
 
-    // a story left alone airs when its clock runs out (5 s in act 1)
+    // a story left alone airs when its clock runs out (7 s in act 1, after
+    // its 0.42 s slide-in) — and not before: it is still there at 6.6 s
     await openPractice(page, 'bulletin', 3);
     const first = await page.locator('.bt-story h2').innerText();
-    await page.waitForTimeout(5600);
+    await page.waitForTimeout(6600);
+    assert.equal(await page.locator('.bt-story h2').innerText(), first, 'A story should stay on the desk for its full 7 s');
+    await page.waitForTimeout(1400);
     assert.notEqual(await page.locator('.bt-story h2').innerText(), first, 'An untouched story should air and the next one come up');
     assert.equal(await page.locator('.bt-rundown li.ok, .bt-rundown li.miss').count(), 1, 'The aired story is judged');
     await page.close();
