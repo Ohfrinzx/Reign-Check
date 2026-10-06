@@ -80,7 +80,7 @@ anything else without asking.**
   All three are daily games and picked by events; six daily games now.
   Part B (Who Was in the Stairwell?, The Ambassador's Table) comes after
   the playtest. `docs/MINIGAMES.md` §2, `docs/SYSTEMS.md` §12.
-- `SAVE_VERSION` is **14**. Tests: **240**, all passing.
+- `SAVE_VERSION` is **14**. Tests: **247**, all passing.
 
 ## 3. How work is done here
 
@@ -214,7 +214,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 240 tests: content integrity, 200 full
+npm test           # vitest, 247 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```

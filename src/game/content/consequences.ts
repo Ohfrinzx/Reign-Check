@@ -224,6 +224,32 @@ export const MARKS: MarkDef[] = [
     setBy: [{ card: 'mg-bulletin', option: 'lost' }],
     factions: { chorus: -1 },
   },
+  /* Find the Mole: what you did with the mole (owner: "have that have an effect on the game") */
+  {
+    id: 'mole-arrested',
+    because: 'had the ministry mole arrested',
+    setBy: [{ card: 'mg-mole', option: 'won' }],
+    factions: { sable: 1, chorus: -1 },
+  },
+  {
+    id: 'mole-turned',
+    because: 'turned the ministry mole into your own source',
+    setBy: [{ card: 'mg-mole', option: 'turn' }],
+    factions: { sable: 2 },
+  },
+  {
+    id: 'mole-fired',
+    because: 'fired the ministry mole without a word',
+    setBy: [{ card: 'mg-mole', option: 'fire' }],
+    // the Sable Office wanted to question them first
+    factions: { sable: -1 },
+  },
+  {
+    id: 'mole-exposed',
+    because: 'named the ministry mole on the news',
+    setBy: [{ card: 'mg-mole', option: 'expose' }],
+    factions: { chorus: 2, sable: -2 },
+  },
   {
     id: 'let-aureth-audit',
     because: 'let Aureth audit the army\'s books',
@@ -233,6 +259,79 @@ export const MARKS: MarkDef[] = [
 ];
 
 export const CONSEQUENCES: ConsequenceDef[] = [
+  /* ---------------------------------------- Find the Mole: the mole you caught */
+  {
+    mark: 'mole-turned',
+    card: 'alert-leak',
+    kind: 'unlock',
+    option: 'double-agent',
+    label: 'Have your double agent tell the Courier the pages are forged.',
+    hint: 'Free. Muddies the story before it runs. Only works while nobody suspects your source.',
+    outcome: {
+      text: 'Your double agent calls the Courier at ten: the pages are forgeries, planted to embarrass the paper.\n\nThe Courier holds the story for "further checks". By the time the checks are done, the news has moved on.',
+      tone: 'good',
+      effects: {
+        stats: { legitimacy: 4 },
+        hidden: { leak: -10, scandal: -10 },
+        factions: { chorus: { loyalty: -2 }, sable: { loyalty: 2 } },
+      },
+    },
+  },
+  {
+    mark: 'mole-fired',
+    card: 'alert-leak',
+    kind: 'unlock',
+    option: 'quiet-word',
+    label: 'Ask the night floor, quietly, who else talks to the press.',
+    hint: 'Free. Does not stop publication. The staff remember you handled the last one without a fuss.',
+    outcome: {
+      text: 'Nobody is arrested and nobody is named. But by morning three people have quietly asked to move departments, and the copier on the night floor has a new lock.\n\nThe documents publish. The next set will be much harder to carry out.',
+      tone: 'mixed',
+      effects: {
+        stats: { legitimacy: -2, security: 3 },
+        hidden: { leak: -12, scandal: 4 },
+        factions: { grey: { loyalty: 3 } },
+      },
+    },
+  },
+  {
+    mark: 'mole-arrested',
+    card: 'alert-leak',
+    kind: 'change',
+    option: 'find-source',
+    faction: 'sable',
+    hint: 'Free. The Office caught a leaker for you once already. It knows where to look.',
+    outcome: {
+      text: 'It takes the Sable Office ninety minutes. They start with the people who sat near the last one.\n\nThe documents publish anyway. But the building has now watched two leakers walk out in handcuffs, and it has gone very quiet.',
+      tone: 'mixed',
+      effects: {
+        stats: { security: 7, legitimacy: -5, support: -3 },
+        hidden: { leak: -20, fear: 12, scandal: 6 },
+        factions: { sable: { loyalty: 6 }, grey: { loyalty: -6 }, chorus: { loyalty: -5 } },
+        flags: { peopleJailed: 1 },
+        news: ['SECOND MINISTRY LEAKER ARRESTED IN A MONTH'],
+      },
+    },
+  },
+  {
+    mark: 'mole-exposed',
+    card: 'alert-leak',
+    kind: 'change',
+    option: 'injunct',
+    faction: 'chorus',
+    hint: 'Free. Hard to argue for secrecy after you named a leaker on live television.',
+    outcome: {
+      text: 'The judge reads your own words back to the court: last month you said the public has a right to know who leaks.\n\nThe injunction is refused, on camera. The documents publish at midnight with a second story about the hearing.',
+      tone: 'bad',
+      effects: {
+        stats: { legitimacy: -15, support: -7 },
+        hidden: { leak: 9, scandal: 18 },
+        factions: { chorus: { loyalty: -12 }, sable: { loyalty: 3 } },
+        news: ['JUDGE REFUSES INJUNCTION, QUOTING THE CHAIR'],
+      },
+    },
+  },
+
   /* ---------------------------------------------- the stairwell question */
   {
     mark: 'bought-news',
@@ -970,6 +1069,8 @@ export const DEMAND_REACTIONS: DemandReactionDef[] = [
   { mark: 'let-aureth-audit', faction: 'staff', kind: 'no-bribe', text: 'the officers will not take money from the government that let Aureth count theirs.' },
   { mark: 'vetted-garrison', faction: 'staff', kind: 'dearer', text: 'the officers remember being vetted like suspects.' },
   /* Phase 5: mini-game results */
+  { mark: 'mole-arrested', faction: 'sable', kind: 'cheaper', text: 'Security saw you let it do its job.' },
+  { mark: 'mole-exposed', faction: 'sable', kind: 'dearer', text: 'the Sable Office wanted the mole handled quietly, not on the news.' },
   { mark: 'held-palace', faction: 'sable', kind: 'cheaper', text: 'Security stood with you the night the officers came, and asks for less.' },
   { mark: 'palace-fell', faction: 'staff', kind: 'dearer', text: 'the officers know they can push you now.' },
   { mark: 'bulletin-aired', faction: 'chorus', kind: 'dearer', text: 'the Street saw on the news what you tried to hide.' },

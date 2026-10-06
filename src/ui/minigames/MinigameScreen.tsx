@@ -50,7 +50,13 @@ const WORDS: Record<string, { go: string; quit: string; won: string; lost: strin
 
 type Step = 'story' | 'howto' | 'play' | 'done';
 
-export interface MinigameEnd { won: boolean; score: number; headline: string; detail: string }
+export interface MinigameEnd {
+  won: boolean; score: number; headline: string; detail: string;
+  /** the card option the player chose at the end (Find the Mole), if any */
+  choice?: string;
+  /** facts for the result text (engine.ts finishMinigame()) */
+  flags?: Record<string, number>;
+}
 
 export const REDUCED = '(prefers-reduced-motion: reduce)';
 
@@ -59,7 +65,7 @@ export function MinigameScreen({
 }: {
   s: GameState;
   card: CardDef | AlertDef;
-  onFinish: (won: boolean, score: number) => void;
+  onFinish: (won: boolean, score: number, choice?: string, flags?: Record<string, number>) => void;
   onContinue: () => void;
   continueLabel?: string;
   practice?: boolean;
@@ -125,7 +131,7 @@ export function MinigameScreen({
       if (veil === 'in') { liftVeil(); return; } // skip the title card
       if (step === 'story') setStep('howto');
       else if (step === 'howto') setStep('play');
-      else if (step === 'done' && end) onFinish(end.won, end.score);
+      else if (step === 'done' && end) onFinish(end.won, end.score, end.choice, end.flags);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -239,7 +245,7 @@ export function MinigameScreen({
             </section>
           </main>
           <footer className="mg-foot">
-            <button className="btn btn-primary" onClick={() => end && onFinish(end.won, end.score)}>
+            <button className="btn btn-primary" onClick={() => end && onFinish(end.won, end.score, end.choice, end.flags)}>
               See what it cost →
             </button>
           </footer>

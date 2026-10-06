@@ -25,8 +25,11 @@ import type { Rng } from '../types';
  *     money first; if that is short, Brask takes the rest from the jars
  *     (money above a line first, then the fullest jar).
  *   - SQUEEZES: some events push the lines above what there is to spend, so
- *     someone must wait below their line. Long squeezes (act 3) need the
- *     player to swap who waits before anyone runs out.
+ *     someone must wait below their line. Act 1 has one short squeeze; the
+ *     longer ones (acts 2–3) can need the player to swap who waits before
+ *     anyone runs out.
+ *   - The jar IN MOST DANGER (below its line, least patience: dangerJar) is
+ *     highlighted on the screen, so the player always knows where to look.
  * Win: reach 20:00 (90 s) with no more than `walkoutsAllowed` walk-outs.
  *
  * Every evening is checked when it is laid out: a quick, careful player
@@ -87,25 +90,29 @@ export interface BudgetDifficulty {
 
 export function budgetDifficulty(act: number): BudgetDifficulty {
   // Harder each act: more and bigger events, less spare money, faster
-  // drain, slower recovery, and longer squeezes (act 3's need a swap).
-  // Calibrated with simulated players (budget.test.ts prints the win
-  // rates by skill and act).
+  // drain, slower recovery, and longer squeezes (act 2's and 3's can need
+  // a swap). Owner's playtest (2026-10-06): "I have yet to even make it to
+  // the vote", so "slower and clearer": patience drains about half as fast
+  // as before (act 1: a walk-out after ~15 s below the line, was ~8 s),
+  // the slips warn earlier, and act 1 has one short squeeze. Calibrated
+  // with simulated players (budget.test.ts prints the win rates by skill
+  // and act).
   const base = { durationMs: 90000, pot: 30, walkoutsAllowed: 1 };
   if (act <= 1) {
     return {
-      ...base, act: 1, spare: 3, draftOff: 2, gapMs: [8000, 10500], leadMs: 4000, size: [2, 3],
-      drain: 12, recover: 3, squeezeFloor: -3, squeezeMs: 11000, squeezes: 2,
+      ...base, act: 1, spare: 3, draftOff: 2, gapMs: [8000, 10000], leadMs: 5000, size: [2, 3],
+      drain: 6.5, recover: 5, squeezeFloor: -3, squeezeMs: 9000, squeezes: 1,
     };
   }
   if (act === 2) {
     return {
-      ...base, act: 2, spare: 2, draftOff: 3, gapMs: [7000, 9000], leadMs: 3500, size: [2, 3],
-      drain: 13.5, recover: 2.3, squeezeFloor: -3, squeezeMs: 13500, squeezes: 3,
+      ...base, act: 2, spare: 2, draftOff: 3, gapMs: [7000, 9000], leadMs: 4500, size: [2, 3],
+      drain: 8.5, recover: 4, squeezeFloor: -3, squeezeMs: 15000, squeezes: 2,
     };
   }
   return {
-    ...base, act: 3, spare: 1, draftOff: 3, gapMs: [6000, 8000], leadMs: 3000, size: [2, 4],
-    drain: 14, recover: 2.2, squeezeFloor: -3, squeezeMs: 15000, squeezes: 2,
+    ...base, act: 3, spare: 1, draftOff: 3, gapMs: [6500, 8500], leadMs: 4000, size: [2, 4],
+    drain: 9, recover: 3.5, squeezeFloor: -3, squeezeMs: 15000, squeezes: 2,
   };
 }
 
@@ -286,23 +293,43 @@ function schedule(rng: Rng, d: BudgetDifficulty, lines0: number[]): BudgetEvent[
 /** A quick, careful player: every evening must be winnable by one. */
 export const EXPERT: BudgetPlayer = { reactMs: 700, tapMs: 180, preload: true, mistake: 0 };
 
+/** Does the schedule ever push the lines above the money (a squeeze)? */
+export function hasSqueeze(setup: BudgetSetup): boolean {
+  const lines = setup.lines.slice();
+  let pot = setup.pot;
+  for (const e of setup.events) {
+    if (e.kind === 'up') lines[e.jar] += e.amount;
+    else if (e.kind === 'down') lines[e.jar] -= e.amount;
+    else if (e.kind === 'cut') pot -= e.amount;
+    else pot += e.amount;
+    if (sum(lines) > pot) return true;
+  }
+  return false;
+}
+
+/** the most layouts budgetSetup tries for one seed */
+const LAYOUT_TRIES = 40;
+
 /**
  * Lay out the evening. Same seed, same evening. An evening the EXPERT
- * cannot win, or that doing nothing does not lose, is laid out again.
+ * cannot win, that doing nothing does not lose, or with no squeeze (when
+ * the act has squeezes), is laid out again. Bounded: at most LAYOUT_TRIES
+ * layouts, each a few hundred cheap steps (about 1 ms per evening).
  */
 export function budgetSetup(seed: number, d: BudgetDifficulty): BudgetSetup {
   let fallback: BudgetSetup | null = null;
   let last: BudgetSetup | null = null;
-  for (let attempt = 0; attempt < 40; attempt++) {
+  for (let attempt = 0; attempt < LAYOUT_TRIES; attempt++) {
     const rng = makeRng((seed ^ Math.imul(attempt, 0x9e3779b1)) >>> 0);
     const { lines, money } = draft(rng, d);
     const setup: BudgetSetup = { seed, d, lines, money, pot: d.pot, events: schedule(rng, d, lines) };
     last = setup;
+    if (d.squeezes > 0 && !hasSqueeze(setup)) continue;
     if (budgetPlay(setup, null).over === 'won') continue; // waiting must never win
     fallback ??= setup;
     if (budgetPlay(setup, EXPERT).over === 'won') return setup;
   }
-  // not reached in 3,000 seeds per act: every one finds an evening well inside 40 tries
+  // not reached in 3,000 seeds per act: act 1 needs at most 5 layouts, acts 2–3 at most 2
   return (fallback ?? last)!;
 }
 
@@ -435,6 +462,15 @@ export function budgetTickTo(prev: BudgetState, t: number): BudgetState {
   return budgetTick(prev, Math.floor(t / STEP_MS) * STEP_MS - prev.t);
 }
 
+/** The jar in most danger: below its line, with the least patience (-1: none). The screen highlights it. */
+export function dangerJar(s: BudgetState): number {
+  let best = -1;
+  s.jars.forEach((j, i) => {
+    if (!j.out && j.money < j.line && (best < 0 || j.patience < s.jars[best].patience)) best = i;
+  });
+  return best;
+}
+
 /** The desk clock: 18:30 at the start, 20:00 at the end (a second of play is a minute). */
 export function budgetClock(t: number): string {
   const m = 30 + Math.min(90, Math.floor(t / 1000));
@@ -449,16 +485,24 @@ export function budgetScore(s: BudgetState): number {
   return Math.max(0, Math.min(100, score));
 }
 
-/* ------------------------------------------- a careful player's plan */
+/* ------------------------------------------- a player's plan */
 
 /**
- * What a careful player wants each jar to hold right now: every line met;
- * an announced line rise paid in advance if there is money for it (with
- * `preload`); and in a squeeze, the shortfall taken from ONE faction, the
- * most patient, swapped when it is running much lower than another.
- * `memo.victim` remembers who is waiting between calls.
+ * What a player wants each jar to hold right now: every line met; an
+ * announced line rise paid in advance if there is money for it (with
+ * `preload`); and in a squeeze, the shortfall taken from ONE faction.
+ *   - The careful rule (`swapBelow` unset): the most patient one waits,
+ *     swapped when it is running 30 points lower than another.
+ *   - A person's rule (`swapBelow` set): whoever is short when the squeeze
+ *     starts waits, until its patience bar turns red (below `swapBelow`);
+ *     then the most patient other one waits instead.
+ * `memo.victim` remembers who is waiting between calls. `wrongVictim` may
+ * pick a random faction instead (a mistake).
  */
-export function budgetPlan(s: BudgetState, memo: { victim?: number }, preload: boolean, wrongVictim?: () => number | undefined): number[] {
+export function budgetPlan(
+  s: BudgetState, memo: { victim?: number }, preload: boolean,
+  wrongVictim?: (from: number[]) => number | undefined, swapBelow?: number,
+): number[] {
   const T = s.jars.map((j) => (j.out ? j.money : j.line));
   const active = s.jars.map((_, i) => i).filter((i) => !s.jars[i].out);
   const avail = s.pot - sum(s.jars.filter((j) => j.out).map((j) => j.money));
@@ -483,8 +527,17 @@ export function budgetPlan(s: BudgetState, memo: { victim?: number }, preload: b
   let deficit = need - avail;
   const byPatience = [...active].sort((a, b) => s.jars[b].patience - s.jars[a].patience || a - b);
   let v = memo.victim;
-  if (v === undefined || s.jars[v].out || s.jars[byPatience[0]].patience - s.jars[v].patience > 30) {
-    v = wrongVictim?.() ?? byPatience[0];
+  if (swapBelow === undefined) {
+    if (v === undefined || s.jars[v].out || s.jars[byPatience[0]].patience - s.jars[v].patience > 30) {
+      v = wrongVictim?.(active) ?? byPatience[0];
+    }
+  } else if (v === undefined || s.jars[v].out) {
+    // the squeeze starts: whoever is short now waits (the most patient of them)
+    v = wrongVictim?.(active) ?? byPatience.find((i) => s.jars[i].money < s.jars[i].line) ?? byPatience[0];
+  } else if (s.jars[v].patience < swapBelow) {
+    // its bar has turned red: someone else waits now
+    const others = active.filter((i) => i !== v);
+    v = wrongVictim?.(others) ?? others.sort((a, b) => s.jars[b].patience - s.jars[a].patience || a - b)[0] ?? v;
   }
   memo.victim = v;
   for (const i of [v, ...byPatience.filter((x) => x !== v)]) {
@@ -496,17 +549,30 @@ export function budgetPlan(s: BudgetState, memo: { victim?: number }, preload: b
   return T;
 }
 
+/** how much longer a lapse of attention makes a reaction */
+const LAPSE_MS = 2000;
+
 /** A simulated player (tests, and the check every evening must pass). */
 export interface BudgetPlayer {
-  /** ms from a change (an event landing, a slip, a jar running low) to acting on it */
-  reactMs: number;
+  /** ms from a change (an event landing, a jar going short) to the first tap; [min, max] varies it each time */
+  reactMs: number | [number, number];
   /** ms per tap (each tap moves $1B) */
   tapMs: number;
-  /** reads the slips and pays a rise before it lands */
+  /**
+   * reads the slips: pays a rise before it lands, keeps money back for a
+   * cut, takes back money above a line. Without it, the player acts only
+   * when a jar is below its line (its line has turned red).
+   */
   preload: boolean;
-  /** chance a decision goes to the wrong jar */
+  /** chance a tap lands on the jar next door (halved); chance a squeeze's waiting faction is picked at random */
   mistake: number;
-  /** seed for the mistakes */
+  /** a person's squeeze rule (see budgetPlan): swap who waits once its patience is below this */
+  swapBelow?: number;
+  /** ms to find another button (a different jar, or + after −); a person watching five jars needs a moment */
+  lookMs?: number;
+  /** chance a reaction takes LAPSE_MS longer (looking at the wrong thing) */
+  lapse?: number;
+  /** seed for the mistakes and the reaction times */
   seed?: number;
 }
 
@@ -516,54 +582,80 @@ export function budgetPlay(setup: BudgetSetup, player: BudgetPlayer | null): Bud
   if (!player) return budgetTick(s, setup.d.durationMs + STEP_MS);
   const rng = makeRng(((player.seed ?? 0) * 7919 + setup.seed * 31 + 17) >>> 0);
   const memo: { victim?: number } = {};
-  const wrong = () => (player.mistake > 0 && rng.chance(player.mistake) ? rng.int(JAR_COUNT) : undefined);
-  let noticed = 0;
+  const wrong = (from: number[]) => (player.mistake > 0 && from.length > 0 && rng.chance(player.mistake) ? rng.pick(from) : undefined);
+  const react = () => (typeof player.reactMs === 'number' ? player.reactMs : rng.range(player.reactMs[0], player.reactMs[1]))
+    + (player.lapse && rng.chance(player.lapse) ? LAPSE_MS : 0);
+  /** when the player acts on what they have noticed (-1: nothing noticed) */
+  let actAt = -1;
   let working = false;
   let nextTap = 0;
+  /** the button last pressed, and the one the player has just looked for */
+  let lastKey = -1;
+  let lookedFor = -1;
+  /** a tap that slips lands on the jar next door */
+  const slip = (i: number) => (player.mistake > 0 && rng.chance(player.mistake / 2) ? Math.max(0, Math.min(JAR_COUNT - 1, i + (rng.chance(0.5) ? 1 : -1))) : i);
   let seen = `${s.next}/${s.walkouts}`;
   while (!s.over) {
     s = budgetTick(s, STEP_MS);
     if (s.over) break;
-    // something landed (or someone walked out): it takes a moment to take in
+    // something landed (or someone walked out): it takes a moment to take
+    // in (a person busy at the jars only glances up)
     const now = `${s.next}/${s.walkouts}`;
-    if (now !== seen) { seen = now; working = false; noticed = s.t; }
-    const T = budgetPlan(s, memo, player.preload, wrong);
-    if (!hasWork(s, T)) { working = false; noticed = -1; continue; }
+    if (now !== seen) {
+      seen = now;
+      if (working && player.lookMs) nextTap = Math.max(nextTap, s.t + player.lookMs);
+      else { working = false; actAt = s.t + react(); }
+    }
+    const T = budgetPlan(s, memo, player.preload, wrong, player.swapBelow);
+    if (!hasWork(s, T, player.preload)) { working = false; actAt = -1; continue; }
     if (!working) {
-      if (noticed < 0) noticed = s.t;
-      if (s.t - noticed < player.reactMs) continue;
+      if (actAt < 0) actAt = s.t + react();
+      if (s.t < actAt) continue;
       working = true;
       nextTap = s.t;
+      lastKey = -1;
     }
     while (working && nextTap <= s.t) {
-      s = tapToward(s, T, rng, player.mistake);
+      const mv = chooseTap(s, T, !!player.lookMs && lastKey >= 0 && lastKey % 2 === 0);
+      if (!mv) { working = false; break; }
+      // moving to another button: a moment to find it
+      const key = mv.jar * 2 + (mv.dir > 0 ? 1 : 0);
+      if (lastKey >= 0 && key !== lastKey && lookedFor !== key && player.lookMs) {
+        lookedFor = key;
+        nextTap += player.lookMs;
+        continue;
+      }
+      s = budgetMove(s, slip(mv.jar), mv.dir);
+      lastKey = key;
       nextTap += player.tapMs;
-      if (!hasWork(s, T)) working = false;
+      if (!hasWork(s, T, player.preload)) working = false;
     }
   }
   return s;
 }
 
-function hasWork(s: BudgetState, T: number[]): boolean {
+/** Anything to do? A jar short of the plan (and money to fill it); a tidy player also takes back money above the plan. */
+function hasWork(s: BudgetState, T: number[], tidy: boolean): boolean {
   const u = unspent(s);
-  return s.jars.some((j, i) => !j.out && ((j.money < T[i] && u > 0) || j.money > T[i]));
+  const over = s.jars.some((j, i) => !j.out && j.money > T[i]);
+  return s.jars.some((j, i) => !j.out && ((j.money < T[i] && (u > 0 || over)) || (tidy && j.money > T[i])));
 }
 
-/** One tap towards the plan: fill the most urgent short jar, else take back a surplus. */
-function tapToward(s: BudgetState, T: number[], rng: Rng, mistake: number): BudgetState {
-  const u = unspent(s);
+/**
+ * The next tap towards the plan: fill the most urgent short jar, else take
+ * back a surplus. `taking`: a person who has started taking money out keeps
+ * going until there is enough to fill every short jar (no back and forth).
+ */
+function chooseTap(s: BudgetState, T: number[], taking: boolean): { jar: number; dir: 1 | -1 } | null {
   const short = s.jars.map((_, i) => i)
     .filter((i) => !s.jars[i].out && s.jars[i].money < T[i])
     .sort((a, b) => Number(s.jars[a].money >= s.jars[a].line) - Number(s.jars[b].money >= s.jars[b].line)
       || s.jars[a].patience - s.jars[b].patience || a - b);
-  if (short.length && u > 0) {
-    let i = short[0];
-    if (mistake > 0 && rng.chance(mistake / 2)) i = rng.int(JAR_COUNT); // the wrong jar
-    return budgetMove(s, i, 1);
-  }
+  const u = unspent(s);
+  const gap = sum(short.map((i) => T[i] - s.jars[i].money));
+  if (short.length && u > 0 && !(taking && u < gap && s.jars.some((j, i) => !j.out && j.money > T[i]))) return { jar: short[0], dir: 1 };
   const over = s.jars.map((_, i) => i)
     .filter((i) => !s.jars[i].out && s.jars[i].money > T[i])
     .sort((a, b) => (s.jars[b].money - T[b]) - (s.jars[a].money - T[a]) || a - b);
-  if (over.length) return budgetMove(s, over[0], -1);
-  return s;
+  return over.length ? { jar: over[0], dir: -1 } : null;
 }

@@ -19,19 +19,27 @@ function evening(over: Partial<B.BudgetSetup> = {}, d: Partial<B.BudgetDifficult
 }
 const total = (s: B.BudgetState) => s.jars.reduce((a, j) => a + j.money, 0) + B.unspent(s);
 
-/** Simulated players, by skill. Reaction = from a change to the first tap. */
+/**
+ * Simulated players, by skill. Reaction = from a change (a jar going below
+ * its line, an event landing) to the first tap, varied each time; a lapse
+ * adds 2 s (looking at the wrong thing); moving to another button costs a
+ * moment (lookMs); a slip lands on the jar next door. Average and slow act
+ * only once a jar's line has turned red, and in a squeeze swap who waits
+ * only once its patience bar turns red. Owner, 2026-10-06, at the old
+ * numbers: "I have yet to even make it to the vote" — these people win
+ * act 1 about 60% (average) and 30% (slow) of the time there.
+ */
 const PLAYERS: Record<string, B.BudgetPlayer | null> = {
-  // reacts within ~1.5 s, reads the slips and pays a rise early, rarely picks the wrong jar
-  attentive: { reactMs: 1500, tapMs: 250, preload: true, mistake: 0.05 },
-  // ~3 s, waits for the line to move, sometimes the wrong jar
-  average: { reactMs: 3000, tapMs: 350, preload: false, mistake: 0.2 },
-  // ~5 s, slow taps, often the wrong jar
-  slow: { reactMs: 5000, tapMs: 500, preload: false, mistake: 0.3 },
+  // reads the slips and pays a rise early; reacts in 1.5–2 s; swaps who waits a little early
+  attentive: { reactMs: [1500, 2000], tapMs: 250, lookMs: 400, preload: true, mistake: 0.05, lapse: 0.1, swapBelow: 45 },
+  // 2.5–3.5 s after a line turns red; sometimes the wrong jar, sometimes looking elsewhere
+  average: { reactMs: [2500, 3500], tapMs: 400, lookMs: 800, preload: false, mistake: 0.2, lapse: 0.25, swapBelow: 35 },
+  // 4.5–5 s, slow taps, often looking elsewhere
+  slow: { reactMs: [4500, 5000], tapMs: 500, lookMs: 900, preload: false, mistake: 0.2, lapse: 0.35, swapBelow: 35 },
   idle: null,
 };
 
-function winRate(act: number, player: B.BudgetPlayer | null, n = 150): number {
-  const d = B.budgetDifficulty(act);
+function winRate(act: number, player: B.BudgetPlayer | null, n = 150, d = B.budgetDifficulty(act)): number {
   let won = 0;
   SEEDS(n).forEach((seed, i) => {
     if (B.budgetPlay(B.budgetSetup(seed, d), player ? { ...player, seed: i } : null).over === 'won') won++;
@@ -150,8 +158,8 @@ describe('Budget Night (rules)', () => {
       { id: 2, at: 15000, kind: 'cut', jar: -1, amount: 5, why: 'Aid is late' },
       { id: 3, at: 20000, kind: 'add', jar: -1, amount: 4, why: 'Customs windfall' },
     ];
-    const d = B.budgetDifficulty(1);
-    let s = evening({ events, money: [5, 5, 5, 5, 6] }, { drain: 1 }); // 26 in jars, 2 unspent
+    const d = { ...B.budgetDifficulty(1), leadMs: 4000 };
+    let s = evening({ events, money: [5, 5, 5, 5, 6] }, { drain: 1, leadMs: 4000 }); // 26 in jars, 2 unspent
     s = B.budgetTick(s, 5000 - d.leadMs - 100);
     expect(B.announced(s)).toHaveLength(0);
     s = B.budgetTick(s, 100);
@@ -182,11 +190,11 @@ describe('Budget Night (rules)', () => {
   });
 
   it('an event aimed at a faction that walked out lands on the next one along', () => {
-    let s = evening({ events: [{ id: 0, at: 12000, kind: 'up', jar: 0, amount: 2, why: '' }], money: [1, 5, 5, 5, 5] });
-    s = B.budgetTickTo(s, 11000);
+    let s = evening({ events: [{ id: 0, at: 20000, kind: 'up', jar: 0, amount: 2, why: '' }], money: [1, 5, 5, 5, 5] });
+    s = B.budgetTickTo(s, 19000);
     expect(s.jars[0].out).toBe(true);
     expect(B.eventTarget(s, s.setup.events[0])).toBe(1);
-    s = B.budgetTickTo(s, 12000);
+    s = B.budgetTickTo(s, 20000);
     expect(s.jars[1].line).toBe(7);
     expect(s.jars[0].line).toBe(5);
   });
@@ -206,13 +214,54 @@ describe('Budget Night (rules)', () => {
 });
 
 describe('Budget Night (the evening and the balance)', () => {
+  it('slower and clearer (owner, 2026-10-06): act 1 drains about half as fast, warns earlier, and has one squeeze; harder each act', () => {
+    const [a1, a2, a3] = [1, 2, 3].map(B.budgetDifficulty);
+    // a full bar runs out after ~15 s below the line in act 1 (it was ~8 s)
+    expect(100 / a1.drain).toBeGreaterThanOrEqual(14);
+    expect(100 / a1.drain).toBeLessThanOrEqual(17);
+    expect(a1.squeezes).toBe(1);
+    expect(a1.leadMs).toBeGreaterThanOrEqual(5000);
+    expect(a1.walkoutsAllowed).toBe(1);
+    // harder each act
+    expect(a1.drain).toBeLessThan(a2.drain);
+    expect(a2.drain).toBeLessThan(a3.drain);
+    expect(a1.recover).toBeGreaterThan(a2.recover);
+    expect(a2.recover).toBeGreaterThan(a3.recover);
+    expect(a1.leadMs).toBeGreaterThan(a2.leadMs);
+    expect(a2.leadMs).toBeGreaterThan(a3.leadMs);
+    expect(a1.spare).toBeGreaterThan(a3.spare);
+    // laying out an evening stays quick (each is checked by two simulated runs; a few tries at most)
+    const t0 = Date.now();
+    for (const d of [a1, a2, a3]) for (const seed of SEEDS(100, 5)) B.budgetSetup(seed, d);
+    expect((Date.now() - t0) / 300).toBeLessThan(20);
+  });
+
+  it('the jar in most danger: below its line, with the least patience; none when every line is met', () => {
+    let s = evening();
+    expect(B.dangerJar(s)).toBe(-1);
+    s = evening({ money: [3, 4, 5, 5, 5] }); // the Army is $2B short, Security $1B
+    expect(B.dangerJar(s)).toBe(0); // the same patience: the first one
+    s = B.budgetTick(s, 1000);
+    s = B.budgetMove(B.budgetMove(s, 0, 1), 0, 1); // the Army is filled
+    s = B.budgetTick(s, 100);
+    expect(B.dangerJar(s)).toBe(1);
+    // the one with less patience left, however small the gap
+    s = evening({ money: [4, 4, 5, 5, 5] });
+    s.jars[0].patience = 60;
+    s.jars[1].patience = 40;
+    expect(B.dangerJar(s)).toBe(1);
+    // a faction that walked out is not in danger any more
+    s.jars[1].out = true;
+    expect(B.dangerJar(s)).toBe(0);
+  });
+
   it('events every ~6–12 s, the first within ~8 s, and the lines go above the pot at least once', () => {
     for (const act of [1, 2, 3]) {
       const d = B.budgetDifficulty(act);
       for (const seed of SEEDS(100)) {
         const st = B.budgetSetup(seed, d);
         const at = st.events.map((e) => e.at);
-        expect(at[0]).toBeLessThanOrEqual(8000);
+        expect(at[0]).toBeLessThanOrEqual(d.leadMs + 3200);
         expect(at[at.length - 1]).toBeGreaterThan(d.durationMs - 16000);
         for (let i = 1; i < at.length; i++) {
           expect(at[i]).toBeGreaterThan(at[i - 1]);
@@ -231,6 +280,7 @@ describe('Budget Night (the evening and the balance)', () => {
           expect(lines.every((l) => l >= 2 && l <= 11)).toBe(true);
         }
         expect(squeezed).toBe(true);
+        expect(B.hasSqueeze(st)).toBe(true);
       }
     }
   });
@@ -249,23 +299,47 @@ describe('Budget Night (the evening and the balance)', () => {
     }
   });
 
-  it('simulated players by skill: attentive wins nearly always in act 1 and most of the time in act 3; average and slow clearly less', () => {
+  it('simulated players by skill: a person wins act 1 nearly always, act 3 about half the time; slower players less', () => {
     const table: Record<string, number[]> = {};
     for (const [name, p] of Object.entries(PLAYERS)) table[name] = [1, 2, 3].map((act) => winRate(act, p));
     // eslint-disable-next-line no-console
     console.log(`Budget Night win rates (acts 1/2/3, 150 seeds each):\n${Object.entries(table)
       .map(([n, r]) => `  ${n.padEnd(9)} ${r.map((x) => `${Math.round(x * 100)}%`.padStart(4)).join(' / ')}`).join('\n')}`);
     const { attentive, average, slow, idle } = table;
-    expect(attentive[0]).toBeGreaterThanOrEqual(0.95);
-    expect(attentive[2]).toBeGreaterThanOrEqual(0.7);
-    expect(attentive[2]).toBeLessThanOrEqual(0.9);
+    const within = (x: number, lo: number, hi: number) => {
+      expect(x).toBeGreaterThanOrEqual(lo);
+      expect(x).toBeLessThanOrEqual(hi);
+    };
+    // attentive ~100 / ~98 / ~95; average ~100 / ~70 / ~50; slow ~99 / ~40 / ~25
+    within(attentive[0], 0.97, 1);
+    within(attentive[1], 0.9, 1);
+    within(attentive[2], 0.8, 0.98);
+    within(average[0], 0.9, 1);
+    within(average[1], 0.6, 0.82);
+    within(average[2], 0.42, 0.65);
+    within(slow[0], 0.8, 1);
+    within(slow[1], 0.3, 0.55);
+    within(slow[2], 0.15, 0.38);
     for (let a = 0; a < 3; a++) {
-      expect(average[a]).toBeLessThan(attentive[a] - 0.1);
-      expect(slow[a]).toBeLessThan(average[a]);
+      expect(average[a]).toBeLessThanOrEqual(attentive[a]);
+      expect(slow[a]).toBeLessThanOrEqual(average[a]);
       expect(idle[a]).toBe(0);
     }
     // harder each act
-    expect(average[2]).toBeLessThan(average[0]);
-    expect(attentive[2]).toBeLessThan(attentive[0]);
+    for (const r of [attentive, average, slow]) {
+      expect(r[1]).toBeLessThanOrEqual(r[0]);
+      expect(r[2]).toBeLessThan(r[1]);
+    }
+  });
+
+  it('the old numbers (before the owner\'s playtest) were too hard for a person: the same players lose act 1 far more often', () => {
+    const old: B.BudgetDifficulty = {
+      ...B.budgetDifficulty(1), gapMs: [8000, 10500], leadMs: 4000, drain: 12, recover: 3, squeezeMs: 11000, squeezes: 2,
+    };
+    const averageOld = winRate(1, PLAYERS.average, 100, old);
+    const slowOld = winRate(1, PLAYERS.slow, 100, old);
+    expect(averageOld).toBeLessThan(0.75);
+    expect(slowOld).toBeLessThan(0.5);
+    expect(winRate(1, PLAYERS.average, 100)).toBeGreaterThan(averageOld + 0.2);
   });
 });

@@ -108,10 +108,25 @@ try {
     await page.keyboard.press('Enter');
     await run(page, 300);
     assert.ok(await page.locator('.mo-lineup.done.won').count(), 'Enter names them: the right one wins');
-    await run(page, 2500);
+    // owner: choose what happens to the mole — four choices, keys 1–4 on a laptop
+    await page.locator('.mo-fate').waitFor();
+    assert.match(await page.locator('.mo-fate-q').innerText(), new RegExp(job, 'i'), 'The question names the mole');
+    assert.equal(await page.locator('.mo-fate-btn').count(), 4, 'Four choices');
+    assert.equal(await page.locator('.mo-fate-btn .mo-key').count(), 4, 'Keys 1–4 shown on a laptop');
+    await run(page, 3000);
+    assert.equal(await page.locator('.mg-end').count(), 0, 'The game waits for the choice');
+    await page.screenshot({ path: shotPath('MO-1366-fate.png') });
+    await page.keyboard.press('2'); // turn them
+    await run(page, 600);
     await page.locator('.mg-end').waitFor();
     assert.ok(await page.locator('.mg-end.won').count(), 'The result: won');
     assert.match(await page.locator('.mg-end h2').innerText(), new RegExp(job, 'i'));
+    assert.match(await page.locator('.mg-end h2').innerText(), /Turn them/);
+    await page.locator('.mg-foot .btn-primary').click();
+    const outcome = page.locator('.mg-result-body .outcome');
+    await outcome.waitFor();
+    assert.match(await outcome.innerText(), new RegExp(`${job}[\\s\\S]*keep meeting the Courier`, 'i'), 'The result names the mole and the choice');
+    assert.match(await outcome.locator('.outcome-marked').innerText(), /turned the ministry mole/, 'The choice goes on the record');
     await page.close();
   }
 
@@ -203,8 +218,16 @@ try {
     await tap(name);
     await run(page, 300);
     assert.ok(await page.locator('.mo-lineup.done.won').count(), 'Named by taps: won');
-    await run(page, 2500);
+    await page.locator('.mo-fate').waitFor();
+    assert.equal(await page.locator('.mo-fate .mo-key').count(), 0, 'No key hints on a phone');
+    const expose = page.locator('.mo-fate-btn[data-choice="expose"]');
+    const eb = await expose.boundingBox();
+    assert.ok(eb.y + eb.height <= 844, 'The choices are on screen');
+    await page.screenshot({ path: shotPath('MO-390-fate.png') });
+    await tap(expose);
+    await run(page, 600);
     await page.locator('.mg-end.won').waitFor();
+    assert.match(await page.locator('.mg-end h2').innerText(), /Expose them/);
     await page.close();
   }
 
@@ -225,4 +248,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-console.log('MOLE: laptop numbers on every person, a number marks and unmarks, the mole marked when the envelope changes hands, line-up by number + Enter: won; arrows + Enter on a wrong name: lost (mole revealed); no name: lost; phone: no numbers, floor turned upright, real taps mark on the floor and in the list, line-up by taps: won; Reduce Motion calm and slower — all OK');
+console.log('MOLE: laptop numbers on every person, a number marks and unmarks, the mole marked when the envelope changes hands, line-up by number + Enter: won, then what happens to the mole (keys 1–4; turned → the result and the record say so); arrows + Enter on a wrong name: lost (mole revealed); no name: lost; phone: no numbers, floor turned upright, real taps mark on the floor and in the list, line-up by taps: won, exposed by a tap; Reduce Motion calm and slower — all OK');

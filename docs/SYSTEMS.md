@@ -10,7 +10,7 @@ what the code does now, not how it got there; the history lives in
 so fix this file.
 
 **Last checked against the code:** 2026-10-06 (mini-games slice 3
-part A). At that point there were 240 unit tests, `SAVE_VERSION` 14, and
+part A). At that point there were 247 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -314,10 +314,14 @@ a clean build.
 
   | Policy | Survives |
   |---|---|
-  | Careful | 63% |
-  | Random | 4% |
-  | Always first | 2% |
-  | Always last | 1% |
+  | Careful | 68% |
+  | Random | 3% |
+  | Always first | 5% |
+  | Always last | 2% |
+
+  (2026-10-06: careful was 63% before the mole choices; the arrest — the
+  probe's choice on a won Find the Mole — and its mark add a few points.
+  At 400 runs the probe moves ±3 points with any small change.)
 
   The probe plays mini-games as a result: `careful` wins 70% of them
   (`MINIGAME_SKILL`), the others half. Owner: careful play should be
@@ -488,31 +492,50 @@ a clean build.
   (big, ringed) / 0.9 / 0.8 s; lingerers 1 / 1 / 2; blackouts 0 / 2 / 3.
   Simulated watchers (attentive / average / distracted): 99 / 94 / 87%
   (act 1), 96 / 89 / 70% (act 2), 80 / 57 / 34% (act 3); a random guess
-  ~1 in N; doing nothing always loses. Won: Legitimacy +5, Security +4,
-  leaks −10, Sable +2, every faction +0.5; lost: Legitimacy −4, Security
-  −3, leaks +6, Sable −4.
+  ~1 in N; doing nothing always loses. 
+  **What happens to the mole** (owner, 2026-10-06): a right name opens
+  four choices (keys 1–4 on laptops), each its own card option and mark
+  (`MOLE_CHOICES`; the job is stored in `flags.mgMole` for the text):
+  **arrest** (`won`; Legitimacy +4, Security +4, leaks −12, fear +5, Sable
+  +2, Street −2; mark `mole-arrested`), **turn** (Legitimacy +3, Security
+  +6, leaks −6, scandal −8, Sable +3; `mole-turned`; the follow-up card
+  `mole-double` four days later: feed one more story — a scandal if leaks
+  are 45+ or Security under 40 — bring them in, or pay their way out),
+  **fire quietly** (Legitimacy +4, Security +3, leaks −8; `mole-fired`),
+  **expose** (Legitimacy +7, support +4, leaks −10, Street +3, Sable −3;
+  `mole-exposed`). Every faction +0.5 on any win. The marks change "A
+  Reporter Has the Documents": turned → a new "forged pages" option;
+  arrested → a surer Find the Source; exposed → the injunction backfires
+  harder; fired → a quiet word with the night floor. Arrested makes
+  Security's demands cheaper, exposed dearer. Lost: Legitimacy −4,
+  Security −3, leaks +6, Sable −4.
 - **Budget Night** (`budget.ts`; bright, a Finance Ministry desk; Workers;
   slice 3). Owner: 90 seconds, *"plenty of time but still can't just sit
   there"*. Five jars (Army, Security, Elites, Workers, Street) and a $30B
   pot; each jar has a line (the least it accepts; a jar holds up to
   $14B). + / − move $1B between the unspent money and a jar (laptops: 1–5
   pick a jar, ↑ ↓ move). Below its line a jar's patience drains; at or
-  above, it slowly recovers; at 0 the faction **walks out** and its jar is
+  above, it recovers; at 0 the faction **walks out** and its jar is
   sealed with its money in it. One walk-out allowed; the second loses;
   20:00 wins. Brask's first draft leaves one jar $2–3B short, so you act
-  from second 0. **Events** on a seeded schedule, each on a slip a few
+  from second 0. **The jar in most danger flashes red with a "!"**
+  (`dangerJar()`). **Events** on a seeded schedule, each on a slip a few
   seconds ahead: a line moves, a **cut** (from the unspent money first,
   then money above a line, then the fullest jar), or more money.
   **Squeezes:** at set points the lines add up to more than the pot, so
-  someone must wait. Every evening is checked at layout: an expert must
-  win it and doing nothing must lose it (else it is laid out again from
-  the same seed). By act 1 / 2 / 3: event gap 8–10.5 / 7–9 / 6–8 s;
-  warning 4 / 3.5 / 3 s; drain 12 / 13.5 / 14 a second; squeezes 2 / 3 /
-  2 (longer in act 3). Simulated (attentive / average / slow): 100 / 87 /
-  49% (act 1), 98 / 46 / 18% (act 2), 85 / 33 / 10% (act 3); idle 0%.
-  Reduce Motion: the evening runs 1.5× slower. Won: Legitimacy +5,
-  stability +3, budget strain −8, Workers +2, every faction +0.5; lost:
-  Legitimacy −4, stability −3, strain +5, Workers −4.
+  someone must wait. Every evening is checked at layout (up to 40 tries):
+  an expert must win it, doing nothing must lose it, and it must have a
+  squeeze. **Retuned 2026-10-06** (owner: *"I have yet to even make it to
+  the vote"*; chose "slower and clearer"). By act 1 / 2 / 3: drain 6.5 /
+  8.5 / 9 a second (a walk-out ~15 s below the line in act 1; was 12 /
+  13.5 / 14), recover 5 / 4 / 3.5, warning 5 / 4.5 / 4 s, squeezes 1 / 2 /
+  2 (act 1's about 9 s, no swap needed), event gap 8–10 / 7–9 / 6.5–8.5 s.
+  Simulated (attentive / average / slow; average and slow only act once a
+  line turns red): 100 / 100 / 98% (act 1), 98 / 71 / 41% (act 2), 95 /
+  51 / 26% (act 3); idle 0%. Reduce Motion: the evening runs 1.5× slower
+  and the highlight holds still. Won: Legitimacy +5, stability +3, budget
+  strain −8, Workers +2, every faction +0.5; lost: Legitimacy −4,
+  stability −3, strain +5, Workers −4.
 - **The Pigeon Run** (`pigeon.ts`; a daylight sky over the Hadem hills;
   Army; slice 3). Drovna jams the radio, so the order to the border
   garrison goes by pigeon. **Hold to climb, let go to glide** (owner's

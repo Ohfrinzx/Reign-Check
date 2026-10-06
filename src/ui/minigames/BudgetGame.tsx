@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { BudgetEvent, BudgetSetup, BudgetState } from '../../game/minigames/budget';
 import {
-  announced, budgetClock, budgetMove, budgetScore, budgetStart, budgetTickTo, canPut, canTake, eventTarget, JAR_CAP, unspent,
+  announced, budgetClock, budgetMove, budgetScore, budgetStart, budgetTickTo, canPut, canTake, dangerJar, eventTarget, JAR_CAP, unspent,
 } from '../../game/minigames/budget';
 import { DISPLAY_FACTIONS } from '../../game/display';
 import { useMedia } from '../useMedia';
@@ -20,6 +20,11 @@ import { useClock } from './useClock';
  * between the cash box and the jars; a slip slides in before every change
  * and drops onto the desk when it lands; a faction that walks out gets a
  * red stamp and its jar is sealed.
+ *
+ * The jar in most danger (below its line, least patience: dangerJar) pulses
+ * with a red glow, its patience bar flashes and a red "!" sits on its
+ * corner — one jar at a time (owner's playtest, 2026-10-06: "slower and
+ * clearer"). The calm version keeps a solid red outline and the "!".
  *
  * Touch: + and − under each jar (pointer-down, so a quick tap never also
  * lands on something else). Keyboard (laptops; owner, 2026-10-06: trackpad
@@ -143,11 +148,13 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
   const short = st.jars.some((j) => !j.out && j.money < j.line);
   const surplus = st.jars.some((j) => !j.out && j.money > j.line);
   const minute = Math.min(90, st.t / 1000);
+  // the jar in most danger (below its line, least patience) is highlighted
+  const danger = st.over ? -1 : dangerJar(st);
 
   const help = st.over
     ? (st.over === 'won' ? 'Eight o\'clock. The budget goes in.' : 'Too many walk-outs.')
     : squeeze ? 'Not enough for everyone. Choose who waits, and swap before anyone runs out.'
-      : short && u > 0 ? 'A red line is not met: put money in that jar.'
+      : short && u > 0 ? 'A red line is not met: put money in the flashing jar.'
         : short ? 'Take money out of a jar above its line, then put it where it is short.'
           : cutComing && u < cutComing.amount ? 'A cut is coming. Keep some money unspent, or Brask takes it from a jar.'
             : slips.some((e) => e.kind === 'up') ? 'A line is about to go up. Put the money in now.'
@@ -230,7 +237,7 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
             return (
               <div
                 key={f.id}
-                className={`bn-jar${isShort ? ' short' : ''}${!j.out && pat < 35 ? ' low' : ''}${j.out ? ' out' : ''}${!j.out && j.money > j.line ? ' over' : ''}${showKeys && usedKeys && sel === i ? ' sel' : ''}${walked ? ' slam' : ''}${nudge?.jar === i ? ` nudge${nudge.n % 2}` : ''}`}
+                className={`bn-jar${isShort ? ' short' : ''}${!j.out && pat < 35 ? ' low' : ''}${j.out ? ' out' : ''}${!j.out && j.money > j.line ? ' over' : ''}${showKeys && usedKeys && sel === i ? ' sel' : ''}${walked ? ' slam' : ''}${nudge?.jar === i ? ` nudge${nudge.n % 2}` : ''}${danger === i ? ' danger' : ''}`}
                 data-jar={i}
                 data-money={j.money}
                 data-line={j.line}
@@ -238,6 +245,7 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
                 data-out={j.out ? 1 : 0}
                 onPointerDown={() => setSel(i)}
               >
+                {danger === i && <span className="bn-alert" role="img" aria-label={`${f.label}: in most danger`}>!</span>}
                 <div className="bn-who">
                   <span className="bn-ico" aria-hidden="true">{f.icon}</span>
                   <span className="bn-name">{f.label}</span>
