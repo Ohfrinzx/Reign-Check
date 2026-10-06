@@ -109,7 +109,10 @@ diff.** Two parts:
 2. **What to look for in playtesting** — a short, concrete checklist: where
    to go, what should happen, what would count as a bug or a balance
    problem. Name the exact buttons and screens; say how to reach anything
-   hard to reach.
+   hard to reach. **Always give full, clickable practice links** (owner,
+   2026-10-06: *"Always send me the actual practice links"*), e.g.
+   `https://ohfrinzx.github.io/Reign-Check/?practice=mole` and
+   `…?practice=mole&act=3` — never just `?practice=mole`.
 
 Also say what you verified (tests, build, browser checks), whether you
 merged into the default branch (§10), and what is next. Documentation-only
