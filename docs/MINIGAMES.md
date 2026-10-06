@@ -9,8 +9,10 @@
 Palace** (coups), **The 7pm Bulletin** and the opening title card.
 **Slice 2 approved (2026-10-06):** **Bread Lines**, **The Last Kilometre**
 (Walk in the Weather), **Shred the Ledger** (with number keys on laptops).
-**Slice 3 part A in progress:** Find the Mole, Budget Night, The Pigeon
-Run (§2). How it works, with the
+**Slice 3 part A built, waiting for the owner's playtest:** Find the
+Mole, Budget Night, The Pigeon Run (§2; rules and numbers in
+`docs/SYSTEMS.md` §12). **Part B next, after that playtest:** Who Was in
+the Stairwell?, The Ambassador's Table. How it works, with the
 numbers: `docs/SYSTEMS.md` §12.
 
 **Before the next slice:** ask the owner which games come next (the list
@@ -96,7 +98,9 @@ the three card layouts) and mobile-first (the owner plays on an iPhone).
 ## 3. The idea list (proposed to the owner; not yet chosen)
 
 Built: **#1 Hold the Palace**, **#2 The 7pm Bulletin**, **#3 Shred the
-Ledger**, **#8 Bread Lines**, **#10 The Last Kilometre**. Still open (the
+Ledger**, **#6 Budget Night**, **#8 Bread Lines**, **#9 Find the Mole**,
+**#10 The Last Kilometre**, **#12 The Pigeon Run**. Chosen for slice 3
+part B: **#5**, **#7**. Still open (the
 reading-heavy ones — #4, #5, #7, #11 — only if the owner wants another
 reading game):
 

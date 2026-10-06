@@ -19,13 +19,13 @@ Then read, in order:
 
 ## The few things Claude Code sessions must not miss
 
-- **Status (2026-10-01):** Phases 1–3, balance slice D (factions remember
+- **Status (2026-10-06):** Phases 1–3, balance slice D (factions remember
   your decisions) and the mobile web version + GitHub Pages deploy are all
-  approved. **Mini-games slice 1** is approved; **slice 2** (Bread Lines, The Last
-  Kilometre, Shred the Ledger) is built and waiting for the owner's
-  playtest (`docs/MINIGAMES.md`). The number explanations and the slower
-  Bulletin are approved (2026-10-06); Shred's number keys for laptops are
-  built and waiting for the owner's playtest. Ask before
+  approved. **Mini-games slices 1 and 2** are approved, as are the number
+  explanations, the slower Bulletin and Shred's laptop keys.
+  **Mini-games slice 3 part A** (Find the Mole, Budget Night, The Pigeon
+  Run) is built and waiting for the owner's playtest; part B (Stairwell,
+  Ambassador's Table) comes after it (`docs/MINIGAMES.md`). Ask before
   designing the next games. **Every
   merge into the default branch now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`

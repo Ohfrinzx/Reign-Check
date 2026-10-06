@@ -8,8 +8,37 @@ one line per step. Full old handovers are in
 
 ## Now (2026-10-06)
 
-**SHRED THE LEDGER NUMBER KEYS — BUILT, WAITING FOR THE OWNER'S
-PLAYTEST.** Owner: *"laptop users on trackpad can't seem to click the
+**MINI-GAMES SLICE 3, PART A — BUILT, WAITING FOR THE OWNER'S PLAYTEST.**
+Owner chose five games for slice 3, in two merges (*"good go onto the
+next slice"*). Part A:
+- **Find the Mole** (dark night camera; Security): staff walk the
+  Interior Ministry's night floor; watch who meets the press contact
+  alone and passes an envelope; name the mole in a line-up. Decoys,
+  coffee hand-overs and camera blackouts from act 2.
+- **Budget Night** (bright Finance desk; Workers): 90 s, five jars, a
+  $30B pot; each faction has a line that keeps moving; below it, patience
+  drains; one walk-out allowed. Owner: *"plenty of time but still can't
+  just sit there"*.
+- **The Pigeon Run** (daylight sky; Army): hold to climb, let go to glide,
+  past hawks (they show their dive line first), storm clouds and hills;
+  three feathers (four with the Pigeon Federation's champion, if you
+  helped the Federation earlier).
+- All three are **daily games** (six now) and **picked by events**
+  (hostile Security / betrayal warning / big leaks → Mole; debt or a
+  Workers/Elites demand → Budget; provinces pulling away → Pigeon). An
+  event never brings yesterday's game.
+- Laptops: every new game has full keyboard controls (owner's trackpad
+  feedback). Built by three agents in parallel, reviewed and merged.
+- No save reset (`SAVE_VERSION` 14). Careful play still survives 63%.
+- Practice links: `…/Reign-Check/?practice=mole`, `budget`, `pigeon`
+  (add `&act=3` for the hardest).
+- **Part B, after the playtest:** Who Was in the Stairwell?, The
+  Ambassador's Table.
+
+**Approved 2026-10-06:** mini-games slice 2 and Shred's number keys
+(*"good go onto the next slice"*).
+
+**SHRED THE LEDGER NUMBER KEYS (approved 2026-10-06).** Owner: *"laptop users on trackpad can't seem to click the
 papers fast enough"*. Chosen: a number on each paper (owner: *"do numbers
 instead. single digits"*).
 - On a laptop (mouse or trackpad), every paper shows a digit 0–9 in its
@@ -112,6 +141,12 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-06** — Slice 2 and Shred's keys approved. Owner chose slice
+  3: Find the Mole (live watching, dark), Budget Night (90 s, "can't just
+  sit there"), The Pigeon Run (hold to climb), then Stairwell (dark) and
+  the Ambassador's Table (rounds + tells) in a second merge. Part A built
+  (three agents in parallel), verified and merged.
 
 - **2026-10-06** — Owner approved the number explanations and the slower
   Bulletin. Then: trackpad players can't click Shred's papers fast enough;

@@ -258,7 +258,7 @@ export const SCENES = [
   // slice 3, part A (new screens, no desktop "before" picture)
   { name: 'mg-mole', primary: null, go: async (p) => { await practice(p, 'mole', 'play', '&freeze=6000'); } },
   { name: 'mg-budget', primary: null, go: async (p) => { await practice(p, 'budget', 'play', '&freeze=6000'); } },
-  { name: 'mg-pigeon', primary: null, go: async (p) => { await practice(p, 'pigeon', 'play', '&freeze=6000'); } },
+  { name: 'mg-pigeon', primary: null, go: async (p) => { await practice(p, 'pigeon', 'play', '&freeze=4200'); } },
   { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {
     await seed(p, 'preEnding'); await closeDemandPops(p);
