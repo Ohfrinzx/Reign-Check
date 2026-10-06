@@ -6,7 +6,7 @@ import * as B from '../minigames/breadlines';
 import * as W from '../minigames/weather';
 import * as SH from '../minigames/shred';
 import { isMinigameCard } from '../minigames';
-import { MG_CARD, DAILY_MINIGAMES, ACT_OPENER, eventMinigame } from '../content/minigames';
+import { MG_CARD, DAILY_MINIGAMES, ACT_OPENER, eventMinigame, eventMinigames } from '../content/minigames';
 import { PLOT_AT } from '../minigames';
 import type { GameState } from '../types';
 
@@ -318,6 +318,47 @@ describe('daily games and events (slice 2)', () => {
     expect(day.crisis?.id).toBe('bread');
     expect(day.todayDeck).toContain(MG_CARD.breadlines);
   });
+  it('slice 3 events: a hostile Sable Office or loud leaks → Find the Mole; debt or a Workers/Elites demand → Budget Night; the provinces pulling away → The Pigeon Run', () => {
+    const s = morning(5);
+    s.factions.sable.loyalty = 10;
+    expect(eventMinigame(s)).toBe(MG_CARD.mole);
+    s.factions.sable.loyalty = 50; s.hidden.leak = 62;
+    expect(eventMinigame(s)).toBe(MG_CARD.mole);
+    s.hidden.leak = 10; s.stats.treasury = -3;
+    expect(eventMinigame(s)).toBe(MG_CARD.budget);
+    s.stats.treasury = 30;
+    s.factions.combine.demand = { id: 'x', issuedDay: 4, dueDay: 6, severity: 'murmur', bribes: 0 };
+    expect(eventMinigame(s)).toBe(MG_CARD.budget);
+    s.factions.combine.demand = undefined; s.hidden.separatism = 50;
+    expect(eventMinigame(s)).toBe(MG_CARD.pigeon);
+    // most urgent first: the Ledger crisis beats everything else
+    s.stats.treasury = -3; s.factions.sable.loyalty = 10;
+    s.crisis = { id: 'ledger', stage: 1, cardId: 'x', startedDay: 4, nextDay: 6 };
+    expect(eventMinigames(s)).toEqual([MG_CARD.shred, MG_CARD.mole, MG_CARD.budget, MG_CARD.pigeon]);
+  });
+
+  it('an event never brings yesterday\'s game: the next event, or the usual draw, gets the day', () => {
+    const s = morning(5);
+    s.stats.treasury = -3; s.hidden.separatism = 55;
+    s.flags.mgDailyLast = DAILY_MINIGAMES.indexOf(MG_CARD.budget) + 1;
+    expect(eventMinigame(s)).toBe(MG_CARD.pigeon);
+    s.hidden.separatism = 10;
+    expect(eventMinigame(s)).toBeUndefined();
+    // a long debt: Budget Night every other day at most
+    let t = morning(5, 4242);
+    let prev = '';
+    for (let day = 5; day <= 11; day++) {
+      t.day = day; t.act = Math.ceil(day / 6); t.phase = 'night'; t.stats.treasury = -3;
+      const d = prepareDay(t);
+      const id = d.todayDeck.find(isMinigameCard);
+      if (id && id !== ACT_OPENER) {
+        if (prev === MG_CARD.budget) expect(id, `day ${day}`).not.toBe(MG_CARD.budget);
+        prev = id;
+      }
+      t = { ...d, phase: 'night' };
+    }
+  });
+
   it('every act opens with The Last Kilometre, first thing, instead of the daily game', () => {
     for (const day of [1, 7, 13]) {
       const s = prepareDay(morning(day, 31));
