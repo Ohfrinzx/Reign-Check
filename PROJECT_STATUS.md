@@ -6,25 +6,22 @@ one line per step. Full old handovers are in
 `docs/archive/SLICE_NOTES.md`. How the systems work today is in
 `docs/SYSTEMS.md`; the rules and workflow are in `AGENTS.md`.
 
-## Now (2026-10-05)
+## Now (2026-10-06)
 
-**THE NUMBERS EXPLAINED IN THE GAME — BUILT, WAITING FOR THE OWNER'S
-LOOK.** Owner: *"No where is it explained in my game what information
-means or what it effects … decisions will still show Information +15."*
-Owner chose: explain all eight hidden-but-shown numbers, on the result
-pills, in Brief me, and in the Grip/Legitimacy explanations.
-- Result pills now say which top number they move: "INFORMATION +7.0 →
-  GRIP". **What do these mean?** under the pills opens one plain line per
-  number (what it feeds, what it does high and low).
-- **Brief me** has a new section, "The numbers under the three": all ten.
-- The **night summary** uses the same names as the pills (INFORMATION,
-  not INFO; MILITARY, not ARMY) and says what Grip and Legitimacy are made
-  of. Tapping **Grip** or **Legitimacy** at the top lists their parts.
-- No game rules or numbers changed; no save reset (`SAVE_VERSION` 14).
-- **The 7pm Bulletin is slower to read** (owner: *"The 7pm bulletin time
-  runs to fast per story. Players don't have enough time to read the
-  story"*): each story now stays up 7 / 6.5 / 6 s by act (was 5 / 4.5 /
-  4), and its clock starts only after the story has slid in.
+**SHRED THE LEDGER NUMBER KEYS — BUILT, WAITING FOR THE OWNER'S
+PLAYTEST.** Owner: *"laptop users on trackpad can't seem to click the
+papers fast enough"*. Chosen: a number on each paper (owner: *"do numbers
+instead. single digits"*).
+- On a laptop (mouse or trackpad), every paper shows a digit 0–9 in its
+  corner. Press it instead of clicking: once to turn a face-down paper
+  over, again to shred. Clicking still works. No two papers on screen
+  share a number. Phones show no numbers and play as before.
+- The how-to screen says so. Same speeds, same papers; no save reset.
+
+**Approved 2026-10-06** (*"both have been playtested and approved"*): the
+ten numbers explained in the game (result pills "→ GRIP", "What do these
+mean?", Brief me, night summary, Grip/Legitimacy parts) and the slower
+7pm Bulletin (7 / 6.5 / 6 s per story, clock after the slide-in).
 
 **Mini-games slice 2** (below) is still waiting for the owner's playtest.
 
@@ -115,6 +112,11 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-06** — Owner approved the number explanations and the slower
+  Bulletin. Then: trackpad players can't click Shred's papers fast enough;
+  chose number keys on the papers (single digits). Built: 0–9 on each
+  paper on laptops, never two alike on screen.
 
 - **2026-10-05** — Owner: the Bulletin's stories go by too fast to read.
   Owner chose 7 / 6.5 / 6 s by act (was 5 / 4.5 / 4) and a clock that

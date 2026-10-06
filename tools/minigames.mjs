@@ -443,7 +443,46 @@ try {
     const id = await down.getAttribute('aria-label');
     await tapAt(down);
     assert.equal(await page.locator(`button.sh-paper.down[aria-label="${id}"]`).count(), 0, 'The first tap turns a face-down paper over');
+    assert.equal(await page.locator('.sh-key').count(), 0, 'A phone shows no number keys on the papers');
     await page.close();
+  }
+  {
+    // laptops (owner: trackpad players "can't click the papers fast enough"):
+    // every paper shows a number, no two alike; pressing it works like a tap,
+    // and a quick careful player wins with the keyboard alone (act 3)
+    const page = await browser.newPage({ viewport: { width: 1366, height: 700 } });
+    page.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(page, 'shred', 5, 3);
+    await page.waitForFunction(() => document.querySelectorAll('button.sh-paper').length >= 3, null, { timeout: 15000 });
+    const keys = await page.locator('button.sh-paper .sh-key').allInnerTexts();
+    assert.equal(keys.length, await page.locator('button.sh-paper').count(), 'Every paper shows a number');
+    assert.equal(new Set(keys).size, keys.length, `No two papers share a number: ${keys}`);
+    assert.ok(keys.every((k) => /^[0-9]$/.test(k)), `Single digits: ${keys}`);
+    // a face-down paper turns over when its number is pressed
+    const h = await page.waitForFunction(() => [...document.querySelectorAll('button.sh-paper.down')]
+      .find((b) => parseFloat(b.style.left) > 5 && parseFloat(b.style.left) < 50)?.querySelector('.sh-key')?.textContent, null, { timeout: 15000 });
+    const k = await h.jsonValue();
+    await page.keyboard.press(k);
+    assert.equal(await page.locator('button.sh-paper.down .sh-key', { hasText: new RegExp(`^${k}$`) }).count(), 0, 'Its number turns a face-down paper over');
+    await page.screenshot({ path: shotPath('MG-shred-keys-1366.png') });
+    await page.close();
+
+    const play = await browser.newPage({ viewport: { width: 1366, height: 700 } });
+    play.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(play, 'shred', 5, 3);
+    await play.evaluate(() => {
+      const t = setInterval(() => {
+        if (document.querySelector('.mg-end')) { clearInterval(t); return; }
+        const papers = [...document.querySelectorAll('button.sh-paper')]
+          .filter((b) => b.classList.contains('down') || b.querySelector('.ilvet:not(.void)'))
+          .sort((a, b) => parseFloat(b.style.left) - parseFloat(a.style.left));
+        const key = papers[0]?.querySelector('.sh-key')?.textContent;
+        if (key) window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+      }, 45);
+    });
+    await play.locator('.mg-end').waitFor({ timeout: 60000 });
+    assert.ok(await play.locator('.mg-end.won').count(), `A quick, careful keyboard player wins act 3: ${await play.locator('.mg-end').innerText()}`);
+    await play.close();
   }
   {
     // ...and a very quick, careful player wins: the paper nearest the box first,
@@ -480,4 +519,4 @@ try {
   await browser.close();
 }
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
-console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre (weather) walked to the steps by reading the dial, ◀ ▶ held on a phone; Shred (belts) won by a quick careful player, a clean paper jams, a face-down paper turns over; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');
+console.log('MINIGAMES: Bread Lines talk + police by tapping, a district calms, a baton spent; Last Kilometre (weather) walked to the steps by reading the dial, ◀ ▶ held on a phone; Shred (belts) won by a quick careful player, a clean paper jams, a face-down paper turns over, number keys on laptops (none on phones), act 3 won by keys alone; Hold the Palace won by tapping (desktop + phone) and lost by holding, keyboard orders; Bulletin won by keys, lost by carelessness, clock airs an untouched story, swipe spikes on a phone; daily game on day 2 of a real run, same game after reload, number keys ignored, Give up confirms and costs Legitimacy, day continues; the Army strike lost ends the run; Reduce Motion calm — all OK');

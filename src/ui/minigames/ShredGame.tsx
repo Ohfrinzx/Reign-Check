@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Paper, PaperKind, ShredSetup, ShredState } from '../../game/minigames/shred';
 import {
-  currentWave, isDirty, isFaceUp, LANES, onBelt, PAPER_W, paperX, shredScore, shredStart, shredTick, tapPaper,
+  currentWave, isDirty, isFaceUp, LANES, onBelt, PAPER_W, paperForKey, paperX, shredScore, shredStart, shredTick, tapPaper,
 } from '../../game/minigames/shred';
+import { useMedia } from '../useMedia';
 import type { MinigameEnd } from './MinigameScreen';
 import { useClock } from './useClock';
 
@@ -16,7 +17,14 @@ import { useClock } from './useClock';
  * out as ribbons; a clean one jams it (it shakes, a red light). Face-down
  * papers show a manila back with a "?" until you turn them over. The stamps
  * are drawn, not written: red square = shred.
+ *
+ * With a mouse or trackpad, each paper also shows a number (0–9): pressing
+ * it is the same as tapping the paper (owner, 2026-10-06: trackpad players
+ * "can't click the papers fast enough"). Phones show no numbers.
  */
+
+/** A mouse or trackpad is attached: show the number keys on the papers. */
+const FINE_POINTER = '(any-pointer: fine)';
 
 function Stamp({ kind }: { kind: PaperKind }) {
   switch (kind) {
@@ -86,6 +94,24 @@ export function ShredGame({ setup, reduced, paused, onEnd }: {
     setSt((s) => tapPaper(s, id, nowRef.current));
   };
 
+  // Number keys: the paper showing that number is tapped. A held key does
+  // not repeat (it would turn a paper over and shred it in one press).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (paused || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+      const digit = /^[0-9]$/.test(e.key) ? Number(e.key) : /^Numpad[0-9]$/.test(e.code) ? Number(e.code.slice(6)) : null;
+      if (digit === null) return;
+      e.preventDefault();
+      setSt((s) => {
+        const p = paperForKey(s, digit, nowRef.current);
+        return p ? tapPaper(s, p.id, nowRef.current) : s;
+      });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [paused]);
+  const showKeys = useMedia(FINE_POINTER);
+
   const belt = onBelt(st, now);
   const jammed = now < st.jamUntil;
   const mistakes = st.evidence + st.jams;
@@ -127,8 +153,9 @@ export function ShredGame({ setup, reduced, paused, onEnd }: {
                   // pointer-down, not click: a tap must never also land on the next paper
                   onPointerDown={(e) => { e.preventDefault(); tap(p.id); }}
                   onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(p.id); } }}
-                  aria-label={up ? `Paper ${p.id}` : `Face-down paper ${p.id}: tap to turn it over`}
+                  aria-label={up ? `Paper ${p.key}` : `Face-down paper ${p.key}: tap to turn it over`}
                 >
+                  {showKeys && <span className="sh-key" aria-hidden="true">{p.key}</span>}
                   {up ? (
                     <>
                       <span className="sh-lines" aria-hidden="true"><i /><i /><i /><i /></span>

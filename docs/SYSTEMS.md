@@ -10,7 +10,7 @@ what the code does now, not how it got there; the history lives in
 so fix this file.
 
 **Last checked against the code:** 2026-10-05 (the numbers explained in
-the game). At that point there were 201 unit tests, `SAVE_VERSION` 14, and
+the game). At that point there were 203 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -449,9 +449,18 @@ a clean build.
   82 / 61 / 42 / 2% (act 1), 76 / 50 / 15 / 0% (act 2), 68 / 30 / 0 / 0%
   (act 3). Every paper is still reachable and doing nothing always
   loses. Won: Legitimacy +5, scandal −10; lost: Legitimacy −5, scandal +8.
+  **Number keys (laptops):** with a mouse or trackpad (`any-pointer:
+  fine`), each paper shows a digit; pressing it is the same as tapping the
+  paper (owner, 2026-10-06: trackpad players "can't click the papers fast
+  enough"; chose single digits). Digits are handed out 1 → 9, 0 in turn
+  (`assignKeys()` in `shred.ts`), skipping any still on the belts plus
+  0.25 s, so no two papers on screen share one (up to 10 can be on the
+  belts at once, so all ten digits are used; a test checks 300 seeds per
+  act). No randomness, so layouts are unchanged. Held keys don't repeat.
+  Phones show no numbers.
 - **Input:** real-time games act on pointer-down (a tap never also lands
   as a click on whatever appears under the finger next); keys too (Bread
-  Lines 1–7 then T/P, the Kilometre ← → held, Shred Enter on a focused paper). The
+  Lines 1–7 then T/P, the Kilometre ← → held, Shred the number on a paper). The
   clock (`useClock`) stops while "Give up?" asks and never jumps more than
   100 ms a frame, so a locked phone pauses the game.
 - **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred`

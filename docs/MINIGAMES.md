@@ -68,6 +68,11 @@ After slice 1 (2026-10-01):
   harder game from scratch). 2026-10-04: act 1's 2× game became the top
   difficulty (act 3); acts 1–2 ramp up to it.
 
+- **2026-10-06:** trackpad players couldn't click Shred's papers fast
+  enough. Owner chose number keys on the papers (*"do numbers instead.
+  single digits"*) over one key per belt, a slower laptop speed, or a
+  redesign. Any new real-time tap game should get a keyboard way too.
+
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).
 

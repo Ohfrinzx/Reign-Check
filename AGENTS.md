@@ -67,13 +67,15 @@ anything else without asking.**
   much faster (act 3 is the 2× game; acts 1–2 ramp up to it).
 - **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
   remaining ending types.
-- **The ten numbers explained in the game (2026-10-05) — built, waiting
-  for the owner's look:** result pills say which top number they feed
-  ("→ GRIP") with a **What do these mean?** button; Brief me lists all ten;
-  the night summary and the Grip/Legitimacy explanations say what those
-  are made of. `docs/SYSTEMS.md` §2. Also: the 7pm Bulletin gives 7 / 6.5
-  / 6 s per story (was 5 / 4.5 / 4), counted after the slide-in.
-- `SAVE_VERSION` is **14**. Tests: **201**, all passing.
+- **Approved 2026-10-06:** the ten numbers explained in the game (result
+  pills "→ GRIP" + "What do these mean?", Brief me, night summary,
+  Grip/Legitimacy parts; `docs/SYSTEMS.md` §2) and the slower 7pm Bulletin
+  (7 / 6.5 / 6 s per story, counted after the slide-in).
+- **Shred the Ledger number keys — built, waiting for the owner's
+  playtest (2026-10-06):** on laptops every paper shows a digit 0–9;
+  pressing it = tapping the paper (trackpad players couldn't click fast
+  enough). Phones unchanged. `docs/SYSTEMS.md` §12.
+- `SAVE_VERSION` is **14**. Tests: **203**, all passing.
 
 ## 3. How work is done here
 
@@ -204,7 +206,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 201 tests: content integrity, 200 full
+npm test           # vitest, 203 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -227,7 +229,7 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `favours.mjs` | aimed favours, disabled-with-reason, receipt |
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
-| `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
+| `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press; Shred's number keys on a laptop, none on a phone, act 3 won by keys alone); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
 | `stat-guide.mjs` | the numbers explained: result pills say what they feed (→ GRIP), "What do these mean?" opens/closes, Brief me's ten cards, night summary names + note, the Grip tip's parts (desktop + phone) |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
 | `phone.mjs` | the phone layout: 28 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
