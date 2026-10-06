@@ -385,6 +385,10 @@ export interface CardOutcome {
   effects?: Effects;
   /** optional tone for the result panel */
   tone?: 'good' | 'bad' | 'mixed' | 'neutral';
+  /** marks this particular result leaves (on top of the option's own
+   *  `setBy` marks) — for results that depend on how a game went, e.g.
+   *  which factions walked out of Budget Night */
+  marks?: string[];
 }
 
 export interface CardOption {

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { BudgetEvent, BudgetSetup, BudgetState } from '../../game/minigames/budget';
 import {
-  announced, budgetClock, budgetMove, budgetScore, budgetStart, budgetTickTo, canPut, canTake, dangerJar, eventTarget, JAR_CAP, unspent,
+  announced, budgetClock, budgetMove, budgetScore, budgetStart, budgetTickTo, canPut, canTake, dangerJar, eventTarget, JAR_CAP, unspent, budgetFlags,
 } from '../../game/minigames/budget';
 import { DISPLAY_FACTIONS } from '../../game/display';
 import { useMedia } from '../useMedia';
@@ -84,6 +84,7 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
     const t = window.setTimeout(() => onEnd({
       won,
       score: budgetScore(st),
+      flags: budgetFlags(st),
       headline: won
         ? (gone.length === 0 ? 'The numbers added up at eight.' : 'One walk-out, but the budget passed.')
         : 'Two walk-outs. The budget fell apart.',
@@ -158,7 +159,7 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
         : short ? 'Take money out of a jar above its line, then put it where it is short.'
           : cutComing && u < cutComing.amount ? 'A cut is coming. Keep some money unspent, or Brask takes it from a jar.'
             : slips.some((e) => e.kind === 'up') ? 'A line is about to go up. Put the money in now.'
-              : surplus ? 'Money above a line does nothing. Take it back for later.'
+              : surplus ? 'Extra money pleases that faction at eight, but another jar may need it now.'
                 : 'Every line is met. Watch for Brask\'s next slip.';
 
   return (
@@ -257,7 +258,7 @@ export function BudgetGame({ setup, reduced, paused, onEnd }: {
                 <div className="bn-glass" ref={(el) => { glassRefs.current[i] = el; }}>
                   <div className="bn-fill" style={{ height: `${(Math.min(JAR_CAP, j.money) / JAR_CAP) * 100}%` }} />
                   {j.money > j.line && (
-                    // money above the line does nothing: hatched
+                    // money above the line: hatched (it pleases the faction at eight, nothing more)
                     <div className="bn-waste" aria-hidden="true" style={{ bottom: `${(j.line / JAR_CAP) * 100}%`, height: `${((Math.min(JAR_CAP, j.money) - j.line) / JAR_CAP) * 100}%` }} />
                   )}
                   <div className="bn-line" style={{ bottom: `${(Math.min(JAR_CAP, j.line) / JAR_CAP) * 100}%` }}>

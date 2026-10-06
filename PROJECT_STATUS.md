@@ -142,6 +142,12 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-10-06** — Owner: Budget Night's jars should matter after eight.
+  Chose: over the line → loyalty up (and remembered from $3B); short → a
+  small drop; walk-out → loyalty −5, remembered, and the faction comes for
+  its money — a demand, or repayment daily or later in full, with
+  interest. Built.
+
 - **2026-10-06** — Owner playtest of slice 3 part A: wants to choose what
   happens to the mole (chose all four: arrest, turn, fire quietly,
   expose; on the record) — built. Budget Night: *"I have yet to even make

@@ -10,7 +10,7 @@ what the code does now, not how it got there; the history lives in
 so fix this file.
 
 **Last checked against the code:** 2026-10-06 (mini-games slice 3
-part A). At that point there were 247 unit tests, `SAVE_VERSION` 14, and
+part A). At that point there were 252 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -536,6 +536,19 @@ a clean build.
   and the highlight holds still. Won: Legitimacy +5, stability +3, budget
   strain −8, Workers +2, every faction +0.5; lost: Legitimacy −4,
   stability −3, strain +5, Workers −4.
+  **The jars at eight** (owner, 2026-10-06; `budgetAftermath()` in
+  `content/mgBudget.ts`, fed by `budgetFlags()` → `bnDiff:<faction>`,
+  `bnOut:<faction>`; win or lose): each faction judges its own jar. **Over
+  its line:** loyalty +1 per $1B (up to +4); $3B+ over goes on the record
+  (`budget-generous-<f>`: mood up, its demands ×0.6). **Short at eight:**
+  −1 per $1B (down to −3). **Walked out:** loyalty −5, on the record
+  (`budget-walkout-<f>`: mood down, its demands ×1.5), and it comes for its
+  money, one of three ways (the run's RNG): a **demand** the next morning
+  ("… wants its budget back", $3B base, via `budget-claim-<f>` and
+  `TRIGGERED_DEMANDS`), **daily repayment** (shortfall × 1.25 over 5 days,
+  a standing cost), or **the full sum in four days** (shortfall × 1.4, a
+  scheduled cost). The result text lists every jar that moved. A card
+  result can now carry its own marks (`CardOutcome.marks`).
 - **The Pigeon Run** (`pigeon.ts`; a daylight sky over the Hadem hills;
   Army; slice 3). Drovna jams the radio, so the order to the border
   garrison goes by pigeon. **Hold to climb, let go to glide** (owner's
