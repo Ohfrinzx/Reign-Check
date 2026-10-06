@@ -15,7 +15,11 @@ import { BASE, closeDemandPops } from './scenes.mjs';
  *   4. The result goes on to the card's outcome; practice saves nothing. In
  *      a real run (the ledger shows too), every + and − is on screen
  *      without scrolling, on a laptop and on a phone.
- *   5. Reduce Motion: the calm version, a slower clock (×1.5), no flying notes.
+ *   5. Reduce Motion: the calm version, a slower clock (×1.5), no flying notes;
+ *      the jar in most danger keeps a solid red outline, no pulsing.
+ *   6. The jar in most danger (below its line, least patience) is highlighted,
+ *      with a red "!" — exactly one while any jar is short, none when every
+ *      line is met. Checked all evening on the laptop and the phone.
  * BUDGET_SHOTS=1 only takes the pictures (for looking at the design).
  */
 
@@ -36,6 +40,7 @@ async function openPractice(page, { seed = 7, act = 1, extra = '' } = {}) {
 const read = (page) => page.evaluate(() => {
   const jars = [...document.querySelectorAll('.bn-jar')].map((e) => ({
     money: +e.dataset.money, line: +e.dataset.line, patience: +e.dataset.patience, out: e.dataset.out === '1',
+    danger: e.classList.contains('danger'), alert: !!e.querySelector('.bn-alert'),
   }));
   const tray = document.querySelector('.bn-tray');
   const slips = [...document.querySelectorAll('.bn-slip[data-kind]')]
@@ -90,17 +95,39 @@ function nextMove(d, T) {
   return over.length ? { jar: over[0], dir: -1 } : null;
 }
 
-/** Play the evening by plan; `press(jar, dir)` makes one move. Returns the moves made. */
-async function playByPlan(page, press) {
+/**
+ * The jar in most danger is highlighted: exactly one while a jar is below its
+ * line, and it is a short one with the least patience (the page rounds the
+ * patience, so a tie may go either way); none when every line is met.
+ * Returns whether a highlight was shown.
+ */
+function checkDanger(d, where) {
+  const lit = d.jars.map((j, i) => i).filter((i) => d.jars[i].danger);
+  const short = d.jars.map((j, i) => i).filter((i) => !d.jars[i].out && d.jars[i].money < d.jars[i].line);
+  assert.ok(lit.length <= 1, `${where}: one highlighted jar at most (${lit})`);
+  if (!short.length) { assert.equal(lit.length, 0, `${where}: no highlight when every line is met`); return false; }
+  assert.equal(lit.length, 1, `${where}: a jar is short, so one is highlighted`);
+  const k = lit[0];
+  assert.ok(short.includes(k), `${where}: the highlighted jar is below its line`);
+  assert.ok(Math.min(...short.map((i) => d.jars[i].patience)) >= d.jars[k].patience - 1, `${where}: the highlighted jar has the least patience`);
+  assert.ok(d.jars[k].alert, `${where}: the highlighted jar shows the red "!"`);
+  assert.equal(d.jars.filter((j) => j.alert).length, 1, `${where}: one "!" only`);
+  return true;
+}
+
+/** Play the evening by plan; `press(jar, dir)` makes one move. Returns the moves made and how often a highlight was seen. */
+async function playByPlan(page, press, where) {
   const memo = {};
   let moves = 0;
+  let lit = 0;
   for (let i = 0; i < 6000; i++) {
     const d = await read(page);
     if (d.over || !d.jars.length) break;
+    if (checkDanger(d, where)) lit++;
     const mv = nextMove(d, plan(d, memo));
     if (mv) { await press(mv.jar, mv.dir); moves++; } else await page.waitForTimeout(80);
   }
-  return moves;
+  return { moves, lit };
 }
 
 try {
@@ -144,6 +171,8 @@ try {
       assert.equal(await desk.locator('.bn-jar').count(), 5, 'Five jars');
       assert.deepEqual(await desk.locator('.bn-key').allInnerTexts(), ['1', '2', '3', '4', '5'], 'A laptop shows keys 1–5 on the jars');
       assert.equal(await desk.locator('.bn-keys').count(), 1, 'A laptop shows the key hint');
+      // Brask's draft leaves one jar short: it is highlighted from the start
+      assert.ok(checkDanger(await read(desk), 'Laptop, 18:30'), 'The short jar is highlighted at 18:30');
       // a digit picks a jar; ↑ puts in exactly $1B, ↓ takes it back
       const d0 = await read(desk);
       const j = d0.jars.findIndex((x) => !x.out && x.money < 14);
@@ -158,10 +187,11 @@ try {
         assert.equal((await read(desk)).jars[j].money, d0.jars[j].money, 'One ↓ takes $1B back');
       }
       let sel = j;
-      const moves = await playByPlan(desk, async (jar, dir) => {
+      const { moves, lit } = await playByPlan(desk, async (jar, dir) => {
         if (jar !== sel) { await desk.keyboard.press(String(jar + 1)); sel = jar; }
         await desk.keyboard.press(dir === 1 ? 'ArrowUp' : 'ArrowDown');
-      });
+      }, 'Laptop');
+      assert.ok(lit > 0, 'Laptop: the highlight was seen during the evening');
       await desk.screenshot({ path: shotPath('BN-end-1366.png') });
       await desk.locator('.mg-end').waitFor();
       assert.ok(await desk.locator('.mg-end.won').count(), `A careful keyboard player wins: ${await desk.locator('.mg-end').innerText()}`);
@@ -177,11 +207,16 @@ try {
 
     const doNothing = (async () => {
       await openPractice(idle, { seed: 7, act: 1 });
+      await idle.waitForTimeout(4000);
+      assert.ok(checkDanger(await read(idle), 'Idle, 18:34'), 'The short jar is highlighted');
+      assert.notEqual(await idle.locator('.bn-jar.danger').evaluate((e) => getComputedStyle(e).animationName), 'none', 'The highlighted jar pulses');
+      assert.notEqual(await idle.locator('.bn-alert').evaluate((e) => getComputedStyle(e).animationName), 'none', 'The "!" bounces');
+      await idle.screenshot({ path: shotPath('BN-danger-1366.png') });
       await idle.locator('.bn-jar.out').first().waitFor({ timeout: 40000 });
       await idle.screenshot({ path: shotPath('BN-walkout-1366.png') });
       assert.ok(await idle.locator('.bn-jar.out .bn-stamp').count(), 'A faction that walks out gets the stamp');
       assert.ok(await idle.locator('.bn-jar.out .bn-btn:not([disabled])').count() === 0, 'A sealed jar takes no money');
-      await idle.locator('.mg-end').waitFor({ timeout: 60000 });
+      await idle.locator('.mg-end').waitFor({ timeout: 90000 });
       assert.ok(await idle.locator('.mg-end.lost').count(), 'Doing nothing loses');
       assert.match(await idle.locator('.mg-stamp').innerText(), /walk-out/i);
       assert.match(await idle.locator('.mg-end h2').innerText(), /Two walk-outs/);
@@ -204,10 +239,13 @@ try {
       await tapAt(btn(j, 1));
       assert.equal((await read(phone)).jars[j].money, d0.jars[j].money, 'One tap on + puts exactly $1B back');
       let shot = false;
-      await playByPlan(phone, async (jar, dir) => {
+      let dangerShot = false;
+      const { lit } = await playByPlan(phone, async (jar, dir) => {
+        if (!dangerShot && (await phone.locator('.bn-jar.danger').count())) { dangerShot = true; await phone.screenshot({ path: shotPath('BN-danger-390.png') }); }
         await tapAt(btn(jar, dir));
         if (!shot && (await read(phone)).t > 20000) { shot = true; await phone.screenshot({ path: shotPath('BN-play-390.png') }); }
-      });
+      }, 'Phone');
+      assert.ok(lit > 0, 'Phone: the highlight was seen during the evening');
       await phone.locator('.mg-end').waitFor();
       assert.ok(await phone.locator('.mg-end.won').count(), `A careful player wins by tapping: ${await phone.locator('.mg-end').innerText()}`);
     })();
@@ -262,6 +300,13 @@ try {
     await calm.keyboard.press(String(k + 1));
     await calm.keyboard.press('ArrowDown');
     assert.equal(await calm.locator('.bn-flyer').count(), 0, 'Reduce Motion: no flying notes');
+    const dc = await read(calm);
+    if (checkDanger(dc, 'Reduce Motion')) {
+      const look = await calm.locator('.bn-jar.danger').evaluate((e) => ({ anim: getComputedStyle(e).animationName, ring: getComputedStyle(e).boxShadow }));
+      assert.equal(look.anim, 'none', 'Reduce Motion: the highlighted jar does not pulse');
+      assert.match(look.ring, /inset/, 'Reduce Motion: the highlighted jar keeps a solid red outline');
+      assert.equal(await calm.locator('.bn-alert').evaluate((e) => getComputedStyle(e).animationName), 'none', 'Reduce Motion: the "!" stays still');
+    }
     await calm.screenshot({ path: shotPath('BN-calm-1366.png') });
     await calm.close();
   }
@@ -271,4 +316,4 @@ try {
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
 console.log(SHOTS_ONLY
   ? 'BUDGET: pictures taken'
-  : 'BUDGET: won by keyboard at 1366×700 (keys 1–5 shown, a digit selects, ↑/↓ = $1B), lost by doing nothing (walk-out stamp, sealed jar), won by real taps at 390×844 (one tap = $1B, no key badges), result → outcome, nothing saved; Reduce Motion calm, 1.5× slower clock, no flying notes — all OK');
+  : 'BUDGET: won by keyboard at 1366×700 (keys 1–5 shown, a digit selects, ↑/↓ = $1B), lost by doing nothing (walk-out stamp, sealed jar), won by real taps at 390×844 (one tap = $1B, no key badges), the jar in most danger highlighted all evening (one at a time, with its "!"), result → outcome, nothing saved; Reduce Motion calm, 1.5× slower clock, no flying notes, a still outline — all OK');

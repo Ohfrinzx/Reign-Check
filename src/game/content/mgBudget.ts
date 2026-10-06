@@ -76,6 +76,7 @@ export function budgetIntro(s: GameState): MinigameIntro {
       'Five jars, one per faction. The dashed line on each jar is the least that faction will accept. It turns red when the jar is below it.',
       'Tap + on a jar to put in $1B of the unspent money. Tap − to take $1B back out.',
       'A jar below its line loses patience (the bar above it). At its line or above, patience slowly comes back. Empty bar: that faction walks out, and its jar is sealed.',
+      'The jar in most danger flashes red, with a red ! on it. Look there first.',
       'Brask\'s slips warn you a few seconds ahead: a line goes up or down, or the whole budget shrinks or grows. A cut comes out of the unspent money first, then out of a jar.',
       'Sometimes the lines add up to more than you have. Choose who waits, and swap before anyone runs out. Money above a line does nothing.',
       'Reach eight o\'clock (90 seconds) with no more than one walk-out. On a laptop: keys 1–5 pick a jar, ↑ and ↓ move $1B.',
