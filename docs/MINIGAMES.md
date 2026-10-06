@@ -7,8 +7,10 @@
 
 **Slice 1 approved (2026-10-01):** the mini-game system, **Hold the
 Palace** (coups), **The 7pm Bulletin** and the opening title card.
-**Slice 2 built, waiting for the owner's playtest:** **Bread Lines**,
-**The Last Kilometre**, **Shred the Ledger**. How it works, with the
+**Slice 2 approved (2026-10-06):** **Bread Lines**, **The Last Kilometre**
+(Walk in the Weather), **Shred the Ledger** (with number keys on laptops).
+**Slice 3 part A in progress:** Find the Mole, Budget Night, The Pigeon
+Run (§2). How it works, with the
 numbers: `docs/SYSTEMS.md` §12.
 
 **Before the next slice:** ask the owner which games come next (the list
@@ -72,6 +74,21 @@ After slice 1 (2026-10-01):
   enough. Owner chose number keys on the papers (*"do numbers instead.
   single digits"*) over one key per belt, a slower laptop speed, or a
   redesign. Any new real-time tap game should get a keyboard way too.
+
+- **2026-10-06 — slice 2 and Shred's number keys approved** (*"good go
+  onto the next slice"*). **Slice 3 chosen:** five games, all in the daily
+  rotation and picked by their events, delivered in **two merges**:
+  - **Part A:** **#9 Find the Mole** (live watching: people walk a
+    ministry floor plan in real time, watch who meets the journalist's
+    contact, then name the mole; **dark**, a night security camera),
+    **#6 Budget Night** (**against the clock, 90 seconds**: *"plenty of
+    time but still can't just sit there"*; bright Finance Ministry desk),
+    **#12 The Pigeon Run** (**hold to climb**, let go to glide, past border
+    hawks; daylight sky).
+  - **Part B** (after the part A playtest): **#5 Who Was in the
+    Stairwell?** (calm logic puzzle; **dark**, a Sable Office archive) and
+    **#7 The Ambassador's Table** (5 rounds, an offer and a line each; his
+    face, glass and notes are the tells; calm, no timer).
 
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).

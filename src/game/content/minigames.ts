@@ -1,6 +1,10 @@
 import type { CardDef, CardOutcome, Effects, GameState } from '../types';
 import { FACTION_MOVES } from './demands';
 import { hasMark, becauseText } from '../consequences';
+import { characterWarnings } from '../characterEvents';
+import { MOLE_CARD, MOLE_CARD_ID, moleIntro } from './mgMole';
+import { BUDGET_CARD, BUDGET_CARD_ID, budgetIntro } from './mgBudget';
+import { PIGEON_CARD, PIGEON_CARD_ID, pigeonIntro } from './mgPigeon';
 
 /**
  * PHASE 5 — MINI-GAME CONTENT. The words and numbers of every mini-game:
@@ -23,11 +27,20 @@ export const MG_CARD = {
    *  earlier rhythm game it replaced, so saves still find the card) */
   kilometre: 'mg-parade',
   shred: 'mg-shred',
+  // slice 3, part A: each game's card and story are in its own file
+  // (content/mgMole.ts, mgBudget.ts, mgPigeon.ts)
+  mole: MOLE_CARD_ID,
+  budget: BUDGET_CARD_ID,
+  pigeon: PIGEON_CARD_ID,
 } as const;
 
 /** The games that can be today's daily one. A day never repeats yesterday's
  *  when there is more than one. */
-export const DAILY_MINIGAMES: string[] = [MG_CARD.bulletin, MG_CARD.breadlines, MG_CARD.shred];
+export const DAILY_MINIGAMES: string[] = [
+  MG_CARD.bulletin, MG_CARD.breadlines, MG_CARD.shred,
+  // slice 3, part A (owner: all in the daily rotation, and picked by events)
+  MG_CARD.mole, MG_CARD.budget, MG_CARD.pigeon,
+];
 
 /** Played first thing on the first day of every act (owner: "like it's a
  *  new year"), getting harder each act. Replaces that day's daily game. */
@@ -35,14 +48,30 @@ export const ACT_OPENER = MG_CARD.kilometre;
 
 /**
  * Events steer the daily game (owner: "certain events should trigger
- * specific mini games"): the Bread Riots, or a hostile Street, bring Bread
- * Lines; the Free Zone Ledger crisis brings Shred the Ledger. Returns the
- * card id to play today, if an event calls for one.
+ * specific mini games"), most urgent first:
+ *   - the Free Zone Ledger crisis → Shred the Ledger;
+ *   - the Bread Riots, or a hostile Street → Bread Lines;
+ *   - a hostile Sable Office, a character about to turn on you, or papers
+ *     being quoted in the press (leaks 62+) → Find the Mole;
+ *   - debt, or a Workers or Elites demand on the desk → Budget Night;
+ *   - the provinces pulling away (separatism 50+) → The Pigeon Run.
  */
+export function eventMinigames(s: GameState): string[] {
+  const out: string[] = [];
+  if (s.crisis?.id === 'ledger') out.push(MG_CARD.shred);
+  if (s.crisis?.id === 'bread' || s.factions.chorus.loyalty < 20) out.push(MG_CARD.breadlines);
+  if (s.factions.sable.loyalty < 20 || s.hidden.leak >= 62 || characterWarnings(s).some((w) => w.turning)) out.push(MG_CARD.mole);
+  if (s.stats.treasury < 0 || s.factions.combine.demand || s.factions.concord.demand) out.push(MG_CARD.budget);
+  if (s.hidden.separatism >= 50) out.push(MG_CARD.pigeon);
+  return out;
+}
+
+/** The card id an event calls for today, if any. Never yesterday's game:
+ *  a long debt or a long crisis would otherwise bring the same game every
+ *  day, so the next event (or the usual draw) gets the day instead. */
 export function eventMinigame(s: GameState): string | undefined {
-  if (s.crisis?.id === 'ledger') return MG_CARD.shred;
-  if (s.crisis?.id === 'bread' || s.factions.chorus.loyalty < 20) return MG_CARD.breadlines;
-  return undefined;
+  const yesterday = DAILY_MINIGAMES[(s.flags.mgDailyLast ?? 0) - 1];
+  return eventMinigames(s).find((id) => id !== yesterday);
 }
 
 /** How well it went, 0..100 (set by engine.ts finishMinigame()); undefined in simulations. */
@@ -334,6 +363,9 @@ export const MINIGAME_CARDS: CardDef[] = [
       },
     ],
   },
+  MOLE_CARD,
+  BUDGET_CARD,
+  PIGEON_CARD,
 ];
 
 /* ---------------------------------------- the story that opens each game */
@@ -355,6 +387,9 @@ export interface MinigameIntro {
 }
 
 export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: number; spikeNote?: string; stories?: number }): MinigameIntro {
+  if (cardId === MG_CARD.mole) return moleIntro(s);
+  if (cardId === MG_CARD.budget) return budgetIntro(s);
+  if (cardId === MG_CARD.pigeon) return pigeonIntro(s);
   if (cardId === MG_CARD.breadlines) {
     const crisis = s.crisis?.id === 'bread';
     return {

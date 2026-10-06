@@ -283,23 +283,25 @@ describe('daily games and events (slice 2)', () => {
     return s;
   };
 
-  it('all four daily games come up, and never the same one two days running', () => {
+  it('every daily game comes up (over a few runs), and never the same one two days running', () => {
     const seen = new Set<string>();
-    let s = morning(2, 77);
-    let yesterday = '';
-    for (let day = 2; day <= 17; day++) {
-      s.day = day; s.phase = 'night';
-      const t = prepareDay(s);
-      const id = t.todayDeck.find(isMinigameCard)!;
-      expect(id).toBeTruthy();
-      expect(id).not.toBe(yesterday);
-      seen.add(id); yesterday = id;
-      s = { ...t, phase: 'night' };
-      for (const f of Object.values(s.factions)) { f.patience = 70; f.loyalty = 50; }
-      for (const k of Object.keys(s.hidden) as (keyof GameState['hidden'])[]) s.hidden[k] = 10;
-      s.crisis = undefined;
+    for (const seed of [77, 78, 79, 80]) {
+      let s = morning(2, seed);
+      let yesterday = '';
+      for (let day = 2; day <= 17; day++) {
+        s.day = day; s.phase = 'night';
+        const t = prepareDay(s);
+        const id = t.todayDeck.find(isMinigameCard)!;
+        expect(id).toBeTruthy();
+        expect(id).not.toBe(yesterday);
+        seen.add(id); yesterday = id;
+        s = { ...t, phase: 'night' };
+        for (const f of Object.values(s.factions)) { f.patience = 70; f.loyalty = 50; }
+        for (const k of Object.keys(s.hidden) as (keyof GameState['hidden'])[]) s.hidden[k] = 10;
+        s.crisis = undefined;
+      }
     }
-    for (const id of DAILY_MINIGAMES) expect(seen.has(id)).toBe(true);
+    for (const id of DAILY_MINIGAMES) expect(seen.has(id), id).toBe(true);
   });
 
   it('events pick the game: the Bread Riots or a hostile Street → Bread Lines; the Ledger crisis → Shred', () => {

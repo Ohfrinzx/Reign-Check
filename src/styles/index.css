@@ -2473,3 +2473,28 @@ abbr.term{
   .bl-map{aspect-ratio:1/1.2}
   .sh-desk{aspect-ratio:1/0.9}
 }
+
+/* =========================================================================
+   MINI-GAMES SLICE 3, PART A — one block per game. Each game's look, its
+   title card (.mg-veil-<key>), its Reduce Motion calm version (.mg-calm)
+   and its phone rules live inside its own block.
+   ========================================================================= */
+
+/* ---- FIND THE MOLE (.mg-mole): a night security camera, dark (owner's
+   choice). BEGIN MOLE */
+.mole-placeholder{padding:40px;text-align:center}
+/* END MOLE ---- */
+
+/* (spacer: the three blocks are kept apart on purpose) */
+
+/* ---- BUDGET NIGHT (.mg-budget): a bright Finance Ministry desk.
+   BEGIN BUDGET */
+.budget-placeholder{padding:40px;text-align:center}
+/* END BUDGET ---- */
+
+/* (spacer: the three blocks are kept apart on purpose) */
+
+/* ---- THE PIGEON RUN (.mg-pigeon): a daylight sky over the Hadem hills.
+   BEGIN PIGEON */
+.pigeon-placeholder{padding:40px;text-align:center}
+/* END PIGEON ---- */

@@ -451,7 +451,11 @@ export type MinigameKey =
   | 'bulletin'
   | 'breadlines'
   | 'weather'
-  | 'shred';
+  | 'shred'
+  // slice 3, part A
+  | 'mole'
+  | 'budget'
+  | 'pigeon';
 
 /* ----------------------------------------------------------------- alerts */
 
