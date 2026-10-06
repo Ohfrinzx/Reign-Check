@@ -189,7 +189,10 @@ describe('mini-games in the run', () => {
   it('content: every mini-game card has exactly `won` and `lost`, a key, and is never drawn at random', () => {
     for (const c of MINIGAME_CARDS) {
       expect(c.minigame, c.id).toBeTruthy();
-      expect(c.options.map((o) => o.id).sort()).toEqual(['lost', 'won']);
+      // `won` and `lost`; Find the Mole adds what you do with the mole (its own choices)
+      const ids = c.options.map((o) => o.id);
+      expect(ids).toContain('won'); expect(ids).toContain('lost');
+      if (c.id !== MG_CARD.mole) expect(ids.sort()).toEqual(['lost', 'won']);
       expect(c.base).toBe(0);
       expect(isMinigameCard(c.id)).toBe(true);
       expect(lookupCard(c.id)).toBe(c);

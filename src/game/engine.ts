@@ -24,6 +24,7 @@ import { spendFavour } from './favours';
 import { shownOptions, marksSetBy, becauseText, hasMark, markFlag, tickFactionMemory } from './consequences';
 import { CRISIS_CARDS } from './content/crises';
 import { MINIGAME_CARDS } from './content/minigames';
+import { MOLE_FOLLOWUPS } from './content/mgMole';
 import { placeDailyMinigame, tickMinigames, SCORE_FLAG } from './minigames';
 import { forcedEnding } from './content/endings';
 import type { ShopItemDef } from './content/shop';
@@ -35,13 +36,14 @@ import {
 
 /* ------------------------------------------------------------- registries */
 
-const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS, ...CRISIS_CARDS, ...MINIGAME_CARDS];
+const ALL_CARDS: CardDef[] = [...CARDS, ...CARDS2, ...CARDS3, ...FOLLOWUPS, ...MOLE_FOLLOWUPS, ...MANDATE_CARDS, ...CHARACTER_EVENT_CARDS, ...CRISIS_CARDS, ...MINIGAME_CARDS];
 export const ALL_CARD_MAP: Record<string, CardDef> = {
   ...CARD_MAP,
   ...Object.fromEntries(MANDATE_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CARDS2.map((c) => [c.id, c])),
   ...Object.fromEntries(CARDS3.map((c) => [c.id, c])),
   ...Object.fromEntries(FOLLOWUPS.map((c) => [c.id, c])),
+  ...Object.fromEntries(MOLE_FOLLOWUPS.map((c) => [c.id, c])),
   ...Object.fromEntries(CHARACTER_EVENT_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(CRISIS_CARDS.map((c) => [c.id, c])),
   ...Object.fromEntries(MINIGAME_CARDS.map((c) => [c.id, c])),
@@ -590,14 +592,24 @@ function rollAlert(s: GameState, rng: Rng): AlertDef | undefined {
  * result text) and resolves the card with its `won` or `lost` option, so the
  * result goes through chooseOption() and applyEffects() like any decision.
  */
-export function finishMinigame(prev: GameState, won: boolean, score?: number): GameState {
+export function finishMinigame(
+  prev: GameState, won: boolean, score?: number,
+  /** a won game can end in a choice the player made (Find the Mole: what
+   *  happens to the mole); it must be one of the card's other options */
+  choice?: string,
+  /** small facts from the game the result text uses (e.g. which job the mole had) */
+  flags?: Record<string, number>,
+): GameState {
   const def = prev.current ? lookupCard(prev.current.cardId) : undefined;
   if (prev.phase !== 'stage' || !def?.minigame) return prev;
   const s = clone(prev);
-  if (score !== undefined) {
-    withRng(s, (rng) => applyEffects(s, { flags: { [SCORE_FLAG]: Math.round(score) } }, rng, `minigame:${def.id}`));
+  const set: Record<string, number> = { ...(flags ?? {}) };
+  if (score !== undefined) set[SCORE_FLAG] = Math.round(score);
+  if (Object.keys(set).length) {
+    withRng(s, (rng) => applyEffects(s, { flags: set }, rng, `minigame:${def.id}`));
   }
-  return chooseOption(s, won ? 'won' : 'lost');
+  const picked = won && choice && choice !== 'lost' && def.options.some((o) => o.id === choice) ? choice : undefined;
+  return chooseOption(s, picked ?? (won ? 'won' : 'lost'));
 }
 
 /** Continue after a normal decision: maybe an interruption, otherwise the next stage. */

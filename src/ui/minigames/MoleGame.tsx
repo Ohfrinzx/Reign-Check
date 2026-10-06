@@ -3,8 +3,9 @@ import type { CSSProperties } from 'react';
 import type { MoleSetup, MoleState, Pt, RoomId } from '../../game/minigames/mole';
 import {
   CORRIDOR, DOOR_W, LINEUP_MS, ROOMS, STEP_MS, blackedOut, cctvClock, contactAt, cuesAt, lineupSecondsLeft, moleScore,
-  moleStart, moleTick, nameMole, pickSuspect, posAt, roomById, staffForKey, toggleMark, areaAt,
+  moleStart, moleTick, nameMole, pickSuspect, posAt, roomById, staffForKey, toggleMark, areaAt, STAFF,
 } from '../../game/minigames/mole';
+import { MOLE_CHOICES, MOLE_JOB_FLAG } from '../../game/content/mgMole';
 import { useMedia } from '../useMedia';
 import type { MinigameEnd } from './MinigameScreen';
 import { useClock } from './useClock';
@@ -95,6 +96,8 @@ export function MoleGame({ setup, reduced, paused, onEnd }: {
   const clock = useClock(!paused && !st.over);
   const now = reduced ? clock / CALM : clock;
   const ended = useRef(false);
+  // after a right name: what happens to the mole (owner, 2026-10-06)
+  const [fate, setFate] = useState<string | null>(null);
   const heading = useRef<Record<string, number>>({});
   const showKeys = useMedia(FINE_POINTER);
   const tall = useMedia(TALL);
@@ -114,25 +117,44 @@ export function MoleGame({ setup, reduced, paused, onEnd }: {
   // the end: show who it was for a moment, then hand the result up
   useEffect(() => {
     if (!st.over || ended.current) return;
-    ended.current = true;
     const won = st.over === 'won';
+    if (won && !fate) return; // waiting for the player to choose
+    ended.current = true;
+    const chosen = MOLE_CHOICES.find((c) => c.id === fate);
     const job = (id?: string) => setup.staff.find((p) => p.id === id)?.job ?? '';
     const env = setup.cues.find((c) => c.kind === 'envelope')!;
     const where = `in the ${roomById(env.room).name.toLowerCase()} at ${cctvClock(env.at)}`;
     const t = window.setTimeout(() => onEnd({
       won,
       score: moleScore(st),
+      choice: won ? fate ?? undefined : undefined,
+      flags: { [MOLE_JOB_FLAG]: STAFF.findIndex((x) => x.id === setup.mole) + 1 },
       headline: won
-        ? `You named the mole: the ${job(st.named)}.`
+        ? `You named the mole: the ${job(st.named)}. ${chosen ? `${chosen.label}.` : ''}`.trim()
         : st.named ? `Wrong desk. It was the ${job(setup.mole)}.` : 'No name. The mole went home.',
       detail: won
         ? `The ${job(setup.mole)} handed the contact an envelope ${where}.`
         : st.named
           ? `You named the ${job(st.named)}. The ${job(setup.mole)} handed over an envelope ${where}.`
           : `It was the ${job(setup.mole)}. The envelope changed hands ${where}.`,
-    }), reduced ? 900 : 1800);
+    }), won ? 350 : reduced ? 900 : 1800);
     return () => window.clearTimeout(t);
-  }, [st, setup, onEnd, reduced]);
+  }, [st, setup, onEnd, reduced, fate]);
+
+  // the choice: buttons, or 1–4 on a keyboard
+  const choosing = st.over === 'won' && !fate;
+  useEffect(() => {
+    if (!choosing || paused) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+      const n = /^[1-4]$/.test(e.key) ? Number(e.key) : /^Numpad[1-4]$/.test(e.code) ? Number(e.code.slice(6)) : 0;
+      if (!n) return;
+      e.preventDefault();
+      setFate(MOLE_CHOICES[n - 1].id);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [choosing, paused]);
 
   const watching = st.phase === 'watch';
   const lineup = st.phase !== 'watch' && (st.over || now >= setup.watchMs + SWITCH_OFF_MS);
@@ -390,6 +412,29 @@ export function MoleGame({ setup, reduced, paused, onEnd }: {
               })}
             </div>
           </div>
+          {choosing ? (
+            <div className="mo-fate" role="group" aria-label={`What happens to the ${job(setup.mole)}?`}>
+              <div className="mo-fate-q">What happens to the {job(setup.mole)}?</div>
+              <div className="mo-fate-opts">
+                {MOLE_CHOICES.map((c, i) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className={`mo-fate-btn ${c.id}`}
+                    disabled={paused}
+                    data-choice={c.id}
+                    onClick={() => setFate(c.id)}
+                  >
+                    <span className="mo-fate-l">
+                      {showKeys && <span className="mo-key" aria-hidden="true">{i + 1}</span>}
+                      {c.label}
+                    </span>
+                    <span className="mo-fate-h">{c.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
           <div className="mo-lu-foot">
             <span className="mo-lu-help">{showKeys ? 'Press a number to pick, Enter to name.' : 'Tap a person, then name them.'}</span>
             <button
@@ -401,6 +446,7 @@ export function MoleGame({ setup, reduced, paused, onEnd }: {
               {st.picked ? `Name the ${job(st.picked)}` : 'Name the mole'}
             </button>
           </div>
+          )}
         </section>
       )}
     </div>

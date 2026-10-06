@@ -2831,6 +2831,33 @@ abbr.term{
 .mo-lu-foot{display:flex;align-items:center;justify-content:flex-end;gap:14px}
 .mo-lu-help{flex:1;font-family:var(--sans);font-size:12.5px;color:var(--ink-soft)}
 .mo-name{min-height:48px;padding:10px 24px;font-size:13px}
+/* after a right name: what happens to the mole (four choices, each remembered) */
+.mo-fate{display:flex;flex-direction:column;gap:10px;animation:moFateIn .35s ease-out both}
+@keyframes moFateIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.mo-fate-q{font-family:var(--black);font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#73e39a}
+.mo-fate-opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.mo-fate-btn{
+  display:flex;flex-direction:column;gap:6px;text-align:left;min-height:88px;padding:12px 14px;cursor:pointer;
+  background:var(--paper-2);color:var(--ink);border:1.5px solid rgba(115,227,154,.35);border-radius:6px;
+  transition:border-color .15s, background .15s, transform .12s;
+}
+.mo-fate-btn:hover:not(:disabled),.mo-fate-btn:focus-visible{border-color:#73e39a;background:var(--paper-3);outline:none}
+.mo-fate-btn:active:not(:disabled){transform:scale(.98)}
+.mo-fate-l{display:flex;align-items:center;gap:8px;font-family:var(--black);font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.mo-fate-h{font-family:var(--sans);font-size:12.5px;line-height:1.4;color:var(--ink-soft)}
+.mo-fate .mo-key{position:static;transform:none;margin:0;flex:none}
+.mo-fate-btn.won .mo-fate-l{color:#f2c14b}
+.mo-fate-btn.turn .mo-fate-l{color:#73e39a}
+.mo-fate-btn.expose .mo-fate-l{color:#ff7a6c}
+.mg-calm .mo-fate{animation:none}
+@media (max-width:1080px){
+  .mo-fate-opts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mo-fate-btn{min-height:84px}
+}
+@media (max-width:420px){
+  .mo-fate-btn{padding:10px 11px}
+  .mo-fate-h{font-size:12px}
+}
 
 /* ---- Reduce Motion: no flicker, no rolling band, no sway, still static */
 .mg-calm .mg-veil-mole{animation:fadeIn .3s both}

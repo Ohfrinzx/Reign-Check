@@ -193,10 +193,10 @@ export default function App() {
   }, []);
 
   /* ---- Phase 5: a mini-game ended; its result resolves the card */
-  const doFinishMinigame = useCallback((won: boolean, score: number) => {
+  const doFinishMinigame = useCallback((won: boolean, score: number, choice?: string, flags?: Record<string, number>) => {
     setGame((g) => {
       if (!g) return g;
-      const next = finishMinigame(g, won, score);
+      const next = finishMinigame(g, won, score, choice, flags);
       setFlash(next.lastOutcome?.deltas ?? {});
       return next;
     });
@@ -342,7 +342,7 @@ export default function App() {
           s={practice}
           card={pc}
           practice
-          onFinish={(won, score) => setPractice((p) => (p ? finishMinigame(p, won, score) : p))}
+          onFinish={(won, score, choice, flags) => setPractice((p) => (p ? finishMinigame(p, won, score, choice, flags) : p))}
           onContinue={leave}
           continueLabel="Back to the title →"
         />
