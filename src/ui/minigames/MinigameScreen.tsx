@@ -7,6 +7,10 @@ import { palaceDifficulty, palaceSetup, GATES } from '../../game/minigames/palac
 import { breadDifficulty, breadSetup } from '../../game/minigames/breadlines';
 import { weatherDifficulty, weatherSetup } from '../../game/minigames/weather';
 import { shredDifficulty, shredSetup } from '../../game/minigames/shred';
+import { moleDifficulty, moleSetup } from '../../game/minigames/mole';
+import { budgetDifficulty, budgetSetup } from '../../game/minigames/budget';
+import { pigeonDifficulty, pigeonSetup } from '../../game/minigames/pigeon';
+import { pigeonChampion } from '../../game/content/mgPigeon';
 import { hasMark } from '../../game/consequences';
 import { Ledger } from '../components/Ledger';
 import { OutcomeView } from '../components/CardView';
@@ -16,6 +20,9 @@ import { BulletinGame } from './BulletinGame';
 import { BreadLinesGame } from './BreadLinesGame';
 import { WeatherGame } from './WeatherGame';
 import { ShredGame } from './ShredGame';
+import { MoleGame } from './MoleGame';
+import { BudgetGame } from './BudgetGame';
+import { PigeonGame } from './PigeonGame';
 
 /** Per game: the start button, what giving up says, and the result stamps. */
 const WORDS: Record<string, { go: string; quit: string; won: string; lost: string }> = {
@@ -24,6 +31,9 @@ const WORDS: Record<string, { go: string; quit: string; won: string; lost: strin
   breadlines: { go: 'Send the teams →', quit: 'You left the city to it', won: 'The city held', lost: 'Sarnica burns' },
   weather: { go: 'Start walking →', quit: 'You got back in the car', won: 'Dry at the steps', lost: 'Soaked through' },
   shred: { go: 'Start shredding →', quit: 'You opened the door', won: 'Nothing found', lost: 'Caught' },
+  mole: { go: 'Watch the cameras →', quit: 'You switched off the cameras', won: 'Mole found', lost: 'Wrong desk' },
+  budget: { go: 'Open the budget →', quit: 'You left Brask to it', won: 'Budget passed', lost: 'Walk-out' },
+  pigeon: { go: 'Release the pigeon →', quit: 'You called the bird back', won: 'Message delivered', lost: 'Brought down' },
 };
 
 /**
@@ -93,6 +103,11 @@ export function MinigameScreen({
     ? { setup: weatherSetup(seed, weatherDifficulty(s.act, s.hidden.scandal)), dryBonus: hasMark(s, 'walked-dovra') ? 4 : 0 }
     : null), [key, s, seed]);
   const shred = useMemo(() => (key === 'shred' ? shredSetup(seed, shredDifficulty(s.act)) : null), [key, s.act, seed]);
+  const mole = useMemo(() => (key === 'mole' ? moleSetup(seed, moleDifficulty(s.act)) : null), [key, s.act, seed]);
+  const budget = useMemo(() => (key === 'budget' ? budgetSetup(seed, budgetDifficulty(s.act)) : null), [key, s.act, seed]);
+  // the Pigeon Federation lends its champion to a Chair who helped it
+  const champion = pigeonChampion(s);
+  const pigeon = useMemo(() => (key === 'pigeon' ? pigeonSetup(seed, pigeonDifficulty(s.act, champion)) : null), [key, s.act, seed, champion]);
   const words = WORDS[key];
 
   const intro = minigameIntro(s, card.id, bulletin
@@ -210,6 +225,9 @@ export function MinigameScreen({
           {bread && <BreadLinesGame setup={bread} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {weather && <WeatherGame setup={weather.setup} dryBonus={weather.dryBonus} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {shred && <ShredGame setup={shred} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {mole && <MoleGame setup={mole} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {budget && <BudgetGame setup={budget} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {pigeon && <PigeonGame setup={pigeon} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
         </main>
       ) : (
         <>

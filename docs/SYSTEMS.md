@@ -9,8 +9,8 @@ what the code does now, not how it got there; the history lives in
 `docs/archive/`. If a number here disagrees with the code, the code wins,
 so fix this file.
 
-**Last checked against the code:** 2026-10-05 (the numbers explained in
-the game). At that point there were 203 unit tests, `SAVE_VERSION` 14, and
+**Last checked against the code:** 2026-10-06 (mini-games slice 3
+part A). At that point there were 240 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -331,9 +331,10 @@ a clean build.
 
 ## 12. Mini-games (Phase 5)
 
-- **Where:** rules in `src/game/minigames/` (`palace.ts`, `bulletin.ts`;
-  when they appear in `index.ts`); words and results in
-  `content/minigames.ts`; screens in `src/ui/minigames/`.
+- **Where:** rules in `src/game/minigames/` (one file per game; when
+  they appear in `index.ts`); words and results in `content/minigames.ts`
+  (slice 3's games each have their own file: `content/mgMole.ts`,
+  `mgBudget.ts`, `mgPigeon.ts`); screens in `src/ui/minigames/`.
 - **A mini-game is a card** with a `minigame` key and two options, `won`
   and `lost`. The player never sees them as buttons: the full-screen game
   picks one when it ends (`engine.ts finishMinigame()`, which also stores
@@ -358,13 +359,19 @@ a clean build.
   mark (the factions remember them, §8).
 - **When they appear:**
   - **Daily:** from day 2 (`DAILY_FROM_DAY`), one drawn card is replaced by
-    a daily game (`DAILY_MINIGAMES`: the Bulletin, Bread Lines, Shred the
-    Ledger), at a random point in the day; never a
-    queued card and never yesterday's game. Never on an act's first day
-    (that day opens with The Last Kilometre). Picked by a hash of seed and
-    day, not the run's RNG. **Events pick the game** (`eventMinigame()`):
-    the Bread Riots or a hostile Street → Bread Lines; the Free Zone
-    Ledger crisis → Shred the Ledger.
+    a daily game (`DAILY_MINIGAMES`, six: the Bulletin, Bread Lines,
+    Shred the Ledger, Find the Mole, Budget Night, The Pigeon Run), at a
+    random point in the day; never a queued card and never yesterday's
+    game. Never on an act's first day (that day opens with The Last
+    Kilometre). Picked by a hash of seed and day, not the run's RNG.
+    **Events pick the game** (`eventMinigames()`, most urgent first):
+    the Free Zone Ledger crisis → Shred the Ledger; the Bread Riots or a
+    hostile Street → Bread Lines; a hostile Sable Office, a character
+    about to turn on you, or leaks at 62+ → Find the Mole; debt or a
+    Workers/Elites demand → Budget Night; separatism 50+ → The Pigeon Run.
+    **An event never brings yesterday's game** (`eventMinigame()`): the
+    next event, or the usual draw, gets the day, so a long debt brings
+    Budget Night at most every other day.
   - **An officers' plot:** from day 3, when hidden coup pressure reaches
     `PLOT_AT` (52, the front page's "The army is talking"), Hold the
     Palace comes that morning, **once per act**. Losing is a heavy hit,
@@ -463,7 +470,73 @@ a clean build.
   Lines 1–7 then T/P, the Kilometre ← → held, Shred the number on a paper). The
   clock (`useClock`) stops while "Give up?" asks and never jumps more than
   100 ms a frame, so a locked phone pauses the game.
-- **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred`
+- **Find the Mole** (`mole.ts`; dark, a night security camera; Security;
+  slice 3). A floor plan of the Interior Ministry's night floor: six
+  rooms off a corridor, lift at one end, stairs at the other. The contact
+  (grey coat, amber box) comes up in the lift, visits 4–5 rooms over about
+  42 s (36–52), and leaves. **The real meeting:** the mole is alone with
+  the contact in a room and a white envelope changes hands. **Decoys:**
+  people passing in the corridor, groups of 2–3, and lingerers alone with
+  the contact as long as the mole (from act 2 they may hand over a coffee
+  — not a clue). **Camera blackouts** (act 2+) cover a room with static;
+  never the envelope, never more than 40% of the meeting. Tap a person
+  (or their name in the staff list) to mark a suspect; on laptops each
+  person shows a number. Then a **line-up** (20 s; 30 with Reduce Motion):
+  pick one, confirm "Name the …". Wrong name or none loses. By act
+  1 / 2 / 3: staff 5 / 6 / 8; walking speed 22 / 25 / 28; real meetings
+  2 / 1 / 1; alone together 3.8 / 3.2 / 2.6 s; envelope on screen 1.5
+  (big, ringed) / 0.9 / 0.8 s; lingerers 1 / 1 / 2; blackouts 0 / 2 / 3.
+  Simulated watchers (attentive / average / distracted): 99 / 94 / 87%
+  (act 1), 96 / 89 / 70% (act 2), 80 / 57 / 34% (act 3); a random guess
+  ~1 in N; doing nothing always loses. Won: Legitimacy +5, Security +4,
+  leaks −10, Sable +2, every faction +0.5; lost: Legitimacy −4, Security
+  −3, leaks +6, Sable −4.
+- **Budget Night** (`budget.ts`; bright, a Finance Ministry desk; Workers;
+  slice 3). Owner: 90 seconds, *"plenty of time but still can't just sit
+  there"*. Five jars (Army, Security, Elites, Workers, Street) and a $30B
+  pot; each jar has a line (the least it accepts; a jar holds up to
+  $14B). + / − move $1B between the unspent money and a jar (laptops: 1–5
+  pick a jar, ↑ ↓ move). Below its line a jar's patience drains; at or
+  above, it slowly recovers; at 0 the faction **walks out** and its jar is
+  sealed with its money in it. One walk-out allowed; the second loses;
+  20:00 wins. Brask's first draft leaves one jar $2–3B short, so you act
+  from second 0. **Events** on a seeded schedule, each on a slip a few
+  seconds ahead: a line moves, a **cut** (from the unspent money first,
+  then money above a line, then the fullest jar), or more money.
+  **Squeezes:** at set points the lines add up to more than the pot, so
+  someone must wait. Every evening is checked at layout: an expert must
+  win it and doing nothing must lose it (else it is laid out again from
+  the same seed). By act 1 / 2 / 3: event gap 8–10.5 / 7–9 / 6–8 s;
+  warning 4 / 3.5 / 3 s; drain 12 / 13.5 / 14 a second; squeezes 2 / 3 /
+  2 (longer in act 3). Simulated (attentive / average / slow): 100 / 87 /
+  49% (act 1), 98 / 46 / 18% (act 2), 85 / 33 / 10% (act 3); idle 0%.
+  Reduce Motion: the evening runs 1.5× slower. Won: Legitimacy +5,
+  stability +3, budget strain −8, Workers +2, every faction +0.5; lost:
+  Legitimacy −4, stability −3, strain +5, Workers −4.
+- **The Pigeon Run** (`pigeon.ts`; a daylight sky over the Hadem hills;
+  Army; slice 3). Drovna jams the radio, so the order to the border
+  garrison goes by pigeon. **Hold to climb, let go to glide** (owner's
+  pick over three lanes): hold anywhere on the game (touch or mouse), or
+  Space / ↑ / W. Physics in 25 ms steps: climb 150 u/s² up to 52 u/s,
+  glide down 115 u/s² up to 46 u/s, in a sky 100 units tall; the top is a
+  soft limit. 40 s to the garrison. **Hits** cost a feather: hills and the
+  valley floor (it bounces up), storm clouds (it flies through), and
+  hawks — a hawk circles, then shows its dive as a red dashed line with a
+  target ring (aimed where the pigeon is heading), then strikes. 1.3 s
+  safe after a hit. **3 feathers** (the third hit loses); **the Pigeon
+  Federation's champion** — when you helped the Federation earlier
+  (flags `pigeonFriend` / `pigeonPatron`) — has 4. Every course follows a
+  flyable guide path, with a way through at least 18 units wide; a
+  planner proves the tested courses can be flown without a hit. By act
+  1 / 2 / 3: speed 30 / 33 / 36; hawk strikes every 4.0–5.2 / 3.3–4.4 /
+  2.8–3.7 s, a second hawk close behind 0 / 20 / 30%; warning 1000 / 900 /
+  800 ms. Simulated (reaction 150 / 250 / 350 ms): 100 / 84 / 47% (act
+  1), 89 / 59 / 20% (act 2), 67 / 34 / 4% (act 3); with the champion
+  100 / 94 / 73, 98 / 87 / 32, 88 / 59 / 9%. Doing nothing, or holding
+  all the time, always loses. Reduce Motion: 2/3 speed, no shake or
+  flashes. Won: Legitimacy +5, Power +3, separatism −10, Army +2, every
+  faction +0.5; lost: Legitimacy −4, Power −3, separatism +6, Army −4.
+- **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon`
   (optional `&seed=`, `&act=`) opens one game on its own, never saved —
   for playtesting. The browser tools use it too (`&freeze` or
   `&freeze=<ms>` holds the real-time clock still for pictures).

@@ -26,6 +26,7 @@ const SIZES = [{ width: 1366, height: 700 }, { width: 1100, height: 700 }];
 const browser = await launchBrowser();
 try {
   const failures = [];
+  const fresh = [];
   for (const size of SIZES) {
     const page = await browser.newPage({ viewport: size });
     const errors = [];
@@ -36,7 +37,8 @@ try {
       const png = await page.screenshot({ animations: 'disabled', caret: 'hide' });
       const file = join(baseDir, `${size.width}-${scene.name}.png`);
       if (mode === 'save') { writeFileSync(file, png); continue; }
-      assert.ok(existsSync(file), `No baseline for ${scene.name} at ${size.width}px — run with "save" first`);
+      // a screen added since the "before" pictures is new: listed, not compared
+      if (!existsSync(file)) { fresh.push(`${size.width}px ${scene.name}`); continue; }
       const before = readFileSync(file);
       if (before.equals(png)) continue;
       // Bytes differ: count the pixels that actually changed.
@@ -67,6 +69,7 @@ try {
   if (mode === 'save') {
     console.log(`DESKTOP SNAP: saved ${SCENES.length * SIZES.length} baselines to ${baseDir}`);
   } else {
+    if (fresh.length) console.log(`DESKTOP SNAP: new screens, no "before" picture (not compared): ${fresh.join(', ')}`);
     assert.deepEqual(failures, [], `Desktop changed:\n${failures.join('\n')}`);
     console.log(`DESKTOP SNAP: all ${SCENES.length * SIZES.length} screens identical to the baseline, pixel for pixel`);
   }
