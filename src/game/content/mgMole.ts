@@ -42,9 +42,9 @@ export const MOLE_CHOICES: { id: string; label: string; hint: string }[] = [
 const BASE_WON = { all: { loyalty: 0.5 } } as const;
 
 const MOLE_ARREST: Effects = {
-  stats: { legitimacy: 4, security: 5 },
-  hidden: { leak: -14, fear: 5 },
-  factions: { ...BASE_WON, sable: { loyalty: 4 }, chorus: { loyalty: -2 } },
+  stats: { legitimacy: 4, security: 4 },
+  hidden: { leak: -12, fear: 5 },
+  factions: { ...BASE_WON, sable: { loyalty: 2 }, chorus: { loyalty: -2 } },
   news: ['NIGHT-SHIFT WORKER DETAINED AT INTERIOR MINISTRY'],
 };
 const MOLE_TURN: Effects = {
@@ -88,7 +88,7 @@ export const MOLE_CARD: CardDef = {
     {
       id: 'won',
       label: 'Arrest the mole.',
-      hint: 'Legitimacy and Security go up, the Sable Office most; leaks dry up. The Street cools a little.',
+      hint: 'Legitimacy and Security go up; leaks dry up. The Street cools a little.',
       outcome: (s): CardOutcome => ({
         text: `${caught(s)} The Sable Office had ${moleJob(s)} in a quiet room by midnight.\n\nSarran sent a one-word note: "Noted." From her, that is a medal. The Street heard about the arrest by breakfast.`,
         tone: 'good',

@@ -142,6 +142,14 @@ remaining ending types.
 
 ## Log (newest first)
 
+- **2026-10-06** — Owner playtest of slice 3 part A: wants to choose what
+  happens to the mole (chose all four: arrest, turn, fire quietly,
+  expose; on the record) — built. Budget Night: *"I have yet to even make
+  it to the vote"* — retuned "slower and clearer" (about half the drain,
+  longer warnings, one squeeze in act 1, the jar in danger flashes).
+  "Clerk always the mole": checked — the mole is random (12 fresh loads,
+  8 different moles); a reload in a real run replays the same game.
+
 - **2026-10-06** — Slice 2 and Shred's keys approved. Owner chose slice
   3: Find the Mole (live watching, dark), Budget Night (90 s, "can't just
   sit there"), The Pigeon Run (hold to climb), then Stairwell (dark) and
