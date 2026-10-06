@@ -205,9 +205,9 @@ describe('Shred the Ledger (rules)', () => {
   it('a face-down paper turns over first; a dirty one shreds; a clean one jams; a dirty one in the box is evidence', () => {
     const d = { ...SH.shredDifficulty(1), allowed: 5 };
     const papers: SH.Paper[] = [
-      { id: 'a', kind: 'dirty', lane: 0, enterAt: 0, crossMs: 4000, faceDown: true, wave: 0, rot: 0 },
-      { id: 'b', kind: 'clean', lane: 1, enterAt: 0, crossMs: 4000, faceDown: false, wave: 0, rot: 0 },
-      { id: 'c', kind: 'dirty', lane: 0, enterAt: 1500, crossMs: 4000, faceDown: false, wave: 0, rot: 0 },
+      { id: 'a', kind: 'dirty', lane: 0, enterAt: 0, crossMs: 4000, faceDown: true, wave: 0, rot: 0, key: 1 },
+      { id: 'b', kind: 'clean', lane: 1, enterAt: 0, crossMs: 4000, faceDown: false, wave: 0, rot: 0, key: 2 },
+      { id: 'c', kind: 'dirty', lane: 0, enterAt: 1500, crossMs: 4000, faceDown: false, wave: 0, rot: 0, key: 3 },
     ];
     let s = SH.shredStart({ papers, d, endMs: 6000 });
     s = SH.tapPaper(s, 'a', 500);
@@ -222,6 +222,35 @@ describe('Shred the Ledger (rules)', () => {
     expect(s.fate.c).toBe('evidence');
     expect(s.evidence).toBe(1);
     expect(s.over).toBe('won'); // 2 mistakes, 5 allowed
+  });
+
+  it('number keys (owner: trackpad players "can\'t click the papers fast enough"): every paper has a digit 0-9, never shared on the belts at once', () => {
+    for (const act of [1, 2, 3]) {
+      for (let seed = 0; seed < 300; seed++) {
+        const { papers } = SH.shredSetup(seed, SH.shredDifficulty(act));
+        for (const p of papers) expect(SH.SHRED_KEYS).toContain(p.key);
+        for (const a of papers) {
+          for (const b of papers) {
+            if (a === b || a.key !== b.key) continue;
+            // a and b share a number only if one has left the belt (plus a rest) before the other enters
+            const apart = a.enterAt + a.crossMs + 250 <= b.enterAt || b.enterAt + b.crossMs + 250 <= a.enterAt;
+            expect(apart, `act ${act} seed ${seed}: ${a.id} and ${b.id} share ${a.key}`).toBe(true);
+          }
+        }
+      }
+    }
+  });
+
+  it('pressing a paper\'s number is the same as tapping it', () => {
+    const setup = SH.shredSetup(3, SH.shredDifficulty(2));
+    const p = setup.papers[0];
+    const now = p.enterAt + 100;
+    const s = SH.shredStart(setup);
+    expect(SH.paperForKey(s, p.key, now)?.id).toBe(p.id);
+    expect(SH.tapPaper(s, SH.paperForKey(s, p.key, now)!.id, now)).toEqual(SH.tapPaper(s, p.id, now));
+    // a number with no paper on the belts does nothing
+    const unused = SH.SHRED_KEYS.find((k) => !SH.onBelt(s, now).some((x) => x.key === k))!;
+    expect(SH.paperForKey(s, unused, now)).toBeUndefined();
   });
 
   it('act 3 is the 2x game (owner: "the first level is really what the top difficulty should be"); acts 1-2 ramp up to it; doing nothing loses', () => {

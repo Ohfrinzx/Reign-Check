@@ -2330,6 +2330,14 @@ abbr.term{
 .sh-paper.late{box-shadow:0 0 0 3px rgba(227,38,47,.65), 0 3px 8px rgba(0,0,0,.45)}
 /* face-down: a manila back with a question mark; turning over is a flip */
 .sh-paper.down{background:repeating-linear-gradient(45deg, #c9a46a 0 6px, #bf9a5f 6px 12px);display:grid;place-items:center}
+/* the paper's number key (mouse/trackpad only): a typewriter key in the corner */
+.sh-key{
+  position:absolute;top:5%;left:5%;z-index:2;min-width:1.55em;height:1.55em;padding:0 .2em;
+  display:grid;place-items:center;border-radius:4px;background:#1d1a17;color:#fbf7ee;
+  font-family:var(--mono);font-weight:700;font-size:clamp(12px,1.6vw,17px);line-height:1;
+  box-shadow:0 2px 0 #000, inset 0 1px 0 rgba(255,255,255,.18);pointer-events:none;
+}
+.sh-paper.down .sh-key{background:#fbf7ee;color:#3d2a12;box-shadow:0 2px 0 #6b4a22}
 .sh-back{font-family:var(--head);font-size:clamp(18px,4.5vw,30px);color:#6b4a22;text-shadow:0 1px 0 rgba(255,255,255,.3)}
 .sh-paper.flipped{animation:mgFlip .28s ease-out}
 @keyframes mgFlip{from{transform:rotate(var(--rot)) rotateY(90deg)}to{transform:rotate(var(--rot)) rotateY(0)}}

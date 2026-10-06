@@ -101,6 +101,9 @@ export interface Paper {
   wave: number;
   /** a slight tilt, for the look */
   rot: number;
+  /** its number key, 0–9: pressing it is the same as tapping the paper.
+   *  Never shared by two papers on the belts at once (assignKeys). */
+  key: number;
 }
 export interface ShredSetup { papers: Paper[]; d: ShredDifficulty; endMs: number }
 
@@ -148,14 +151,51 @@ export function shredSetup(seed: number, d: ShredDifficulty): ShredSetup {
       lastAt[lane] = at;
       papers.push({
         id: `d${++n}`, kind, lane, enterAt: Math.round(at), crossMs,
-        faceDown: rng.chance(d.faceDown), wave: w, rot: Math.round(rng.range(-6, 6)),
+        faceDown: rng.chance(d.faceDown), wave: w, rot: Math.round(rng.range(-6, 6)), key: 0,
       });
       t = at + rng.range(d.gapMs[0], d.gapMs[1]) * shrink;
     }
     t += 1200; // a breath between waves
   }
+  assignKeys(papers);
   const endMs = Math.max(...papers.map((p) => p.enterAt + p.crossMs)) + 200;
   return { papers, d, endMs };
+}
+
+/** The number keys, in the order they are handed out (0 last, as on the
+ *  keyboard). Up to 10 papers can be on the belts at once, counting a key's
+ *  rest, so all ten digits are needed. */
+export const SHRED_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+/** A key is only reused this long after its last paper reached the box, so
+ *  a quick player never presses a number that has just changed papers. */
+const KEY_REST_MS = 250;
+
+/**
+ * Number keys for laptop players (owner, 2026-10-06: trackpad users "can't
+ * click the papers fast enough"; chose "numbers instead. single digits").
+ * Handed out in turn, 1 → 9, 0, 1 …, skipping any number still on the belts.
+ * No randomness, so the layout and the RNG are untouched.
+ */
+function assignKeys(papers: Paper[]) {
+  const freeAt: number[] = SHRED_KEYS.map(() => -Infinity);
+  let next = 0;
+  for (const p of [...papers].sort((a, b) => a.enterAt - b.enterAt)) {
+    let pick = -1;
+    for (let i = 0; i < SHRED_KEYS.length; i++) {
+      const k = (next + i) % SHRED_KEYS.length;
+      if (freeAt[k] <= p.enterAt) { pick = k; break; }
+    }
+    // never happens at the shipped speeds (a test checks); the safest fallback
+    if (pick < 0) pick = freeAt.indexOf(Math.min(...freeAt));
+    p.key = SHRED_KEYS[pick];
+    freeAt[pick] = p.enterAt + p.crossMs + KEY_REST_MS;
+    next = (pick + 1) % SHRED_KEYS.length;
+  }
+}
+
+/** The paper on the belts now that answers to this number key, if any. */
+export function paperForKey(s: ShredState, key: number, now: number): Paper | undefined {
+  return onBelt(s, now).find((p) => p.key === key);
 }
 
 export function shredStart(setup: ShredSetup): ShredState {

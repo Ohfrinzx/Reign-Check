@@ -434,6 +434,7 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
         'Some papers come face-down. Tap once to turn one over, again to shred it.',
         'Tricks: a red stamp crossed out (VOID) is clean. A round red seal is not the square stamp: let it go. A pale red stamp is still dirty.',
         'The belts speed up wave by wave.',
+        'On a laptop: each paper shows a number. Press it instead of clicking (once to turn over, again to shred).',
         'A red-stamped paper in the box, or a jam, is a mistake. One is allowed; a second and you lose.',
       ],
       stakes: {

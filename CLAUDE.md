@@ -23,8 +23,9 @@ Then read, in order:
   your decisions) and the mobile web version + GitHub Pages deploy are all
   approved. **Mini-games slice 1** is approved; **slice 2** (Bread Lines, The Last
   Kilometre, Shred the Ledger) is built and waiting for the owner's
-  playtest (`docs/MINIGAMES.md`). The ten numbers on result pills are now
-  explained in the game (2026-10-05, `docs/SYSTEMS.md` §2). Ask before
+  playtest (`docs/MINIGAMES.md`). The number explanations and the slower
+  Bulletin are approved (2026-10-06); Shred's number keys for laptops are
+  built and waiting for the owner's playtest. Ask before
   designing the next games. **Every
   merge into the default branch now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
