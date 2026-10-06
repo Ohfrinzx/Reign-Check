@@ -220,6 +220,13 @@ try {
       assert.ok(await idle.locator('.mg-end.lost').count(), 'Doing nothing loses');
       assert.match(await idle.locator('.mg-stamp').innerText(), /walk-out/i);
       assert.match(await idle.locator('.mg-end h2').innerText(), /Two walk-outs/);
+      // the jars at eight: the walked-out factions come for their money (owner, 2026-10-06)
+      await idle.locator('.mg-foot .btn-primary').click();
+      const lost = idle.locator('.mg-result-body .outcome');
+      await lost.waitFor();
+      assert.match(await lost.innerText(), /The jars at eight:[\s\S]*walked out/, 'The result says how each jar ended');
+      assert.match(await lost.locator('.outcome-marked').innerText(), /walk out of the budget/, 'A walk-out goes on the record');
+      await idle.screenshot({ path: shotPath('BN-aftermath-1366.png'), fullPage: true });
     })();
 
     /* ---------------------------------------------- 3. phone: real taps */
@@ -316,4 +323,4 @@ try {
 assert.deepEqual(errors, [], `Page errors: ${errors.join('\n')}`);
 console.log(SHOTS_ONLY
   ? 'BUDGET: pictures taken'
-  : 'BUDGET: won by keyboard at 1366×700 (keys 1–5 shown, a digit selects, ↑/↓ = $1B), lost by doing nothing (walk-out stamp, sealed jar), won by real taps at 390×844 (one tap = $1B, no key badges), the jar in most danger highlighted all evening (one at a time, with its "!"), result → outcome, nothing saved; Reduce Motion calm, 1.5× slower clock, no flying notes, a still outline — all OK');
+  : 'BUDGET: won by keyboard at 1366×700 (keys 1–5 shown, a digit selects, ↑/↓ = $1B), lost by doing nothing (walk-out stamp, sealed jar; the result names the walked-out factions and puts them on the record), won by real taps at 390×844 (one tap = $1B, no key badges), the jar in most danger highlighted all evening (one at a time, with its "!"), result → outcome, nothing saved; Reduce Motion calm, 1.5× slower clock, no flying notes, a still outline — all OK');

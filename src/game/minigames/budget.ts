@@ -478,6 +478,25 @@ export function budgetClock(t: number): string {
 }
 
 /** 0..100: how well it went, for the result text (85+ means nobody walked out). */
+/**
+ * How each jar ended the evening, for the card's result (owner, 2026-10-06:
+ * money over a line should win a faction over; a walk-out should cost you,
+ * and the faction should use the budget against you). Keys are flags:
+ * `bnDiff:<faction>` = money minus line at the end ($B; for a walk-out, the
+ * shortfall when it walked), `bnOut:<faction>` = 1 if it walked out. Jars are
+ * in DISPLAY_FACTIONS order (display.ts).
+ */
+export const BUDGET_FACTIONS = ['staff', 'sable', 'concord', 'combine', 'chorus'] as const;
+export function budgetFlags(s: BudgetState): Record<string, number> {
+  const out: Record<string, number> = {};
+  s.jars.forEach((j, i) => {
+    const f = BUDGET_FACTIONS[i];
+    out[`bnDiff:${f}`] = j.out ? Math.min(-1, j.money - j.line) : j.money - j.line;
+    out[`bnOut:${f}`] = j.out ? 1 : 0;
+  });
+  return out;
+}
+
 export function budgetScore(s: BudgetState): number {
   const shortMs = sum(s.jars.map((j) => j.shortMs));
   let score = 100 - 30 * s.walkouts - Math.round((40 * shortMs) / (s.setup.d.durationMs * 2));

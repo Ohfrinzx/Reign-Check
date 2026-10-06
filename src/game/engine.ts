@@ -492,7 +492,7 @@ export function chooseOption(prev: GameState, optionId: string): GameState {
 
   // Balance slice C: this decision may leave a mark that later cards react to.
   const marked: string[] = [];
-  for (const m of marksSetBy(def.id, opt.id)) {
+  for (const m of [...marksSetBy(def.id, opt.id), ...(outcome.marks ?? [])]) {
     if (hasMark(s, m)) continue;
     withRng(s, (rng) => applyEffects(s, { flags: { [markFlag(m)]: s.day } }, rng, `mark:${m}`));
     marked.push(becauseText(s, m).replace(/^Because you /, 'You '));

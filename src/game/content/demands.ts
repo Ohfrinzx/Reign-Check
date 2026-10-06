@@ -1,4 +1,5 @@
 import type { Effects, FactionId, GameState } from '../types';
+import { BUDGET_CLAIMS } from './mgBudget';
 
 /**
  * PHASE 3 STEP 1 — FACTION DEMANDS (content only; the rules live in
@@ -250,6 +251,8 @@ export const DEMANDS: DemandDef[] = [
  * "Because you …" and is never drawn at random.
  */
 export const TRIGGERED_DEMANDS: DemandDef[] = [
+  // Budget Night: a walked-out faction comes for its money (content/mgBudget.ts)
+  ...BUDGET_CLAIMS,
   {
     id: 'street-release-vel',
     faction: 'chorus',

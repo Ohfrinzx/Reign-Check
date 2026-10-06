@@ -1,4 +1,5 @@
 import type { CardOutcome, ConsequenceKind, FactionId } from '../types';
+import { BUDGET_MARKS, BUDGET_DEMAND_REACTIONS } from './mgBudget';
 
 /**
  * BALANCE SLICE C — CONSEQUENCES (content only; the rules live in
@@ -250,6 +251,8 @@ export const MARKS: MarkDef[] = [
     setBy: [{ card: 'mg-mole', option: 'expose' }],
     factions: { chorus: 2, sable: -2 },
   },
+  // Budget Night: how each faction's jar ended (set by the result, content/mgBudget.ts)
+  ...BUDGET_MARKS,
   {
     id: 'let-aureth-audit',
     because: 'let Aureth audit the army\'s books',
@@ -1069,6 +1072,7 @@ export const DEMAND_REACTIONS: DemandReactionDef[] = [
   { mark: 'let-aureth-audit', faction: 'staff', kind: 'no-bribe', text: 'the officers will not take money from the government that let Aureth count theirs.' },
   { mark: 'vetted-garrison', faction: 'staff', kind: 'dearer', text: 'the officers remember being vetted like suspects.' },
   /* Phase 5: mini-game results */
+  ...BUDGET_DEMAND_REACTIONS,
   { mark: 'mole-arrested', faction: 'sable', kind: 'cheaper', text: 'Security saw you let it do its job.' },
   { mark: 'mole-exposed', faction: 'sable', kind: 'dearer', text: 'the Sable Office wanted the mole handled quietly, not on the news.' },
   { mark: 'held-palace', faction: 'sable', kind: 'cheaper', text: 'Security stood with you the night the officers came, and asks for less.' },
