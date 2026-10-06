@@ -2496,5 +2496,232 @@ abbr.term{
 
 /* ---- THE PIGEON RUN (.mg-pigeon): a daylight sky over the Hadem hills.
    BEGIN PIGEON */
-.pigeon-placeholder{padding:40px;text-align:center}
+/* A daylight flight over the Hadem hills (owner, 2026-10-06: hold to
+   climb, a bright sky, not dark). The frame keeps the newspaper's ink but
+   sits on a pale sky; the game is one SVG drawn in world units (see
+   PigeonGame.tsx), so all its colours are here. */
+.app.mg-pigeon{
+  --paper:#f2f8fc; --paper-2:#e1eef7; --paper-3:#c8dceb; --ink:#13293d; --ink-soft:#3b5770; --ash:#6c8397;
+  --red:#cc2b1d; --teal:#2f8a4e; --good:#2f8a4e; --hair:rgba(19,41,61,.15); --mg-bar:#16466e;
+  background:linear-gradient(#bfe0f6, #f2f8fc 42%);
+}
+.mg-pigeon .mg-top{border-bottom:3px solid #f2c94c}
+.mg-pigeon .mg-light{background:#f2c94c;box-shadow:0 0 12px #f2c94c}
+.mg-pigeon .btn-primary{background:#16466e;border-color:#16466e;color:#fff}
+.mg-pigeon .btn-primary:hover:not(:disabled){background:#0f3556;border-color:#0f3556}
+.mg-pigeon .mg-foot{background:#f2f8fc}
+
+/* the title card: the newspaper opens onto a morning sky, a pigeon flies across */
+.mg-veil-pigeon{background:#5fb0ea;color:#fff;animation:pgDawn .6s ease-out both}
+.mg-veil-pigeon::before{content:'';position:absolute;inset:0;background:linear-gradient(#3f9be6, #9fd3f4 62%, #e3f4fc);opacity:0;animation:fadeIn .6s .15s ease-out forwards}
+.mg-veil-pigeon .mg-veil-fx{
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 12'%3E%3Cpath fill='%23fff' d='M2 11.5a4 4 0 0 1 4-4 6 6 0 0 1 11-3.5 5 5 0 0 1 8 3.5 4 4 0 0 1 3.5 4z'/%3E%3C/svg%3E") 10% 24%/clamp(110px,18vw,200px) auto no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 12'%3E%3Cpath fill='%23fff' d='M2 11.5a4 4 0 0 1 4-4 6 6 0 0 1 11-3.5 5 5 0 0 1 8 3.5 4 4 0 0 1 3.5 4z'/%3E%3C/svg%3E") 88% 14%/clamp(130px,22vw,240px) auto no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 12'%3E%3Cpath fill='%23fff' d='M2 11.5a4 4 0 0 1 4-4 6 6 0 0 1 11-3.5 5 5 0 0 1 8 3.5 4 4 0 0 1 3.5 4z'/%3E%3C/svg%3E") 66% 80%/clamp(80px,13vw,150px) auto no-repeat,
+    radial-gradient(ellipse 120% 40% at 50% 118%, #6fbf55 50%, transparent 51%),
+    radial-gradient(ellipse 80% 30% at 12% 112%, #8fd07a 50%, transparent 51%);
+  opacity:0;animation:fadeIn .5s .2s forwards, pgVeilDrift 2.6s .2s linear forwards;
+}
+.mg-veil-pigeon .mg-veil-fx::after{
+  content:'';position:absolute;left:-12%;top:58%;width:clamp(60px,10vw,110px);aspect-ratio:60/34;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 34'%3E%3Cpath fill='%2316466e' d='M3 21l10-3c4-2 9-3 14-2L21 2c7 2 11 7 13 12l6-11c4 4 4 9 2 13 4-1 8-2 11-3 2-1 4 0 5 2l-3 1c-2 4-6 7-11 8-8 2-20 2-29 0H3z'/%3E%3C/svg%3E") center/contain no-repeat;
+  animation:pgVeilBird 2s .25s cubic-bezier(.45,.05,.4,1) forwards;
+}
+.mg-veil-pigeon .mg-veil-kicker{color:#fff3b0;text-shadow:0 1px 0 #16466e}
+.mg-veil-pigeon .mg-veil-title{color:#fff;text-shadow:0 4px 0 #16466e, 0 10px 24px rgba(22,70,110,.35);animation:pgVeilTitle .65s .3s cubic-bezier(.2,1.2,.4,1) forwards}
+.mg-veil-pigeon .mg-veil-teaser{color:#0f3556}
+@keyframes pgDawn{from{background-color:#f2e9d5}to{background-color:#5fb0ea}}
+@keyframes pgVeilDrift{from{transform:translateX(0)}to{transform:translateX(-3%)}}
+@keyframes pgVeilBird{0%{transform:translate(0,0)}35%{transform:translate(45vw,-6vh)}70%{transform:translate(85vw,2vh)}100%{transform:translate(122vw,-8vh)}}
+@keyframes pgVeilTitle{from{opacity:0;transform:translateY(30px) scale(.94)}to{opacity:1;transform:none}}
+
+/* the game: feathers and the route on top, the sky, a hold pad below */
+.pg{
+  position:relative;display:flex;flex-direction:column;gap:8px;width:100%;max-width:1180px;min-height:0;
+  touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;cursor:pointer;
+}
+.pg-hud{flex:none;display:flex;align-items:center;gap:16px;padding:0 2px}
+.pg-feathers{display:flex;gap:4px;align-items:center}
+.pg-feather{width:17px;height:34px;overflow:visible;transition:opacity .3s;filter:drop-shadow(0 2px 0 rgba(22,70,110,.25))}
+.pg-feather path{fill:#fff;stroke:#16466e;stroke-width:1.4;stroke-linejoin:round}
+.pg-feather .quill{fill:none;stroke:#16466e;stroke-width:1.1}
+.pg-feather.lost path{fill:#c8dceb}
+.pg-feather.lost{opacity:.22;animation:pgFeatherLost .6s ease-in both}
+@keyframes pgFeatherLost{0%{opacity:1;transform:none}60%{opacity:.6;transform:translate(4px,10px) rotate(40deg)}100%{opacity:.22;transform:none}}
+.pg-route{position:relative;flex:1;height:22px}
+.pg-route-line{position:absolute;left:0;right:14px;top:50%;height:4px;margin-top:-2px;border-radius:2px;
+  background:repeating-linear-gradient(90deg, rgba(22,70,110,.35) 0 6px, transparent 6px 11px)}
+.pg-route-fill{position:absolute;left:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:#f2c94c;box-shadow:0 0 0 1px rgba(22,70,110,.25);max-width:calc(100% - 14px)}
+.pg-route-bird{position:absolute;top:50%;width:26px;height:15px;margin:-9px 0 0 -13px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 34'%3E%3Cpath fill='%2316466e' d='M3 21l10-3c4-2 9-3 14-2L21 2c7 2 11 7 13 12l6-11c4 4 4 9 2 13 4-1 8-2 11-3 2-1 4 0 5 2l-3 1c-2 4-6 7-11 8-8 2-20 2-29 0H3z'/%3E%3C/svg%3E") center/contain no-repeat}
+.pg-route-flag{position:absolute;right:0;top:0;width:14px;height:22px;
+  background:linear-gradient(#5b4632 0 0) 1px 0/2px 100% no-repeat, linear-gradient(#cc2b1d 0 0) 3px 1px/11px 8px no-repeat}
+
+.pg-stage{position:relative;flex:1 1 auto;min-height:0;border-radius:12px;overflow:hidden;isolation:isolate;
+  border:3px solid #16466e;background:#8fcaf2;box-shadow:0 14px 34px rgba(22,70,110,.28)}
+.pg-svg{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:hidden}
+.pg-stage.hit{animation:pgShake .38s cubic-bezier(.36,.07,.19,.97) both}
+.pg-stage.hit::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 4px rgba(224,50,43,.55), inset 0 0 40px rgba(224,50,43,.35);pointer-events:none;animation:fadeOut .45s forwards}
+@keyframes pgShake{20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,0)}}
+
+/* scenery */
+.pg-sun{fill:#fffbe6}
+.pg-far{fill:#a8c9e4}
+.pg-fluff path{fill:#fff;opacity:.92}
+.pg-mid{fill:#94cb8f}
+.pg-houses .wall{fill:#f7f1e4}
+.pg-houses .roof{fill:#c8553d}
+.pg-terrain{fill:url(#pgGrass)}
+.pg-terrain-edge{fill:none;stroke:#2f6b2a;stroke-width:.7;stroke-linejoin:round}
+.pg-terrain-light{fill:none;stroke:#9be07a;stroke-width:1.5;stroke-linejoin:round;opacity:.75}
+.pg-bushes ellipse{fill:#3f8a3a;opacity:.42}
+.pg-fort-hill{fill:#68ad4e}
+.pg-pines path{fill:#2d6a3a}
+.pg-wall{fill:#c3bcb0;stroke:#6d665c;stroke-width:.35}
+.pg-wall.dark{fill:#aea69a}
+.pg-wall-top{fill:#c3bcb0;stroke:#6d665c;stroke-width:.35}
+.pg-loft{fill:#c8553d;stroke:#7a2f22;stroke-width:.35}
+.pg-door{fill:#5b4632}
+.pg-slit{fill:#3a3a3a}
+.pg-pole{stroke:#5b4632;stroke-width:.7}
+.pg-flag-red{fill:#cc2b1d}
+.pg-flag-band{fill:#f7f1e4}
+.pg-flag-star{fill:#f2c94c}
+.pg-flag{transform-box:fill-box;transform-origin:0 50%;animation:pgFlag 1.1s ease-in-out infinite alternate}
+@keyframes pgFlag{from{transform:skewY(-4deg) scaleX(.94)}to{transform:skewY(5deg) scaleX(1.03)}}
+
+/* storm clouds: dark and heavy, light on top, with lightning */
+.pg-storm-fill{fill:url(#pgStorm)}
+.pg-storm-rim{fill:#262b34}
+.pg-storm-billows circle{fill:url(#pgBillow)}
+.pg-storm-flash{fill:#fff8d6;opacity:0;animation:pgFlash 3.1s var(--d) linear infinite}
+.pg-bolt{fill:#ffe066;stroke:#fff6b0;stroke-width:.35;stroke-linejoin:round;opacity:0;animation:pgBolt 3.1s var(--d) linear infinite}
+@keyframes pgBolt{0%,90%{opacity:0}91%{opacity:1}93%{opacity:.1}95%{opacity:1}97%,100%{opacity:0}}
+@keyframes pgFlash{0%,90%{opacity:0}91%{opacity:.28}93%{opacity:0}95%{opacity:.2}97%,100%{opacity:0}}
+
+/* the pigeon */
+.pg-body{fill:#a7b4c6}
+.pg-neck{fill:#5f9a85}
+.pg-head{fill:#8a98ab}
+.pg-beak{fill:#3d3b3a}
+.pg-cere{fill:#f3efe6}
+.pg-eye{fill:#f08c2a}
+.pg-pupil{fill:#111}
+.pg-tail{fill:#8c99ac}
+.pg-tail-band{fill:#3e4757}
+.pg-leg path{stroke:#d77a6d;stroke-width:.6;stroke-linecap:round}
+.pg-tube{fill:#cc2b1d;stroke:#7a1810;stroke-width:.25}
+.pg-wing path{fill:#bcc7d5;stroke:#6b7a8f;stroke-width:.3;stroke-linejoin:round}
+.pg-wing.far path{fill:#8693a7;stroke:none}
+.pg-wing .pg-bars{fill:none;stroke:#3e4757;stroke-width:.75;stroke-linecap:round}
+.pg-wing{transform-box:fill-box;transform-origin:100% 95%}
+.pg-bird.flap .pg-wing{animation:pgFlap .2s ease-in-out infinite alternate}
+.pg-bird.flap .pg-wing.far{animation-delay:-.04s}
+.pg-bird.glide .pg-wing{transform:scaleY(.62) rotate(-6deg);transition:transform .18s ease-out}
+.pg-bird.glide .pg-wing.far{transform:scaleY(.5) rotate(-4deg)}
+@keyframes pgFlap{from{transform:scaleY(1.04)}to{transform:scaleY(-.62)}}
+.pg-pigeon.safe .pg-bird{animation:pgBlink .2s steps(2,jump-none) infinite}
+@keyframes pgBlink{from{opacity:1}to{opacity:.3}}
+.pg-pigeon.lost .pg-bird{animation:pgFall 1.1s cubic-bezier(.5,0,.9,.6) forwards}
+@keyframes pgFall{to{transform:translate(10px,70px) rotate(200deg);opacity:.2}}
+.pg-pigeon.won .pg-bird{animation:pgLand 1.1s ease-in-out forwards}
+@keyframes pgLand{to{transform:translate(var(--land-dx,34px),var(--land-dy,0px)) scale(.8)}}
+
+/* the hawks */
+.pg-hbody{fill:#7b5133}
+.pg-hbelly{fill:#ecdcbf}
+.pg-hhead{fill:#8a5d3b}
+.pg-hbeak{fill:#f2c230}
+.pg-heye{fill:#1b1b1b}
+.pg-htail{fill:#b5562b;stroke:#5a2a12;stroke-width:.3}
+.pg-htail-band{fill:none;stroke:#5a2a12;stroke-width:.5}
+.pg-hbrow{fill:none;stroke:#3e2614;stroke-width:.5;stroke-linecap:round}
+.pg-hwing path{fill:#6b4429;stroke:#3e2614;stroke-width:.3;stroke-linejoin:round}
+.pg-hwing .pg-hbars{fill:none;stroke:#3e2614;stroke-width:.45;stroke-linecap:round}
+.pg-hwing.far path{fill:#4e3019}
+.pg-hwing{transform-box:fill-box;transform-origin:15% 100%}
+.pg-hawk.circle .pg-hwing{animation:pgHawkFlap .7s ease-in-out infinite alternate}
+.pg-hawk.warn .pg-hwing{transform:scaleY(1.12) rotate(-8deg)}
+.pg-hawk-bird.dive .pg-hwing{transform:scaleY(.28) rotate(14deg)}
+.pg-hawk-bird.dive{filter:drop-shadow(3px -1px 0 rgba(255,255,255,.55))}
+@keyframes pgHawkFlap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
+.pg-dive-line line{stroke:#e0322b;stroke-width:.7;stroke-dasharray:2.2 1.6;stroke-linecap:round;animation:pgDash .5s linear infinite}
+@keyframes pgDash{to{stroke-dashoffset:3.8}}
+.pg-target{transform-box:fill-box;transform-origin:center;animation:pgTarget .5s ease-in-out infinite alternate}
+.pg-target circle{fill:rgba(224,50,43,.14);stroke:#e0322b;stroke-width:.7}
+.pg-target path{stroke:#e0322b;stroke-width:.9;stroke-linecap:round}
+@keyframes pgTarget{from{transform:scale(.88)}to{transform:scale(1.08)}}
+.pg-cry{transform-box:fill-box;transform-origin:center;animation:pgCry .3s cubic-bezier(.2,1.5,.4,1) both}
+.pg-cry circle{fill:#e0322b;stroke:#fff;stroke-width:.6}
+.pg-cry path{stroke:#fff;stroke-width:1;stroke-linecap:round}
+@keyframes pgCry{from{transform:scale(0)}to{transform:scale(1)}}
+
+/* a hit: feathers fly (or dust, off a hill) */
+.pg-puff path{fill:#f4f7fb;stroke:#8794a8;stroke-width:.2;transform-box:fill-box;transform-origin:center;
+  animation:pgPuff 1s ease-out forwards}
+.pg-dust{fill:#d9c79f;transform-box:fill-box;transform-origin:center;animation:pgDust .7s ease-out forwards}
+@keyframes pgDust{from{transform:scale(.4);opacity:.8}to{transform:scale(2.2);opacity:0}}
+@keyframes pgPuff{from{transform:rotate(var(--a)) translateY(0) scale(1);opacity:1}to{transform:rotate(var(--a)) translateY(-9px) rotate(70deg) scale(.7);opacity:0}}
+
+.pg-hint{position:absolute;left:60%;bottom:9%;transform:translateX(-50%);z-index:2;pointer-events:none;white-space:nowrap;
+  padding:8px 16px;border-radius:30px;background:rgba(255,255,255,.92);color:#13293d;box-shadow:0 4px 14px rgba(22,70,110,.25);
+  font-family:var(--sans);font-weight:700;font-size:14px;animation:pgHint 1.4s ease-in-out infinite alternate}
+@keyframes pgHint{from{transform:translateX(-50%) translateY(0)}to{transform:translateX(-50%) translateY(-5px)}}
+.pg kbd{display:inline-block;min-width:1.6em;padding:1px 6px;border-radius:5px;background:#16466e;color:#fff;
+  font-family:var(--mono);font-weight:700;font-size:.9em;line-height:1.4;text-align:center;box-shadow:0 2px 0 #0a2238}
+
+/* the hold pad: where a thumb rests (the whole game is one big button: hold anywhere) */
+.pg-pad{flex:none;display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;padding:8px 14px;border-radius:12px;
+  background:linear-gradient(#fff,#e8f2fa);border:2px solid #b9d2e6;color:#16466e;box-shadow:0 4px 0 #b9d2e6;
+  font-family:var(--black);font-size:12px;letter-spacing:.1em;text-transform:uppercase;transition:transform .08s, box-shadow .08s, background .15s}
+.pg.held .pg-pad{transform:translateY(3px);box-shadow:0 1px 0 #b9d2e6;background:linear-gradient(#fff4c2,#f2c94c);border-color:#d9a92a}
+.pg-pad-icon{width:28px;height:28px;flex:none;border-radius:50%;background:#16466e;position:relative}
+.pg-pad-icon::before{content:'';position:absolute;left:50%;top:52%;width:10px;height:10px;border:solid #fff;border-width:3px 0 0 3px;transform:translate(-50%,-30%) rotate(45deg)}
+.pg.held .pg-pad-icon::before{animation:pgUp .35s ease-in-out infinite alternate}
+@keyframes pgUp{to{transform:translate(-50%,-62%) rotate(45deg)}}
+.pg-pad kbd{letter-spacing:0;text-transform:none;font-size:11px}
+
+/* Reduce Motion: a calm flight (the game also runs at 2/3 speed) */
+.mg-calm .pg-stage.hit{animation:none}
+.mg-calm .pg-bolt{animation:none;opacity:.35}
+.mg-calm .pg-storm-flash{animation:none}
+.mg-calm .pg-dive-line line,.mg-calm .pg-target,.mg-calm .pg-hint,.mg-calm .pg-flag,.mg-calm .pg-cry,.mg-calm .pg-feather.lost,
+.mg-calm .pg-hawk.circle .pg-hwing,.mg-calm .pg.held .pg-pad-icon::before{animation:none}
+.mg-calm .pg-bird.flap .pg-wing{animation-duration:.4s}
+.mg-calm .pg-pigeon.safe .pg-bird{animation:none;opacity:.45}
+.mg-calm .pg-pigeon.lost .pg-bird{animation:fadeOut .8s forwards}
+.mg-calm .pg-pigeon.won .pg-bird{animation:none}
+.mg-calm .pg-puff path,.mg-calm .pg-dust{animation:fadeOut .6s forwards}
+.mg-calm .mg-veil-pigeon,.mg-calm .mg-veil-pigeon::before{animation:fadeIn .3s both}
+.mg-calm .mg-veil-pigeon .mg-veil-fx{animation:fadeIn .3s forwards}
+.mg-calm .mg-veil-pigeon .mg-veil-fx::after{display:none}
+@media (prefers-reduced-motion:reduce){
+  .mg-veil-pigeon,.mg-veil-pigeon::before{animation:fadeIn .3s both}
+  .mg-veil-pigeon .mg-veil-fx{animation:fadeIn .3s forwards}
+  .mg-veil-pigeon .mg-veil-fx::after{display:none}
+}
+
+/* phones and tablets: a stage about as tall as it is wide (enough sky ahead
+   to see what is coming), and the rest of the screen is a big hold pad */
+@media (max-width:1080px){
+  /* lifted above a phone's bottom safe area (Safari's toolbar), never padded into it */
+  .pg{gap:6px;margin-bottom:env(safe-area-inset-bottom)}
+  /* between 1.25:1 and 1:1 (the sky is always 100 units tall, so a taller
+     stage would show less of what is coming) */
+  .pg-stage{flex:1 1 0;min-height:min(calc((100vw - 20px) / 1.25), 62vh);max-height:calc(100vw - 20px)}
+  .pg-pad{flex:1 1 auto;min-height:88px;max-height:300px;flex-direction:column;gap:8px;font-size:13px}
+  .pg-pad-icon{width:44px;height:44px}
+  .pg-pad-icon::before{width:14px;height:14px;border-width:4px 0 0 4px}
+  .pg-feather{width:14px;height:28px}
+  .pg-hint{font-size:13px}
+}
+/* landscape phones: the sky fills the height, the pad is a column on the right */
+@media (max-width:1080px) and (max-height:500px){
+  .pg{display:grid;grid-template-columns:minmax(0,1fr) 128px;grid-template-rows:auto minmax(0,1fr);gap:6px 10px}
+  .pg-hud{grid-column:1 / -1}
+  .pg-stage{min-height:0;max-height:none;height:100%}
+  .pg-pad{height:100%;min-height:0;font-size:11px}
+  .pg-feather{width:11px;height:22px}
+}
 /* END PIGEON ---- */

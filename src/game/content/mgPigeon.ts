@@ -74,15 +74,17 @@ export function pigeonIntro(s: GameState): MinigameIntro {
     story: [
       'Drovna\'s radio station is jamming every frequency in the Hadem hills. The border garrison has not heard from the capital in two days.',
       champion
-        ? 'The Pigeon Federation has lent you its champion, Velmorra\'s fastest bird. It is carrying your order.'
-        : 'The Pigeon Federation has lent you a bird. It is carrying your order.',
-      'Drovnan hawks hunt over the border. Get the pigeon to the garrison.',
+        ? 'The Pigeon Federation has lent you its champion, the toughest bird in Velmorra. It is carrying your order in a tube on its leg.'
+        : 'The Pigeon Federation has lent you a bird. It is carrying your order in a tube on its leg.',
+      'Drovnan hawks hunt over the border, and there is a storm in the hills. Get the pigeon to the garrison.',
     ],
     howTo: [
-      'The pigeon flies on its own. Hold anywhere on the screen to climb; let go to glide down.',
-      'Hawks dive at you. Their shadow warns you first. Dodge them, and the storm clouds.',
-      'Each hit costs feathers. Too many hits and the pigeon goes down.',
-      'Reach the garrison flag. On a keyboard: hold Space or ↑.',
+      'The pigeon flies on its own. Hold to climb. Let go to glide down.',
+      'On a phone, hold anywhere on the game. On a laptop, hold Space, ↑ or W (or the mouse button).',
+      'A hawk circles, then shows its dive as a red dashed line. Be off that line when it strikes.',
+      'Keep out of the dark storm clouds, and off the hills.',
+      // the number is the rules' own (pigeonDifficulty: 3 feathers, 4 for the champion; a test checks it)
+      `The pigeon has ${champion ? 4 : 3} feathers. Each hit costs one. Lose them all and it goes down.`,
     ],
     stakes: {
       win: 'Win: Legitimacy and Power go up, every faction warms a little (the Army most), and the provinces pull away less.',
