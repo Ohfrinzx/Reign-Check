@@ -72,10 +72,14 @@ export function moleIntro(s: GameState): MinigameIntro {
       'Watch who meets the contact. Then name the mole.',
     ],
     howTo: [
-      'The night floor is on the screen. Staff walk between rooms. The contact (in the grey coat) comes in and moves around.',
-      'The mole is the one who meets the contact. Watch closely: others pass by too.',
-      'Tap a person to mark them as a suspect while you watch.',
-      'When the contact leaves, name the mole. A wrong name loses.',
+      'The night floor is on camera. Staff walk between the rooms. The contact (grey coat, hat, amber box) comes up in the lift.',
+      'The mole meets the contact alone in a room and hands over a white envelope. It takes a moment. Watch for it.',
+      s.act >= 2
+        ? 'Others pass the contact in the corridor, share a room with them, or bring them a coffee. A coffee is not an envelope.'
+        : 'Others pass the contact in the corridor, share a room with them, or stop for a chat. Only the envelope counts.',
+      ...(s.act >= 2 ? ['Some cameras cut out for a few seconds. Keep watching.'] : []),
+      'Tap a person, or their name in the staff list, to mark a suspect. On a laptop, press their number.',
+      'When the contact leaves, pick one person in the line-up and name them. A wrong name loses. So does no name before the clock runs out.',
     ],
     stakes: {
       win: 'Win: Legitimacy and Security go up, every faction warms a little (Security most), and the leaks dry up.',
