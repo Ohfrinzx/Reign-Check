@@ -11,10 +11,12 @@
 
 **Written 2026-09-23, at the end of Phase 3; checked again after balance
 slice D.** Read this after `AGENTS.md`, `PROJECT_STATUS.md` and
-`docs/SYSTEMS.md`. It is the brief for the next piece of work. The owner
-is starting a new agent session for it. Slice D (factions remember) added
-memory lines under each faction on the Files rail, which the phone layout
-must show too.
+`docs/SYSTEMS.md`. **It is now the as-built record (checked 2026-10-07),
+not a brief:** read §0 for what shipped and §2 for how the owner runs and
+deploys it. Every merge into the default branch publishes the live site.
+Mini-games added since then follow the same phone rules (each game's CSS
+block carries its own phone rules; `npm run test:browser:phone` covers
+them).
 
 ## 0. As built (2026-09-23)
 

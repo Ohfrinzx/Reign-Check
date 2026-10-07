@@ -11,10 +11,14 @@ the code map, change it here.
 1. This file, in full.
 2. `PROJECT_STATUS.md` — where things stand today and what is next (short).
 3. `docs/SYSTEMS.md` — how every game system works now, with the numbers.
-4. For the phone layout and GitHub Pages hosting: `docs/MOBILE_AND_HOSTING.md`
+4. **`docs/BALANCE.md` — before changing any number that affects how hard
+   the game is** (the next job): every tunable number and where it lives,
+   how to measure, the baseline, and the change log you must keep.
+5. For the phone layout and GitHub Pages hosting: `docs/MOBILE_AND_HOSTING.md`
    (§0 is what was built).
-5. For mini-games (the next job): `docs/MINIGAMES.md`.
-6. `docs/DESIGN_V2.md` before UI or design work — the design record.
+6. For mini-games: `docs/MINIGAMES.md` (the owner's decisions, how to add one).
+7. `docs/DESIGN_V2.md` before UI or design work — the design record (its
+   roadmap sections are history; `PROJECT_STATUS.md` says what is next).
 
 `docs/archive/` holds old handovers and slice notes. It is history, not
 instructions; parts of it are out of date.
@@ -33,58 +37,48 @@ The game runs in a light **Poster** skin (cream newsprint, condensed black
 headlines, one red) in a **Broadsheet** layout (masthead + front page +
 card-as-lead-story + a right rail). A **display layer** (`src/game/
 display.ts`) shows 3 resources and 5 factions over a fuller 10-stat,
-7-faction engine. Two screens are deliberately dark, both at the owner's
-request: the Back Room shop and the crisis situation room. **Do not darken
-anything else without asking.**
+7-faction engine. Some screens are deliberately dark, each at the owner's
+request: the Back Room shop, the crisis situation room, and the mini-games
+Hold the Palace, Shred the Ledger, Find the Mole and Who Was in the
+Stairwell?. **Do not darken anything else without asking.**
 
-## 2. Where the project stands (2026-09-23)
+A day is 3–5 cards plus, from day 2, one full-screen **mini-game** (ten
+games; every act opens with Walk in the Weather). Mini-game results move
+the same numbers cards do, so they are part of the balance.
 
-- **Phases 1, 2 and 3 are complete and owner-approved**: the playable core
-  and Poster/Broadsheet look; the roguelike layer (acts, confidence vote,
-  Back Room shop, mandates, run deck, meta-progression); faction demands,
-  character events, crisis chains; and the balance phase (slices A–C).
-- **Balance slice D — factions remember your decisions — approved
-  (2026-10-01):** *"Slice D Approved."* Factions show what they remember,
-  make demands because of your decisions, and handle demands differently
-  (cheaper, dearer, no bribes); more blocked options on cards. Details in
-  `docs/SYSTEMS.md` §5 and §8.
-- **Mobile web version + free GitHub Pages hosting — playtested on the
-  owner's phone and approved (2026-09-24):** *"Playtested on my phone, everything works now"*. Every merge into the
-  default branch now tests, builds and publishes the game to
-  https://ohfrinzx.github.io/Reign-Check/ (`.github/workflows/deploy.yml`).
-  At 1080px and narrower the game uses a phone layout (☰ menu, faction
-  strip + Files drawer, compact floating action button); desktop is pixel-identical to
-  before. Details: `docs/MOBILE_AND_HOSTING.md` §0.
-- **Mini-games (Phase 5):** slice 1 (the system, **Hold the Palace**,
-  **The 7pm Bulletin**, the opening title card) **approved 2026-10-01**.
-  **Slice 2 — approved 2026-10-06:** **Bread Lines**,
-  **The Last Kilometre**, **Shred the Ledger** (low-reading, skill games),
-  events picking the daily game, and bigger win rewards (careful play
-  ~60%). Owner's decisions and the idea list: `docs/MINIGAMES.md`. How it
-  works: `docs/SYSTEMS.md` §12. After the owner's playtests: The Last
-  Kilometre became **Walk in the Weather**, the act opener (first thing on
-  days 1, 7, 13); Shred the Ledger moved to conveyor belts and is now
-  much faster (act 3 is the 2× game; acts 1–2 ramp up to it).
-- **Later, with the owner's go-ahead:** sound, a coup crisis chain, the
-  remaining ending types.
-- **Approved 2026-10-06:** the ten numbers explained in the game (result
-  pills "→ GRIP" + "What do these mean?", Brief me, night summary,
-  Grip/Legitimacy parts; `docs/SYSTEMS.md` §2) and the slower 7pm Bulletin
-  (7 / 6.5 / 6 s per story, counted after the slide-in).
-- **Approved 2026-10-06:** Shred the Ledger's number keys on laptops
-  (every paper shows a digit 0–9; pressing it = tapping it).
-- **Mini-games slice 3, part B — built, waiting for the owner's playtest
-  (2026-10-07):** **Who Was in the Stairwell?** (dark archive logic puzzle:
-  one liar, name who was in the stairwell) and **The Ambassador's Table**
-  (five courses, read his face / glass / notes, stay under Brask's limit).
-  Eight daily games now. `docs/SYSTEMS.md` §12.
-- **Mini-games slice 3, part A — approved 2026-10-07:** **Find the Mole** (dark night camera; watch who meets
-  the contact, name the mole), **Budget Night** (90 s, five jars, faction
-  lines that keep moving), **The Pigeon Run** (hold to climb past hawks).
-  All three are daily games and picked by events; six daily games now.
-  Part B (Who Was in the Stairwell?, The Ambassador's Table) comes after
-  the playtest. `docs/MINIGAMES.md` §2, `docs/SYSTEMS.md` §12.
-- `SAVE_VERSION` is **14**. Tests: **299**, all passing.
+## 2. Where the project stands (2026-10-07)
+
+**Next job: a balancing pass on the core gameplay systems** (owner,
+2026-10-07: "A new agent will be making same big changes to core gameplay
+systems for proper balancing before I move forward with anything else").
+Start with `docs/BALANCE.md`. Nothing else is planned until the owner says.
+
+Approved by the owner, newest first:
+- **Mini-games slice 3 part A (2026-10-07):** Find the Mole (and the
+  choice of what happens to the mole), Budget Night (retuned; each
+  faction judges its own jar at eight), The Pigeon Run.
+- **2026-10-06:** mini-games slice 2 (Bread Lines; The Last Kilometre,
+  now Walk in the Weather, the act opener; Shred the Ledger, with number
+  keys on laptops); the ten numbers explained in the game; the slower 7pm
+  Bulletin.
+- **2026-10-01:** mini-games slice 1 (the system, Hold the Palace, the 7pm
+  Bulletin, the title card); balance slice D (factions remember your
+  decisions).
+- **2026-09-24:** the mobile web version, published free on GitHub Pages
+  (https://ohfrinzx.github.io/Reign-Check/, `.github/workflows/deploy.yml`;
+  every merge into the default branch goes live). `docs/MOBILE_AND_HOSTING.md`.
+- **2026-09-21 → 23:** Phases 1–3 (the playable core and look; acts, the
+  confidence vote, the Back Room, mandates, run deck, meta-progression;
+  faction demands, character events, crisis chains) and balance slices A–C.
+
+**Built, waiting for the owner's playtest:** mini-games slice 3 part B —
+Who Was in the Stairwell? and The Ambassador's Table (2026-10-07).
+
+**Later, only with the owner's go-ahead:** sound, a coup crisis chain, the
+remaining ending types, the two unbuilt mini-game ideas.
+
+`SAVE_VERSION` is **14**. Tests: **299**, all passing. Careful-play
+survival (balance probe): **68%**.
 
 ## 3. How work is done here
 
@@ -95,9 +89,13 @@ go-ahead. Content (cards, items, lines) is written as part of the slice it
 belongs to, not as a separate pass.
 
 **The owner's preferences:** concise answers without filler; ask
-clarifying questions when a request is unclear or leaves something out;
-when using material from the web, always list the source so it can be
-checked.
+clarifying questions when a request is unclear or leaves something out
+(and before designing anything the owner hasn't described); when using
+material from the web, always list the source so it can be checked.
+Delegating to sub-agents is fine, but use the smallest model that does
+the job well, not the biggest (owner, 2026-10-07). Sub-agents that build
+in parallel each get their own git worktree and run browser checks under
+`flock /tmp/reign-check-browser.lock` (they share port 5173).
 
 ## 3a. Required hand-off report — every agent, every time
 
@@ -241,17 +239,17 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `favours.mjs` | aimed favours, disabled-with-reason, receipt |
 | `hostile.mjs` | hostile faction pop-up, daily action, desk danger |
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
-| `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press; Shred's number keys on a laptop, none on a phone, act 3 won by keys alone); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
+| `minigames.mjs` | Bread Lines, Walk in the Weather (the Kilometre) and Shred the Ledger played for real (taps, keys, one tap = one press; Shred's number keys on a laptop, none on a phone, act 3 won by keys alone); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
 | `stat-guide.mjs` | the numbers explained: result pills say what they feed (→ GRIP), "What do these mean?" opens/closes, Brief me's ten cards, night summary names + note, the Grip tip's parts (desktop + phone) |
 | `mole.mjs`, `budget.mjs`, `pigeon.mjs`, `stairwell.mjs`, `ambassador.mjs` | slice 3's games played for real at 1366×700 (keys) and 390×844 (touch): a win, a loss (wrong name / doing nothing), number or key hints on laptops only, Reduce Motion. Each plays real time (~100 s; Find the Mole uses Playwright's fake clock) |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
-| `phone.mjs` | the phone layout: 28 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
+| `phone.mjs` | the phone layout: 33 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
-| `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 28 screens at 1366×700 and 1100×700. `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
+| `desktop-snap.mjs` (not in the default list) | desktop before/after, pixel by pixel, 33 screens at 1366×700 and 1100×700 (screens without a "before" picture are listed as new). The `ending` screen changes whenever daily games or results change (its scripted run plays out differently). `SNAP_MODE=save node tools/run-browser.mjs desktop-snap` BEFORE a UI change, then `node tools/run-browser.mjs desktop-snap` after |
 | `pages-preview.mjs` (no dev server; run after `npm run build`) | serves `dist/` from `/Reign-Check/` like GitHub Pages: no failed requests, all fonts load, manifest + icons, game starts |
 | `phone-audit.mjs` | the original measuring tool (screenshots + numbers), superseded by `phone.mjs` |
 
-`tools/scenes.mjs` reaches each of those 28 screens from a fixed seed (the
+`tools/scenes.mjs` reaches each of those 33 screens from a fixed seed (the
 mini-game ones through practice mode; the real-time ones with `&freeze`); both
 `phone.mjs` and `desktop-snap.mjs` use it. `tools/make-icons.mjs` redraws
 the Home Screen icons in `public/icons/`.
@@ -265,6 +263,9 @@ Screenshots go to `<OS temp>/reign-check-shots/` (`REIGN_SHOTS` overrides).
 **Tooling gotchas that have bitten agents before:**
 - Close demand pop-ups (`.demand-pop .dm-foot .btn`) before driving a day;
   keyboard shortcuts are disabled while one is open.
+- **The balance probe is part of `npm test`** (`balance.test.ts` prints a
+  line per play style). It takes ~30 s; a quick unit run can skip it with
+  `npx vitest run --dir src --exclude '**/balance*'`.
 - **From day 2 every day has a mini-game** (a full-screen `.mg-full`, no
   `.opt` buttons). A tool that drives days must call `passMinigame(page)`
   from `tools/browser.mjs` (it gives the game up and goes on). Engine-side
@@ -318,8 +319,9 @@ src/game/            pure logic, no React/DOM, fully testable
                      demands (+ hostile actions, triggered demands),
                      consequences (marks, reactions), characterEvents,
                      characterRequests, crises, shop, minigames (the cards,
-                     story intros and how-to-play; slice 3's games in
-                     mgMole, mgBudget, mgPigeon)
+                     story intros and how-to-play; slice 3's games each
+                     in their own file: mgMole, mgBudget, mgPigeon,
+                     mgStairwell, mgAmbassador)
 src/ui/
   components/        CardView (3 card layouts + OptionText), DeltaPills
                      (result pills + "What do these mean?"), Rail (also the
@@ -340,7 +342,7 @@ public/              fonts/ (relative URLs — required under /Reign-Check/),
                      icons/ + manifest.webmanifest (Home Screen)
 .github/workflows/   deploy.yml — test, build, publish to GitHub Pages
 tools/               Playwright browser checks (§7)
-docs/                SYSTEMS.md, MOBILE_AND_HOSTING.md, MINIGAMES.md, DESIGN_V2.md,
+docs/                SYSTEMS.md, BALANCE.md, MOBILE_AND_HOSTING.md, MINIGAMES.md, DESIGN_V2.md,
                      mockups/ (design exploration), archive/ (history)
 ```
 
@@ -426,5 +428,8 @@ Update in the same session, not "later":
   status summary.
 - **`docs/SYSTEMS.md`** — whenever a system's behaviour or numbers change.
   Describe how it works now, not the history.
+- **`docs/BALANCE.md`** — every balance change gets a row in its change
+  log (§5) in the same commit, with the probe before/after; the knob
+  inventory (§2) and the baseline (§3) are kept current.
 - **`docs/DESIGN_V2.md`** — design decisions and the roadmap.
 - **`CLAUDE.md`** — only if the reading order changes; it just points here.

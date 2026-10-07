@@ -1,13 +1,18 @@
 # Design V2 — simplification and the roguelike turn
 
-**Status (2026-10-01): Phases 1–3, balance slice D (factions remember your
-decisions) and the mobile web version on GitHub Pages
-(`docs/MOBILE_AND_HOSTING.md`) are complete and owner-approved. The next
-job is mini-games (`docs/MINIGAMES.md`).** This file is the design record: the
-decisions, the evidence behind them and the roadmap (§9, §10). Older
-status notes inside it describe earlier checkpoints and are kept as
-history. **For how the systems work today, see `docs/SYSTEMS.md`**; for
-the rules and workflow, `AGENTS.md`.
+**Status (2026-10-07): Phases 1–3, balance slices A–D, the mobile web
+version on GitHub Pages (`docs/MOBILE_AND_HOSTING.md`) and mini-games
+slices 1–3 (Phase 5, ten games; `docs/MINIGAMES.md`) are built; all are
+owner-approved except mini-games slice 3 part B, which waits for the
+owner's playtest. The next job is a balancing pass on the core systems
+(`docs/BALANCE.md`).**
+
+This file is the **design record**: the decisions, the evidence behind
+them, and the roadmap as it was written (§9, §10). Its status notes and
+"what is next" lines describe earlier checkpoints and are kept as history
+— they are not instructions. **For how the systems work today, see
+`docs/SYSTEMS.md`**; for what is next, `PROJECT_STATUS.md`; for the rules
+and workflow, `AGENTS.md`.
 
 Decisions made by the owner, in order:
 1. Visual direction: the flat top-down **desk**, then **Poster** skin
@@ -34,8 +39,11 @@ Decisions made by the owner, in order:
    folded into Phase 2's sub-steps) and section 10 (the mobile guardrails —
    what to preserve and what to avoid, no mobile work scheduled).
 
-**What is NOT built yet:** nothing in Phase 2. Read section 9 for later
-phases and section 10 for the mobile architecture guardrails.
+**What is NOT built yet (2026-10-07):** sound, a coup crisis chain, the
+remaining ending types (assassination, election defeat, constitutional
+removal), and Phase 4's native iOS app (the web version is installable
+from the browser instead). Section 10 holds the mobile architecture
+guardrails, which still apply.
 
 ---
 
@@ -1375,12 +1383,12 @@ when it's actually picked up.
 
 ### Phase 5 — Remaining nice-to-haves
 
-Lowest priority, no dependencies forcing an order: mini-games (**started
-2026-10-01**; the owner is designing them with the agent — brief in
-`docs/MINIGAMES.md`; `MinigameKey`/`CardDef.minigame` exist as hooks), sound, assassination/election-
-defeat/constitutional-removal endings, run history/legacy across runs (note
-this likely folds into Phase 2's meta-progression, §4.5, rather than being
-built twice).
+Lowest priority, no dependencies forcing an order: mini-games (**built
+2026-10-01 → 10-07**: ten games in three slices, the owner designing each
+with the agent — `docs/MINIGAMES.md`, `docs/SYSTEMS.md` §12), sound,
+assassination/election-defeat/constitutional-removal endings, run
+history/legacy across runs (**built** as Phase 2's meta-progression,
+§4.5).
 
 ### What "finished and polished" means for this project
 

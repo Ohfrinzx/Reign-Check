@@ -9,9 +9,13 @@ what the code does now, not how it got there; the history lives in
 `docs/archive/`. If a number here disagrees with the code, the code wins,
 so fix this file.
 
-**Last checked against the code:** 2026-10-06 (mini-games slice 3
-part A). At that point there were 299 unit tests, `SAVE_VERSION` 14, and
-a clean build.
+**Last checked against the code:** 2026-10-07 (full audit before the
+balancing pass; every count and number below re-read from the code). At
+that point there were 299 unit tests, `SAVE_VERSION` 14, and a clean build.
+
+**Balancing?** Read `docs/BALANCE.md` too: every tunable number and where
+it lives, how the probe works and its blind spots, the baseline, and the
+change log every balance change must be recorded in.
 
 ---
 
@@ -128,10 +132,13 @@ a clean build.
 ## 4. Money
 
 - **The daily budget** comes from `economy.ts computeBudget()`:
-  - **Revenue:** lithium, ports, taxes (1.2 × economy), and Ilvet.
-  - **Spending:** payroll, energy, security, corruption leakage, debt
-    service, commitments, and **Pensions & subsidies** (+$0.06B a day for
-    every day in office).
+  - **Revenue** (e = economy ÷ 50, so 1.0 at a middling economy):
+    lithium & salt 1.7 × e, port fees 0.8 × e, taxes 1.2 × e, the Ilvet
+    Free Zone 0.35 (+0.3 with the transit levy).
+  - **Spending:** payroll 2.05, energy imports 0.5, police & armed forces
+    0.6, corruption leakage (corruption ÷ 50), debt service (fiscal strain
+    ÷ 42), **Pensions & subsidies** (0.06 × (day − 1)), every commitment
+    (standing cost) and project upkeep. All in $B a day.
 - **Below 0:** debt damages support, stability and power every morning.
   Debt also costs votes, and at −$38B the run ends in collapse.
 
@@ -185,12 +192,17 @@ a clean build.
     live demand, within 6 days.
   - It ignores patience and cooldown, but not `MAX_LIVE`.
   - It shows "Because you …", and is never drawn at random.
-  - There are 8 of them, e.g. the Street demanding Vel's release.
+  - There are 13 of them: 8 from decisions (e.g. the Street demanding
+    Vel's release) and 5 from Budget Night walk-outs ("… wants its budget
+    back", §12).
 - **Demand reactions** (`DEMAND_REACTIONS`): a memory makes meeting that
   faction's demands cheaper (×0.6) or dearer (×1.5), or rules out bribes.
   - The reason shows in the demand ("CHEAPER / DEARER · Because you …")
     and under a disabled Bribe button.
-  - There are 17 of them (3 from mini-game results).
+  - There are 29 of them: 14 from decisions, 3 from Hold the Palace and
+    the Bulletin, 2 from Find the Mole (arrested → Security cheaper,
+    exposed → dearer) and 10 from Budget Night (generous → cheaper,
+    walked out → dearer, one pair per faction).
 - **Other factions' opinions:** `effects.ts RELATION_SPILL` (0.25) —
   gaining loyalty with one faction costs its rivals.
 - **Fading goodwill:** loyalty above 60 slides back a little every morning
@@ -238,30 +250,38 @@ a clean build.
 ## 8. Consequences: decisions that come back
 
 - **Where:** `consequences.ts`, words in `content/consequences.ts`.
-- **Marks:** 27 of them (`MARKS`), each left by specific options (`setBy`
-  lists the card id and option id). Three come from mini-game results
-  (`held-palace`, `palace-fell`, `bulletin-aired`).
+- **Marks:** 46 of them (`MARKS`). Most are left by specific options
+  (`setBy` lists the card id and option id): 24 by ordinary cards, 3 by
+  Hold the Palace and the Bulletin, 4 by Find the Mole's choices
+  (`mole-arrested`, `mole-turned`, `mole-fired`, `mole-exposed`). 15 are
+  set by a result instead of an option (`setBy: []`, listed in
+  `CardOutcome.marks`): Budget Night's `budget-generous-<f>`,
+  `budget-walkout-<f>`, `budget-claim-<f>` for the five factions.
   - Stored as the flag `mark:<id>`, holding the day it was made, and set
-    in `engine.ts chooseOption()` through `applyEffects()`.
+    in `engine.ts chooseOption()` through `applyEffects()` (a mark is set
+    once per run; a repeat keeps the first day).
   - The result screen says "ON THE RECORD: You … (day N). This will come
     up again."
   - The rail's **On the record** panel lists them.
-- **Card reactions:** 50 of them on 27 cards (`CONSEQUENCES`), applied by
+- **Card reactions:** 54 of them on 27 cards (`CONSEQUENCES`), applied by
   `shownOptions()`:
-  - **unlock** (10) adds a new option: "NEW OPTION · Because you …", with
+  - **unlock** (12) adds a new option: "NEW OPTION · Because you …", with
     a teal edge.
-  - **change** (24) replaces an option's hint and outcome: "CHANGED ·
+  - **change** (26) replaces an option's hint and outcome: "CHANGED ·
     Because you …", with a mustard edge.
   - **lock** (16) blocks an option, shown disabled with "✕ Because you …:
     <reason>". A locked option can't be chosen.
-  - With `faction` set (10 of the 50), the reason ends "— the army
+  - With `faction` set (12 of the 54), the reason ends "— the army
     remembers" (or the Sable Office / the Elites / the unions / the
     Street).
+  - The Find the Mole marks drive 4 of them, all on "A Reporter Has the
+    Documents" (`alert-leak`).
 - **Rule for content:** no card may ever have every option locked. A test
   sets every mark at once and checks each reacting card still has at least
   two usable options.
-- **Measured** (100 random-play runs): about 7.6 cards per run show a
-  reaction, in 99% of runs. A blocked option appears in about 76% of runs.
+- **Measured** (100 random-play runs, 2026-09-23 — before the mini-game
+  marks; not re-measured since): about 7.6 cards per run show a reaction,
+  in 99% of runs. A blocked option appears in about 76% of runs.
   Faction-triggered demands average about 1.6 per run.
 
 ## 9. The Back Room (shop) and favours
@@ -315,13 +335,14 @@ a clean build.
   | Policy | Survives |
   |---|---|
   | Careful | 68% |
-  | Random | 3% |
+  | Random | 5% |
   | Always first | 5% |
-  | Always last | 2% |
+  | Always last | 1% |
 
-  (2026-10-06: careful was 63% before the mole choices; the arrest — the
-  probe's choice on a won Find the Mole — and its mark add a few points.
-  At 400 runs the probe moves ±3 points with any small change.)
+  (2026-10-07, after slice 3 part B. Careful was 63% before the mole
+  choices; the arrest — the probe's choice on a won Find the Mole — and
+  its mark add a few points. At 120 runs the probe moves ±4 points, at
+  400 runs ±3, with any small change: see `docs/BALANCE.md` §3.)
 
   The probe plays mini-games as a result: `careful` wins 70% of them
   (`MINIGAME_SKILL`), the others half. Owner: careful play should be
@@ -338,7 +359,8 @@ a clean build.
 - **Where:** rules in `src/game/minigames/` (one file per game; when
   they appear in `index.ts`); words and results in `content/minigames.ts`
   (slice 3's games each have their own file: `content/mgMole.ts`,
-  `mgBudget.ts`, `mgPigeon.ts`); screens in `src/ui/minigames/`.
+  `mgBudget.ts`, `mgPigeon.ts`, `mgStairwell.ts`, `mgAmbassador.ts`);
+  screens in `src/ui/minigames/`.
 - **A mini-game is a card** with a `minigame` key and two options, `won`
   and `lost`. The player never sees them as buttons: the full-screen game
   picks one when it ends (`engine.ts finishMinigame()`, which also stores
