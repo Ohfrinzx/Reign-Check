@@ -6,7 +6,26 @@ one line per step. Full old handovers are in
 `docs/archive/SLICE_NOTES.md`. How the systems work today is in
 `docs/SYSTEMS.md`; the rules and workflow are in `AGENTS.md`.
 
-## Now (2026-10-06)
+## Now (2026-10-07)
+
+**MINI-GAMES SLICE 3 PART B — BUILT, WAITING FOR THE OWNER'S PLAYTEST.**
+Owner: *"Confirmed all standing play tests. Move to part B."*
+- **Who Was in the Stairwell?** (dark Sable Office archive; the Street):
+  files on the night Krast died; exactly one person lies; stamp the liar
+  and who was in the stairwell, then close the case. No clock. Every
+  puzzle has exactly one answer.
+- **The Ambassador's Table** (candlelit dinner; the Elites): five courses;
+  each round a gas price and a line; his face, glass and notebook show
+  how close he is to walking out. Kel Brask's limit: a deal over it loses.
+  The better the price, the bigger the gain.
+- Both are daily games (eight now) and picked by events (Stairwell Tapes;
+  Ostrene gas cutoff or foreign pressure 60+).
+- No save reset. Careful play still survives 68%.
+
+**Approved 2026-10-07:** slice 3 part A, the mole choices, Budget Night's
+retune and the jars at eight.
+
+## Earlier (2026-10-06)
 
 **MINI-GAMES SLICE 3, PART A — BUILT, WAITING FOR THE OWNER'S PLAYTEST.**
 Owner chose five games for slice 3, in two merges (*"good go onto the
@@ -141,6 +160,12 @@ mobile-first, each with its own look), sound, a coup crisis chain, the
 remaining ending types.
 
 ## Log (newest first)
+
+- **2026-10-07** — Owner confirmed all standing playtests (slice 3 part A
+  approved) and asked for part B, delegating to cheaper models. Built by
+  two Sonnet agents: Who Was in the Stairwell? (logic puzzle) and The
+  Ambassador's Table (five courses, tells). Lead's fixes: Brask's limit so
+  caving loses; rewards scale with the price; "four files" wording.
 
 - **2026-10-06** — Owner: Budget Night's jars should matter after eight.
   Chose: over the line → loyalty up (and remembered from $3B); short → a

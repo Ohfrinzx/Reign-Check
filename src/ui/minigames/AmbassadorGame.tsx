@@ -362,6 +362,7 @@ function describeEnd(st: AmbassadorState): MinigameEnd {
     return {
       won: false,
       score: 0,
+      stamp: 'Over the limit',
       headline: `Brask would not sign ${money(st.deal)}.`,
       detail: `He agreed to ${money(st.deal)}, but Brask's limit was ${money(st.setup.limit)}. A price at or under the limit was there: he would have gone as low as ${money(floor)}.`,
     };
@@ -377,6 +378,7 @@ function describeEnd(st: AmbassadorState): MinigameEnd {
   return {
     won: false,
     score: 0,
+    stamp: 'No deal',
     headline: 'Dessert came and went with no deal.',
     detail: 'You went through all five courses without agreeing a price. His price was always there to take.',
   };

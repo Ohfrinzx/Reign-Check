@@ -24,8 +24,9 @@ Then read, in order:
   approved. **Mini-games slices 1 and 2** are approved, as are the number
   explanations, the slower Bulletin and Shred's laptop keys.
   **Mini-games slice 3 part A** (Find the Mole, Budget Night, The Pigeon
-  Run) is built and waiting for the owner's playtest; part B (Stairwell,
-  Ambassador's Table) comes after it (`docs/MINIGAMES.md`). Ask before
+  Run) is approved; **part B** (Who Was in the Stairwell?, The
+  Ambassador's Table) is built and waiting for the owner's playtest
+  (`docs/MINIGAMES.md`). Ask before
   designing the next games. **Every
   merge into the default branch now publishes the live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`

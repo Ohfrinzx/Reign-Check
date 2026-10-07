@@ -62,6 +62,8 @@ export interface MinigameEnd {
   choice?: string;
   /** facts for the result text (engine.ts finishMinigame()) */
   flags?: Record<string, number>;
+  /** a stamp for this particular ending, instead of the game's won/lost words */
+  stamp?: string;
 }
 
 export const REDUCED = '(prefers-reduced-motion: reduce)';
@@ -249,7 +251,7 @@ export function MinigameScreen({
         <>
           <main className="mg-body">
             <section className={`mg-sheet mg-end ${end?.won ? 'won' : 'lost'}`}>
-              <div className="mg-stamp">{end?.won ? words.won : words.lost}</div>
+              <div className="mg-stamp">{end?.stamp ?? (end?.won ? words.won : words.lost)}</div>
               <h2>{end?.headline}</h2>
               <p>{end?.detail}</p>
             </section>

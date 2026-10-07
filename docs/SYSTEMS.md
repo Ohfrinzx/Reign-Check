@@ -10,7 +10,7 @@ what the code does now, not how it got there; the history lives in
 so fix this file.
 
 **Last checked against the code:** 2026-10-06 (mini-games slice 3
-part A). At that point there were 252 unit tests, `SAVE_VERSION` 14, and
+part A). At that point there were 299 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -597,6 +597,32 @@ a clean build.
   lost: Legitimacy −5, support −2, scandal +8, Street −4.
   **Picked by** the Stairwell Tapes crisis, or scandal 50+ on the Stairwell
   mandate.
+- **The Ambassador's Table** (`ambassador.ts`; a candlelit claret dining
+  room; the Elites; slice 3 part B). Five courses, five rounds, no clock.
+  Gas is priced per 1,000 m³; he opens at $430–500. Each round: an offer
+  (his price, or $20 / 40 / 60 / 80 under it; laptops 1–5) and a line
+  (Flatter him, Shared history, Stand firm, Mention Sereth; 6–9), then
+  Enter. At or above his secret floor he signs; below it he refuses,
+  concedes a quarter of the way, and loses patience (more the further
+  under); the line adds or takes patience by his hidden temper (vain /
+  proud / trader / nervous). Patience 0: he walks out. No deal by dessert
+  loses. **Tells** (face, glass, notebook): relaxed (60+) / irritated /
+  about to stand (under 30), also written in words; act 2 freezes one tell
+  at "relaxed", act 3 has one tell show a level too calm (two always stay
+  honest). **Kel Brask's limit** (shown from the start: "Do not sign above
+  $X"): a deal over it is a loss ("Over the limit"); the limit sits 0.4 /
+  0.35 / 0.3 of the gap above his floor (never under $20 above it), so a
+  deal under the limit always exists. Score 0–100 from his ask to his
+  floor. **The better the price, the bigger the gain:** 85+ Legitimacy +6,
+  economy +6, $1B, foreign −12, Elites +3; 75–84 Legitimacy +5, economy +4,
+  foreign −10, Elites +2; under 75 Legitimacy +2, economy +2, foreign −6,
+  Elites +1 (every faction +0.5 / +0.5 / +0.3). Lost: Legitimacy −4,
+  economy −3, foreign +6, Elites −4. By act 1 / 2 / 3: annoy 6 / 8 / 10,
+  hit 10 / 12 / 18. Simulated (win % / average score): a careful tell
+  reader 100/95, 91/96, 84/90; a face-glancing reader 100/95, 81/96, 73/90;
+  greedy 11 / 0 / 0%; caving (his price) 0%; timid 11 / 26 / 26%; offering
+  just under the limit at once 100% but score ~71 (the small reward).
+  **Picked by** the Ostrene gas cutoff or foreign pressure 60+.
 - **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon|stairwell|ambassador`
   (optional `&seed=`, `&act=`) opens one game on its own, never saved —
   for playtesting. The browser tools use it too (`&freeze` or

@@ -238,6 +238,7 @@ try {
     await cave.locator('.mg-end').waitFor({ timeout: 10000 });
     assert.ok(await cave.locator('.mg-end.lost').count(), 'Caving to his price loses');
     assert.match(await cave.locator('.mg-end h2').innerText(), /Brask would not sign \$\d{3}/, 'The headline says Brask would not sign');
+    assert.match(await cave.locator('.mg-stamp').innerText(), /Over the limit/i, 'The stamp says over the limit, not a walk-out');
     assert.match(await cave.locator('.mg-end p').innerText(), /Brask's limit was \$\d{3}/, 'The detail says the limit');
     await cave.screenshot({ path: shotPath('AM-caved-1366.png') });
     await cave.locator('.mg-foot .btn-primary').click();

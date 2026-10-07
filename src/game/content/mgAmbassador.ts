@@ -14,10 +14,29 @@ export const AMBASSADOR_CARD_ID = 'mg-ambassador';
 
 const score = (s: GameState) => s.flags.mgScore;
 
+/**
+ * The better the price, the bigger the gain (2026-10-07): a deal anywhere
+ * under Brask's limit wins, so a player who simply offers just under the
+ * limit always gets a deal. Reading his tells for a better price has to be
+ * worth it. Score is 0–100 from his opening ask (0) to his secret floor
+ * (100); a simulation has no score and gets the middle tier.
+ */
+export const AMBASSADOR_GREAT = 85;
+export const AMBASSADOR_FAIR_BELOW = 75;
 const AMBASSADOR_WON: Effects = {
   stats: { legitimacy: 5, economy: 4 },
   hidden: { foreign: -10 },
   factions: { all: { loyalty: 0.5 }, concord: { loyalty: 2 } },
+};
+const AMBASSADOR_WON_GREAT: Effects = {
+  stats: { legitimacy: 6, economy: 6, treasury: 1 },
+  hidden: { foreign: -12 },
+  factions: { all: { loyalty: 0.5 }, concord: { loyalty: 3 } },
+};
+const AMBASSADOR_WON_FAIR: Effects = {
+  stats: { legitimacy: 2, economy: 2 },
+  hidden: { foreign: -6 },
+  factions: { all: { loyalty: 0.3 }, concord: { loyalty: 1 } },
 };
 const AMBASSADOR_LOST: Effects = {
   stats: { legitimacy: -4, economy: -3 },
@@ -38,13 +57,16 @@ export const AMBASSADOR_CARD: CardDef = {
     {
       id: 'won',
       label: 'You got the gas deal.',
-      hint: 'Legitimacy and the economy go up, every faction warms a little, the Elites most; Ostrene\'s patience grows.',
+      hint: 'Legitimacy and the economy go up, every faction warms a little, the Elites most; Ostrene\'s patience grows. The better the price, the bigger the gain.',
       outcome: (s): CardOutcome => ({
-        text: (score(s) ?? 0) >= 85
-          ? 'The ambassador signed on the tablecloth, which in Ostrene counts. The price is better than the Finance Ministry hoped for.\n\nThe Elites have their gas, and nobody had to be humiliated in public.'
-          : 'It was not the price you wanted, but it was a price, and he signed it. The pipes stay full this winter.',
+        text: (score(s) ?? 80) >= AMBASSADOR_GREAT
+          ? 'The ambassador signed on the tablecloth, which in Ostrene counts. The price is better than the Finance Ministry hoped for, and the savings start this month.\n\nThe Elites have their gas, and nobody had to be humiliated in public.'
+          : (score(s) ?? 80) >= AMBASSADOR_FAIR_BELOW
+            ? 'It was a fair price, and he signed it. The pipes stay full this winter.'
+            : 'He signed, just under Brask\'s limit. The pipes stay full, but Brask spent the walk back to the office doing sums, and none of them made him smile.',
         tone: 'good',
-        effects: AMBASSADOR_WON,
+        effects: (score(s) ?? 80) >= AMBASSADOR_GREAT ? AMBASSADOR_WON_GREAT
+          : (score(s) ?? 80) >= AMBASSADOR_FAIR_BELOW ? AMBASSADOR_WON : AMBASSADOR_WON_FAIR,
       }),
     },
     {
@@ -83,7 +105,7 @@ export function ambassadorIntro(s: GameState): MinigameIntro {
       'Push while he is relaxed, and settle when he is not. If he leaves, or there is no deal under the limit by dessert, you lose.',
     ],
     stakes: {
-      win: 'Win: Legitimacy and the economy go up, every faction warms a little (the Elites most), and Ostrene\'s patience grows.',
+      win: 'Win: a deal at or under Brask\'s limit. Legitimacy and the economy go up, every faction warms a little (the Elites most), and Ostrene\'s patience grows. The better the price, the bigger the gain.',
       lose: 'Lose: Legitimacy, the economy and the Elites\' loyalty drop, and Ostrene runs shorter of patience.',
     },
     ...(crisis ? { because: 'Today\'s game comes from the Ostrene gas cutoff.' } : {}),
