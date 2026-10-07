@@ -3974,5 +3974,450 @@ abbr.term{
 
 /* ---- THE AMBASSADOR'S TABLE (.mg-ambassador): a candlelit dinner table.
    BEGIN AMBASSADOR */
-.ambassador-placeholder{padding:40px;text-align:center}
+/* Owner (2026-10-06): a calm, warm, candlelit dinner (not dark like the
+   archive): a claret dining room, a white tablecloth, candles that flicker,
+   five courses arriving one per round, and the ambassador across the table
+   whose face, glass and notebook are his tells. Rules: game/minigames/
+   ambassador.ts; screen: ui/minigames/AmbassadorGame.tsx. */
+
+.app.mg-full.mg-ambassador{
+  --paper:#fbf3e3; --paper-2:#f3e4c6; --paper-3:#e8d3a8; --ink:#34190f; --ink-soft:#6e4a38; --ash:#94705a;
+  --red:#a3262e; --teal:#2f7a55; --good:#2f7a55; --mustard:#b8862b; --hair:rgba(80,40,20,.2); --mg-bar:#4a1620;
+  --am-gold:#d9a441; --am-claret:#6b1f2d; --am-green:#2f7a55; --am-amber:#d98a1f; --am-red:#c4202c;
+  background:
+    radial-gradient(ellipse 80% 46% at 50% 0%, rgba(255,238,196,.95), transparent 72%),
+    linear-gradient(#f7e8c9, #ecd3a0);
+}
+.mg-ambassador .mg-top{border-bottom:3px solid var(--am-gold);--teal:#8fe3b2;--red:#ff9a8f;--mustard:#f4c862}
+.mg-ambassador .mg-top .tone-ok{color:#d3e89f}
+.mg-ambassador .mg-top .bg-ok{background:#d3e89f}
+.mg-ambassador .mg-top .res .r{border-left-color:rgba(255,255,255,.16)}
+.mg-ambassador .mg-light{background:#ffb84a;box-shadow:0 0 12px #ffb84a}
+.mg-ambassador .mg-story h1{color:var(--am-claret)}
+.mg-ambassador .mg-kicker{color:#a8761c}
+.mg-ambassador .mg-foot{background:#f8eed8}
+.mg-ambassador .btn-primary{background:var(--am-claret);border-color:var(--am-claret);color:#fff}
+.mg-ambassador .btn-primary:hover:not(:disabled){background:#8a2c3b;border-color:#8a2c3b}
+.mg-ambassador .btn-primary:disabled{background:#cdb48f;border-color:#cdb48f;color:#fff8e8;opacity:1}
+
+/* the title card: the cloth is laid, a plate is served, two candles are lit */
+.mg-veil-ambassador{background:radial-gradient(ellipse 70% 60% at 50% 55%, #7d2837, #4a1622 70%, #34101a);color:#fbeed1;animation:amVeilIn .6s ease-out both}
+.mg-veil-ambassador .mg-veil-fx{
+  --flame-y:calc(84% - clamp(110px,22vh,190px) - 20px);
+  background:
+    radial-gradient(circle 210px at 18% var(--flame-y), rgba(255,196,96,.55), transparent 72%),
+    radial-gradient(circle 210px at 82% var(--flame-y), rgba(255,196,96,.55), transparent 72%);
+  animation:amVeilGlow 2.4s ease-in-out both;
+}
+.mg-veil-ambassador::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:16%;pointer-events:none;
+  background:linear-gradient(#fffaf0,#efe3cc);border-top:3px solid #d9a441;box-shadow:0 -10px 28px rgba(0,0,0,.28);
+  transform-origin:50% 100%;animation:amCloth .75s .1s cubic-bezier(.2,.9,.3,1) both;
+}
+.mg-veil-ambassador::before{
+  content:'';position:absolute;left:50%;bottom:calc(8% - 20px);width:min(300px,64vw);height:46px;margin-left:calc(min(300px,64vw) / -2);pointer-events:none;z-index:1;
+  background:radial-gradient(ellipse 50% 50% at 50% 42%, #fff 0 56%, #e9dcc0 60% 66%, #fffdf8 70% 86%, rgba(0,0,0,.2) 90%, transparent 94%);
+  animation:amServeVeil .9s .85s cubic-bezier(.2,1.1,.4,1) both;
+}
+/* the candles are drawn with the flame as the top of the same box, so it can flicker on its own layer */
+.mg-veil-ambassador .mg-veil-fx::before,.mg-veil-ambassador .mg-veil-fx::after{
+  content:'';position:absolute;bottom:16%;width:16px;height:calc(clamp(110px,22vh,190px) + 38px);
+  background:
+    radial-gradient(ellipse 5px 12px at 50% 20px, #fff8d4 0 30%, #ffc247 55%, rgba(255,140,30,0) 76%) 50% 0 / 100% 38px no-repeat,
+    linear-gradient(90deg,#e4d6b3,#fff7df 45%,#d4c398) 0 100% / 100% calc(100% - 38px) no-repeat;
+  filter:drop-shadow(0 0 14px rgba(255,180,70,.7));
+  animation:amVeilFlame .8s ease-in-out infinite alternate;
+}
+.mg-veil-ambassador .mg-veil-fx::before{left:calc(18% - 8px)}
+.mg-veil-ambassador .mg-veil-fx::after{right:calc(18% - 8px);animation-duration:1.05s}
+.mg-veil-ambassador .mg-veil-kicker{color:#f1c36a;letter-spacing:.34em;animation-delay:.55s}
+.mg-veil-ambassador .mg-veil-title{
+  font-family:var(--head);color:#fff4d6;text-shadow:0 0 28px rgba(255,190,90,.45), 0 3px 0 rgba(0,0,0,.25);
+  animation:amPlaceCard .75s .6s cubic-bezier(.2,1.25,.4,1) forwards;
+}
+.mg-veil-ambassador .mg-veil-teaser{color:#f0d9aa;animation-delay:1.25s}
+.mg-veil-ambassador .mg-veil-card{padding:26px 22px 22px;border-radius:6px;background:rgba(40,10,18,.45);box-shadow:0 0 0 1px rgba(241,195,106,.5), inset 0 0 0 5px rgba(40,10,18,.35), inset 0 0 0 6px rgba(241,195,106,.35);margin-bottom:6vh}
+.mg-veil-ambassador .mg-veil-card .mg-veil-teaser::after{
+  content:'';display:block;height:2px;width:0;margin:14px auto 0;background:linear-gradient(90deg,transparent,#f1c36a,transparent);
+  animation:amRule 1s 1.5s ease-out forwards;
+}
+@keyframes amCloth{from{transform:translateY(100%) scaleY(.4)}60%{transform:translateY(-4%) scaleY(1.06)}to{transform:none}}
+@keyframes amServeVeil{from{transform:translateX(70vw) rotate(10deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes amVeilFlame{0%{background-position:50% 0, 0 100%;filter:drop-shadow(0 0 12px rgba(255,180,70,.6))}50%{background-position:46% 1px, 0 100%}100%{background-position:54% -1px, 0 100%;filter:drop-shadow(0 0 18px rgba(255,190,80,.85))}}
+@keyframes amVeilIn{from{opacity:0}to{opacity:1}}
+@keyframes amVeilGlow{0%{opacity:0}30%{opacity:.35}55%{opacity:1}70%{opacity:.82}85%{opacity:1}100%{opacity:.94}}
+@keyframes amPlaceCard{from{opacity:0;transform:translateY(-34px) rotate(-3deg) scale(1.06)}60%{opacity:1;transform:translateY(3px) rotate(.8deg)}to{opacity:1;transform:none}}
+@keyframes amRule{to{width:min(260px,70%)}}
+
+/* ------------------------------------------------------------ the game */
+.am{
+  width:100%;max-width:1000px;display:grid;gap:8px;align-content:start;
+  grid-template-columns:minmax(0,1fr);
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;
+}
+.am > *{min-width:0}
+.am-hud{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* the five courses: a plate each, the one being served ringed in gold */
+.am-courses{list-style:none;margin:0;padding:0;display:flex;gap:8px;min-width:0}
+.am-courses li{display:grid;justify-items:center;gap:3px;min-width:0}
+.am-pl{
+  position:relative;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #fffdf8 0 52%, #e9dcc0 56% 62%, #fffdf8 66%);
+  box-shadow:0 2px 4px rgba(80,40,20,.25), 0 0 0 1.5px #d8c9a8;
+  transition:transform .4s cubic-bezier(.3,1.4,.5,1), opacity .4s, box-shadow .4s;
+}
+.am-cn{font-family:var(--sans);font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ash)}
+.am-courses li.done .am-pl{opacity:.45;transform:scale(.88)}
+.am-courses li.done .am-pl::after{content:'';position:absolute;left:50%;top:50%;width:11px;height:6px;margin:-4px 0 0 -6px;border-radius:50%;background:#c79c63;opacity:.7}
+.am-courses li.now .am-pl{transform:scale(1.12);box-shadow:0 2px 6px rgba(80,40,20,.3), 0 0 0 2.5px var(--am-gold), 0 0 12px 2px rgba(255,190,90,.55)}
+.am-courses li.now .am-cn{color:var(--am-claret)}
+.am-courses li:not(.done):not(.now) .am-pl{opacity:.7}
+
+/* his price: a menu card with a gold rim; the number rolls when it changes */
+.am-board{
+  position:relative;display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:8px;row-gap:0;
+  padding:5px 12px 6px;border-radius:6px;background:#fffaf0;border:1.5px solid var(--am-gold);
+  box-shadow:0 3px 8px rgba(80,40,20,.18), inset 0 0 0 3px #fffaf0, inset 0 0 0 4px rgba(217,164,65,.45);
+}
+.am-board-k{grid-column:1;grid-row:1;font-family:var(--black);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--am-claret)}
+.am-board-v{grid-column:2;grid-row:1 / 3;font-family:var(--head);font-size:34px;line-height:1;color:var(--am-claret);animation:amRoll .55s cubic-bezier(.2,1.2,.4,1) both}
+.am-board-u{grid-column:1;grid-row:2;font-family:var(--mono);font-size:9.5px;color:var(--ink-soft);white-space:nowrap}
+.am-board-limit{grid-column:1 / 3;grid-row:3;font-family:var(--sans);font-size:11px;font-weight:700;color:var(--ink-soft);white-space:nowrap}
+.am-board-limit b{font-family:var(--black);color:var(--am-red);font-weight:400}
+.am-board-was{grid-column:1 / 3;grid-row:4;font-family:var(--mono);font-size:9.5px;color:var(--ash);text-decoration:line-through;text-decoration-color:rgba(163,38,46,.55)}
+@keyframes amRoll{from{opacity:0;transform:translateY(-55%) scale(1.15);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+
+/* the picture */
+.am-stage{
+  --am-r:.7;--am-w:max(min(100%, calc((100vh - 430px) / var(--am-r))), min(100%, 270px));
+  position:relative;width:var(--am-w);height:0;padding-bottom:calc(var(--am-w) * var(--am-r));margin:0 auto;
+  border-radius:16px;overflow:hidden;cursor:default;
+  box-shadow:0 14px 30px rgba(70,30,15,.32), 0 0 0 3px #d9a441, 0 0 0 5px #6b1f2d;
+}
+.am-svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.am-svg *{transform-box:fill-box}
+
+/* candles */
+.am-flame{transform-origin:50% 100%;animation:amFlame .9s ease-in-out infinite alternate}
+.am-candle:nth-of-type(2) .am-flame{animation-duration:1.15s}
+@keyframes amFlame{0%{transform:scale(1,1) skewX(-3deg)}30%{transform:scale(.93,1.1) skewX(4deg)}65%{transform:scale(1.05,.93) skewX(-5deg)}100%{transform:scale(.97,1.07) skewX(2deg)}}
+.am-glow{transform-origin:50% 50%;animation:amGlow 2.3s ease-in-out infinite alternate;mix-blend-mode:screen}
+@keyframes amGlow{0%{opacity:.7;transform:scale(.97)}35%{opacity:1;transform:scale(1.04)}70%{opacity:.8;transform:scale(.99)}100%{opacity:.95;transform:scale(1.02)}}
+.am-flicker{animation:amFlick 3.1s steps(1) infinite}
+@keyframes amFlick{0%,100%{opacity:.0}12%{opacity:.07}24%{opacity:.02}41%{opacity:.09}58%{opacity:.03}77%{opacity:.08}}
+
+/* the man */
+.am-breathe{animation:amBreathe 4.6s ease-in-out infinite}
+@keyframes amBreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.4px)}}
+.am-man{transition:transform .6s}
+.am-body{transition:transform .7s cubic-bezier(.3,.8,.3,1);transform-origin:50% 100%}
+.am-headwrap{transition:transform .7s cubic-bezier(.3,.8,.3,1)}
+.am-head *{transform-box:fill-box}
+.am-man[data-face="1"] .am-headwrap{transform:translateY(-1px)}
+.am-man[data-face="0"] .am-headwrap{transform:translateY(-5px)}
+.am-man[data-face="0"] .am-body{transform:translateY(-4px) scale(1.025)}
+.am-brow{transform-origin:50% 50%;transition:transform .55s cubic-bezier(.3,.8,.3,1)}
+.am-man[data-face="2"] .am-brow.l{transform:translateY(-2px) rotate(-6deg)}
+.am-man[data-face="2"] .am-brow.r{transform:translateY(-2px) rotate(6deg)}
+.am-man[data-face="1"] .am-brow.l{transform:translateY(2px) rotate(11deg)}
+.am-man[data-face="1"] .am-brow.r{transform:translateY(2px) rotate(-11deg)}
+.am-man[data-face="0"] .am-brow.l{transform:translateY(4.5px) rotate(23deg)}
+.am-man[data-face="0"] .am-brow.r{transform:translateY(4.5px) rotate(-23deg)}
+.am-lid{transition:transform .5s ease;transform:translateY(-9px)}
+.am-man[data-face="1"] .am-lid{transform:translateY(-6.2px)}
+.am-man[data-face="0"] .am-lid{transform:translateY(-4.4px)}
+.am-iris{transition:transform .5s}
+.am-man[data-face="0"] .am-iris{transform:translateY(.8px)}
+.am-mouth path{opacity:0;transition:opacity .4s}
+.am-man[data-face="2"] .am-mouth .m2,.am-man[data-face="1"] .am-mouth .m1,.am-man[data-face="0"] .am-mouth .m0{opacity:1}
+.am-stache{transform-origin:50% 50%;transition:transform .5s}
+.am-man[data-face="2"] .am-stache{transform:translateY(-.6px) scaleX(1.03)}
+.am-man[data-face="0"] .am-stache{transform:translateY(.8px) scaleX(.97)}
+.am-flush{opacity:0;transition:opacity .8s}
+.am-man[data-face="1"] .am-flush{opacity:.1}
+.am-man[data-face="0"] .am-flush{opacity:.3}
+.am-jaw,.am-sweat,.am-puffs{opacity:0;transition:opacity .5s}
+.am-man[data-face="0"] .am-jaw{opacity:.8}
+.am-man[data-face="0"] .am-sweat{opacity:1;animation:amSweat 2.2s ease-in infinite}
+.am-man[data-face="0"] .am-puffs{opacity:.75;animation:amPuffs 1.6s ease-out infinite}
+@keyframes amSweat{0%{transform:translateY(-4px);opacity:0}15%{opacity:1}100%{transform:translateY(16px);opacity:0}}
+@keyframes amPuffs{0%{transform:translateY(2px) scale(.7);opacity:0}30%{opacity:.8}100%{transform:translateY(-9px) scale(1.25);opacity:0}}
+
+/* how a line landed: the head moves, a mark pops beside it */
+.am-headwrap[data-react]{transform-box:view-box;transform-origin:200px 150px}
+.am-headwrap[data-react="nod"]{animation:amNod .9s ease-in-out}
+.am-headwrap[data-react="shake"]{animation:amShake .85s ease-in-out}
+.am-headwrap[data-react="laugh"]{animation:amLaugh 1.1s ease-in-out}
+.am-headwrap[data-react="cool"]{animation:amCool .9s ease-in-out}
+@keyframes amNod{0%,100%{transform:translateY(0)}25%{transform:translateY(5px)}50%{transform:translateY(0)}75%{transform:translateY(4px)}}
+@keyframes amShake{0%,100%{transform:translateX(0) rotate(0)}15%{transform:translateX(-4px) rotate(-2deg)}35%{transform:translateX(4px) rotate(2deg)}55%{transform:translateX(-3px) rotate(-1.5deg)}75%{transform:translateX(2px) rotate(1deg)}}
+@keyframes amLaugh{0%,100%{transform:rotate(0) translateY(0)}20%{transform:rotate(-5deg) translateY(-3px)}40%{transform:rotate(3deg) translateY(1px)}60%{transform:rotate(-4deg) translateY(-3px)}80%{transform:rotate(2deg) translateY(0)}}
+@keyframes amCool{0%,100%{transform:rotate(0)}40%{transform:rotate(-3deg) translateY(1px)}}
+.am-mark{animation:amPop 1.9s cubic-bezier(.2,1.4,.4,1) both;transform-box:fill-box;transform-origin:50% 50%}
+@keyframes amPop{0%{transform:scale(0) rotate(-20deg);opacity:0}16%{transform:scale(1.25) rotate(6deg);opacity:1}28%{transform:scale(1) rotate(0)}80%{opacity:1}100%{transform:scale(.9) translateY(-8px);opacity:0}}
+
+/* his glass: held and sipped, left alone, or pushed away */
+.am-glassmove{transform-box:view-box;transform-origin:0 0;transition:transform .8s cubic-bezier(.3,.8,.3,1)}
+.am-glassbox[data-glass="2"] .am-glassmove{transform:translate(44px,-30px) rotate(9deg);animation:amSip 6.4s ease-in-out infinite}
+.am-glassbox[data-glass="1"] .am-glassmove{transform:none}
+.am-glassbox[data-glass="0"] .am-glassmove{transform:translate(70px,16px) rotate(12deg)}
+@keyframes amSip{0%,52%{transform:translate(44px,-30px) rotate(9deg)}62%{transform:translate(80px,-58px) rotate(30deg)}70%{transform:translate(84px,-62px) rotate(58deg)}78%{transform:translate(80px,-58px) rotate(30deg)}88%,100%{transform:translate(44px,-30px) rotate(9deg)}}
+.am-hand{transition:opacity .4s, transform .8s cubic-bezier(.3,.8,.3,1)}
+.am-hand.hold{opacity:0}
+.am-glassbox[data-glass="2"] .am-hand.hold{opacity:1}
+.am-glassbox[data-glass="2"] .am-hand.rest{opacity:0}
+.am-glassbox[data-glass="0"] .am-hand.rest{transform:translate(40px,10px)}
+.am-wine{transform-box:view-box}
+.am-glass.pour .am-wine{animation:amFill 1.7s .1s ease-out both}
+@keyframes amFill{0%{transform:translateY(9px)}55%{transform:translateY(9px)}100%{transform:translateY(0)}}
+.am-bottle{pointer-events:none}
+.am-bottle-in{transform-box:view-box;transform-origin:0 0;animation:amBottle 1.9s ease-in-out both}
+@keyframes amBottle{0%{transform:translate(-40px,-10px) rotate(0);opacity:0}18%{transform:translate(0,0) rotate(0);opacity:1}30%{transform:translate(8px,6px) rotate(118deg)}72%{transform:translate(8px,6px) rotate(118deg);opacity:1}100%{transform:translate(-40px,-10px) rotate(0);opacity:0}}
+.am-stream{stroke-dasharray:24;animation:amStream 1.9s ease-in-out both}
+@keyframes amStream{0%,28%{stroke-dashoffset:24;opacity:0}36%{opacity:1;stroke-dashoffset:0}68%{stroke-dashoffset:0;opacity:1}78%,100%{stroke-dashoffset:-24;opacity:0}}
+
+/* his notebook: numbers, crossing out, closed */
+.am-nb-open,.am-nb-closed{transition:opacity .45s;transform-origin:50% 50%}
+.am-nb-closed{opacity:0}
+.am-notebox[data-notes="0"] .am-nb-open{opacity:0}
+.am-notebox[data-notes="0"] .am-nb-closed{opacity:1;animation:amSnap .45s cubic-bezier(.3,1.5,.5,1)}
+@keyframes amSnap{from{transform:scaleY(1.35)}to{transform:none}}
+.am-nb-nums text{animation:amWrite .9s .1s steps(7) both}
+@keyframes amWrite{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.am-nb-ink{stroke-dasharray:60;animation:amInk 1.2s .5s ease-out both}
+@keyframes amInk{from{stroke-dashoffset:60}to{stroke-dashoffset:0}}
+.am-nb-strike path{stroke-dasharray:26;stroke-dashoffset:26;opacity:0}
+.am-notebox[data-notes="1"] .am-nb-strike path{opacity:1;animation:amStrike .5s .15s ease-out forwards}
+.am-notebox[data-notes="1"] .am-nb-strike path:nth-child(2){animation-delay:.4s}
+@keyframes amStrike{to{stroke-dashoffset:0}}
+.am-pen{transform-origin:100% 100%}
+.am-notebox[data-notes="2"] .am-pen{animation:amScribble 1.1s ease-in-out infinite}
+.am-notebox[data-notes="1"] .am-pen{animation:amPress .5s ease-in-out infinite;transform:translate(-14px,3px)}
+@keyframes amScribble{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,1.4px)}50%{transform:translate(-5px,0)}75%{transform:translate(-3px,1.6px)}}
+@keyframes amPress{0%,100%{transform:translate(-14px,3px) rotate(0)}50%{transform:translate(-18px,4px) rotate(-3deg)}}
+.am-hand.pen{transition:transform .7s cubic-bezier(.3,.8,.3,1), opacity .4s}
+.am-notebox[data-notes="2"] .am-hand.pen{animation:amScribble 1.1s ease-in-out infinite}
+.am-notebox[data-notes="1"] .am-hand.pen{transform:translate(-14px,3px);animation:amPress .5s ease-in-out infinite}
+.am-notebox[data-notes="0"] .am-hand.pen{transform:translate(-30px,12px)}
+
+/* the courses */
+.am-plate{animation:amServe .85s .05s cubic-bezier(.2,1.15,.4,1) both}
+@keyframes amServe{from{transform:translateX(150px) rotate(8deg);opacity:0}to{transform:none;opacity:1}}
+.am-plate.out{animation:amTakeAway .8s ease-in both;pointer-events:none}
+@keyframes amTakeAway{from{transform:none;opacity:1}to{transform:translateX(-170px) rotate(-8deg);opacity:0}}
+.am-steam path{stroke-dasharray:36;animation:amSteam 2.4s ease-out infinite}
+@keyframes amSteam{0%{stroke-dashoffset:36;opacity:0}30%{opacity:.7}100%{stroke-dashoffset:-20;opacity:0}}
+
+/* your offer slides across the table on a card */
+.am-card{animation:amCardIn .65s cubic-bezier(.2,1,.3,1) both;transform-origin:50% 50%}
+@keyframes amCardIn{from{transform:translateY(68px) scale(1.6) rotate(-8deg);opacity:0}to{transform:none;opacity:1}}
+.am-card.back{animation:amCardBack .7s .2s ease-in forwards}
+@keyframes amCardBack{from{transform:none;opacity:1}to{transform:translateY(70px) scale(1.5) rotate(7deg);opacity:0}}
+.am-sign{stroke-dasharray:70;stroke-dashoffset:70;opacity:0}
+.am-seal{opacity:0;transform-origin:50% 50%}
+.am-card.signed .am-sign{opacity:1;animation:amSigned .9s .15s ease-out forwards}
+.am-card.signed .am-seal{animation:amSeal .5s 1s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes amSigned{to{stroke-dashoffset:0}}
+@keyframes amSeal{from{opacity:0;transform:scale(2.4)}to{opacity:1;transform:scale(1)}}
+.am-sparks path{transform-origin:50% 50%;opacity:0;animation:amSpark 1.4s ease-out infinite}
+@keyframes amSpark{0%{transform:scale(0) rotate(0);opacity:0}25%{opacity:1;transform:scale(1.3) rotate(20deg)}60%{opacity:.8;transform:scale(.9) rotate(40deg)}100%{opacity:0;transform:scale(.4) rotate(60deg)}}
+
+/* how it ends: a toast, a walk-out, or the cloth cleared */
+.am-svg.end-won .am-glassmove{animation:none;transform:translate(86px,-58px) rotate(24deg)}
+.am-svg.end-won .am-body{transform:translateY(-3px)}
+.am-napkin-drop{opacity:0}
+.am-svg.end-walked .am-napkin-drop,.am-svg.end-dessert .am-napkin-drop{animation:amNapkin .7s .2s cubic-bezier(.4,0,.6,1) both}
+@keyframes amNapkin{from{transform:translate(50px,-60px) rotate(40deg);opacity:0}30%{opacity:1}to{opacity:1}}
+.am-svg.end-walked .am-napkin{opacity:0}
+.am-svg.end-walked .am-breathe,.am-svg.end-dessert .am-breathe{animation:none}
+.am-svg.end-walked .am-man{animation:amLeave 1.9s .2s cubic-bezier(.5,0,.4,1) forwards}
+.am-svg.end-dessert .am-man{animation:amLeave 2.2s .5s cubic-bezier(.5,0,.4,1) forwards}
+@keyframes amLeave{0%{transform:none;opacity:1}22%{transform:translateY(-14px)}42%{transform:translateY(-34px)}62%{transform:translate(70px,-34px);opacity:1}100%{transform:translate(290px,-34px);opacity:0}}
+.am-svg.end-walked .am-chair,.am-svg.end-dessert .am-chair{animation:amChair .9s .3s ease-out forwards}
+@keyframes amChair{to{transform:translate(8px,-4px) rotate(5deg)}}
+.am-svg.end-dessert .am-plate{animation:amTakeAway .9s .2s ease-in forwards}
+.am-svg.end-walked .am-candle .am-glow{animation:amGlow 2.3s ease-in-out infinite alternate}
+
+/* Brask's note, and the stamp when a deal is over his limit */
+.am-note{filter:drop-shadow(0 3px 3px rgba(60,30,10,.3))}
+.am-nosign{opacity:0;transform-origin:50% 50%}
+.am-card.vetoed .am-nosign{animation:amNo .5s 1.1s cubic-bezier(.2,1.6,.4,1) forwards}
+.am-card.vetoed .am-seal{display:none}
+@keyframes amNo{from{opacity:0;transform:scale(2.2)}to{opacity:1;transform:scale(1)}}
+.mg-calm .am-card.vetoed .am-nosign{animation:fadeIn .3s forwards}
+.am-say.brask{left:2.5%;bottom:24%;max-width:50%;background:#ffe0dc;color:#5b1218;animation:amBubble .45s .15s cubic-bezier(.2,1.3,.4,1) both;transform-origin:20% 100%}
+.am-say.brask::after{right:18px;top:-5px}
+/* what he and you say */
+.am-say{
+  position:absolute;max-width:52%;padding:7px 11px;border-radius:12px;font-family:var(--body);font-size:13px;line-height:1.3;
+  box-shadow:0 5px 12px rgba(40,10,5,.35);pointer-events:none;
+}
+.am-say::after{content:'';position:absolute;width:12px;height:12px;background:inherit;transform:rotate(45deg)}
+.am-say.him{right:3%;top:6%;background:#fffaf0;color:#34190f;animation:amBubble .45s cubic-bezier(.2,1.3,.4,1) both;transform-origin:20% 100%}
+.am-say.him::after{left:16px;bottom:-5px}
+.am-say.him.r-delighted{background:#fff3c4}
+.am-say.him.r-offended,.am-say.him.v-walkout{background:#ffe0dc;color:#5b1218}
+.am-say.me{left:2.5%;bottom:5%;max-width:46%;background:#2f7a55;color:#fff;animation:amBubble .45s cubic-bezier(.2,1.3,.4,1) both;transform-origin:20% 100%}
+.am-say.me::after{right:18px;top:-5px}
+@keyframes amBubble{from{opacity:0;transform:translateY(8px) scale(.85)}to{opacity:1;transform:none}}
+
+/* his three tells, in words under the picture */
+.am-tells{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.am-tell{
+  display:grid;gap:1px;padding:5px 9px 6px;border-radius:8px;background:#fffaf0;border:1.5px solid var(--hair);
+  border-left:5px solid #b9a98a;transition:border-color .5s, background .5s;
+}
+.am-tell[data-level="2"]{border-left-color:var(--am-green)}
+.am-tell[data-level="1"]{border-left-color:var(--am-amber)}
+.am-tell[data-level="0"]{border-left-color:var(--am-red);background:#fff1ee}
+.am-tell-k{font-family:var(--black);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ash)}
+.am-ti{vertical-align:-2px;margin-right:5px;color:var(--ink-soft)}
+.am-tell-v{font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink);line-height:1.2}
+.am-tell-v i{display:none}
+.am-last{margin:0;min-height:2.7em;font-family:var(--sans);font-size:13px;font-weight:600;line-height:1.35;color:var(--ink-soft);text-align:center}
+
+/* the offer and the line */
+.am-panel{display:grid;gap:8px}
+.am-group{display:grid;gap:4px}
+.am-label{font-family:var(--black);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--am-claret)}
+.am-label span{font-family:var(--mono);font-weight:400;letter-spacing:.04em;text-transform:none;color:var(--ash);margin-left:6px}
+.am-offers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.am-lines{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.am-offer,.am-line{
+  position:relative;display:grid;place-items:center;align-content:center;gap:1px;min-height:52px;padding:6px 4px;border-radius:10px;
+  background:#fffaf0;border:2px solid #dfcba2;color:var(--ink);font-family:var(--sans);cursor:pointer;
+  transition:transform .15s, background .2s, border-color .2s, box-shadow .2s, color .2s;
+}
+.am-offer b{font-family:var(--head);font-size:21px;font-weight:400;line-height:1;letter-spacing:.01em}
+.am-offer em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--ash)}
+.am-offer.his em{color:var(--am-claret);font-weight:700}
+.am-line{min-height:46px;padding:6px 8px}
+.am-line b{font-size:13px;font-weight:800;line-height:1.15}
+.am-line em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.02em}
+.am-line.s-delighted em,.am-line.s-pleased em{color:var(--am-green)}
+.am-line.s-cool em{color:#6b7686}
+.am-line.s-offended em{color:var(--am-red)}
+.am-offer:hover:not(:disabled),.am-line:hover:not(:disabled){border-color:var(--am-gold);transform:translateY(-1px)}
+.am-offer:active:not(:disabled),.am-line:active:not(:disabled){transform:scale(.97)}
+.am-offer.over{background:#fff1ee;border-color:#e6b4ac}
+.am-offer.over b{color:var(--am-red)}
+.am-offer.over em{color:var(--am-red);font-weight:700}
+.am-offer.on,.am-line.on{background:var(--am-claret);border-color:var(--am-gold);color:#fff;box-shadow:0 4px 10px rgba(107,31,45,.35), inset 0 0 0 1px rgba(255,236,190,.35)}
+.am-offer.on em,.am-line.on em{color:#f6dca0}
+.am-offer.over.on{background:var(--am-red);border-color:#6b1f2d}
+.am-offer.over.on b,.am-offer.over.on em{color:#fff}
+.am-offer:disabled,.am-line:disabled{cursor:default;opacity:.72}
+.am-offer.on:disabled,.am-line.on:disabled{opacity:1}
+.am-offer kbd,.am-line kbd{
+  position:absolute;top:3px;left:4px;font-family:var(--mono);font-size:9.5px;padding:0 4px;border:1px solid var(--ash);border-radius:3px;background:#fffdf5;color:var(--ink);line-height:1.35
+}
+.am-offer:focus-visible,.am-line:focus-visible,.am-go:focus-visible{outline:3px solid #2457d6;outline-offset:2px}
+.am-go{width:100%;min-height:52px;font-size:14px;letter-spacing:.08em}
+.am-keys{font-family:var(--mono);font-size:11px;text-align:center;color:var(--ash)}
+.am-keys kbd{font-family:var(--mono);font-size:10.5px;padding:1px 5px;border:1px solid var(--ash);border-radius:3px;background:#fffdf5;color:var(--ink)}
+
+/* laptops and tablets wider than a phone: picture on the left, the table on the right */
+@media (min-width:1081px){
+  .am{grid-template-columns:minmax(0,1.55fr) minmax(300px,1fr);grid-template-areas:"hud hud" "stage panel" "tells panel" "last panel";column-gap:20px;align-content:start}
+  .am-hud{grid-area:hud}
+  .am-stage{grid-area:stage;--am-w:max(min(100%, calc((100vh - 280px) / var(--am-r))), min(100%, 270px))}
+  .am-tells{grid-area:tells}
+  .am-last{grid-area:last}
+  .am-panel{grid-area:panel;align-content:start;gap:12px;padding-top:2px}
+  .am-offers{grid-template-columns:1fr;gap:6px}
+  .am-offer{grid-template-columns:auto 1fr auto;min-height:44px;padding:4px 12px;justify-items:start}
+  .am-offer b{grid-column:2;font-size:22px}
+  .am-offer em{grid-column:3}
+  .am-offer kbd{position:static;grid-column:1}
+  .am-line kbd{left:6px;top:50%;transform:translateY(-50%)}
+  .am-line b{padding-left:14px}
+}
+/* Reduce Motion: the picture holds still, things fade, the tells keep a still picture of each state */
+.mg-calm .am-flame,.mg-calm .am-glow,.mg-calm .am-flicker,.mg-calm .am-breathe,.mg-calm .am-steam path,
+.mg-calm .am-glassbox[data-glass="2"] .am-glassmove,.mg-calm .am-notebox .am-pen,.mg-calm .am-notebox .am-hand.pen,
+.mg-calm .am-man[data-face="0"] .am-sweat,.mg-calm .am-man[data-face="0"] .am-puffs,.mg-calm .am-sparks path{animation:none}
+.mg-calm .am-sparks path{opacity:.9}
+.mg-calm .am-glassbox[data-glass="2"] .am-glassmove{transform:translate(44px,-30px) rotate(9deg)}
+.mg-calm .am-man[data-face="0"] .am-sweat{transform:translateY(4px)}
+.mg-calm .am-headwrap[data-react]{animation:none}
+.mg-calm .am-mark{animation:amFade 1.6s both}
+@keyframes amFade{0%{opacity:0}15%,80%{opacity:1}100%{opacity:0}}
+.mg-calm .am-plate,.mg-calm .am-card,.mg-calm .am-say,.mg-calm .am-board-v{animation:fadeIn .35s both}
+.mg-calm .am-plate.out{animation:fadeOut .35s forwards}
+.mg-calm .am-card.back{animation:fadeOut .35s .2s forwards}
+.mg-calm .am-nb-nums text,.mg-calm .am-nb-ink{animation:none;clip-path:none;stroke-dashoffset:0}
+.mg-calm .am-notebox[data-notes="1"] .am-nb-strike path{animation:none;stroke-dashoffset:0}
+.mg-calm .am-card.signed .am-sign{animation:none;stroke-dashoffset:0}
+.mg-calm .am-card.signed .am-seal{animation:fadeIn .3s forwards}
+.mg-calm .am-svg.end-walked .am-man,.mg-calm .am-svg.end-dessert .am-man{animation:fadeOut .6s .2s forwards}
+.mg-calm .am-svg.end-walked .am-chair,.mg-calm .am-svg.end-dessert .am-chair{animation:none}
+.mg-calm .am-svg.end-walked .am-napkin-drop,.mg-calm .am-svg.end-dessert .am-napkin-drop{animation:fadeIn .3s forwards}
+.mg-calm .am-svg.end-dessert .am-plate{animation:fadeOut .5s forwards}
+.mg-calm .am-svg.end-won .am-glassmove{transform:translate(86px,-58px) rotate(24deg)}
+.mg-calm .mg-veil-ambassador,.mg-calm .mg-veil-ambassador .mg-veil-fx{animation:fadeIn .3s both}
+.mg-calm .mg-veil-ambassador .mg-veil-fx::before,.mg-calm .mg-veil-ambassador .mg-veil-fx::after,.mg-calm .mg-veil-ambassador::before,.mg-calm .mg-veil-ambassador::after{animation:none}
+.mg-calm .mg-veil-ambassador .mg-veil-card .mg-veil-teaser::after{animation:none;width:min(260px,70%)}
+
+/* phones */
+@media (max-width:1080px){
+  .am-stage{--am-r:.909;--am-w:max(min(100%, calc((100vh - 590px - env(safe-area-inset-bottom)) / var(--am-r))), min(100%, 250px))}
+}
+@media (max-width:620px){
+  .am{gap:6px}
+  .am-hud{gap:6px}
+  .am-courses{gap:5px}
+  .am-pl{width:22px;height:22px}
+  .am-cn{font-size:8px;letter-spacing:.03em}
+  .am-board{padding:4px 9px 5px;column-gap:6px}
+  .am-board-v{font-size:28px}
+  .am-board-k{font-size:8.5px}
+  .am-board-u{font-size:8.5px}
+  .am-board-was{font-size:8.5px}
+  .am-stage{border-radius:12px}
+  .am-courses li:not(.now) .am-cn{display:none}
+  .am-courses li.now .am-cn{font-size:9px}
+  .am-say{font-size:11.5px;padding:5px 9px;max-width:56%}
+  .am-tells{gap:4px}
+  .am-tell{padding:4px 7px 5px}
+  .am-tell-k{font-size:8.5px}
+  .am-tell-v{font-size:11.5px}
+  .am-last{font-size:12px;min-height:2.6em}
+  .am-offers{gap:4px}
+  .am-offer{min-height:50px;padding:5px 2px}
+  .am-offer b{font-size:19px}
+  .am-offer em{font-size:9px}
+  .am-line{min-height:44px}
+  .am-line b{font-size:12.5px}
+  .am-go{min-height:50px}
+}
+/* landscape phones: the picture, then his price and tells, then the table */
+@media (max-width:1080px) and (max-height:500px){
+  .am{height:100%;grid-template-columns:auto minmax(110px,1fr) 262px;grid-template-rows:auto minmax(0,1fr);grid-template-areas:"stage hud panel" "stage tells panel";align-content:start;gap:6px 10px}
+  .am-stage{grid-area:stage;--am-w:auto;width:auto;height:calc(100vh - 80px);padding-bottom:0;aspect-ratio:400 / 316;margin:0;min-width:0;border-radius:12px}
+  .am-hud{grid-area:hud;flex-direction:column;align-items:stretch;gap:6px}
+  .am-courses{justify-content:space-between;gap:2px}
+  .am-pl{width:20px;height:20px}
+  .am-cn{display:none}
+  .am-board{padding:3px 8px 4px;display:flex;flex-direction:column;align-items:flex-start}
+  .am-board-k{order:1}
+  .am-board-v{order:2;font-size:28px}
+  .am-board-u{order:3;white-space:normal;font-size:8.5px}
+  .am-board-was{display:none}
+  .am-offer.his em{white-space:nowrap;font-size:7.5px;letter-spacing:-.03em}
+  .am-tells{grid-area:tells;grid-template-columns:1fr;align-content:start;gap:4px}
+  .am-tell{padding:3px 7px 4px}
+  .am-tell-k{font-size:8.5px}
+  .am-tell-v{font-size:11.5px}
+  .am-panel{grid-area:panel;gap:5px;align-content:start}
+  .am-last,.am-keys{display:none}
+  .am-offer{min-height:40px;padding:3px 2px}
+  .am-offer b{font-size:17px}
+  .am-offer em{font-size:8.5px}
+  .am-line{min-height:36px;padding:3px 6px}
+  .am-line b{font-size:11.5px}
+  .am-go{min-height:42px;font-size:12px}
+  .am-label{font-size:9px}
+  .am-say{font-size:10.5px;padding:4px 8px}
+}
 /* END AMBASSADOR ---- */
