@@ -337,6 +337,21 @@ describe('daily games and events (slice 2)', () => {
     expect(eventMinigames(s)).toEqual([MG_CARD.shred, MG_CARD.mole, MG_CARD.budget, MG_CARD.pigeon]);
   });
 
+  it('slice 3 part B events: the gas cutoff or Ostrene\'s patience running out → the Ambassador; the Stairwell Tapes → the Stairwell', () => {
+    const s = morning(5);
+    s.crisis = { id: 'gas', stage: 1, cardId: 'x', startedDay: 4, nextDay: 6 };
+    expect(eventMinigame(s)).toBe(MG_CARD.ambassador);
+    s.crisis = undefined; s.hidden.foreign = 60;
+    expect(eventMinigame(s)).toBe(MG_CARD.ambassador);
+    s.hidden.foreign = 10;
+    s.crisis = { id: 'tapes', stage: 1, cardId: 'x', startedDay: 4, nextDay: 6 };
+    expect(eventMinigame(s)).toBe(MG_CARD.stairwell);
+    s.crisis = undefined; s.mandateId = 'stairwell'; s.hidden.scandal = 50;
+    expect(eventMinigame(s)).toBe(MG_CARD.stairwell);
+    s.hidden.scandal = 10;
+    expect(eventMinigame(s)).toBeUndefined();
+  });
+
   it('an event never brings yesterday\'s game: the next event, or the usual draw, gets the day', () => {
     const s = morning(5);
     s.stats.treasury = -3; s.hidden.separatism = 55;

@@ -10,7 +10,7 @@ what the code does now, not how it got there; the history lives in
 so fix this file.
 
 **Last checked against the code:** 2026-10-06 (mini-games slice 3
-part A). At that point there were 252 unit tests, `SAVE_VERSION` 14, and
+part A). At that point there were 299 unit tests, `SAVE_VERSION` 14, and
 a clean build.
 
 ---
@@ -363,14 +363,17 @@ a clean build.
   mark (the factions remember them, §8).
 - **When they appear:**
   - **Daily:** from day 2 (`DAILY_FROM_DAY`), one drawn card is replaced by
-    a daily game (`DAILY_MINIGAMES`, six: the Bulletin, Bread Lines,
-    Shred the Ledger, Find the Mole, Budget Night, The Pigeon Run), at a
+    a daily game (`DAILY_MINIGAMES`, eight: the Bulletin, Bread Lines,
+    Shred the Ledger, Find the Mole, Budget Night, The Pigeon Run, Who Was
+    in the Stairwell?, The Ambassador's Table), at a
     random point in the day; never a queued card and never yesterday's
     game. Never on an act's first day (that day opens with The Last
     Kilometre). Picked by a hash of seed and day, not the run's RNG.
     **Events pick the game** (`eventMinigames()`, most urgent first):
     the Free Zone Ledger crisis → Shred the Ledger; the Bread Riots or a
-    hostile Street → Bread Lines; a hostile Sable Office, a character
+    hostile Street → Bread Lines; the Ostrene gas cutoff or foreign
+    pressure 60+ → The Ambassador's Table; the Stairwell Tapes (or scandal
+    50+ on the Stairwell mandate) → Who Was in the Stairwell?; a hostile Sable Office, a character
     about to turn on you, or leaks at 62+ → Find the Mole; debt or a
     Workers/Elites demand → Budget Night; separatism 50+ → The Pigeon Run.
     **An event never brings yesterday's game** (`eventMinigame()`): the
@@ -572,7 +575,55 @@ a clean build.
   all the time, always loses. Reduce Motion: 2/3 speed, no shake or
   flashes. Won: Legitimacy +5, Power +3, separatism −10, Army +2, every
   faction +0.5; lost: Legitimacy −4, Power −3, separatism +6, Army −4.
-- **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon`
+- **Who Was in the Stairwell?** (`stairwell.ts`; dark, a Sable Office
+  archive under a desk lamp; the Street; slice 3 part B). A calm logic
+  puzzle, no clock. Krast fell at 21:40; each file is a few typed
+  statements about where people were at that minute ("X was in P", "X was
+  not in P", "I was with X", "Nobody was in P", and from act 2 "X is
+  lying" / "X is telling the truth"). Exactly one person lies (every one
+  of their statements is false); exactly one person was in the stairwell.
+  Eight places on a three-floor plan; tapping a line lights its place.
+  Strike lines out as notes. Stamp one file LIAR and one IN THE STAIRWELL
+  (stamps can be moved or lifted), then **Close the case**: a wrong
+  stairwell name loses; score 100 with the right liar too, 60 without. By
+  act 1 / 2 / 3: files 4 / 4 / 5, about 8 / 12 / 15 statements, accusation
+  lines 0 / 1+ / 2+, a truthful red herring on the landing from act 2.
+  Every puzzle is checked at layout (`stairwellSetup` + a solver) to have
+  exactly one answer, reachable by plain deduction (`reasonOut`). Careful
+  solver 100% in every act; a guess ~1 in N; "take whoever says they were
+  in the stairwell" ~40%. Laptops: 1–5 files, ← → ↑ ↓, X strike, L / S
+  stamp, Enter close. Phones: one file at a time behind tabs. Won:
+  Legitimacy +5, support +3, scandal −10, Street +2, every faction +0.5;
+  lost: Legitimacy −5, support −2, scandal +8, Street −4.
+  **Picked by** the Stairwell Tapes crisis, or scandal 50+ on the Stairwell
+  mandate.
+- **The Ambassador's Table** (`ambassador.ts`; a candlelit claret dining
+  room; the Elites; slice 3 part B). Five courses, five rounds, no clock.
+  Gas is priced per 1,000 m³; he opens at $430–500. Each round: an offer
+  (his price, or $20 / 40 / 60 / 80 under it; laptops 1–5) and a line
+  (Flatter him, Shared history, Stand firm, Mention Sereth; 6–9), then
+  Enter. At or above his secret floor he signs; below it he refuses,
+  concedes a quarter of the way, and loses patience (more the further
+  under); the line adds or takes patience by his hidden temper (vain /
+  proud / trader / nervous). Patience 0: he walks out. No deal by dessert
+  loses. **Tells** (face, glass, notebook): relaxed (60+) / irritated /
+  about to stand (under 30), also written in words; act 2 freezes one tell
+  at "relaxed", act 3 has one tell show a level too calm (two always stay
+  honest). **Kel Brask's limit** (shown from the start: "Do not sign above
+  $X"): a deal over it is a loss ("Over the limit"); the limit sits 0.4 /
+  0.35 / 0.3 of the gap above his floor (never under $20 above it), so a
+  deal under the limit always exists. Score 0–100 from his ask to his
+  floor. **The better the price, the bigger the gain:** 85+ Legitimacy +6,
+  economy +6, $1B, foreign −12, Elites +3; 75–84 Legitimacy +5, economy +4,
+  foreign −10, Elites +2; under 75 Legitimacy +2, economy +2, foreign −6,
+  Elites +1 (every faction +0.5 / +0.5 / +0.3). Lost: Legitimacy −4,
+  economy −3, foreign +6, Elites −4. By act 1 / 2 / 3: annoy 6 / 8 / 10,
+  hit 10 / 12 / 18. Simulated (win % / average score): a careful tell
+  reader 100/95, 91/96, 84/90; a face-glancing reader 100/95, 81/96, 73/90;
+  greedy 11 / 0 / 0%; caving (his price) 0%; timid 11 / 26 / 26%; offering
+  just under the limit at once 100% but score ~71 (the small reward).
+  **Picked by** the Ostrene gas cutoff or foreign pressure 60+.
+- **Practice:** `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon|stairwell|ambassador`
   (optional `&seed=`, `&act=`) opens one game on its own, never saved —
   for playtesting. The browser tools use it too (`&freeze` or
   `&freeze=<ms>` holds the real-time clock still for pictures).

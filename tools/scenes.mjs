@@ -259,6 +259,9 @@ export const SCENES = [
   { name: 'mg-mole', primary: null, go: async (p) => { await practice(p, 'mole', 'play', '&freeze=6000'); } },
   { name: 'mg-budget', primary: null, go: async (p) => { await practice(p, 'budget', 'play', '&freeze=6000'); } },
   { name: 'mg-pigeon', primary: null, go: async (p) => { await practice(p, 'pigeon', 'play', '&freeze=4200'); } },
+  // slice 3, part B (calm games: no clock to freeze)
+  { name: 'mg-stairwell', primary: null, go: async (p) => { await practice(p, 'stairwell', 'play'); } },
+  { name: 'mg-ambassador', primary: null, go: async (p) => { await practice(p, 'ambassador', 'play'); } },
   { name: 'mg-result', primary: '.mg-result-body .outcome-foot .btn-primary', go: async (p) => { await seed(p, 'minigameResult'); } },
   { name: 'ending', primary: '.ending-sheet .btn-primary', go: async (p) => {
     await seed(p, 'preEnding'); await closeDemandPops(p);

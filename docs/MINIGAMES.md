@@ -9,10 +9,14 @@
 Palace** (coups), **The 7pm Bulletin** and the opening title card.
 **Slice 2 approved (2026-10-06):** **Bread Lines**, **The Last Kilometre**
 (Walk in the Weather), **Shred the Ledger** (with number keys on laptops).
-**Slice 3 part A built, waiting for the owner's playtest:** Find the
-Mole, Budget Night, The Pigeon Run (§2; rules and numbers in
-`docs/SYSTEMS.md` §12). **Part B next, after that playtest:** Who Was in
-the Stairwell?, The Ambassador's Table. How it works, with the
+**Slice 3 part A approved (2026-10-07)** (*"Confirmed all standing play
+tests. Move to part B"*): Find the Mole (with the choice of what happens
+to the mole), Budget Night (retuned; each jar judged at eight), The Pigeon
+Run. **Part B built, waiting for the owner's playtest (2026-10-07):** Who Was
+in the Stairwell?, The Ambassador's Table (both daily, picked by the
+Stairwell Tapes / Ostrene gas crises). That completes the idea list's
+chosen games (all of §3 except #4 Count the Votes and #11 Balcony Speech).
+Owner: delegate, but use only the model a task needs (not the biggest). How it works, with the
 numbers: `docs/SYSTEMS.md` §12.
 
 **Before the next slice:** ask the owner which games come next (the list

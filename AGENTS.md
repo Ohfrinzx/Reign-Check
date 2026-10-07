@@ -73,14 +73,18 @@ anything else without asking.**
   (7 / 6.5 / 6 s per story, counted after the slide-in).
 - **Approved 2026-10-06:** Shred the Ledger's number keys on laptops
   (every paper shows a digit 0–9; pressing it = tapping it).
-- **Mini-games slice 3, part A — built, waiting for the owner's playtest
-  (2026-10-06):** **Find the Mole** (dark night camera; watch who meets
+- **Mini-games slice 3, part B — built, waiting for the owner's playtest
+  (2026-10-07):** **Who Was in the Stairwell?** (dark archive logic puzzle:
+  one liar, name who was in the stairwell) and **The Ambassador's Table**
+  (five courses, read his face / glass / notes, stay under Brask's limit).
+  Eight daily games now. `docs/SYSTEMS.md` §12.
+- **Mini-games slice 3, part A — approved 2026-10-07:** **Find the Mole** (dark night camera; watch who meets
   the contact, name the mole), **Budget Night** (90 s, five jars, faction
   lines that keep moving), **The Pigeon Run** (hold to climb past hawks).
   All three are daily games and picked by events; six daily games now.
   Part B (Who Was in the Stairwell?, The Ambassador's Table) comes after
   the playtest. `docs/MINIGAMES.md` §2, `docs/SYSTEMS.md` §12.
-- `SAVE_VERSION` is **14**. Tests: **252**, all passing.
+- `SAVE_VERSION` is **14**. Tests: **299**, all passing.
 
 ## 3. How work is done here
 
@@ -214,7 +218,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 252 tests: content integrity, 200 full
+npm test           # vitest, 299 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -239,7 +243,7 @@ node tools/run-browser.mjs X # just check X (e.g. consequences)
 | `consequences.mjs` | on-the-record, new/locked/changed options, faction memory, faction-triggered demand, no-bribe |
 | `minigames.mjs` | Bread Lines, The Last Kilometre and Shred the Ledger played for real (taps, keys, one tap = one press; Shred's number keys on a laptop, none on a phone, act 3 won by keys alone); Hold the Palace won by tapping (desktop + phone, against the rules' own simulation) and lost; the Bulletin won/lost, its clock, a touch swipe; the daily game in a real run, same game after reload, Give up, the result; the Army strike ending the run; Reduce Motion |
 | `stat-guide.mjs` | the numbers explained: result pills say what they feed (→ GRIP), "What do these mean?" opens/closes, Brief me's ten cards, night summary names + note, the Grip tip's parts (desktop + phone) |
-| `mole.mjs`, `budget.mjs`, `pigeon.mjs` | slice 3's games played for real at 1366×700 (keys) and 390×844 (touch): a win, a loss (wrong name / doing nothing), number or key hints on laptops only, Reduce Motion. Each plays real time (~100 s; Find the Mole uses Playwright's fake clock) |
+| `mole.mjs`, `budget.mjs`, `pigeon.mjs`, `stairwell.mjs`, `ambassador.mjs` | slice 3's games played for real at 1366×700 (keys) and 390×844 (touch): a win, a loss (wrong name / doing nothing), number or key hints on laptops only, Reduce Motion. Each plays real time (~100 s; Find the Mole uses Playwright's fake clock) |
 | `verify.mjs`, `to-ending.mjs`, `playthrough.mjs` | full days, an ending and restart, save/reload |
 | `phone.mjs` | the phone layout: 28 screens × 5 sizes (390×844, 360×800, 768×1024, 844×390, and 390×844 with an emulated iPhone-Safari bottom safe area) with touch — no sideways overflow, primary action on screen and uncovered; ☰ menu, ledger, faction strip, Files drawer; two days by tapping |
 | `legacy.mjs` (not in the default list) | cross-run record on the title screen |
@@ -265,7 +269,7 @@ Screenshots go to `<OS temp>/reign-check-shots/` (`REIGN_SHOTS` overrides).
   `.opt` buttons). A tool that drives days must call `passMinigame(page)`
   from `tools/browser.mjs` (it gives the game up and goes on). Engine-side
   scripts can just `chooseOption(s, 'won' | 'lost')`. To open one game
-  directly: `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon&seed=N`.
+  directly: `?practice=palace|strike|bulletin|bread|kilometre|shred|mole|budget|pigeon|stairwell|ambassador&seed=N`.
   **Every act's first day opens with The Last Kilometre** before any card;
   `scenes.mjs`'s `briefing` recipe removes mini-games from its day so its
   card scenes still show a card.
@@ -301,7 +305,8 @@ src/game/            pure logic, no React/DOM, fully testable
   minigames/         Phase 5 mini-games: index.ts (when they appear: daily
                      slot, officers' plot, the Army's strike), and each
                      game's rules, pure: palace, bulletin, breadlines,
-                     weather (the Kilometre), shred, mole, budget, pigeon
+                     weather (the Kilometre), shred, mole, budget, pigeon,
+                     stairwell, ambassador
   favours.ts         aimed favours and their receipts
   shop.ts            the Back Room: stock, prices, caps, timed deals
   meta.ts            cross-run record and unlocks (own save key/version)

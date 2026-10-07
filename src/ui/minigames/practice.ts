@@ -5,7 +5,7 @@ import { MG_CARD } from '../../game/content/minigames';
 import { STRIKE_ODDS_FLAG } from '../../game/minigames';
 
 /**
- * `?practice=bulletin|palace|strike|bread|kilometre|shred|mole|budget|pigeon` — one mini-game on its own, for playtesting the rare ones
+ * `?practice=bulletin|palace|strike|bread|kilometre|shred|mole|budget|pigeon|stairwell|ambassador` — one mini-game on its own, for playtesting the rare ones
  * (a coup may never come in a careful run). Optional `&seed=N` and `&act=N`.
  * Not saved and not recorded (App.tsx keeps it apart from the real run).
  */
@@ -21,6 +21,8 @@ const PRACTICE: Record<string, string> = {
   mole: MG_CARD.mole,
   budget: MG_CARD.budget,
   pigeon: MG_CARD.pigeon,
+  stairwell: MG_CARD.stairwell,
+  ambassador: MG_CARD.ambassador,
 };
 
 export function practiceGame(search: string): GameState | null {
