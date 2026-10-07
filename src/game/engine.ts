@@ -604,9 +604,15 @@ export function finishMinigame(
   if (prev.phase !== 'stage' || !def?.minigame) return prev;
   const s = clone(prev);
   const set: Record<string, number> = { ...(flags ?? {}) };
-  if (score !== undefined) set[SCORE_FLAG] = Math.round(score);
+  if (score !== undefined) set[SCORE_FLAG] = Math.round(Math.max(0, Math.min(100, score)));
   if (Object.keys(set).length) {
-    withRng(s, (rng) => applyEffects(s, { flags: set }, rng, `minigame:${def.id}`));
+    // Results are snapshots, while Effects.flags intentionally adds counters.
+    // Convert to deltas so a previous score, mole job or Budget walk-out
+    // cannot be inherited by this game's result. Keep all world mutation
+    // in applyEffects, including explicit zeroes that clear old jar facts.
+    const deltas = Object.fromEntries(Object.entries(set).map(([key, value]) =>
+      [key, value - (s.flags[key] ?? 0)]));
+    withRng(s, (rng) => applyEffects(s, { flags: deltas }, rng, `minigame:${def.id}`));
   }
   const picked = won && choice && choice !== 'lost' && def.options.some((o) => o.id === choice) ? choice : undefined;
   return chooseOption(s, picked ?? (won ? 'won' : 'lost'));

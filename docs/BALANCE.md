@@ -61,9 +61,12 @@ bump it (now 14) and tell the owner it resets their run in progress.
 | 2026-10-02 | A mini-game must not be lost *"even if you do everything right"*. | `docs/MINIGAMES.md` |
 | 2026-10-06 | Budget Night: *"I have yet to even make it to the vote"* → retuned "slower and clearer". Hard is fine; impossible is not. | `PROJECT_STATUS.md` log |
 
-**Open question for the owner:** careful play is now **68%** in the
-probe, above both "about half" and "about 60%". Ask whether that is too
-easy, and whether the target is for the probe or for their own play.
+**Current target (2026-10-07, supersedes the older targets above):**
+"Nearly always as long as they also do good within the minigames. It should all be tied together."
+Reward learned, intentional strategies with strong mini-game performance; keep random decisions weak.
+Do not interpret the old 68% bot as an expert player's win rate. The owner explicitly requires
+**a separate branch and their playtest before any merge** for this pass. See `STRATEGIES.md`
+for routes/evidence and `WIP_STRATEGY_BALANCE.md` for handoff.
 
 ## 2. Where the numbers live (the knob inventory)
 
@@ -137,7 +140,7 @@ e = economy / 50 (1.0 at 50).
 | Lithium & salt | +1.7e |
 | Port & transit | +0.8e |
 | Taxes | +1.2e |
-| Ilvet Free Zone | +0.35 (+0.3 with the levy flag) |
+| Ilvet Free Zone | +0.35; ordinary-card levy +0.3 from flag, Back Room levy +0.3 from its commitment only |
 | Diverted | −corruption/50 |
 | Payroll, energy, police & army | −2.05, −0.5, −0.6 |
 | Pensions & subsidies | −0.06 × (day − 1) |
@@ -175,8 +178,9 @@ Owned Back Room items can scale stat changes (`ownedStatMult()` in
 |---|---|
 | `VOTE_SEATS` | Army 15, Sable 10, Concord 20, Workers 25, Street 30 (100) |
 | `VOTES_NEEDED` | 45, 58, 68 (acts 1, 2, 3) |
-| Lean (inline, `computeConfidenceVote()`) | 0.6×loyalty + 0.4×(Grip+Legitimacy)/2 − debt |
-| Debt (inline) | if treasury < 0: min(25, 8 + 0.5×\|treasury\|) |
+| Lean (`computeConfidenceVote()`) | 0.6×loyalty + 0.4×bloc standing − debt |
+| `BLOC_GRIP_WEIGHT` | Army/Security 0.8, Elites 0.5, Workers 0.3, Street 0.2; remaining weight is Legitimacy |
+| Debt (`VOTE_DEBT_PER_BILLION`, `VOTE_DEBT_CAP`) | max(0, −treasury) ×0.75, capped at 25; continuous from zero |
 | Share of a bloc's seats | (lean − 30)/40, 0..1; a hostile bloc gives 0 |
 
 ### 2.8 Endings — `src/game/content/endings.ts` `ENDINGS[].check`
@@ -245,6 +249,12 @@ no bribe).
 60/72/26. Each item's price, effects and `daily` block are in
 `SHOP_ITEMS`. The `handover` mandate scales prices.
 `src/game/__tests__/shop.probe.ts` measures purchases per run.
+On days 1/7/13, one nightly slot draws from `MandateDef.shopFocus` if an eligible
+item remains; the rest are ordinary stock. No extra slot, unlock bypass or discount.
+Clerk: +0.3 all-faction loyalty/day, +0.5 corruption/day. Pigeon endorsement:
++4 Support at purchase, then +1 each morning while held (three mornings before
+its existing four-day countdown expires). Active deals' daily effects end on cut/expiry.
+Ilvet Back Room levy no longer also pays the ordinary-card flag revenue.
 
 ### 2.13 Mini-games — `src/game/minigames/index.ts` and the content files
 
@@ -296,7 +306,7 @@ whole runs with four policies:
   `MINIGAME_SKILL` (70%) of the time; the others win half.
 
 `npm test` runs it at 120 runs per policy (`balance.test.ts`, about 30
-seconds). It **prints and asserts nothing**:
+seconds). It **prints results but makes no balance assertions**:
 
 ```bash
 npx vitest run --dir src balance       # the probe alone
@@ -332,9 +342,22 @@ and `endings` (count per ending id).
 | first | 5% | 11.9 | 24% | +15, +1, −6 | noConfidence 83, revolution 7, survival 6, elite 5, foreign 4, coup 4, sable-removal 4, scandal 3, hollow 2, fracture 2 |
 | last | 1% | 11.6 | 22% | +12, −1, −13 | noConfidence 81, revolution 11, elite 9, foreign 5, fracture 4, collapse 3, general-strike 2, coup 2, survival 1, scandal 1, sable-removal 1 |
 
-What it says: most runs end at the vote (as designed). Coup, revolution,
-scandal and the others are rare for a careful player. Careful players
-pass every vote with room to spare.
+These are historical mixed-policy results. Positive median vote margins describe runs reaching those votes, not a guarantee that every careful run passes. The 400-run reproduction before this pass won 274/400 (68.5%).
+
+### 3b. Strategy measurements
+
+`node tools/strategy-runner.mjs --n=400 --skill=.9 --policies=adaptive --out=/tmp/strategy.json`
+runs every mandate separately and checkpoints each completed cell. `--offset=10000`
+uses independent seeds. `--skill=.5` isolates weaker games; `--policies=random,random-managed`
+compares random card choices with/without rational purchases and demand handling.
+`--management=false` disables shopping, favours and demand intervention. Exact results,
+counts and limitations are in `STRATEGIES.md` and `docs/balance-results/`.
+
+The new policies score expected authored outcomes using fixed samples independent of
+the live RNG. They model an experienced content-aware player, not a first-time reader.
+They still inspect some engine state unavailable as exact UI numbers, use a short
+planning horizon, and approximate mini-games by result rolls. Do not describe them
+as a human win-rate forecast, perfect play, or proof every seed is winnable.
 
 ## 4. Known issues to look at
 
@@ -365,7 +388,7 @@ support's 0.1 and economy's 0.12 drift rates; the alert numbers (0.07,
 make one change apply everywhere.
 
 **Balance observations** (for the owner to decide on):
-- Careful play is 68%, above the stated targets (§1a).
+- Historical 68% target comparisons are superseded by the current mastery target (§1a).
 - Careful players' vote margins are wide (+30 in act 1). Act 1's vote
   rarely matters for them.
 - Most endings other than the vote almost never happen to a careful
@@ -379,7 +402,8 @@ count. Quote the owner's words where they asked for it.
 
 | Date | Change (what, old → new) | Why (owner's words) | Probe before → after | Commit / branch |
 |---|---|---|---|---|
-| *(next)* | | | | |
+| 2026-10-07 | Mini-game score/jar/mole facts add across games → replace each result; scores clamp 0–100 | Later good play must not repeat an old walk-out penalty or inherit a reward tier | Reproduced score 95+70=165 and old walk-out persisting; sequential regressions pass. Legacy probe bypasses this UI result path | codex/strategy-balance |
+| 2026-10-07 | Bloc Grip weights 0.5 for all → 0.8/0.8/0.5/0.3/0.2; debt lean penalty discontinuous 8+0.5×debt → continuous 0.75×debt (cap remains 25); one eligible mandate toolkit offer on opening nights; Clerk daily goodwill implemented, pigeon ongoing support implemented, duplicate Ilvet revenue fixed | "their choices must be intentional"; "Nearly always as long as they also do good within the minigames" | Legacy before 274/400; full per-start baseline/after in STRATEGIES.md | codex/strategy-balance, awaiting owner playtest; NOT merged |
 
 ### History (before this log existed, from the record)
 

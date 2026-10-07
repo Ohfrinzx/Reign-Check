@@ -121,9 +121,10 @@ change log every balance change must be recorded in.
 - **How it's counted** (`content/endings.ts computeConfidenceVote()`):
   - **Seats:** 100 in five blocs (`VOTE_SEATS`): Army 15, Security 10,
     Elites 20, Workers 25, Street 30.
-  - **Each bloc's lean** = 0.6 × that faction's loyalty + 0.4 × (Grip +
-    Legitimacy)/2, minus a debt penalty. The penalty applies when the
-    treasury is below 0: 8 + half the debt, capped at 25.
+  - **Each bloc's lean** = 0.6 × that faction's loyalty + 0.4 × that bloc's standing, minus a debt penalty. Army and Security
+    standing is 80% Grip / 20% Legitimacy; Elites 50/50; Workers 30/70;
+    Street 20/80. Debt penalty is 0.75 × debt in $B, capped at 25,
+    starting continuously from zero.
   - **The share voting for you** runs from 0 at lean 30 to all at lean 70.
   - **A hostile faction's bloc votes against you as one.**
 - **Needed:** `VOTES_NEEDED` = 45 / 58 / 68 of 100.
@@ -134,7 +135,7 @@ change log every balance change must be recorded in.
 - **The daily budget** comes from `economy.ts computeBudget()`:
   - **Revenue** (e = economy ÷ 50, so 1.0 at a middling economy):
     lithium & salt 1.7 × e, port fees 0.8 × e, taxes 1.2 × e, the Ilvet
-    Free Zone 0.35 (+0.3 with the transit levy).
+    Free Zone 0.35 (+0.3 with the ordinary-card transit levy). A Back Room levy pays its +0.3 through a commitment instead, never both; cutting that deal stops its income.
   - **Spending:** payroll 2.05, energy imports 0.5, police & armed forces
     0.6, corruption leakage (corruption ÷ 50), debt service (fiscal strain
     ÷ 42), **Pensions & subsidies** (0.06 × (day − 1)), every commitment
@@ -291,6 +292,17 @@ change log every balance change must be recorded in.
 - **Opening times:** it opens every night. The nightly room offers 3 items
   and you can buy one. The act room (after a passed vote) offers 5
   including the expensive tier, and you can buy as many as you can afford.
+- **Starting toolkits:** on nights 1, 7 and 13, one of the three offers comes
+  from the mandate's four-item `shopFocus` list, if eligible. Existing
+  unlocks, purchase history, recent-offer exclusions and tier rules still
+  apply. The other slots remain random; exhausted toolkits fall back to
+  normal stock. The shop explains this on those nights.
+- **Benefits match purchases:** the Convocation Clerk adds 0.3 loyalty to
+  every faction each morning, with 0.5 corruption; firing ends that rule.
+  The Pigeon endorsement adds 4 Support immediately, then 1 on each active
+  morning. Its four-day countdown expires before the fourth morning, so
+  there are three daily ticks; cutting it also ends the daily gain. Daily
+  rules can now include faction effects and belong to active deals too.
 - **Caps:** at most 3 advisors and 3 deals (`ADVISOR_CAP`, `DEAL_CAP`).
   Fire an advisor or cut a deal to free a slot.
 - **The run deck:** some policies change which cards you get. `deck.add`
@@ -349,8 +361,11 @@ change log every balance change must be recorded in.
   rewarding (~60%); mini-game win rewards were sized to get there (slice
   1 alone had dropped it to 46%).
 
-- **The owner's target is "Hard"**, where careful human play survives
-  about half the time.
+- **Current target (2026-10-07)** supersedes the historical targets:
+  intentional, learned decisions plus good mini-games should win nearly
+  always; random decisions should remain weak. `docs/STRATEGIES.md` holds
+  current per-start evidence and routes. The old probe is historical only;
+  `tools/strategy-runner.mjs` measures starts, management and skill separately.
 - **Most runs end at the confidence vote.**
 - **Re-run the probe after any change to numbers, and report what moved.**
 
@@ -367,6 +382,12 @@ change log every balance change must be recorded in.
   how well it went, 0–100, in `flags.mgScore` for the result text). So
   every effect goes through `applyEffects()`, and the tests and the probe
   play past a mini-game with `chooseOption()`.
+- **Each result replaces the previous result facts:** `finishMinigame()`
+  converts supplied score/jar/mole facts into deltas for the additive flag
+  system. Scores are clamped to 0–100. An old score cannot inflate a later
+  reward tier, and an old Budget walk-out/surplus cannot be charged again
+  when the new jars clear it. Historical faction memories and already
+  incurred debts remain; only the current result facts are replaced.
 - **The screen** (`MinigameScreen.tsx`, an `App.tsx` early return): a
   short title card first ("Mini-game", the name, one line of what is
   happening; ~2–2.5 s, its own style per game, tap or Enter skips — owner:
@@ -378,7 +399,7 @@ change log every balance change must be recorded in.
   extra is saved and `SAVE_VERSION` did not change.
 - **Owner's rules for results:** a loss costs Legitimacy and the loyalty
   of the faction the game is about; a win is a reward worth chasing
-  (careful play ~60%). A daily win: Legitimacy +5, a stat bonus, +2 with
+  (current target: learned decisions and good mini-games win reliably). A daily win: Legitimacy +5, a stat bonus, +2 with
   the game's faction and **+0.5 with every faction** (that last part
   matters most: the vote leans on loyalty). A daily loss: Legitimacy −4
   or −5, the faction −4, and the game's pressure up. Results can leave a
