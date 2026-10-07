@@ -1,31 +1,70 @@
-# Strategy balance — working handoff
+# Strategy balance — resumable handoff
 
-## Authorization and target (2026-10-07)
-Owner requests start-specific winning/losing strategies, meaningful purchases and decisions, and nearly always winning with strong choices **and good mini-game play**. Random choice spam must remain weak. This supersedes historical 50–60% careful-play targets.
+## Owner authorization
+2026-10-07: distinct winning/losing routes by start, meaningful choices and purchases,
+near-reliable survival with learned decisions **and good mini-games**. This supersedes
+historical 50–60% careful-play targets. Owner permits non-Astra delegation; two
+GPT-6.1 Sol agents assisted with audit and measurements.
 
-Work branch: `codex/strategy-balance`, from live default `claude/confident-meitner-lc0bgc`. **Do not merge or push the live default. Owner must playtest this branch first. No PR requested.**
+**Branch: `codex/strategy-balance`. Do not merge until the owner playtests and approves.**
+Live default is `claude/confident-meitner-lc0bgc`, not `main`. No PR was requested.
+Every push to the live default deploys to family devices; never use it for this playtest.
 
-## Findings so far
-- Six implemented mandates (four base, two unlocks), not five. Include all six.
-- Legacy 68% probe mixes randomly rolled mandates, deliberately randomizes 25% of decisions, wins 70% of mini-games, never buys or handles demands. It also looks ahead at actual seeded outcomes. Not a mastery metric.
-- Read AGENTS, PROJECT_STATUS, SYSTEMS, BALANCE and shop/mandate/probe implementation.
+## Completed
+- Carefully read AGENTS, status, systems, balance, design, mobile and mini-game docs.
+- Six mandates confirmed (four standard + two unlocks), not five.
+- Found old 68% probe is a weaker policy, not mastery: 25% random choices,
+  70% games, no purchases/favours/demand handling, actual-outcome peeking.
+- Added expected-outcome per-start harness, management controls, independent
+  seed offsets, optional explicit Budget/Ambassador stress aftermath.
+- Distinct bloc priorities (Grip weights .8/.8/.5/.3/.2), same loyalty weight,
+  seats and thresholds; continuous debt penalty .75 per $B capped25.
+- One eligible mandate toolkit offer within the existing three nightly slots
+  on days1/7/13, with normal unlock/purchase/recency filters and fallback.
+- Clerk goodwill, Pigeon recurring support and double Ilvet levy income fixed;
+  later ordinary levy works after a deal is cut.
+- Critical real-play bug reproduced and fixed: finishMinigame now replaces
+  score/jar/mole facts via deltas, rather than adding old snapshots. Old Budget
+  walk-outs no longer create new penalties after clean games; score95 then70
+  is now70, not165. Historical memories and legitimate debts remain.
+- No save shape change; SAVE_VERSION14 remains. Start fresh for balance testing.
+- Developer strategy guide: `docs/STRATEGIES.md`; exact summary evidence in
+  `docs/balance-results/`. Core docs updated with explicit no-merge override.
 
-## Work in progress
-- Lead: complete audit, choose systemic adjustments based on measured failures, integrate and verify, write docs/STRATEGIES.md.
-- `audit` agent: read-only independent systemic review.
-- `measurement` agent: own worktree, new strategy measurement files only; baseline across all mandates, skill and random controls.
-- Dependencies installing. No gameplay changes yet.
+## Measured evidence
+400 runs/start, adaptive experienced policy, 90% simulated games:
+before98/96.8/99.8/99.3/99.8/99.8%; branch99.5/99.3/99.8/99.8/100/100%.
+Order: Stairwell/Landslide/Handover/Accident/CleanHands/PayDeal.
+Baseline was already near-reliable; do not claim 69% human wins became100%.
+Independent stress120/start offset10000:100/96.7/100/100/99.2/100%.
+Legacy random weak-games control remains6/120=5%; strategy guide includes
+random-card/strong-games and rational-management controls honestly.
+These are content-aware heuristics, not human forecasts or exhaustive solutions.
+Standard macro simulations omit Budget jar aftermath and Ambassador tiers;
+stress explicitly exercises them. See guide for remaining information advantages.
 
-## Remaining gates
-Baseline before tuning; meaningful engine regression tests; all tests/build; affected browser checks; updated SYSTEMS/BALANCE/PROJECT_STATUS/AGENTS; committed and pushed feature branch only; exact local playtest commands and brief strategy report to owner.
+## Verification
+- Resumed session: all319 tests pass, production build passes (existing large
+  bundle advisory only), GitHub Pages path preview passes.
+- Browser vote/mandates/favours passed again on resume; five affected screens
+  across all five phone sizes and touch interactions pass with Chromium141 headless.
+- Full initial phone run blocked by Chromium131 lacking safe-area CDP support.
+  Regular newer Chrome then hit environment socket restrictions; the standard
+  newer headless shell launches successfully. No game/tool permissions bypass.
+- Desktop before snapshots were taken but transient files were lost at resume;
+  affected-screen desktop fit checks replace any claim of a completed pixel diff.
+- Desktop: five affected screens at 1366×700 and 1100×700 passed overflow
+  checks; shop/vote/result controls reachable. Existing desktop Brief me
+  scroll-to-close limitation remains and is documented in the strategy guide.
 
-## Baseline checkpoint
-Legacy careful, 400 runs: 274/400 wins (68.5%); elite 25, noConfidence 82, sable-removal 14, collapse 2, coup 3. Output `/tmp/reign-baseline.log`. New strategy harness still running in agent worktree.
+## Handoff status and next steps
+Implementation, measurements, final verification and documentation are complete.
+The final documentation/evidence commit is ready for feature-branch upload.
 
-## Implementation checkpoint
-- Integrated shop fixes and expected-outcome measurement harness.
-- Added distinct bloc preferences, continuous debt penalty, opening-night mandate toolkits.
-- Found/reproduced/fixed additive mini-game result corruption (95+70 became165; old Budget walk-outs survived new zero flags). Regression tests pass.
-- All initial314 tests passed; final rerun needed after result fix and stress harness. Build passed. Browser vote/mandates/favours passed; phone/desktop ongoing.
-- Baseline mastery400/start complete: 98/96.8/99.8/99.3/99.8/99.8%. This was already near-reliable; avoid claiming blanket difficulty fix from old69%.
-- After400/start still running, outputs scratch strategy-after-*.json; standard simulations bypass finishMinigame so result bug does not change those macro comparisons. Optional stress harness pending agent.
+1. Push ONLY `codex/strategy-balance`, verify remote matches local HEAD.
+2. Verify live default remains `abe32e8b93ac70c87875feb3e4194f7ce12904ff`.
+3. Send owner guide link, concise findings/routes and local playtest commands.
+4. Wait for owner playtest. Do not merge or deploy on their behalf yet.
+
+After resuming, inspect `git status`, `git log -1` and the two remote refs before
+repeating an upload. A matching feature ref means upload is already complete.

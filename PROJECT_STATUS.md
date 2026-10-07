@@ -8,13 +8,18 @@ one line per step. Full old handovers are in
 
 ## Now (2026-10-07)
 
-**NEXT JOB: A BALANCING PASS ON THE CORE GAMEPLAY SYSTEMS.** Owner: *"A
-new agent will be making same big changes to core gameplay systems for
-proper balancing before I move forward with anything else."* Read
-**`docs/BALANCE.md`** first: the brief, every tuning number and where it
-lives, how to measure, the known problems, and the **balance change log**
-that every balance change must add a row to. No new mini-games, features
-or content until the owner says so.
+**STRATEGY BALANCE BUILT ON `codex/strategy-balance`; NOT MERGED.**
+Owner must playtest before any merge into the live default. The current target
+supersedes old 50–60% targets: learned choices **and good mini-games** should
+win nearly always. `docs/STRATEGIES.md` contains winning/losing routes for all
+six starts, evidence and playtest instructions; `docs/WIP_STRATEGY_BALANCE.md`
+is the working handoff.
+
+Built: bloc-specific voting priorities, a smooth debt vote penalty, one
+start-specific toolkit offer on each act's opening shop night, functioning
+Clerk/Pigeon benefits and corrected Ilvet levy income. Critical mini-game
+result bug fixed: current scores/jars replace prior facts instead of accumulating
+old rewards and penalties. Vote thresholds and mini-game reward sizes unchanged.
 
 **Waiting for the owner's playtest: mini-games slice 3 part B** (built
 2026-10-07, merged, live). Owner: *"Confirmed all standing play tests.
@@ -39,14 +44,24 @@ mobile web version and GitHub Pages; mini-games slices 1, 2 and 3 part A
 eight, The Pigeon Run); the number explanations; the slower Bulletin;
 Shred's number keys.
 
-**Numbers today:** `SAVE_VERSION` 14; 299 unit tests; careful play
-survives 68% (balance probe, 400 runs, ±3), random 5%.
+**Numbers:** `SAVE_VERSION` remains 14; no automatic save reset. Use a new
+run to playtest this balance. The old engine's experienced bot already won
+2373/2400 runs (98.9%) with 90% simulated mini-game skill. The old "careful"
+bot's 68.5% included deliberate mistakes and no management; it was not a
+mastery estimate. Final branch results/limits are in `docs/STRATEGIES.md`.
 
 **Later, each needing the owner's go-ahead:** sound, a coup crisis chain,
 the remaining ending types, mini-game ideas #4 and #11
 (`docs/MINIGAMES.md`).
 
 ## Log (newest first)
+
+- **2026-10-07 — strategy balance:** owner requested distinct routes,
+  meaningful decisions/perks, near-reliable skilled wins, and playtest before
+  merge. Built on separate branch; explicit no-merge override recorded in
+  AGENTS. Added reproducible per-start/skill/management measurements, strategy
+  guide and handoff. Corrected real mini-game result accumulation and shop
+  benefits, differentiated bloc preferences and opening toolkit offers.
 
 - **2026-10-07** — Owner: update all documentation for a balancing pass
   by a new agent. Chose a balance brief and a balance change log: new

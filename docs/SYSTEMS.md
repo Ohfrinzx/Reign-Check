@@ -342,7 +342,7 @@ change log every balance change must be recorded in.
     shuffled per run);
   - `careful`: picks the option that leaves the visible position best 3
     times in 4, and misjudges the rest.
-- **Latest numbers:**
+- **Historical legacy-probe numbers before the strategy-balance branch:**
 
   | Policy | Survives |
   |---|---|

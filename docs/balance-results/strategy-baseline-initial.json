@@ -1,0 +1,616 @@
+{
+  "commit": "abe32e8",
+  "results": [
+    {
+      "n": 60,
+      "mandateId": "stairwell",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        94,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        32,
+        32,
+        28
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 7,
+      "avgDemandsMet": 0.6,
+      "avgFavoursUsed": 2.7,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "survival": 60
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "stairwell",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 16.7,
+      "survival95": [
+        9.3,
+        28
+      ],
+      "avgDays": 12.1,
+      "voteMarginMedianByAct": [
+        17,
+        6,
+        2
+      ],
+      "reachedVotes": [
+        56,
+        38,
+        17
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.8,
+      "endings": {
+        "noConfidence": 37,
+        "scandal": 4,
+        "survival": 10,
+        "elite": 5,
+        "sable-removal": 1,
+        "revolution": 1,
+        "collapse": 1,
+        "fracture": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "stairwell",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 85,
+      "survival95": [
+        73.9,
+        91.9
+      ],
+      "avgDays": 17.7,
+      "voteMarginMedianByAct": [
+        30,
+        27,
+        20
+      ],
+      "reachedVotes": [
+        60,
+        59,
+        56
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 89.7,
+      "endings": {
+        "survival": 51,
+        "noConfidence": 6,
+        "elite": 3
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "landslide",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 93.3,
+      "survival95": [
+        84.1,
+        97.4
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        34,
+        31,
+        26
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 6.4,
+      "avgDemandsMet": 1.1,
+      "avgFavoursUsed": 2.2,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "survival": 56,
+        "noConfidence": 4
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "landslide",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 11.7,
+      "survival95": [
+        5.8,
+        22.2
+      ],
+      "avgDays": 14.4,
+      "voteMarginMedianByAct": [
+        22,
+        2,
+        -7
+      ],
+      "reachedVotes": [
+        60,
+        49,
+        23
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 91.6,
+      "endings": {
+        "noConfidence": 39,
+        "sable-removal": 4,
+        "survival": 7,
+        "fracture": 1,
+        "elite": 4,
+        "collapse": 4,
+        "coup": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "landslide",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 58.3,
+      "survival95": [
+        45.7,
+        69.9
+      ],
+      "avgDays": 16.6,
+      "voteMarginMedianByAct": [
+        28,
+        22,
+        15
+      ],
+      "reachedVotes": [
+        60,
+        57,
+        44
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 91.1,
+      "endings": {
+        "sable-removal": 2,
+        "survival": 35,
+        "noConfidence": 16,
+        "coup": 1,
+        "elite": 5,
+        "collapse": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "handover",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 98.3,
+      "survival95": [
+        91.1,
+        99.7
+      ],
+      "avgDays": 17.9,
+      "voteMarginMedianByAct": [
+        37,
+        36,
+        29
+      ],
+      "reachedVotes": [
+        60,
+        59,
+        59
+      ],
+      "avgPurchases": 8.9,
+      "avgDemandsMet": 1,
+      "avgFavoursUsed": 4.1,
+      "minigameWinRate": 90.5,
+      "endings": {
+        "survival": 59,
+        "revolution": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "handover",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 15,
+      "survival95": [
+        8.1,
+        26.1
+      ],
+      "avgDays": 13,
+      "voteMarginMedianByAct": [
+        17,
+        5,
+        -1
+      ],
+      "reachedVotes": [
+        57,
+        42,
+        22
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 88.2,
+      "endings": {
+        "noConfidence": 39,
+        "revolution": 4,
+        "survival": 9,
+        "elite": 6,
+        "hollow": 1,
+        "sable-removal": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "handover",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 83.3,
+      "survival95": [
+        72,
+        90.7
+      ],
+      "avgDays": 17.6,
+      "voteMarginMedianByAct": [
+        31,
+        25,
+        19
+      ],
+      "reachedVotes": [
+        60,
+        59,
+        54
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.9,
+      "endings": {
+        "survival": 50,
+        "elite": 5,
+        "noConfidence": 4,
+        "sable-removal": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "accident",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        94,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        40,
+        38,
+        30
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 6.8,
+      "avgDemandsMet": 1,
+      "avgFavoursUsed": 2.9,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "survival": 60
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "accident",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 18.3,
+      "survival95": [
+        10.6,
+        29.9
+      ],
+      "avgDays": 14.6,
+      "voteMarginMedianByAct": [
+        21,
+        7,
+        -3
+      ],
+      "reachedVotes": [
+        60,
+        51,
+        25
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "noConfidence": 35,
+        "survival": 11,
+        "scandal": 1,
+        "elite": 8,
+        "general-strike": 1,
+        "sable-removal": 1,
+        "fracture": 2,
+        "foreign": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "accident",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 98.3,
+      "survival95": [
+        91.1,
+        99.7
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        39,
+        32,
+        24
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 91.4,
+      "endings": {
+        "survival": 59,
+        "noConfidence": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "clean-hands",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        94,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        39,
+        36,
+        29
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 6.2,
+      "avgDemandsMet": 1,
+      "avgFavoursUsed": 2.4,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "survival": 60
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "clean-hands",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 36.7,
+      "survival95": [
+        25.6,
+        49.3
+      ],
+      "avgDays": 15.7,
+      "voteMarginMedianByAct": [
+        26,
+        9,
+        1
+      ],
+      "reachedVotes": [
+        60,
+        56,
+        38
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 91.9,
+      "endings": {
+        "noConfidence": 32,
+        "survival": 22,
+        "sable-removal": 1,
+        "elite": 5
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "clean-hands",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 86.7,
+      "survival95": [
+        75.8,
+        93.1
+      ],
+      "avgDays": 17.5,
+      "voteMarginMedianByAct": [
+        36,
+        29,
+        23
+      ],
+      "reachedVotes": [
+        60,
+        57,
+        53
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.6,
+      "endings": {
+        "survival": 52,
+        "sable-removal": 2,
+        "noConfidence": 2,
+        "elite": 4
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "pay-deal",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        94,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        35,
+        34,
+        29
+      ],
+      "reachedVotes": [
+        60,
+        60,
+        60
+      ],
+      "avgPurchases": 6.1,
+      "avgDemandsMet": 0.8,
+      "avgFavoursUsed": 2.3,
+      "minigameWinRate": 90.4,
+      "endings": {
+        "survival": 60
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "pay-deal",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 11.7,
+      "survival95": [
+        5.8,
+        22.2
+      ],
+      "avgDays": 14.3,
+      "voteMarginMedianByAct": [
+        19,
+        1,
+        -6
+      ],
+      "reachedVotes": [
+        60,
+        51,
+        23
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.7,
+      "endings": {
+        "survival": 7,
+        "noConfidence": 41,
+        "elite": 6,
+        "sable-removal": 2,
+        "foreign": 1,
+        "collapse": 2,
+        "general-strike": 1
+      }
+    },
+    {
+      "n": 60,
+      "mandateId": "pay-deal",
+      "policy": "legacy-careful",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 76.7,
+      "survival95": [
+        64.6,
+        85.6
+      ],
+      "avgDays": 17.6,
+      "voteMarginMedianByAct": [
+        31,
+        23,
+        16
+      ],
+      "reachedVotes": [
+        60,
+        59,
+        55
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 91,
+      "endings": {
+        "survival": 46,
+        "noConfidence": 11,
+        "sable-removal": 1,
+        "elite": 2
+      }
+    }
+  ]
+}

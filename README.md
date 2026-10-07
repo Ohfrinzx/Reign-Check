@@ -15,6 +15,10 @@ Survive **three acts of six days**, each ending in a confidence vote.
 
 ## Play
 
+**Strategy-balance playtest:** changes on `codex/strategy-balance` are not on
+GitHub Pages yet. See [the strategy guide](docs/STRATEGIES.md) for local
+playtest commands, routes and evidence. The owner approves before merging.
+
 ### On your phone or computer — just open the link
 
 **https://ohfrinzx.github.io/Reign-Check/** (the capital letters in
@@ -123,8 +127,7 @@ Sable Office would like to discuss with you.
 **For developers and agents:** start with **[AGENTS.md](AGENTS.md)** (rules,
 workflow, code map), then **[PROJECT_STATUS.md](PROJECT_STATUS.md)** (where
 things stand) and **[docs/SYSTEMS.md](docs/SYSTEMS.md)** (how each system
-works). **The next job is a balancing pass: its brief, the tuning numbers
-and the balance change log are in [docs/BALANCE.md](docs/BALANCE.md).**
+works). **The strategy-balance branch is awaiting playtest. Its routes and evidence are in [docs/STRATEGIES.md](docs/STRATEGIES.md); tuning numbers and the change log are in [docs/BALANCE.md](docs/BALANCE.md).**
 The phone layout and GitHub Pages hosting are in
 **[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**; the
 mini-games record is **[docs/MINIGAMES.md](docs/MINIGAMES.md)**.

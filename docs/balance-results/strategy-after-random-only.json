@@ -1,0 +1,239 @@
+{
+  "commit": "02d96a36bd559135e57a4409f663f95135e5fd81",
+  "generatedAt": "2026-10-07T06:24:30.550Z",
+  "note": "Scripted learned policies, full catalogue unlocked; fixed expected outcome samples, pressure warning bands, no future run RNG. Legacy-careful retains the old oracle. Skill is a Bernoulli result approximation, not actual minigame play: generic wins omit Budget Night jar aftermath and Ambassador price-tier flags.",
+  "results": [
+    {
+      "n": 120,
+      "mandateId": "stairwell",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 21.7,
+      "survival95": [
+        15.2,
+        29.9
+      ],
+      "avgDays": 12.9,
+      "voteMarginMedianByAct": [
+        17,
+        6,
+        2
+      ],
+      "reachedVotes": [
+        116,
+        80,
+        42
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90,
+      "endings": {
+        "noConfidence": 67,
+        "scandal": 4,
+        "survival": 26,
+        "revolution": 2,
+        "elite": 11,
+        "sable-removal": 4,
+        "collapse": 3,
+        "fracture": 2,
+        "general-strike": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "landslide",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 14.2,
+      "survival95": [
+        9,
+        21.5
+      ],
+      "avgDays": 14.3,
+      "voteMarginMedianByAct": [
+        20,
+        4,
+        -4
+      ],
+      "reachedVotes": [
+        120,
+        101,
+        43
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.8,
+      "endings": {
+        "noConfidence": 72,
+        "sable-removal": 7,
+        "survival": 17,
+        "fracture": 1,
+        "elite": 14,
+        "collapse": 6,
+        "revolution": 1,
+        "coup": 1,
+        "general-strike": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "handover",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 11.7,
+      "survival95": [
+        7.1,
+        18.6
+      ],
+      "avgDays": 12.9,
+      "voteMarginMedianByAct": [
+        16,
+        7,
+        -4
+      ],
+      "reachedVotes": [
+        114,
+        82,
+        43
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 89,
+      "endings": {
+        "noConfidence": 79,
+        "survival": 14,
+        "revolution": 8,
+        "elite": 13,
+        "hollow": 1,
+        "sable-removal": 2,
+        "collapse": 1,
+        "scandal": 1,
+        "fracture": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "accident",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 20,
+      "survival95": [
+        13.8,
+        28
+      ],
+      "avgDays": 14.1,
+      "voteMarginMedianByAct": [
+        20,
+        6,
+        1
+      ],
+      "reachedVotes": [
+        117,
+        96,
+        47
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90,
+      "endings": {
+        "noConfidence": 67,
+        "survival": 24,
+        "scandal": 3,
+        "elite": 12,
+        "general-strike": 1,
+        "sable-removal": 1,
+        "fracture": 4,
+        "foreign": 1,
+        "revolution": 4,
+        "collapse": 3
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "clean-hands",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 30.8,
+      "survival95": [
+        23.3,
+        39.6
+      ],
+      "avgDays": 15.8,
+      "voteMarginMedianByAct": [
+        27,
+        11,
+        1
+      ],
+      "reachedVotes": [
+        120,
+        107,
+        74
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.6,
+      "endings": {
+        "noConfidence": 63,
+        "survival": 37,
+        "sable-removal": 1,
+        "elite": 13,
+        "collapse": 3,
+        "coup": 1,
+        "general-strike": 1,
+        "fracture": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "pay-deal",
+      "policy": "random",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 15.8,
+      "survival95": [
+        10.4,
+        23.4
+      ],
+      "avgDays": 14.2,
+      "voteMarginMedianByAct": [
+        17,
+        3,
+        -4
+      ],
+      "reachedVotes": [
+        120,
+        100,
+        48
+      ],
+      "avgPurchases": 0,
+      "avgDemandsMet": 0,
+      "avgFavoursUsed": 0,
+      "minigameWinRate": 90.3,
+      "endings": {
+        "survival": 19,
+        "noConfidence": 78,
+        "elite": 10,
+        "sable-removal": 5,
+        "foreign": 1,
+        "collapse": 6,
+        "general-strike": 1
+      }
+    }
+  ]
+}

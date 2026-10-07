@@ -7,6 +7,15 @@ owner-approved except mini-games slice 3 part B, which waits for the
 owner's playtest. The next job is a balancing pass on the core systems
 (`docs/BALANCE.md`).**
 
+**2026-10-07 strategy-balance amendment (unmerged, awaiting playtest):**
+strong choices plus good mini-games should win nearly always. The legacy
+careful bot is not that target. Blocs now have distinct Grip/Legitimacy
+priorities; mandate toolkits reserve one eligible opening-night shop offer
+without expanding stock or removing catches. Debt vote losses grow smoothly.
+Mini-game result facts replace previous results; old walk-outs must not
+penalize a later clean budget. Rules and evidence: `SYSTEMS.md`, `BALANCE.md`,
+`STRATEGIES.md`. No new screen, stat, regime selector or save shape.
+
 This file is the **design record**: the decisions, the evidence behind
 them, and the roadmap as it was written (§9, §10). Its status notes and
 "what is next" lines describe earlier checkpoints and are kept as history

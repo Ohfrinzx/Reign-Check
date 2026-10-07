@@ -1,6 +1,6 @@
 # Winning and losing strategies — developer playtest guide
 
-Status: strategy-balance branch under verification, **not merged**. Numbers below will be filled from the final measured matrix. Target agreed 2026-10-07: near-reliable survival with strong decisions **and good mini-games**, while random decision spam remains weak. Six mandates exist: four base starts and two unlocks. "Let fate decide" is not another mandate.
+Status: strategy-balance branch prepared for owner playtesting, **not merged**. Measured results and limits appear below. Target agreed 2026-10-07: near-reliable survival with strong decisions **and good mini-games**, while random decision spam remains weak. Six mandates exist: four base starts and two unlocks. "Let fate decide" is not another mandate.
 
 ## What a winning strategy means
 
@@ -71,3 +71,144 @@ faction memories or unknown follow-up cards/deck draws. Its rational style
 variants retain shared safety rules; high win rates across styles do not mean
 blindly repeating a political ideology is safe. Purchases help but are not
 mandatory keys: the baseline strong bot could often win without management.
+
+## Measured results (2026-10-07)
+
+Same 400 seeds per start, experienced adaptive choices, management enabled,
+90% simulated mini-game success. All shop content unlocked. Standard macro
+scenario (limitations above apply):
+
+| Start | Before wins / 400 | Branch wins / 400 | Branch win rate |
+|---|---:|---:|---:|
+| Stairwell | 392 | 398 | 99.5% |
+| Landslide | 387 | 397 | 99.3% |
+| Handover | 399 | 399 | 99.8% |
+| Accident | 397 | 399 | 99.8% |
+| Clean Hands | 399 | 400 | 100.0% |
+| Pay Deal | 399 | 400 | 100.0% |
+
+The baseline already met the broad reliability target. The change is not a
+claimed transformation from 69% human wins to 100%. It fixes real repeated-result
+bugs and makes coalition priorities and opening purchases more deliberate.
+Small differences near 100% should not be overinterpreted; confidence intervals
+are in the result files. No seed or arbitrary outcome was made an automatic win.
+
+Controls, **120 runs per start** on this branch:
+
+| Start | Strong choices, 50% games | Random choices, 90% games | Random choices + rational management, 90% games |
+|---|---:|---:|---:|
+| Stairwell | 93.3% | 21.7% | 33.3% |
+| Landslide | 90.8% | 14.2% | 25.0% |
+| Handover | 100.0% | 11.7% | 60.8% |
+| Accident | 99.2% | 20.0% | 33.3% |
+| Clean Hands | 99.2% | 30.8% | 50.8% |
+| Pay Deal | 97.5% | 15.8% | 36.7% |
+
+Strong macro play can compensate for missed mini-games; the design does not
+require every mini-game to be won. Rational management also rescues some random
+card runs, especially the wealthy Handover. Those controls are not pure random
+play: they have excellent mini-game performance and, in the last column,
+competent purchases/demand handling. The unchanged legacy random control at
+50% games wins **6/120 (5%)**; always-first 6/120, always-last 2/120. Legacy
+careful on this branch is 87/120 (72.5%), a separate weaker policy, not mastery.
+
+Four rational style variants on the old engine all often won (60/start/style).
+This is evidence that the previous starts shared viable safety-first strategies.
+The new weights and toolkits make decisions respond differently; they do not
+force one predetermined build per start. Shared fundamentals remain valid.
+
+Raw aggregate evidence (endings, vote margins, purchases/run, skills, settings,
+Wilson 95% intervals) is versioned in [balance-results](balance-results/).
+Full per-card tallies can be reproduced with `tools/strategy-runner.mjs`.
+
+## Reproduce
+
+```bash
+node tools/strategy-runner.mjs --n=400 --skill=.9 --policies=adaptive --out=/tmp/strategy.json
+node tools/strategy-runner.mjs --n=120 --skill=.9 --policies=random,random-managed --out=/tmp/controls.json
+node tools/strategy-runner.mjs --n=120 --skill=.9 --offset=10000 --policies=adaptive --aftermath=stress --out=/tmp/stress.json
+```
+
+The stress scenario uses independent seeds, Budget losses with two rotating
+factions walking out $4B short each (actual bills/claims/memories), neutral jars
+on wins, and Ambassador wins at score70 (the small reward). It checks a harsher
+assumption, not the frequency of those outcomes in human play.
+
+
+Independent holdout, stress aftermath, **120 runs/start**, offset10000, 90% games:
+
+| Start | Wins / 120 | Rate |
+|---|---:|---:|
+| stairwell | 120 | 100.0% |
+| landslide | 116 | 96.7% |
+| handover | 120 | 100.0% |
+| accident | 120 | 100.0% |
+| clean-hands | 119 | 99.2% |
+| pay-deal | 120 | 100.0% |
+
+This preserves near-reliable wins under the stated harsher assumptions. It is still a scripted scenario, not an exhaustive winnability proof.
+
+## Playtest this branch before merging
+
+The public GitHub Pages link still runs the live default, **not these changes**.
+From an existing clean local checkout:
+
+```bash
+git fetch origin
+git switch --track origin/codex/strategy-balance
+npm ci
+npm run dev -- --host 0.0.0.0
+```
+
+If the local branch already exists, use `git switch codex/strategy-balance`
+then `git pull --ff-only`. Local edits should be committed or stashed before
+switching; do not discard them. Open [the local game](http://localhost:5173/).
+For a phone on the same Wi-Fi, use the exact Network URL Vite prints. In
+Codespaces, create the codespace from `codex/strategy-balance` and forward 5173.
+No new public deployment was made, and no save-version reset was introduced.
+Start a fresh run for comparable balance; the browser's old save otherwise resumes.
+
+1. Choose Stairwell, then Landslide. Read **Brief me**. Build different
+   coalitions; check that Grip favours Army/Security and Legitimacy favours
+   Workers/Street. Do not expect Army alone to carry 68 seats.
+2. On the first night of each act, open **The Back Room**. Check there are
+   still three offers, one from that start's eligible toolkit. Buying one
+   should still close an ordinary night's shop.
+3. Buy the **Clerk** and watch faction goodwill; fire him in **Advisors &
+   Deals** and confirm it stops. Buy/cut the **Pigeon endorsement** and check
+   daily Support. The **Ilvet levy** adds $0.30B/day once, not $0.60B, and
+   cutting removes that deal's income.
+4. Play Budget Night twice in a real run: a later clean budget must not
+   generate a new bill for an earlier walk-out. Old legitimate bills and
+   faction memories should remain. A later weak Ambassador deal must not
+   inherit an earlier game's high reward tier.
+5. Compare a coherent plan with repeated reckless spending/repression. Note
+   start, day, important purchases, game results, vote margin and ending;
+   report any run where the cause of failure is unreadable or unavoidable.
+
+Practice links on this local branch:
+[Budget Night](http://localhost:5173/?practice=budget),
+[Ambassador](http://localhost:5173/?practice=ambassador),
+[Walk in the Weather, act3](http://localhost:5173/?practice=kilometre&act=3).
+Practice isolates one game and cannot reproduce cross-game result carryover;
+that requires a real run (covered by sequential engine regression tests).
+
+## Verification and remaining limitations
+
+- **319 unit/simulation tests pass**, including sequential mini-game results,
+  levy buy/cut/re-impose, shop eligibility and deterministic bloc voting.
+- Production build passes; the existing large-bundle advisory remains.
+- Browser vote, mandate/unlock/save flow and favours pass. The five affected
+  screens (Brief me, both shops, vote, mini-game result) pass phone layout
+  checks at all five repository sizes, including emulated iPhone safe area;
+  menu/drawer/ledger interactions and two days of touch play pass too.
+- Pages preview passes under `/Reign-Check/`, including fonts, icons and start.
+- Desktop affected-screen checks at1366×700 and1100×700 inspect overflow and
+  controls. A pre-existing limitation remains: desktop **Brief me** places
+  its close/start button after the long text, requiring scrolling. The
+  unchanged desktop CSS already did this; phone has a sticky footer.
+- The original before screenshots were lost when the scratch runtime resumed.
+  No claim is made that a full66-screen pixel comparison completed. No CSS
+  or layout structure was changed in this branch; rule wording changed.
+- Actual human balance, ease of discovering a strategy and real iPhone Safari
+  behaviour still need the owner's playtest. No branch merge or live deploy.

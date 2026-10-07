@@ -12,6 +12,13 @@ balance knobs; they are listed in `docs/BALANCE.md`. Change a game's
 *rules* here and in its own file; change a result's *size* through the
 balance process (`docs/BALANCE.md` §5).
 
+**2026-10-07 balance amendment (feature branch, not live):** strong macro
+choices and good mini-game play should jointly reward mastery; old approximate
+60% targets below are historical. Fixed result facts accumulating across games:
+Budget jars and scores now reflect only the current game. Already incurred
+bills and historical memories remain. See `STRATEGIES.md` for measurement
+limits and `WIP_STRATEGY_BALANCE.md` before resuming this unmerged work.
+
 ## 1. Where it stands
 
 **Slice 1 approved (2026-10-01):** the mini-game system, **Hold the

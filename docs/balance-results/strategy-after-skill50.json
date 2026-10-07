@@ -1,0 +1,198 @@
+{
+  "commit": "b63c2d65596c0a7b2794bea70ac6b541625af4e7",
+  "generatedAt": "2026-10-07T06:21:50.691Z",
+  "note": "Scripted learned policies, full catalogue unlocked; fixed expected outcome samples, pressure warning bands, no future run RNG. Legacy-careful retains the old oracle. Skill is a Bernoulli result approximation, not actual minigame play.",
+  "results": [
+    {
+      "n": 120,
+      "mandateId": "stairwell",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 93.3,
+      "survival95": [
+        87.4,
+        96.6
+      ],
+      "avgDays": 17.5,
+      "voteMarginMedianByAct": [
+        23,
+        28,
+        23
+      ],
+      "reachedVotes": [
+        120,
+        115,
+        114
+      ],
+      "avgPurchases": 7.1,
+      "avgDemandsMet": 0.8,
+      "avgFavoursUsed": 2.5,
+      "minigameWinRate": 50.4,
+      "endings": {
+        "survival": 112,
+        "noConfidence": 8
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "landslide",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 90.8,
+      "survival95": [
+        84.3,
+        94.8
+      ],
+      "avgDays": 17.8,
+      "voteMarginMedianByAct": [
+        27,
+        22,
+        16
+      ],
+      "reachedVotes": [
+        120,
+        120,
+        116
+      ],
+      "avgPurchases": 6.8,
+      "avgDemandsMet": 1.4,
+      "avgFavoursUsed": 2.2,
+      "minigameWinRate": 50.5,
+      "endings": {
+        "survival": 109,
+        "noConfidence": 11
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "handover",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        96.9,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        31,
+        31,
+        25
+      ],
+      "reachedVotes": [
+        120,
+        120,
+        120
+      ],
+      "avgPurchases": 9.7,
+      "avgDemandsMet": 1.5,
+      "avgFavoursUsed": 4.1,
+      "minigameWinRate": 50.3,
+      "endings": {
+        "survival": 120
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "accident",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.2,
+      "survival95": [
+        95.4,
+        99.9
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        35,
+        34,
+        27
+      ],
+      "reachedVotes": [
+        120,
+        120,
+        119
+      ],
+      "avgPurchases": 7.9,
+      "avgDemandsMet": 1.4,
+      "avgFavoursUsed": 3.3,
+      "minigameWinRate": 50.2,
+      "endings": {
+        "survival": 119,
+        "foreign": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "clean-hands",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.2,
+      "survival95": [
+        95.4,
+        99.9
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        35,
+        30,
+        24
+      ],
+      "reachedVotes": [
+        120,
+        119,
+        119
+      ],
+      "avgPurchases": 6.9,
+      "avgDemandsMet": 1.1,
+      "avgFavoursUsed": 2.7,
+      "minigameWinRate": 50.3,
+      "endings": {
+        "survival": 119,
+        "coup": 1
+      }
+    },
+    {
+      "n": 120,
+      "mandateId": "pay-deal",
+      "policy": "adaptive",
+      "minigameSkill": 0.5,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 97.5,
+      "survival95": [
+        92.9,
+        99.1
+      ],
+      "avgDays": 17.9,
+      "voteMarginMedianByAct": [
+        27,
+        28,
+        23
+      ],
+      "reachedVotes": [
+        120,
+        119,
+        119
+      ],
+      "avgPurchases": 7,
+      "avgDemandsMet": 0.9,
+      "avgFavoursUsed": 2.6,
+      "minigameWinRate": 50.4,
+      "endings": {
+        "survival": 117,
+        "noConfidence": 3
+      }
+    }
+  ]
+}

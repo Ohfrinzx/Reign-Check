@@ -48,10 +48,12 @@ the same numbers cards do, so they are part of the balance.
 
 ## 2. Where the project stands (2026-10-07)
 
-**Next job: a balancing pass on the core gameplay systems** (owner,
-2026-10-07: "A new agent will be making same big changes to core gameplay
-systems for proper balancing before I move forward with anything else").
-Start with `docs/BALANCE.md`. Nothing else is planned until the owner says.
+**Current branch work: strategy balance, waiting for the owner's playtest.**
+See `docs/STRATEGIES.md` (winning/losing routes and measured evidence) and
+`docs/WIP_STRATEGY_BALANCE.md` (resumable handoff). Latest target: learned
+choices plus good mini-games win nearly always; random spam stays weak.
+**Owner explicitly requires testing `codex/strategy-balance` before merging.
+Do not apply §10's default auto-merge rule to this branch.**
 
 Approved by the owner, newest first:
 - **Mini-games slice 3 part A (2026-10-07):** Find the Mole (and the
@@ -77,8 +79,7 @@ Who Was in the Stairwell? and The Ambassador's Table (2026-10-07).
 **Later, only with the owner's go-ahead:** sound, a coup crisis chain, the
 remaining ending types, the two unbuilt mini-game ideas.
 
-`SAVE_VERSION` is **14**. Tests: **299**, all passing. Careful-play
-survival (balance probe): **68%**.
+`SAVE_VERSION` is **14**. Tests: **319**, all passing. Legacy careful survival is not a mastery metric; see `docs/STRATEGIES.md` for per-start measurements.
 
 ## 3. How work is done here
 
@@ -216,7 +217,7 @@ fast, precise parse errors, then `npx tsc --noEmit`.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # typecheck + production build (to dist/)
-npm test           # vitest, 299 tests: content integrity, 200 full
+npm test           # vitest, 319 tests: content integrity, 200 full
                    #   simulated runs, determinism, every system, and the
                    #   balance probe (prints survival per play style)
 ```
@@ -310,6 +311,7 @@ src/game/            pure logic, no React/DOM, fully testable
                      stairwell, ambassador
   favours.ts         aimed favours and their receipts
   shop.ts            the Back Room: stock, prices, caps, timed deals
+  __tests__/strategy.probe.ts expected-outcome start/skill/management comparisons
   meta.ts            cross-run record and unlocks (own save key/version)
   save.ts            this run's save (version-guarded)
   rng.ts, text.ts, stats.ts, glossary.ts   helpers
@@ -389,6 +391,10 @@ docs/                SYSTEMS.md, BALANCE.md, MOBILE_AND_HOSTING.md, MINIGAMES.md
   deliberately clipped text in its "sticks out" check.
 
 ## 10. Git and verification workflow
+
+**Current owner override (2026-10-07): `codex/strategy-balance` must stay
+unmerged until the owner playtests and approves it. Push the feature branch
+only. The live default below must not move in this session.**
 
 `claude/confident-meitner-lc0bgc` is the default branch — the one the owner
 looks at, and **the one GitHub Pages publishes from: every push to it goes

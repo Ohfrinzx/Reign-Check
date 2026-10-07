@@ -1,0 +1,197 @@
+{
+  "commit": "c239fe17c664c3a360487ba3900c6c151925e1b3",
+  "generatedAt": "2026-10-07T06:20:59.591Z",
+  "note": "Scripted learned policies, full catalogue unlocked; fixed expected outcome samples, pressure warning bands, no future run RNG. Legacy-careful retains the old oracle. Skill is a Bernoulli result approximation, not actual minigame play.",
+  "results": [
+    {
+      "n": 400,
+      "mandateId": "stairwell",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.5,
+      "survival95": [
+        98.2,
+        99.9
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        33,
+        34,
+        29
+      ],
+      "reachedVotes": [
+        400,
+        400,
+        399
+      ],
+      "avgPurchases": 7.6,
+      "avgDemandsMet": 0.7,
+      "avgFavoursUsed": 2.5,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 398,
+        "noConfidence": 2
+      }
+    },
+    {
+      "n": 400,
+      "mandateId": "landslide",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.3,
+      "survival95": [
+        97.8,
+        99.7
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        34,
+        31,
+        25
+      ],
+      "reachedVotes": [
+        400,
+        399,
+        399
+      ],
+      "avgPurchases": 7,
+      "avgDemandsMet": 1.1,
+      "avgFavoursUsed": 2.3,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 397,
+        "noConfidence": 3
+      }
+    },
+    {
+      "n": 400,
+      "mandateId": "handover",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.8,
+      "survival95": [
+        98.6,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        38,
+        37,
+        30
+      ],
+      "reachedVotes": [
+        400,
+        400,
+        399
+      ],
+      "avgPurchases": 9.4,
+      "avgDemandsMet": 0.9,
+      "avgFavoursUsed": 3.9,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 399,
+        "coup": 1
+      }
+    },
+    {
+      "n": 400,
+      "mandateId": "accident",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 99.8,
+      "survival95": [
+        98.6,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        40,
+        37,
+        30
+      ],
+      "reachedVotes": [
+        400,
+        399,
+        399
+      ],
+      "avgPurchases": 7.5,
+      "avgDemandsMet": 1.1,
+      "avgFavoursUsed": 3,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 399,
+        "hollow": 1
+      }
+    },
+    {
+      "n": 400,
+      "mandateId": "clean-hands",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        99,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        39,
+        36,
+        29
+      ],
+      "reachedVotes": [
+        400,
+        400,
+        400
+      ],
+      "avgPurchases": 6.9,
+      "avgDemandsMet": 0.8,
+      "avgFavoursUsed": 2.6,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 400
+      }
+    },
+    {
+      "n": 400,
+      "mandateId": "pay-deal",
+      "policy": "adaptive",
+      "minigameSkill": 0.9,
+      "seedOffset": 0,
+      "management": true,
+      "survived": 100,
+      "survival95": [
+        99,
+        100
+      ],
+      "avgDays": 18,
+      "voteMarginMedianByAct": [
+        35,
+        35,
+        29
+      ],
+      "reachedVotes": [
+        400,
+        400,
+        400
+      ],
+      "avgPurchases": 6.5,
+      "avgDemandsMet": 0.7,
+      "avgFavoursUsed": 2.5,
+      "minigameWinRate": 90,
+      "endings": {
+        "survival": 400
+      }
+    }
+  ]
+}
