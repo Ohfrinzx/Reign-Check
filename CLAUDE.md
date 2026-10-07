@@ -11,24 +11,25 @@ Then read, in order:
 2. `docs/SYSTEMS.md` — how every game system works now, with the numbers.
 3. `docs/MOBILE_AND_HOSTING.md` — the phone layout and GitHub Pages
    hosting (§0 is what was built).
-4. `docs/MINIGAMES.md` — the brief for the next job (mini-games). The
-   owner will describe their ideas; ask them first.
-5. `docs/DESIGN_V2.md` — before any UI or design work.
+4. `docs/BALANCE.md` — **the brief for the next job (a balancing pass on
+   the core systems)**: every tuning number and where it lives, how to
+   measure, and the balance change log every balance change must add to.
+5. `docs/MINIGAMES.md` — the mini-games record and how to add one.
+6. `docs/DESIGN_V2.md` — before any UI or design work.
 
 `docs/archive/` is history, not instructions.
 
 ## The few things Claude Code sessions must not miss
 
-- **Status (2026-10-06):** Phases 1–3, balance slice D (factions remember
-  your decisions) and the mobile web version + GitHub Pages deploy are all
-  approved. **Mini-games slices 1 and 2** are approved, as are the number
-  explanations, the slower Bulletin and Shred's laptop keys.
-  **Mini-games slice 3 part A** (Find the Mole, Budget Night, The Pigeon
-  Run) is approved; **part B** (Who Was in the Stairwell?, The
-  Ambassador's Table) is built and waiting for the owner's playtest
-  (`docs/MINIGAMES.md`). Ask before
-  designing the next games. **Every
-  merge into the default branch now publishes the live site.**
+- **Status (2026-10-07):** **next job: a balancing pass on the core
+  gameplay systems** (`docs/BALANCE.md`). Ask the owner what they want
+  first; work in playtested slices; **every balance change adds a row to
+  the change log in `docs/BALANCE.md` §5, in the same commit.** No new
+  mini-games or features until the owner says so. Everything built is
+  approved except **mini-games slice 3 part B** (Who Was in the
+  Stairwell?, The Ambassador's Table): built, live, waiting for the
+  owner's playtest. **Every merge into the default branch publishes the
+  live site.**
 - **Work on your session branch; merge into `claude/confident-meitner-lc0bgc`
   only after `npm test`, `npm run build` and the browser checks pass.
   Announce the merge before and after** (`AGENTS.md` §10). No pull request

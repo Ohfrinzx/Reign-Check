@@ -51,7 +51,7 @@ npm run dev
 
 Then open http://localhost:5173.
 
-- `1`–`4` choose the option with that number (the order changes every run), `Enter` / `Space` continues.
+- The number keys choose the option with that number (the order changes every run), `Enter` / `Space` continues. Mini-games say their own keys on their how-to screen.
 - Your run autosaves to browser storage. Refreshing will not destroy it.
 
 ## What it is
@@ -75,6 +75,16 @@ marked *requires clarification from the General Staff*.
 There are no government types to choose. The kind of government you ran is
 **named at the end**, from what you actually did.
 
+Most days, one stage is a **mini-game** instead of a card: read the 7pm
+Bulletin, calm Bread Lines, shred the ledger, catch the mole, split the
+budget, fly a pigeon, solve the Stairwell files, haggle with the
+ambassador. Each act opens with Walk in the Weather, and a coup attempt is
+played out as Hold the Palace. Win or lose, the result moves your numbers
+like any decision. Each one has a practice link:
+`https://ohfrinzx.github.io/Reign-Check/?practice=<name>` (bulletin,
+bread, kilometre, shred, palace, mole, budget, pigeon, stairwell,
+ambassador; add `&act=3` for the hardest).
+
 A **Brief me** button in the top bar explains who you are, who everyone else
 is, and how you can lose, at any point.
 
@@ -94,7 +104,7 @@ what's still locked and what it takes.
 ```bash
 npm test
 npm run build
-npx playwright install chromium
+npx playwright install chromium   # once, if you have no Chromium
 npm run test:browser
 ```
 
@@ -113,9 +123,11 @@ Sable Office would like to discuss with you.
 **For developers and agents:** start with **[AGENTS.md](AGENTS.md)** (rules,
 workflow, code map), then **[PROJECT_STATUS.md](PROJECT_STATUS.md)** (where
 things stand) and **[docs/SYSTEMS.md](docs/SYSTEMS.md)** (how each system
-works). The phone layout and GitHub Pages hosting are described in
-**[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**; the brief for
-the mini-games (next) is **[docs/MINIGAMES.md](docs/MINIGAMES.md)**.
+works). **The next job is a balancing pass: its brief, the tuning numbers
+and the balance change log are in [docs/BALANCE.md](docs/BALANCE.md).**
+The phone layout and GitHub Pages hosting are in
+**[docs/MOBILE_AND_HOSTING.md](docs/MOBILE_AND_HOSTING.md)**; the
+mini-games record is **[docs/MINIGAMES.md](docs/MINIGAMES.md)**.
 
 ## Commands
 
@@ -123,5 +135,5 @@ the mini-games (next) is **[docs/MINIGAMES.md](docs/MINIGAMES.md)**.
 |---|---|
 | `npm run dev` | Dev server on :5173 |
 | `npm run build` | Typecheck + production build to `dist/` |
-| `npm test` | Simulation tests: 200 full runs, content integrity, determinism |
+| `npm test` | Unit and simulation tests (200 full runs, content integrity, determinism, mini-game rules) plus the balance probe (prints survival rates; asserts nothing) |
 | `npm run test:browser` | Real-browser checks of every screen at 1366×700, and the phone layout |

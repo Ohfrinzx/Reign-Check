@@ -8,8 +8,17 @@ one line per step. Full old handovers are in
 
 ## Now (2026-10-07)
 
-**MINI-GAMES SLICE 3 PART B — BUILT, WAITING FOR THE OWNER'S PLAYTEST.**
-Owner: *"Confirmed all standing play tests. Move to part B."*
+**NEXT JOB: A BALANCING PASS ON THE CORE GAMEPLAY SYSTEMS.** Owner: *"A
+new agent will be making same big changes to core gameplay systems for
+proper balancing before I move forward with anything else."* Read
+**`docs/BALANCE.md`** first: the brief, every tuning number and where it
+lives, how to measure, the known problems, and the **balance change log**
+that every balance change must add a row to. No new mini-games, features
+or content until the owner says so.
+
+**Waiting for the owner's playtest: mini-games slice 3 part B** (built
+2026-10-07, merged, live). Owner: *"Confirmed all standing play tests.
+Move to part B."*
 - **Who Was in the Stairwell?** (dark Sable Office archive; the Street):
   files on the night Krast died; exactly one person lies; stamp the liar
   and who was in the stairwell, then close the case. No clock. Every
@@ -20,146 +29,30 @@ Owner: *"Confirmed all standing play tests. Move to part B."*
   The better the price, the bigger the gain.
 - Both are daily games (eight now) and picked by events (Stairwell Tapes;
   Ostrene gas cutoff or foreign pressure 60+).
-- No save reset. Careful play still survives 68%.
+- Practice: https://ohfrinzx.github.io/Reign-Check/?practice=stairwell and
+  https://ohfrinzx.github.io/Reign-Check/?practice=ambassador (add
+  `&act=3` for the hardest).
 
-**Approved 2026-10-07:** slice 3 part A, the mole choices, Budget Night's
-retune and the jars at eight.
+**Everything else is approved:** Phases 1–3; balance slices A–D; the
+mobile web version and GitHub Pages; mini-games slices 1, 2 and 3 part A
+(Find the Mole with the mole's fate, Budget Night retuned, its jars after
+eight, The Pigeon Run); the number explanations; the slower Bulletin;
+Shred's number keys.
 
-## Earlier (2026-10-06)
+**Numbers today:** `SAVE_VERSION` 14; 299 unit tests; careful play
+survives 68% (balance probe, 400 runs, ±3), random 5%.
 
-**MINI-GAMES SLICE 3, PART A — BUILT, WAITING FOR THE OWNER'S PLAYTEST.**
-Owner chose five games for slice 3, in two merges (*"good go onto the
-next slice"*). Part A:
-- **Find the Mole** (dark night camera; Security): staff walk the
-  Interior Ministry's night floor; watch who meets the press contact
-  alone and passes an envelope; name the mole in a line-up. Decoys,
-  coffee hand-overs and camera blackouts from act 2.
-- **Budget Night** (bright Finance desk; Workers): 90 s, five jars, a
-  $30B pot; each faction has a line that keeps moving; below it, patience
-  drains; one walk-out allowed. Owner: *"plenty of time but still can't
-  just sit there"*.
-- **The Pigeon Run** (daylight sky; Army): hold to climb, let go to glide,
-  past hawks (they show their dive line first), storm clouds and hills;
-  three feathers (four with the Pigeon Federation's champion, if you
-  helped the Federation earlier).
-- All three are **daily games** (six now) and **picked by events**
-  (hostile Security / betrayal warning / big leaks → Mole; debt or a
-  Workers/Elites demand → Budget; provinces pulling away → Pigeon). An
-  event never brings yesterday's game.
-- Laptops: every new game has full keyboard controls (owner's trackpad
-  feedback). Built by three agents in parallel, reviewed and merged.
-- No save reset (`SAVE_VERSION` 14). Careful play still survives 63%.
-- Practice links: `…/Reign-Check/?practice=mole`, `budget`, `pigeon`
-  (add `&act=3` for the hardest).
-- **Part B, after the playtest:** Who Was in the Stairwell?, The
-  Ambassador's Table.
-
-**Approved 2026-10-06:** mini-games slice 2 and Shred's number keys
-(*"good go onto the next slice"*).
-
-**SHRED THE LEDGER NUMBER KEYS (approved 2026-10-06).** Owner: *"laptop users on trackpad can't seem to click the
-papers fast enough"*. Chosen: a number on each paper (owner: *"do numbers
-instead. single digits"*).
-- On a laptop (mouse or trackpad), every paper shows a digit 0–9 in its
-  corner. Press it instead of clicking: once to turn a face-down paper
-  over, again to shred. Clicking still works. No two papers on screen
-  share a number. Phones show no numbers and play as before.
-- The how-to screen says so. Same speeds, same papers; no save reset.
-
-**Approved 2026-10-06** (*"both have been playtested and approved"*): the
-ten numbers explained in the game (result pills "→ GRIP", "What do these
-mean?", Brief me, night summary, Grip/Legitimacy parts) and the slower
-7pm Bulletin (7 / 6.5 / 6 s per story, clock after the slide-in).
-
-**Mini-games slice 2** (below) is still waiting for the owner's playtest.
-
-## Mini-games slice 2 (2026-10-01)
-
-**MINI-GAMES SLICE 2 — BUILT, WAITING FOR THE OWNER'S PLAYTEST.** Slice 1
-approved: *"besides that all works and we can move onto the next"*. Owner,
-for slice 2: careful play should be rewarding (about 60%), games need
-strategy and skill but not a 100% pass, and *"the goal of the mini games is
-to add more content into the game and make it not feel as if the users are
-just reading and clicking buttons"* (2–3 reading games are fine; the
-story and how-to screens keep their text).
-- **Three new daily games, little reading:** **Bread Lines** (real-time
-  city map: talk or police each flare-up), **The Last Kilometre** (rhythm:
-  duck / wave / stop as things come out of the crowd), **Shred the Ledger**
-  (shred the red-stamped papers on the belts before they reach the
-  auditors' box). Each has its own look,
-  title card and animations.
-- **Daily games now rotate** (never the same two days running), and
-  **events pick the game**: the Bread Riots or a hostile Street → Bread
-  Lines; the Free Zone Ledger → Shred.
-- **Bigger win rewards:** careful play survives 59% (was 46% after slice 1).
-- **After the owner's playtests (2026-10-02/03):** The Last Kilometre is
-  now **Walk in the Weather**, the act opener (first thing on days 1, 7 and
-  13, harder each act, bigger stakes); Shred the Ledger runs on conveyor
-  belts with face-down papers, much faster, and harder each act (act 3 is
-  the 2× game the owner played in act 1).
-- **Bug found and fixed while testing:** on a phone, the tap that finished
-  a pile of papers also landed as a click on the next pile's paper.
-- No save reset (`SAVE_VERSION` 14). Tests 195.
-- Practice links: `…/Reign-Check/?practice=bread`, `kilometre`, `shred`.
-
-**Mini-games slice 1 (approved 2026-10-01):** the system (a daily game
-from day 2; coups trigger Hold the Palace), The 7pm Bulletin, and the
-opening title card.
-
-**Balance slice D (factions remember your decisions) is approved:**
-*"Slice D Approved."*
-
-**PLAYTESTED ON THE OWNER'S PHONE AND APPROVED: the mobile web version,
-hosted free on GitHub Pages.** Owner, verbatim: *"Playtested on my phone, everything works now"*
-(after three fixes from their first phone playtest: an accepted bribe now
-closes the demand pop-up; the bottom button is a compact floating one; one
-Continue on phones — see the log). Owner's
-choices: build it all, then one merge; Home Screen polish; factions as a
-strip + Files drawer; tablets get the phone layout; tests before every
-deploy.
-- **Live link:** https://ohfrinzx.github.io/Reign-Check/ — every merge
-  into the default branch now runs the tests, builds and publishes
-  (`.github/workflows/deploy.yml`).
-- **Phone layout** (1080px and narrower): ☰ menu, the three resources
-  always visible, a faction strip that opens the Files drawer (everything
-  from the desktop rail, faction memories included), a compact red action
-  button floating at the bottom, one-column front page, stacked Back Room, touch-sized
-  buttons, no keyboard hints on touch screens, a tighter landscape mode.
-- **Home Screen:** icon, name, full-screen launch (`manifest.webmanifest`).
-- **Found and fixed:** the fonts would all have failed on GitHub Pages
-  (they pointed at the site root); tapping Money/Grip/Legitimacy on a phone
-  opened and closed its explanation at once.
-- **Desktop is pixel-identical** to before (40 screenshots compared). No
-  game logic changed; no save reset (`SAVE_VERSION` stays 14).
 **Later, each needing the owner's go-ahead:** sound, a coup crisis chain,
-the remaining ending types.
-
-**Balance slice D — factions remember your decisions (approved
-2026-10-01).** The owner asked for it, verbatim: *"I
-do want to update the consequences so factions react to my decisions as
-well. That's a key part of gameplay I would say. add a few more blocked
-options I don't believe I have even seen one during testing."* They chose
-all four options offered: faction demands, changed demand options, factions
-remember, and faction reactions on cards.
-- **Factions remember:** each faction's row in Files shows what it
-  remembers ("▼ Remembers: you sent soldiers to the Gorsk mines (day 5)"),
-  and its mood keeps drifting that way for 4 mornings.
-- **Decisions trigger demands:** 8 demands a faction makes because of what
-  you did (e.g. "The Street wants Sanna Vel released"), shown with
-  "Because you …".
-- **Demands handled differently:** 14 memories make a faction's demand
-  cheaper or dearer, or make it refuse bribes, with the reason shown.
-- **More blocked options:** 10 more locks on common cards, several
-  credited to a faction ("— the army remembers"). Locks now appear in
-  about 76% of runs (about 20% before).
-- No save reset: `SAVE_VERSION` stays 14. Balance: careful play survives
-  59% (was 67%), random 3%.
-
-**Later, each needing the owner's go-ahead:** mini-games (build them
-mobile-first, each with its own look), sound, a coup crisis chain, the
-remaining ending types.
+the remaining ending types, mini-game ideas #4 and #11
+(`docs/MINIGAMES.md`).
 
 ## Log (newest first)
+
+- **2026-10-07** — Owner: update all documentation for a balancing pass
+  by a new agent. Chose a balance brief and a balance change log: new
+  `docs/BALANCE.md`; every doc checked against the code. Part B stays
+  waiting for its playtest. The old "Now" blocks moved to
+  `docs/archive/PROJECT_STATUS_HISTORY.md`.
 
 - **2026-10-07** — Owner confirmed all standing playtests (slice 3 part A
   approved) and asked for part B, delegating to cheaper models. Built by

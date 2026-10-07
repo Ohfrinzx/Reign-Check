@@ -1,7 +1,16 @@
-# Mini-games — brief for the next agent
+# Mini-games — the owner's decisions, the record, and how to add one
 
-**Written 2026-10-01; slice 1 built the same day.** Phase 5. Read this after `AGENTS.md`,
-`PROJECT_STATUS.md` and `docs/SYSTEMS.md`.
+**Phase 5, 2026-10-01 → 2026-10-07.** Eleven mini-game cards (ten games)
+are built. This file holds the owner's decisions about mini-games, the
+idea list, and the rules for adding or changing one. How each game works
+now, with its numbers, is in `docs/SYSTEMS.md` §12. Read this after
+`AGENTS.md`, `PROJECT_STATUS.md` and `docs/SYSTEMS.md`.
+
+**Balancing note:** every mini-game result changes the core numbers
+(Legitimacy, faction loyalty, hidden pressures). Those result sizes are
+balance knobs; they are listed in `docs/BALANCE.md`. Change a game's
+*rules* here and in its own file; change a result's *size* through the
+balance process (`docs/BALANCE.md` §5).
 
 ## 1. Where it stands
 
@@ -16,13 +25,15 @@ Run. **Part B built, waiting for the owner's playtest (2026-10-07):** Who Was
 in the Stairwell?, The Ambassador's Table (both daily, picked by the
 Stairwell Tapes / Ostrene gas crises). That completes the idea list's
 chosen games (all of §3 except #4 Count the Votes and #11 Balcony Speech).
-Owner: delegate, but use only the model a task needs (not the biggest). How it works, with the
-numbers: `docs/SYSTEMS.md` §12.
+How each works, with the numbers: `docs/SYSTEMS.md` §12.
 
-**Before the next slice:** ask the owner which games come next (the list
-in §3), build them as a slice, stop for a playtest. Don't build several
-slices at once. Don't fill gaps in the owner's description with your own
-design. Ask.
+**Next (owner, 2026-10-07):** a balancing pass on the core systems before
+anything else — `docs/BALANCE.md`. No new mini-games until the owner asks.
+
+**Before any new mini-game:** ask the owner (the list in §3 has the two
+unbuilt ideas), build it as a slice, stop for a playtest. Don't build
+several slices at once. Don't fill gaps in the owner's description with
+your own design. Ask.
 
 ## 2. What the owner has decided
 
@@ -99,14 +110,15 @@ After slice 1 (2026-10-01):
 Earlier notes still stand: variety (each game its own look, distinct from
 the three card layouts) and mobile-first (the owner plays on an iPhone).
 
-## 3. The idea list (proposed to the owner; not yet chosen)
+## 3. The idea list
 
 Built: **#1 Hold the Palace**, **#2 The 7pm Bulletin**, **#3 Shred the
-Ledger**, **#6 Budget Night**, **#8 Bread Lines**, **#9 Find the Mole**,
-**#10 The Last Kilometre**, **#12 The Pigeon Run**. Chosen for slice 3
-part B: **#5**, **#7**. Still open (the
-reading-heavy ones — #4, #5, #7, #11 — only if the owner wants another
-reading game):
+Ledger**, **#5 Who Was in the Stairwell?**, **#6 Budget Night**, **#7 The
+Ambassador's Table**, **#8 Bread Lines**, **#9 Find the Mole**, **#10 The
+Last Kilometre** (now Walk in the Weather), **#12 The Pigeon Run**.
+**Not built:** #4 Count the Votes and #11 Balcony Speech (both
+reading-heavy; only if the owner asks). The table keeps the original
+pitches of the later games for reference:
 
 | # | Name | What you do | Hook / trigger |
 |---|---|---|---|
@@ -118,11 +130,27 @@ reading game):
 | 11 | Balcony Speech | Build a speech line by line as the crowd reacts | a Street or Workers demand |
 | 12 | The Pigeon Run | Steer a racing pigeon with a secret message past Drovnan hawks | Drovna, the Hadem border |
 
-Adding a game: rules in `src/game/minigames/<game>.ts` (pure), a card with
-`won`/`lost` and its intro in `content/minigames.ts`, a `MinigameKey`, a
-screen in `src/ui/minigames/`, its look in the MINI-GAMES block of
-`index.css`, a practice name in `practice.ts`, tests, and scenes. A daily
-game also goes in `DAILY_MINIGAMES` (then days stop repeating yesterday's).
+Adding a game (the pattern slice 3 used):
+- rules in `src/game/minigames/<game>.ts` (pure; `xDifficulty(act)` and
+  `xSetup(seed, d)`), its card (`won` / `lost`, plus any extra choices —
+  see Find the Mole) and its intro (`story`, `howTo`, `stakes`) in its own
+  `content/mg<Game>.ts`, registered in `content/minigames.ts` (`MG_CARD`,
+  `MINIGAME_CARDS`, `minigameIntro`), a `MinigameKey` in `types.ts`;
+- the screen in `src/ui/minigames/<Game>Game.tsx`, wired in
+  `MinigameScreen.tsx` (`WORDS`, setup, render); its look in its own
+  marked block at the end of `index.css`;
+- a practice name in `practice.ts`, a scene in `tools/scenes.mjs`, a
+  browser check `tools/<game>.mjs` registered in `tools/run-browser.mjs`,
+  and unit tests `src/game/__tests__/<game>.test.ts` with simulated
+  players by skill;
+- a daily game also goes in `DAILY_MINIGAMES`; an event trigger goes in
+  `eventMinigames()` (most urgent first; an event never brings
+  yesterday's game).
+- The frame supports, without engine changes: a chosen option at the end
+  (`MinigameEnd.choice`, e.g. the mole's fate), facts for the result text
+  (`MinigameEnd.flags`, e.g. Budget Night's jars), and a custom result
+  stamp (`MinigameEnd.stamp`). A result can carry its own marks
+  (`CardOutcome.marks`).
 
 ## 4. Rules a mini-game must follow
 
@@ -151,8 +179,10 @@ to break:
 - **Touch first.** Every action works with a tap. Nothing needed to play
   may depend on hover (rule 11). If you use dragging, also give a tap way
   to do the same thing.
-- **Keyboard on desktop** where it makes sense (the game already has number
-  keys and Enter; see `App.tsx`).
+- **Keyboard on desktop for everything** (owner, 2026-10-06: trackpad
+  players can't click fast-moving things): number keys or arrows + Enter,
+  with the key hints shown only when a mouse or trackpad is attached
+  (`(any-pointer: fine)`), never on phones.
 - **The main action is always on screen without scrolling** (rule 9). On a
   phone, keep it clear of the bottom safe area. iPhone Safari's floating
   toolbar counts as that area. Never pad a fixed element down into it
@@ -161,8 +191,10 @@ to break:
 - **Don't change existing desktop screens.** Take before/after pictures
   with `tools/desktop-snap.mjs` (see §6). Mini-game screens are new, so
   they are added to the checks rather than compared.
-- Only two screens are dark (the Back Room and the situation room), both at
-  the owner's request. Ask before making a mini-game dark.
+- Dark looks are the owner's call. Dark now: the Back Room, the situation
+  room, and the mini-games Hold the Palace, Shred the Ledger (walnut desk),
+  Find the Mole and Who Was in the Stairwell?. Ask before making anything
+  else dark.
 
 ## 6. Testing (all of it, before every merge)
 
@@ -180,10 +212,11 @@ to break:
 - `tools/desktop-snap.mjs`: run `SNAP_MODE=save node tools/run-browser.mjs
   desktop-snap` **before** your changes (the pictures live in the temp
   folder, so a new session has none until you do), and `node
-  tools/run-browser.mjs desktop-snap` after. The 40 existing desktop
-  pictures must not change. A screen you add to `scenes.mjs` has no
-  "before" picture, so the comparison reports it missing. Compare before
-  adding it, or check that only the new screen is reported, then save again.
+  tools/run-browser.mjs desktop-snap` after. The existing desktop pictures
+  (33 screens × 2 widths) must not change, except the `ending` screen,
+  whose scripted run changes whenever the daily games or results change.
+  A screen you add to `scenes.mjs` has no "before" picture; the
+  comparison lists it as new instead of failing.
 - `npm run build && node tools/pages-preview.mjs`: the game still works
   from the `/Reign-Check/` folder GitHub Pages uses.
 
