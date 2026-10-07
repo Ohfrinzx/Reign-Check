@@ -1534,6 +1534,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     endsCommitment: 'cmt-ilvet',
     cutCost: 3.0,
     cutEffects: {
+      flags: {
+        ilvetLevy: -1,
+      },
       hidden: {
         scandal: 4,
       },

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createGame } from '../state';
-import { buyShopItem, cutDeal, fireAdvisor, leaveShop } from '../engine';
+import { buyShopItem, chooseOption, cutDeal, fireAdvisor, leaveShop } from '../engine';
 import { dailyFromOwned, tickHeldDeals } from '../shop';
 import { computeBudget } from '../economy';
 import { applyEffects } from '../effects';
@@ -89,5 +89,20 @@ describe('Back Room benefits match their promises', () => {
     const before = computeBudget(s);
     s.flags.ilvetLevy = 1;
     expect(computeBudget(s).revenue - before.revenue).toBeCloseTo(0.3);
+  });
+
+  it('the ordinary levy can be imposed again after ending the Back Room deal', () => {
+    const bought = buyShopItem(shopWith('ilvet-levy'), 'ilvet-levy');
+    const cut = cutDeal(bought, 'ilvet-levy');
+    expect(cut.flags.ilvetLevy).toBe(0);
+    cut.phase = 'stage';
+    cut.current = { cardId: 'ilvet-audit', isAlert: false };
+    const levied = chooseOption(cut, 'levy');
+    expect(levied.flags.ilvetLevy).toBe(1);
+    expect(levied.commitments.some((c) => c.id === 'cmt-ilvet')).toBe(false);
+    expect(computeBudget(levied).lines.find((l) => l.label === 'Ilvet Free Zone')?.amount).toBe(0.65);
+    const unlevied = structuredClone(levied);
+    unlevied.flags.ilvetLevy = 0;
+    expect(computeBudget(levied).revenue - computeBudget(unlevied).revenue).toBeCloseTo(0.3);
   });
 });

@@ -34,9 +34,9 @@ export function computeBudget(s: GameState): Budget {
   lines.push({ kind: 'revenue', label: 'Port & transit fees', amount: 0.8 * eco, note: 'Mavro corridor tolls.' });
   lines.push({ kind: 'revenue', label: 'Taxes', amount: 1.2 * eco, note: 'Income, sales, corporate.' });
   // The ordinary card's levy is represented by the flag. The Back Room
-  // deal uses a cancellable commitment instead: never count both, and never
-  // resume the flag's revenue after that deal has been cut.
-  const cardLevy = s.flags.ilvetLevy && !s.shopBought.includes('ilvet-levy');
+  // deal uses a cancellable commitment instead: never count both. Cutting
+  // that deal clears the flag, but a later ordinary card can impose it anew.
+  const cardLevy = s.flags.ilvetLevy && !s.commitments.some((c) => c.id === 'cmt-ilvet');
   lines.push({
     kind: 'revenue',
     label: 'Ilvet Free Zone',
