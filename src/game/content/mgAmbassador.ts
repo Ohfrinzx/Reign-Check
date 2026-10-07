@@ -70,14 +70,15 @@ export function ambassadorIntro(s: GameState): MinigameIntro {
       crisis
         ? 'Ostrene has cut the gas. Its ambassador has agreed to dinner, which is the closest Ostrene comes to saying sorry.'
         : 'Velmorra buys most of its gas from Ostrene. The contract runs out this winter, and Ostrene\'s ambassador is coming to dinner.',
-      'He wants a high price. You want a low one. He will walk out if you push too far, and he will not tell you when that is.',
-      'But his face, his glass and his notes will.',
+      'He opens at about $450 to $500 for every 1,000 cubic metres. You want less. His lowest price is a secret, and he will walk out if you push too far.',
+      'He will not tell you when that is. But his face, his glass and his notes will.',
     ],
     howTo: [
       'Five courses, five rounds. Each round, pick a price to offer and a line to say.',
-      'Watch his face, his wine glass and his notebook. They show how close he is to walking out.',
-      'Push for a low price while he is relaxed. Give ground when he is not.',
-      'There is no clock. Agree a price by dessert, without him walking out.',
+      'If your price is high enough, he signs. If it is too low, he refuses, comes down a little and loses patience. The further under, the more he loses.',
+      'Watch his face, his glass and his notebook. Smiling, sipping and writing numbers: relaxed. Frowning, an untouched glass and crossing out: irritated. A glass pushed away and a closed notebook: he is about to stand.',
+      'Every man likes different lines. Watch how each one lands. Some men hide one tell or fake one. When two tells agree, believe them.',
+      'His own price always works. Push while he is relaxed, and take his price when he is not. If he leaves, or there is no deal by dessert, you lose.',
     ],
     stakes: {
       win: 'Win: Legitimacy and the economy go up, every faction warms a little (the Elites most), and Ostrene\'s patience grows.',
