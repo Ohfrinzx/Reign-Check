@@ -20,8 +20,8 @@ import type { CardOption, Effects, GameState, HiddenKey, Rng } from '../types';
  * themselves to a seed. All shop items are unlocked for the experienced
  * player comparison. Legacy-careful intentionally retains the old oracle.
  */
-export type StrategyPolicy = 'adaptive' | 'coalition' | 'command' | 'reform' | 'economy' | 'random' | 'legacy-careful';
-export const STRATEGY_POLICIES: StrategyPolicy[] = ['adaptive', 'coalition', 'command', 'reform', 'economy', 'random', 'legacy-careful'];
+export type StrategyPolicy = 'adaptive' | 'coalition' | 'command' | 'reform' | 'economy' | 'random' | 'random-managed' | 'legacy-careful';
+export const STRATEGY_POLICIES: StrategyPolicy[] = ['adaptive', 'coalition', 'command', 'reform', 'economy', 'random', 'random-managed', 'legacy-careful'];
 type Style = 'coalition' | 'command' | 'reform' | 'economy';
 export const START_STYLE: Record<string, Style> = {
   stairwell: 'command', landslide: 'coalition', handover: 'economy',
@@ -54,7 +54,7 @@ export function readerPosition(s: GameState): GameState {
 }
 
 function styleFor(s: GameState, policy: StrategyPolicy): Style {
-  return policy === 'adaptive' ? START_STYLE[s.mandateId] ?? 'coalition'
+  return policy === 'adaptive' || policy === 'random-managed' ? START_STYLE[s.mandateId] ?? 'coalition'
     : policy === 'command' || policy === 'reform' || policy === 'economy' ? policy : 'coalition';
 }
 
@@ -129,7 +129,7 @@ export function strategyChoice(s: GameState, policy: StrategyPolicy, rng: Rng): 
   const card = activeCard(s)!;
   const options = orderedOptions(s, card).filter((o) => !o.enabled || o.enabled(s));
   if (!options.length) throw new Error(`No legal option on ${card.id}`);
-  if (policy === 'random') return options[rng.int(options.length)].id;
+  if (policy === 'random' || policy === 'random-managed') return options[rng.int(options.length)].id;
   if (policy === 'legacy-careful') {
     if (!rng.chance(0.75)) return options[rng.int(options.length)].id;
     return [...options].sort((a, b) => visibleScore(chooseOption(s, b.id)) - visibleScore(chooseOption(s, a.id)))[0].id;
