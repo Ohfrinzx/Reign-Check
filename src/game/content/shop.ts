@@ -323,7 +323,7 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     tier: 'small',
     name: 'A Clerk in the Convocation',
     seller: 'Handles the paperwork for the body that meets four times a year and votes on you in one of them.',
-    upside: 'He keeps every faction talking to your office. Their support rises a little each morning while he works for you.',
+    upside: 'Across government, he keeps every faction talking to your office. Their support rises a little each morning while he works for you.',
     downside: 'He expects a favour back for every favour forward. The state gets a little more purchasable.',
     cost: 3.5,
     daily: {
