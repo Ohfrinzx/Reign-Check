@@ -1,5 +1,5 @@
 import { createGame } from '../state';
-import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop, completeConfidenceVote, orderedOptions, buyShopItem, useFavour } from '../engine';
+import { prepareDay, beginStages, chooseOption, continueAfterResolve, continueAfterAlert, activeCard, openShop, leaveShop, completeConfidenceVote, orderedOptions, buyShopItem, useFavour, finishMinigame } from '../engine';
 import { makeRng } from '../rng';
 import { applyEffects } from '../effects';
 import { computeBudget } from '../economy';
@@ -10,6 +10,7 @@ import { computeConfidenceVote } from '../content/endings';
 import { shopPrice, capBlockReason, roomIsClosed } from '../shop';
 import { liveDemands, meetDemand, meetBlockReason, meetCost } from '../demands';
 import { favourTargets, favourBlockReason } from '../favours';
+import { BUDGET_FACTIONS } from '../minigames/budget';
 import { visibleScore } from './balance.probe';
 import type { CardOption, Effects, GameState, HiddenKey, Rng } from '../types';
 
@@ -206,10 +207,35 @@ export interface StrategySettings {
   seedOffset?: number;
   /** Ablation removes purchases, held favour use and demand intervention. */
   management?: boolean;
+  /** Sensitivity assumption, not a measured distribution of human results. */
+  aftermath?: 'standard' | 'stress';
+}
+
+/** Harsh detail sensitivity: each lost Budget Night has two walkouts, each
+ * $4B short; the pair rotates by day/act, never by a hidden seeded result.
+ * Every won budget has neutral jars. Ambassador wins get score70 (small
+ * reward), losses0. Other games retain the original macro result path.
+ * This is deliberately synthetic, NOT measured human performance. */
+export function resolveProbeMinigame(s: GameState, won: boolean, choice: string, aftermath: StrategySettings['aftermath'] = 'standard'): GameState {
+  const card = activeCard(s)!;
+  if (aftermath !== 'stress') return chooseOption(s, choice);
+  if (card.minigame === 'ambassador') return finishMinigame(s, won, won ? 70 : 0);
+  if (card.minigame === 'budget') {
+    const first = (s.day + s.act) % BUDGET_FACTIONS.length;
+    const second = (first + 2) % BUDGET_FACTIONS.length;
+    const flags: Record<string, number> = {};
+    BUDGET_FACTIONS.forEach((faction, i) => {
+      const out = !won && (i === first || i === second);
+      flags[`bnDiff:${faction}`] = out ? -4 : 0;
+      flags[`bnOut:${faction}`] = out ? 1 : 0;
+    });
+    return finishMinigame(s, won, won ? 100 : 20, undefined, flags);
+  }
+  return chooseOption(s, choice);
 }
 
 export function strategyProbe(settings: StrategySettings) {
-  const { n, mandateId, policy, minigameSkill, seedOffset = 0, management = true } = settings;
+  const { n, mandateId, policy, minigameSkill, seedOffset = 0, management = true, aftermath = 'standard' } = settings;
   const endings: Record<string, number> = {};
   const purchases: Record<string, number> = {};
   const choices: Record<string, Record<string, number>> = {};
@@ -226,9 +252,11 @@ export function strategyProbe(settings: StrategySettings) {
       else if (s.phase === 'stage' || s.phase === 'alert') {
         const card = activeCard(s)!;
         let id: string;
+        let wonMinigame = false;
         if (card.minigame) {
           minigamesPlayed++;
           const won = rng.chance(minigameSkill);
+          wonMinigame = won;
           if (won) minigamesWon++;
           // A won mole game still has a meaningful policy choice.
           id = won ? card.minigame === 'mole' && policy !== 'random' && policy !== 'legacy-careful'
@@ -237,7 +265,7 @@ export function strategyProbe(settings: StrategySettings) {
         } else id = strategyChoice(s, policy, rng);
         choices[card.id] ??= {};
         choices[card.id][id] = (choices[card.id][id] ?? 0) + 1;
-        s = chooseOption(s, id);
+        s = card.minigame ? resolveProbeMinigame(s, wonMinigame, id, aftermath) : chooseOption(s, id);
       } else if (s.phase === 'resolve') s = continueAfterResolve(s);
       else if (s.phase === 'alertResolve') s = continueAfterAlert(s);
       else if (s.phase === 'vote') {
@@ -270,7 +298,7 @@ export function strategyProbe(settings: StrategySettings) {
   const center = (rate + z2 / (2 * n)) / (1 + z2 / n);
   const spread = 1.96 * Math.sqrt(rate * (1 - rate) / n + z2 / (4 * n * n)) / (1 + z2 / n);
   return {
-    ...settings, seedOffset, management,
+    ...settings, seedOffset, management, aftermath,
     survived: Math.round(rate * 1000) / 10,
     survival95: [Math.round((center - spread) * 1000) / 10, Math.round((center + spread) * 1000) / 10],
     avgDays: Math.round(days / n * 10) / 10,

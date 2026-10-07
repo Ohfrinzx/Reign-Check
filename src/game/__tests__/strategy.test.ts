@@ -3,7 +3,12 @@ import { createGame } from '../state';
 import { beginStages, prepareDay, activeCard } from '../engine';
 import { makeRng } from '../rng';
 import { MANDATES } from '../content/mandates';
-import { expectedOptionValue, readerPosition, strategyChoice, strategyMatrix, strategyProbe, STRATEGY_POLICIES } from './strategy.probe';
+import { expectedOptionValue, readerPosition, resolveProbeMinigame, strategyChoice, strategyMatrix, strategyProbe, STRATEGY_POLICIES } from './strategy.probe';
+import { BUDGET_CARD_ID } from '../content/mgBudget';
+import { AMBASSADOR_CARD_ID } from '../content/mgAmbassador';
+import { BUDGET_FACTIONS } from '../minigames/budget';
+import { hasMark } from '../consequences';
+import { tickDemands } from '../demands';
 
 describe('strategy measurement', () => {
   it('evaluates a gamble without inspecting the saved random outcome or mutating the run', () => {
@@ -47,6 +52,48 @@ describe('strategy measurement', () => {
       expect(result.avgPurchases).toBeGreaterThan(0);
     }
   }, 120000);
+
+  it('stress Budget losses reach actual walkout memories, repayment bills and demand claims', () => {
+    let bills = 0, claims = 0;
+    for (let seed = 0; seed < 20; seed++) {
+      const state = createGame({ seed, mandateId: 'accident' });
+      state.day = 4;
+      state.phase = 'stage';
+      state.current = { cardId: BUDGET_CARD_ID, isAlert: false };
+      const after = resolveProbeMinigame(state, false, 'lost', 'stress');
+      const walked = BUDGET_FACTIONS.filter((f) => hasMark(after, `budget-walkout-${f}`));
+      expect(walked).toHaveLength(2);
+      expect(walked.every((f) => after.flags[`bnDiff:${f}`] === -4)).toBe(true);
+      expect(after.factions.staff.loyalty).toBeLessThan(state.factions.staff.loyalty);
+      bills += after.commitments.filter((c) => c.id.startsWith('budget-repay-') && c.perDay === 1 && c.daysLeft === 5).length;
+      bills += after.scheduled.filter((s) => s.effects?.stats?.treasury === -5.6 && s.day === 8).length;
+      const morning = structuredClone(after);
+      morning.day++;
+      tickDemands(morning, makeRng(71));
+      claims += BUDGET_FACTIONS.filter((f) => morning.factions[f].demand?.id === `budget-claim-${f}`).length;
+      const win = resolveProbeMinigame(state, true, 'won', 'stress');
+      expect(BUDGET_FACTIONS.every((f) => win.flags[`bnDiff:${f}`] === 0 && win.flags[`bnOut:${f}`] === 0)).toBe(true);
+      expect(win.commitments.some((c) => c.id.startsWith('budget-repay-'))).toBe(false);
+    }
+    expect(bills).toBeGreaterThan(0);
+    expect(claims).toBeGreaterThan(0);
+  });
+
+  it('stress Ambassador wins reach the low reward tier and preserve standard results', () => {
+    const state = createGame({ seed: 9, mandateId: 'accident' });
+    state.phase = 'stage';
+    state.current = { cardId: AMBASSADOR_CARD_ID, isAlert: false };
+    const standard = resolveProbeMinigame(state, true, 'won');
+    const stress = resolveProbeMinigame(state, true, 'won', 'stress');
+    expect(stress.flags.mgScore).toBe(70);
+    expect(stress.stats.legitimacy - state.stats.legitimacy).toBe(2);
+    expect(stress.stats.economy - state.stats.economy).toBe(2);
+    expect(standard.stats.legitimacy - state.stats.legitimacy).toBe(5);
+    expect(standard.stats.economy - state.stats.economy).toBe(4);
+    const loss = resolveProbeMinigame(state, false, 'lost', 'stress');
+    expect(loss.flags.mgScore).toBe(0);
+    expect(loss.stats.legitimacy).toBeLessThan(state.stats.legitimacy);
+  });
 });
 
 // Explicit opt-in; normal npm test stays small. Commands:
