@@ -4,6 +4,7 @@ import { computeResources, DISPLAY_FACTIONS, STAT_GUIDE } from '../../game/displ
 import { FACTIONS } from '../../game/content/country';
 import { currentMandate } from '../../game/content/mandates';
 import { HONORIFICS, ACT_LENGTH, NUM_ACTS } from '../../game/state';
+import { VOTE_RULE_TEXT } from '../../game/content/endings';
 import { NARROW, useMedia } from '../useMedia';
 
 /**
@@ -41,7 +42,7 @@ export function IntroScreen({ s, onBegin, returning }: { s: GameState; onBegin: 
         <Section title="What you are trying to do">
           <p>
             The run is <b>{NUM_ACTS} acts</b> of about {ACT_LENGTH} days each ({s.maxDays} days in all).
-            Every act ends with a <b>confidence vote</b>{` in parliament. The chamber votes in five blocs, one per faction ${narrow ? 'in your Files (tap the faction strip)' : 'on the right'}. Each bloc follows its faction's mood plus your Grip and Legitimacy. A faction at the bottom of its bar votes against you as one, and debt costs votes everywhere. The bar rises each act. Lose one and the job ends there and then. Survive all `}{NUM_ACTS} and you have won.
+            Every act ends with a <b>confidence vote</b>{` in parliament. The chamber votes in five blocs, one per faction ${narrow ? 'in your Files (tap the faction strip)' : 'on the right'}. ${VOTE_RULE_TEXT} The bar rises each act. Lose one and the job ends there and then. Survive all `}{NUM_ACTS} and you have won.
           </p>
           <p>
             Every day you will be handed three to five <b>cards</b> (one more with The Accident): a minister with a request, a crisis,

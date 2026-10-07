@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ConfidenceVoteResult, GameState } from '../../game/types';
 import { NUM_ACTS } from '../../game/state';
 import { DISPLAY_FACTIONS } from '../../game/display';
-import { TOTAL_SEATS } from '../../game/content/endings';
+import { TOTAL_SEATS, VOTE_RULE_TEXT } from '../../game/content/endings';
 
 function marginLine(vote: ConfidenceVoteResult): string {
   const d = Math.abs(vote.margin);
@@ -145,7 +145,7 @@ export function ConfidenceVoteScreen({
         </div>
 
         <p className="vote-method">
-          Each bloc follows its faction&apos;s mood, plus your Grip and Legitimacy. A hostile faction votes against you as one. Debt costs votes everywhere. No ballot is random.
+          {VOTE_RULE_TEXT}
         </p>
         <div className="sr-only" aria-live="polite">
           {complete

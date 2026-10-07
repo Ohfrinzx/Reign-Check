@@ -1,7 +1,7 @@
 import type { Effects, GameState, HeldDeal, Rng, StatKey } from './types';
 import type { ShopItemDef, ShopRarity } from './content/shop';
 import { SHOP_ITEMS, SHOP_MAP } from './content/shop';
-import { NUM_ACTS, justAdvancedAct } from './state';
+import { NUM_ACTS, justAdvancedAct, dayInAct } from './state';
 import { currentMandate } from './content/mandates';
 
 /**
@@ -136,6 +136,14 @@ export function rollStock(s: GameState, rng: Rng, big = isActRoom(s)): string[] 
   const weights = big ? RARITY_WEIGHT_ACT : RARITY_WEIGHT_NIGHTLY;
   const pool = eligibleStock(s, big);
   const picked: ShopItemDef[] = [];
+
+  // An opening toolkit makes a build possible without giving extra stock,
+  // bypassing unlocks, or promising the same item every run.
+  if (!big && dayInAct(s) === 1) {
+    const focus = currentMandate(s).shopFocus ?? [];
+    const lead = rng.weighted(pool.filter((d) => focus.includes(d.id)), (d) => weights[d.rarity]);
+    if (lead) picked.push(lead);
+  }
 
   // The act room always leads with something expensive, or it isn't an event.
   if (big) {
@@ -387,6 +395,8 @@ export function shopHeading(s: GameState): { title: string; sub: string } {
   }
   return {
     title: 'The Back Room',
-    sub: 'The building is empty. Three people waited for it to be empty.',
+    sub: dayInAct(s) === 1
+      ? `${currentMandate(s).name}: one offer comes from your starting toolkit, when available. Choose carefully; it still has a catch.`
+      : 'The building is empty. Three people waited for it to be empty.',
   };
 }

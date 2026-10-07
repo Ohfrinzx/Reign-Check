@@ -11,6 +11,8 @@ export interface MandateDef {
   daily?: Effects;
   extraCards?: number;
   priceMult?: number;
+  /** One eligible offer from this toolkit on each act's opening night. */
+  shopFocus?: string[];
   pressureGainMult?: Partial<Record<HiddenKey, number>>;
   patienceLossMult?: Partial<Record<FactionId, number>>;
 }
@@ -18,6 +20,7 @@ export interface MandateDef {
 export const MANDATES: MandateDef[] = [
   {
     id: 'stairwell',
+    shopFocus: ['communion-man', 'fixer', 'garrison-envelope', 'convocation-clerk'],
     name: 'The Stairwell',
     summary: 'Krast died in a stairwell. The army put you in his chair before anyone asked who was with him. Sarran kept the recording.',
     startText: 'Army support +20. Legitimacy starts about 20 lower.',
@@ -36,6 +39,7 @@ export const MANDATES: MandateDef[] = [
   },
   {
     id: 'landslide',
+    shopFocus: ['communion-man', 'publish-accounts', 'loz-seven-oclock', 'pigeon-endorsement'],
     name: 'The Landslide',
     summary: 'The emergency election was yours by a mile. The victory party filled the square. The campaign bills filled three offices.',
     startText: 'Street support +30. Starting treasury −$20.0B.',
@@ -48,6 +52,7 @@ export const MANDATES: MandateDef[] = [
   },
   {
     id: 'handover',
+    shopFocus: ['bread-subsidy', 'customs-supervisor', 'word-to-vel', 'convocation-clerk'],
     name: 'The Handover',
     summary: 'The old cabinet handed you the keys and a well-funded account. The people outside were not invited to the handover.',
     startText: 'Starting treasury +$30.0B. Street support −20.',
@@ -62,6 +67,7 @@ export const MANDATES: MandateDef[] = [
   },
   {
     id: 'accident',
+    shopFocus: ['sarran-standing-order', 'loz-standing-slot', 'adamek-open-line', 'automate-payroll'],
     name: 'The Accident',
     summary: 'The meeting needed a temporary chair. You raised your hand to ask a question. The minutes record unanimous consent.',
     startText: 'No starting bonuses or penalties.',
@@ -71,6 +77,7 @@ export const MANDATES: MandateDef[] = [
   },
   {
     id: 'clean-hands',
+    shopFocus: ['night-reader', 'publish-accounts', 'grebs-missing-file', 'word-to-vel'],
     name: 'The Clean Hands Promise',
     summary: 'You promised an honest audit of everything. The public believed you. Sarran asked whether everything included his department.',
     startText: 'Legitimacy starts about 10 higher. Security support −15.',
@@ -83,6 +90,7 @@ export const MANDATES: MandateDef[] = [
   },
   {
     id: 'pay-deal',
+    shopFocus: ['customs-supervisor', 'convocation-clerk', 'hess-owes-you', 'settle-with-gorsk'],
     name: 'The Pay Deal',
     summary: 'Hess called off the national strike after you signed a wage agreement. Parliament made you chair before he could change his mind.',
     startText: 'Workers support +20. Starting treasury −$10.0B.',

@@ -8,10 +8,10 @@ import { isActEndDay } from '../state';
 /**
  * Confidence vote (balance slice B). The Grand Convocation votes in blocs,
  * one per visible faction. Each bloc's deputies follow that faction's mood
- * (60%) and how the government looks overall — Grip and Legitimacy (40%).
+ * (60%) and its own priorities within Grip and Legitimacy (40%).
  * A faction that has turned hostile (the bottom mood on its bar) votes
  * against you as one. An empty treasury costs votes in every bloc. The bar
- * rises each act: a simple majority first, three-fifths at the end.
+ * rises each act: 45, 58, then 68 seats.
  *
  * Deterministic — no dice. Everything that goes in is on screen: the faction
  * bars, Grip, Legitimacy and Money.
@@ -27,16 +27,25 @@ export const TOTAL_SEATS = VOTE_SEATS.reduce((a, b) => a + b.seats, 0);
 /** votes needed at the end of act 1, 2, 3 */
 export const VOTES_NEEDED = [45, 58, 68];
 
+/** Faction priorities use only the two visible governing resources. */
+export const BLOC_GRIP_WEIGHT: Partial<Record<FactionId, number>> = {
+  staff: 0.8, sable: 0.8, concord: 0.5, combine: 0.3, chorus: 0.2,
+};
+export const VOTE_DEBT_PER_BILLION = 0.75;
+export const VOTE_DEBT_CAP = 25;
+export const VOTE_RULE_TEXT = 'Faction loyalty matters most. Army and Security favour Grip; Workers and Street favour Legitimacy; Elites weigh both equally. Hostile factions vote against you. Debt costs more votes as it grows. No ballot is random.';
+
 export function computeConfidenceVote(s: GameState): ConfidenceVoteResult {
   const resources = computeResources(s);
   const grip = resources.find((r) => r.key === 'grip')?.value ?? 0;
   const legitimacy = resources.find((r) => r.key === 'legitimacy')?.value ?? 0;
-  const standing = (grip + legitimacy) / 2;
-  const debt = s.stats.treasury < 0 ? Math.min(25, 8 + Math.abs(s.stats.treasury) * 0.5) : 0;
+  const debt = Math.min(VOTE_DEBT_CAP, Math.max(0, -s.stats.treasury) * VOTE_DEBT_PER_BILLION);
 
   const blocs: VoteBloc[] = VOTE_SEATS.map(({ faction, seats }) => {
     const loyalty = s.factions[faction].loyalty;
     if (loyalty < HOSTILE_BELOW) return { faction, seats, votesFor: 0, why: 'hostile: all voted against' };
+    const gripWeight = BLOC_GRIP_WEIGHT[faction] ?? 0.5;
+    const standing = gripWeight * grip + (1 - gripWeight) * legitimacy;
     const lean = 0.6 * loyalty + 0.4 * standing - debt;
     const share = Math.max(0, Math.min(1, (lean - 30) / 40));
     const votesFor = Math.round(seats * share);
