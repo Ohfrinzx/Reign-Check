@@ -181,11 +181,13 @@ export function heldFavourDefs(s: GameState): ShopItemDef[] {
 }
 
 /**
- * Every owned advisor's / policy's per-day rule, merged into one Effects so
+ * Every owned advisor/policy and actively held deal's per-day rule, merged
+ * into one Effects so
  * engine.ts can push it through the normal applyEffects() path.
  */
 export function dailyFromOwned(s: GameState): Effects | undefined {
-  const defs = ownedDefs(s).filter((d) => d.daily);
+  const held = s.heldDeals.map((d) => SHOP_MAP[d.itemId]).filter(Boolean);
+  const defs = [...ownedDefs(s), ...held].filter((d) => d.daily);
   if (!defs.length) return undefined;
 
   const out: Effects = {};
@@ -202,6 +204,18 @@ export function dailyFromOwned(s: GameState): Effects | undefined {
       for (const [k, v] of Object.entries(def.daily.hidden)) {
         const key = k as keyof GameState['hidden'];
         out.hidden[key] = (out.hidden[key] ?? 0) + (v as number);
+      }
+    }
+    if (def.daily?.factions) {
+      out.factions = out.factions ?? {};
+      for (const [id, changes] of Object.entries(def.daily.factions)) {
+        const faction = id as keyof NonNullable<Effects['factions']>;
+        const target: NonNullable<NonNullable<Effects['factions']>[typeof faction]> = out.factions[faction] ?? {};
+        for (const [key, value] of Object.entries(changes)) {
+          const field = key as keyof typeof target;
+          target[field] = (target[field] ?? 0) + value;
+        }
+        out.factions[faction] = target;
       }
     }
   }

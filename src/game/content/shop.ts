@@ -66,10 +66,11 @@ export interface ShopItemDef {
   requires?: (s: GameState) => boolean;
   /** resolved at purchase through applyEffects(), exactly like a card option */
   effects?: Effects;
-  /** advisors and policies: applied every morning for as long as you own it */
+  /** Advisors/policies while owned; deals only while actively held. */
   daily?: {
     stats?: Partial<Stats>;
     hidden?: Partial<Hidden>;
+    factions?: Effects['factions'];
   };
   /** multiplies incoming NEGATIVE stat changes while owned (0.5 = losses halved) */
   lossMult?: Partial<Record<StatKey, number>>;
@@ -322,10 +323,13 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     tier: 'small',
     name: 'A Clerk in the Convocation',
     seller: 'Handles the paperwork for the body that meets four times a year and votes on you in one of them.',
-    upside: 'Whatever you send to the Grand Convocation now moves. It stops sitting in a drawer.',
+    upside: 'He keeps every faction talking to your office. Their support rises a little each morning while he works for you.',
     downside: 'He expects a favour back for every favour forward. The state gets a little more purchasable.',
     cost: 3.5,
     daily: {
+      factions: {
+        all: { loyalty: 0.3 },
+      },
       hidden: {
         corruption: 0.5,
       },
@@ -1764,6 +1768,9 @@ export const SHOP_ITEMS: ShopItemDef[] = [
     cost: 3.0,
     durationDays: 4,
     requires: (s) => !s.flags.pigeonEndorsement,
+    daily: {
+      stats: { support: 1 },
+    },
     effects: {
       flags: {
         pigeonEndorsement: 1,

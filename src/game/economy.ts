@@ -33,11 +33,15 @@ export function computeBudget(s: GameState): Budget {
   lines.push({ kind: 'revenue', label: 'Lithium & salt exports', amount: 1.7 * eco, note: '44% of exports. One serious buyer.' });
   lines.push({ kind: 'revenue', label: 'Port & transit fees', amount: 0.8 * eco, note: 'Mavro corridor tolls.' });
   lines.push({ kind: 'revenue', label: 'Taxes', amount: 1.2 * eco, note: 'Income, sales, corporate.' });
+  // The ordinary card's levy is represented by the flag. The Back Room
+  // deal uses a cancellable commitment instead: never count both, and never
+  // resume the flag's revenue after that deal has been cut.
+  const cardLevy = s.flags.ilvetLevy && !s.shopBought.includes('ilvet-levy');
   lines.push({
     kind: 'revenue',
     label: 'Ilvet Free Zone',
-    amount: 0.35 + (s.flags.ilvetLevy ? 0.3 : 0),
-    note: s.flags.ilvetLevy ? 'Including the transit levy you imposed.' : 'Enormous turnover. Almost no tax.',
+    amount: 0.35 + (cardLevy ? 0.3 : 0),
+    note: cardLevy ? 'Including the transit levy you imposed.' : 'Enormous turnover. Almost no tax.',
   });
 
   const leakage = s.hidden.corruption / 50;

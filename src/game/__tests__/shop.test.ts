@@ -77,10 +77,10 @@ describe('shop content integrity', () => {
     }
   });
 
-  it('only advisors and policies carry ongoing rules', () => {
+  it('only advisors, policies and held deals carry daily rules; deals have no loss multiplier', () => {
     for (const d of SHOP_ITEMS) {
       if (d.kind === 'advisor' || d.kind === 'policy') continue;
-      expect(d.daily, `${d.id} is a ${d.kind} but has a daily rule`).toBeUndefined();
+      if (d.kind !== 'deal') expect(d.daily, `${d.id} is a ${d.kind} but has a daily rule`).toBeUndefined();
       expect(d.lossMult, `${d.id} is a ${d.kind} but has a lossMult`).toBeUndefined();
     }
   });
