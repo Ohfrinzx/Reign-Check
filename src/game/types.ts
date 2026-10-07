@@ -459,7 +459,10 @@ export type MinigameKey =
   // slice 3, part A
   | 'mole'
   | 'budget'
-  | 'pigeon';
+  | 'pigeon'
+  // slice 3, part B
+  | 'stairwell'
+  | 'ambassador';
 
 /* ----------------------------------------------------------------- alerts */
 

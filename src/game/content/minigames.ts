@@ -5,6 +5,8 @@ import { characterWarnings } from '../characterEvents';
 import { MOLE_CARD, MOLE_CARD_ID, moleIntro } from './mgMole';
 import { BUDGET_CARD, BUDGET_CARD_ID, budgetIntro } from './mgBudget';
 import { PIGEON_CARD, PIGEON_CARD_ID, pigeonIntro } from './mgPigeon';
+import { STAIRWELL_CARD, STAIRWELL_CARD_ID, stairwellIntro } from './mgStairwell';
+import { AMBASSADOR_CARD, AMBASSADOR_CARD_ID, ambassadorIntro } from './mgAmbassador';
 
 /**
  * PHASE 5 — MINI-GAME CONTENT. The words and numbers of every mini-game:
@@ -32,6 +34,9 @@ export const MG_CARD = {
   mole: MOLE_CARD_ID,
   budget: BUDGET_CARD_ID,
   pigeon: PIGEON_CARD_ID,
+  // slice 3, part B (content/mgStairwell.ts, mgAmbassador.ts)
+  stairwell: STAIRWELL_CARD_ID,
+  ambassador: AMBASSADOR_CARD_ID,
 } as const;
 
 /** The games that can be today's daily one. A day never repeats yesterday's
@@ -40,6 +45,8 @@ export const DAILY_MINIGAMES: string[] = [
   MG_CARD.bulletin, MG_CARD.breadlines, MG_CARD.shred,
   // slice 3, part A (owner: all in the daily rotation, and picked by events)
   MG_CARD.mole, MG_CARD.budget, MG_CARD.pigeon,
+  // slice 3, part B
+  MG_CARD.stairwell, MG_CARD.ambassador,
 ];
 
 /** Played first thing on the first day of every act (owner: "like it's a
@@ -51,6 +58,10 @@ export const ACT_OPENER = MG_CARD.kilometre;
  * specific mini games"), most urgent first:
  *   - the Free Zone Ledger crisis → Shred the Ledger;
  *   - the Bread Riots, or a hostile Street → Bread Lines;
+ *   - the Ostrene gas cutoff, or Ostrene's patience running out (foreign
+ *     pressure 60+) → The Ambassador's Table;
+ *   - the Stairwell Tapes crisis (or, on the Stairwell mandate, scandal
+ *     pressure 50+) → Who Was in the Stairwell?;
  *   - a hostile Sable Office, a character about to turn on you, or papers
  *     being quoted in the press (leaks 62+) → Find the Mole;
  *   - debt, or a Workers or Elites demand on the desk → Budget Night;
@@ -60,6 +71,8 @@ export function eventMinigames(s: GameState): string[] {
   const out: string[] = [];
   if (s.crisis?.id === 'ledger') out.push(MG_CARD.shred);
   if (s.crisis?.id === 'bread' || s.factions.chorus.loyalty < 20) out.push(MG_CARD.breadlines);
+  if (s.crisis?.id === 'gas' || s.hidden.foreign >= 60) out.push(MG_CARD.ambassador);
+  if (s.crisis?.id === 'tapes' || (s.mandateId === 'stairwell' && s.hidden.scandal >= 50)) out.push(MG_CARD.stairwell);
   if (s.factions.sable.loyalty < 20 || s.hidden.leak >= 62 || characterWarnings(s).some((w) => w.turning)) out.push(MG_CARD.mole);
   if (s.stats.treasury < 0 || s.factions.combine.demand || s.factions.concord.demand) out.push(MG_CARD.budget);
   if (s.hidden.separatism >= 50) out.push(MG_CARD.pigeon);
@@ -366,6 +379,8 @@ export const MINIGAME_CARDS: CardDef[] = [
   MOLE_CARD,
   BUDGET_CARD,
   PIGEON_CARD,
+  STAIRWELL_CARD,
+  AMBASSADOR_CARD,
 ];
 
 /* ---------------------------------------- the story that opens each game */
@@ -390,6 +405,8 @@ export function minigameIntro(s: GameState, cardId: string, extra?: { spikes?: n
   if (cardId === MG_CARD.mole) return moleIntro(s);
   if (cardId === MG_CARD.budget) return budgetIntro(s);
   if (cardId === MG_CARD.pigeon) return pigeonIntro(s);
+  if (cardId === MG_CARD.stairwell) return stairwellIntro(s);
+  if (cardId === MG_CARD.ambassador) return ambassadorIntro(s);
   if (cardId === MG_CARD.breadlines) {
     const crisis = s.crisis?.id === 'bread';
     return {

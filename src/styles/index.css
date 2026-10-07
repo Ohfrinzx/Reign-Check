@@ -3570,3 +3570,20 @@ abbr.term{
   .pg-feather{width:11px;height:22px}
 }
 /* END PIGEON ---- */
+
+/* =========================================================================
+   MINI-GAMES SLICE 3, PART B — one block per game (its look, title card
+   .mg-veil-<key>, .mg-calm version and phone rules inside its own block).
+   ========================================================================= */
+
+/* ---- WHO WAS IN THE STAIRWELL? (.mg-stairwell): a Sable Office archive
+   under a desk lamp, dark (owner's choice). BEGIN STAIRWELL */
+.stairwell-placeholder{padding:40px;text-align:center}
+/* END STAIRWELL ---- */
+
+/* (spacer: the two blocks are kept apart on purpose) */
+
+/* ---- THE AMBASSADOR'S TABLE (.mg-ambassador): a candlelit dinner table.
+   BEGIN AMBASSADOR */
+.ambassador-placeholder{padding:40px;text-align:center}
+/* END AMBASSADOR ---- */

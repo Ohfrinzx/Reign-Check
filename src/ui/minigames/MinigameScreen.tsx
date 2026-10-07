@@ -11,6 +11,8 @@ import { moleDifficulty, moleSetup } from '../../game/minigames/mole';
 import { budgetDifficulty, budgetSetup } from '../../game/minigames/budget';
 import { pigeonDifficulty, pigeonSetup } from '../../game/minigames/pigeon';
 import { pigeonChampion } from '../../game/content/mgPigeon';
+import { stairwellDifficulty, stairwellSetup } from '../../game/minigames/stairwell';
+import { ambassadorDifficulty, ambassadorSetup } from '../../game/minigames/ambassador';
 import { hasMark } from '../../game/consequences';
 import { Ledger } from '../components/Ledger';
 import { OutcomeView } from '../components/CardView';
@@ -23,6 +25,8 @@ import { ShredGame } from './ShredGame';
 import { MoleGame } from './MoleGame';
 import { BudgetGame } from './BudgetGame';
 import { PigeonGame } from './PigeonGame';
+import { StairwellGame } from './StairwellGame';
+import { AmbassadorGame } from './AmbassadorGame';
 
 /** Per game: the start button, what giving up says, and the result stamps. */
 const WORDS: Record<string, { go: string; quit: string; won: string; lost: string }> = {
@@ -34,6 +38,8 @@ const WORDS: Record<string, { go: string; quit: string; won: string; lost: strin
   mole: { go: 'Watch the cameras →', quit: 'You switched off the cameras', won: 'Mole found', lost: 'Wrong desk' },
   budget: { go: 'Open the budget →', quit: 'You left Brask to it', won: 'Budget passed', lost: 'Walk-out' },
   pigeon: { go: 'Release the pigeon →', quit: 'You called the bird back', won: 'Message delivered', lost: 'Brought down' },
+  stairwell: { go: 'Open the files →', quit: 'You closed the files', won: 'Case closed', lost: 'Wrong name' },
+  ambassador: { go: 'Sit down to dinner →', quit: 'You left the table', won: 'Deal signed', lost: 'He walked out' },
 };
 
 /**
@@ -114,6 +120,8 @@ export function MinigameScreen({
   // the Pigeon Federation lends its champion to a Chair who helped it
   const champion = pigeonChampion(s);
   const pigeon = useMemo(() => (key === 'pigeon' ? pigeonSetup(seed, pigeonDifficulty(s.act, champion)) : null), [key, s.act, seed, champion]);
+  const stairwell = useMemo(() => (key === 'stairwell' ? stairwellSetup(seed, stairwellDifficulty(s.act)) : null), [key, s.act, seed]);
+  const ambassador = useMemo(() => (key === 'ambassador' ? ambassadorSetup(seed, ambassadorDifficulty(s.act)) : null), [key, s.act, seed]);
   const words = WORDS[key];
 
   const intro = minigameIntro(s, card.id, bulletin
@@ -234,6 +242,8 @@ export function MinigameScreen({
           {mole && <MoleGame setup={mole} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {budget && <BudgetGame setup={budget} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
           {pigeon && <PigeonGame setup={pigeon} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {stairwell && <StairwellGame setup={stairwell} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
+          {ambassador && <AmbassadorGame setup={ambassador} reduced={reduced} paused={confirmQuit} onEnd={finish} />}
         </main>
       ) : (
         <>
