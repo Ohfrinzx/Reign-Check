@@ -69,14 +69,15 @@ export function stairwellIntro(s: GameState): MinigameIntro {
     teaser: 'Four files. Four stories. One of them is a lie.',
     story: [
       'Krast died in a stairwell in the Palace. The army put you in his chair before anyone asked who was with him.',
-      'The Sable Office has kept four files on that night. Four people say where they were. One of them is lying.',
-      'Read the files. Find the lie. Name who was in the stairwell.',
+      'The Sable Office kept a file on each person in the building that night. Each file has a few typed statements about where people were at 21:40, the minute Krast fell.',
+      'One of them is lying. Find the lie, and you find who was in the stairwell.',
     ],
     howTo: [
-      'Each file says where that person was, and what they saw.',
-      'Exactly one person is lying. Everyone else tells the truth.',
-      'Find the story that does not fit with the others. Then name who was in the stairwell.',
-      'There is no clock. One name. A wrong name loses.',
+      'Each file has a few short statements about where people were at 21:40. "With" means in the same place. Exactly one person was in the stairwell.',
+      'Exactly one person is lying, and every statement they make is false. Everyone else tells the truth in every statement.',
+      'Try each person as the liar. Make their lines false and everyone else\'s true. If the story breaks, it is not them.',
+      'Tap a line to see it on the plan. Strike out lines you have ruled out. They are only notes.',
+      'Stamp the liar and stamp who was in the stairwell. Then close the case. There is no clock. A wrong name for the stairwell loses.',
     ],
     stakes: {
       win: 'Win: Legitimacy and support go up, every faction warms a little (the Street most), and the scandals cool.',
