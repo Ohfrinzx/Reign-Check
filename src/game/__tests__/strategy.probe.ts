@@ -19,6 +19,9 @@ import type { CardOption, Effects, GameState, HiddenKey, Rng } from '../types';
  * They do not search future card draws, optimise minigame layouts, or tune
  * themselves to a seed. All shop items are unlocked for the experienced
  * player comparison. Legacy-careful intentionally retains the old oracle.
+ * Minigames use chooseOption(won/lost), so they omit Budget Night jar
+ * aftermath and Ambassador price-tier flags. This is a macro comparison,
+ * with optimistic generic wins, not a full simulation of those games.
  */
 export type StrategyPolicy = 'adaptive' | 'coalition' | 'command' | 'reform' | 'economy' | 'random' | 'random-managed' | 'legacy-careful';
 export const STRATEGY_POLICIES: StrategyPolicy[] = ['adaptive', 'coalition', 'command', 'reform', 'economy', 'random', 'random-managed', 'legacy-careful'];
