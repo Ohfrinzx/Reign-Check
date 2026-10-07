@@ -59,7 +59,10 @@ stress explicitly exercises them. See guide for remaining information advantages
 
 ## Handoff status and next steps
 Implementation, measurements, final verification and documentation are complete.
-The final documentation/evidence commit is ready for feature-branch upload.
+All source commits were uploaded through the connected GitHub app with identical
+source trees. See `docs/balance-results/PROVENANCE.md` for local-to-GitHub commit
+IDs; evidence retains its original local IDs. The feature branch is prepared
+for publication and remote verification; no merge is authorized.
 
 1. Push ONLY `codex/strategy-balance`, verify remote matches local HEAD.
 2. Verify live default remains `abe32e8b93ac70c87875feb3e4194f7ce12904ff`.
