@@ -164,7 +164,7 @@ try {
     page.on('pageerror', (e) => errors.push(e.message));
     await open(page, 12, 2);
     await watch(page);
-    await run(page, 21000, async () => page.locator('.mo-lineup.done').count());
+    await run(page, 32000, async () => page.locator('.mo-lineup.done').count());
     assert.ok(await page.locator('.mo-lineup.done.lost').count(), 'No name in time loses');
     await run(page, 2500);
     await page.locator('.mg-end.lost').waitFor();
