@@ -34,7 +34,7 @@ export const STAIRWELL_CARD: CardDef = {
   faction: 'chorus',
   minigame: 'stairwell',
   base: 0,
-  body: 'The Sable Office has four files on the night Krast died. One of the four is lying about where they were.',
+  body: 'The Sable Office has files on the night Krast died. One of the people in them is lying about where they were.',
   options: [
     {
       id: 'won',
@@ -42,7 +42,7 @@ export const STAIRWELL_CARD: CardDef = {
       hint: 'Legitimacy and support go up, every faction warms a little, the Street most; the scandals cool.',
       outcome: (s): CardOutcome => ({
         text: (score(s) ?? 0) >= 85
-          ? 'You laid the four files side by side and the lie fell out of them on the first reading. Sarran closed the folder and said, "Yes."\n\nThe Street has wanted a straight answer about that stairwell since the day you took office. Tonight it has one.'
+          ? 'You laid the files side by side and the lie fell out of them on the first reading. Sarran closed the folder and said, "Yes."\n\nThe Street has wanted a straight answer about that stairwell since the day you took office. Tonight it has one.'
           : 'It took a second reading and a wrong turn. But the story that did not fit was the one you named, and Sarran agreed.\n\nThe Street gets its answer, a little late.',
         tone: 'good',
         effects: STAIRWELL_WON,
@@ -66,7 +66,7 @@ export function stairwellIntro(s: GameState): MinigameIntro {
   return {
     kicker: `Sable Office archive · Day ${s.day} · 01:15`,
     title: 'Who Was in the Stairwell?',
-    teaser: 'Four files. Four stories. One of them is a lie.',
+    teaser: 'Files on the night Krast died. One of them is a lie.',
     story: [
       'Krast died in a stairwell in the Palace. The army put you in his chair before anyone asked who was with him.',
       'The Sable Office kept a file on each person in the building that night. Each file has a few typed statements about where people were at 21:40, the minute Krast fell.',
