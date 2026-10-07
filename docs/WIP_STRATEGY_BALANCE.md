@@ -58,16 +58,17 @@ stress explicitly exercises them. See guide for remaining information advantages
   scroll-to-close limitation remains and is documented in the strategy guide.
 
 ## Handoff status and next steps
-Implementation, measurements, final verification and documentation are complete.
+Implementation, measurements, verification and documentation are complete.
+`codex/strategy-balance` is published on GitHub and remains unmerged.
+Remote verification confirmed the live default is unchanged at
+`abe32e8b93ac70c87875feb3e4194f7ce12904ff`.
+
 All source commits were uploaded through the connected GitHub app with identical
 source trees. See `docs/balance-results/PROVENANCE.md` for local-to-GitHub commit
-IDs; evidence retains its original local IDs. The feature branch is prepared
-for publication and remote verification; no merge is authorized.
+IDs; evidence retains its original local IDs. The local checkout tracks the
+published feature branch and the original history remains on the local-only
+`codex/strategy-balance-local-evidence` branch.
 
-1. Push ONLY `codex/strategy-balance`, verify remote matches local HEAD.
-2. Verify live default remains `abe32e8b93ac70c87875feb3e4194f7ce12904ff`.
-3. Send owner guide link, concise findings/routes and local playtest commands.
-4. Wait for owner playtest. Do not merge or deploy on their behalf yet.
-
-After resuming, inspect `git status`, `git log -1` and the two remote refs before
-repeating an upload. A matching feature ref means upload is already complete.
+Next: owner playtests using `docs/STRATEGIES.md` and reports start, choices,
+purchases, mini-game results, vote margin and ending. Do not merge or deploy
+until the owner approves. Inspect current branch and remote refs on resume.
