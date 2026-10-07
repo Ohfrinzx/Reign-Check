@@ -11,6 +11,9 @@ import { BASE, closeDemandPops } from './scenes.mjs';
  *      tells from the page (data-level on .am-tell, the course, his price, how
  *      each line landed), never the rules' hidden numbers, and plays the way
  *      the rules' careful player does. The key badges show on a laptop.
+ *   Brask's limit (the Finance Minister's note, "Brask's limit $X" above the
+ *   prices): his opening price is over it, prices over it are marked, and a
+ *   deal over it is lost ("Brask would not sign").
  *   2. A greedy player (always the lowest price, always "Stand firm")
  *      pushes him out: the napkin drops, he leaves, the stamp says so.
  *   3. Phone (390×844, touch): a dinner played with real taps ends in a
@@ -48,6 +51,7 @@ const read = (page) => page.evaluate(() => {
   for (const el of document.querySelectorAll('.am-line')) if (el.dataset.seen) lines[el.dataset.line] = el.dataset.seen;
   return {
     phase: root.dataset.phase, round: Number(root.dataset.round), price: Number(root.dataset.price), over: root.dataset.over,
+    limit: Number((document.querySelector('.am-board-limit b')?.textContent ?? '').replace('$', '')),
     tells, lines,
     offers: [...document.querySelectorAll('.am-offer')].map((e) => Number(e.dataset.price)),
   };
@@ -67,6 +71,7 @@ const choose = (page, act) => page.evaluate(async (a) => {
   for (const el of document.querySelectorAll('.am-line')) if (el.dataset.seen) history.push({ line: el.dataset.line, reaction: el.dataset.seen });
   const view = {
     round: Number(root.dataset.round), price: Number(root.dataset.price),
+    limit: Number((document.querySelector('.am-board-limit b')?.textContent ?? '').replace('$', '')),
     offers: [...document.querySelectorAll('.am-offer')].map((e) => Number(e.dataset.price)), tells, history,
   };
   return A.EXPERT(view, A.ambassadorDifficulty(a));
@@ -166,6 +171,12 @@ try {
     for (let i = 1; i < 5; i++) assert.equal(d0.offers[i] - d0.offers[i - 1], 20, 'The prices are $20 apart');
     assert.equal(d0.offers[4], d0.price, 'The top price is his price');
     assert.deepEqual(d0.tells, { face: 2, glass: 2, notes: 2 }, 'At the start he is relaxed: every tell shows it');
+    // Brask's limit is on screen from the start (the board and his note), under his opening price
+    assert.ok(d0.limit >= 400 && d0.limit < d0.price, `Brask's limit is shown and under his opening price (${d0.limit} < ${d0.price})`);
+    assert.match(await careful.locator('.am-svg .am-note').textContent(), new RegExp(`Do not sign above\\$${d0.limit}`), "Brask's note by the plate says the limit");
+    assert.equal(await careful.locator('.am-offer[data-idx="4"]').getAttribute('data-over'), '1', 'His own price is over the limit and is marked');
+    assert.match(await careful.locator('.am-offer[data-idx="4"] em').innerText(), /over limit/);
+    assert.ok((await careful.locator('.am-offer[data-over="0"]').count()) >= 1, 'Some prices are under the limit');
     assert.ok(await careful.locator('.am-go[disabled]').count(), 'Nothing is said until a price and a line are picked');
     // keys 1–5 pick the price, 6–9 the line (and a pick shows its badge)
     await careful.keyboard.press('3');
@@ -187,6 +198,8 @@ try {
     assert.ok(await careful.locator('.mg-end.won').count(), `A careful keyboard player closes the deal: ${await careful.locator('.mg-end').innerText()}`);
     assert.match(await careful.locator('.mg-end h2').innerText(), /\$\d{3}/, 'The result names the price');
     assert.match(await careful.locator('.mg-end p').innerText(), /He would have gone as low as \$\d{3}/);
+    const signed = Number((await careful.locator('.mg-end h2').innerText()).match(/\$(\d{3})/)[1]);
+    assert.ok(signed <= d0.limit, `The deal ($${signed}) is at or under Brask's limit ($${d0.limit})`);
     assert.ok(rounds >= 2, `The dinner took more than one round (${rounds})`);
     await careful.screenshot({ path: shotPath('AM-won-1366.png') });
     await careful.locator('.mg-foot .btn-primary').click();
@@ -214,6 +227,23 @@ try {
     assert.match(await greedy.locator('.mg-result-body .outcome').innerText(), /napkin|walked|left/i);
     await greedy.close();
     await careful.close();
+
+    // caving: his own price is over Brask's limit, so signing it loses
+    const cave = await browser.newPage({ viewport: { width: 1366, height: 700 } });
+    cave.on('pageerror', (e) => errors.push(e.message));
+    await openPractice(cave, { seed: 7, act: 1 });
+    await cave.keyboard.press('5');
+    await cave.keyboard.press('6');
+    await cave.keyboard.press('Enter');
+    await cave.locator('.mg-end').waitFor({ timeout: 10000 });
+    assert.ok(await cave.locator('.mg-end.lost').count(), 'Caving to his price loses');
+    assert.match(await cave.locator('.mg-end h2').innerText(), /Brask would not sign \$\d{3}/, 'The headline says Brask would not sign');
+    assert.match(await cave.locator('.mg-end p').innerText(), /Brask's limit was \$\d{3}/, 'The detail says the limit');
+    await cave.screenshot({ path: shotPath('AM-caved-1366.png') });
+    await cave.locator('.mg-foot .btn-primary').click();
+    await cave.locator('.mg-result-body .outcome').waitFor();
+    assert.match(await cave.locator('.mg-result-body .outcome').innerText(), /napkin|walked|left|valve/i, 'A lost dinner gets the lost outcome');
+    await cave.close();
 
     /* --------------------------------- 3. phone: a dinner played by real taps */
     const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });

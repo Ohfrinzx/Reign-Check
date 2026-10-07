@@ -6,12 +6,12 @@ import { makeRng } from '../rng';
 
 const SEEDS = (n: number, salt = 0) => Array.from({ length: n }, (_, i) => i * 37 + 11 + salt);
 
-/** A small dinner for the rule tests: his ask $480, his floor $430. */
+/** A small dinner for the rule tests: his ask $480, his floor $430, Brask's limit $460. */
 function dinner(over: Partial<A.AmbassadorSetup> = {}, d: Partial<A.AmbassadorDifficulty> = {}): A.AmbassadorState {
   return A.ambassadorStart({
     seed: 1,
     d: { ...A.ambassadorDifficulty(1), ...d },
-    ask: 480, floor: 430, temper: 'vain', frozen: null, bluff: null, soft: [0, 0, 0, 0, 0],
+    ask: 480, floor: 430, limit: 460, temper: 'vain', frozen: null, bluff: null, soft: [0, 0, 0, 0, 0],
     ...over,
   });
 }
@@ -32,11 +32,13 @@ function reader(faceOnly: number, sloppy: number): Maker {
     const rng = makeRng(seed * 31 + 7);
     return (v) => {
       const line = rng.chance(sloppy) ? rng.pick(A.LINES) : A.chooseLine(v.history, v.round <= 2);
-      if (v.round >= A.ROUNDS) return { offer: A.OFFER_COUNT - 1, line };
+      // a person never offers over Brask's limit: the highest price under it is the "take his price" of the night
+      const cap = A.highestUnder(v);
+      if (v.round >= A.ROUNDS) return { offer: cap, line };
       const level = rng.chance(faceOnly) ? v.tells.face.level : A.consensusLevel(v.tells);
-      if (level === 2) return { offer: rng.chance(0.5) ? 0 : 1, line };
-      if (level === 1) return { offer: 3, line };
-      return { offer: A.OFFER_COUNT - 1, line };
+      if (level === 2) return { offer: Math.min(cap, rng.chance(0.5) ? 0 : 1), line };
+      if (level === 1) return { offer: Math.min(cap, 3), line };
+      return { offer: cap, line };
     };
   };
 }
@@ -49,10 +51,12 @@ const PLAYERS: Record<string, Maker> = {
   reader: reader(0.6, 0.2),
   // always the lowest price, always "Stand firm"
   greedy: () => () => ({ offer: 0, line: 'firm' }),
-  // a mild offer first, then his price
+  // a mild offer first, then his price (over the limit or not: he does not look)
   timid: () => (v) => (v.round === 1 ? { offer: 3, line: 'flatter' } : { offer: A.OFFER_COUNT - 1, line: A.chooseLine(v.history, false) }),
   // his price straight away
   caves: () => () => ({ offer: A.OFFER_COUNT - 1, line: 'flatter' }),
+  // the highest price under Brask's limit straight away: always a deal, never a good one
+  hugger: () => (v) => ({ offer: A.highestUnder(v), line: 'flatter' }),
 };
 
 interface Result { win: number; score: number; walked: number; dessert: number; rounds: number }
@@ -88,6 +92,10 @@ describe("The Ambassador's Table (rules)", () => {
         expect(s.ask - s.floor).toBeGreaterThanOrEqual(d.slack[0]);
         expect(s.ask - s.floor).toBeLessThanOrEqual(d.slack[1]);
         expect(s.floor % 5).toBe(0);
+        // Brask's limit: at least $20 over his floor (a price just under it is always accepted), under his opening ask
+        expect(s.limit % 5).toBe(0);
+        expect(s.limit - s.floor).toBeGreaterThanOrEqual(A.ROOM_MIN);
+        expect(s.limit).toBeLessThan(s.ask);
         expect(A.TEMPERS).toContain(s.temper);
         expect(s.soft).toHaveLength(A.ROUNDS);
         expect(s.soft.every((x) => x === 0 || x === 5)).toBe(true);
@@ -115,13 +123,14 @@ describe("The Ambassador's Table (rules)", () => {
     s = A.ambassadorOffer(dinner({ floor: 400 }), 0, 'flatter'); // $400 = the floor, the lowest offer
     expect(s.over).toBe('won');
     expect(s.deal).toBe(400);
-    // his own price is always accepted, whatever the patience
+    // his own price is always accepted, whatever the patience (it ends the dinner; over Brask's limit it is a loss)
     for (const patience of [100, 60, 30, 1]) {
       const d = { ...dinner(), patience };
-      expect(A.ambassadorOffer(d, A.OFFER_COUNT - 1, 'firm').over).toBe('won');
+      expect(A.ambassadorOffer(d, A.OFFER_COUNT - 1, 'firm').deal).toBe(480);
+      expect(A.ambassadorOffer({ ...d, setup: { ...d.setup, limit: 480 } }, A.OFFER_COUNT - 1, 'firm').over).toBe('won');
     }
     // a signed dinner stays signed
-    const done = A.ambassadorOffer(dinner(), 4, 'firm');
+    const done = A.ambassadorOffer(dinner({ limit: 480 }), 4, 'firm');
     expect(A.ambassadorOffer(done, 0, 'firm')).toBe(done);
   });
 
@@ -145,6 +154,24 @@ describe("The Ambassador's Table (rules)", () => {
     // the soft rounds give $5 more
     s = A.ambassadorOffer(dinner({ soft: [5, 0, 0, 0, 0] }), 0, 'firm');
     expect(s.price).toBe(455);
+  });
+
+  it("Brask's limit: a deal at or under it is signed; over it he refuses and the dinner is lost", () => {
+    // limit $460, floor $430
+    const under = A.ambassadorOffer(dinner(), 3, 'flatter'); // $460, at the limit
+    expect(under.over).toBe('won');
+    expect(under.deal).toBe(460);
+    const over = A.ambassadorOffer(dinner(), 4, 'flatter'); // $480, his price: over the limit
+    expect(over.over).toBe('vetoed');
+    expect(over.deal).toBe(480);
+    expect(over.log[0].verdict).toBe('vetoed');
+    expect(A.ambassadorScore(over)).toBe(0);
+    // an offer under his floor is not a deal at all, limit or not
+    expect(A.ambassadorOffer(dinner(), 0, 'flatter').over).toBeUndefined();
+    // the highest price under the limit, from the screen
+    expect(A.highestUnder(A.ambassadorView(dinner()))).toBe(3);
+    expect(A.highestUnder(A.ambassadorView({ ...dinner(), price: 450 }))).toBe(4);
+    expect(A.ambassadorView(dinner()).limit).toBe(460);
   });
 
   it('the lines: each temper likes one line a lot, one a little, and dislikes two; every temper has all four', () => {
@@ -280,10 +307,13 @@ describe("The Ambassador's Table (the tells)", () => {
 });
 
 describe("The Ambassador's Table (the dinner and the balance)", () => {
-  it('harder each act: a tighter gap, a shorter fuse, lines that land harder, noisier tells', () => {
+  it('harder each act: a tighter limit, a shorter fuse, lines that land harder, noisier tells', () => {
     const [a1, a2, a3] = [1, 2, 3].map(A.ambassadorDifficulty);
     expect(a1.slack[1]).toBeGreaterThan(a2.slack[1]);
-    expect(a2.slack[1]).toBeGreaterThan(a3.slack[1]);
+    expect(a1.slack[0]).toBeGreaterThan(a3.slack[0]);
+    // Brask's limit sits closer to his floor each act
+    expect(a1.room).toBeGreaterThan(a2.room);
+    expect(a2.room).toBeGreaterThan(a3.room);
     expect(a1.annoy).toBeLessThan(a2.annoy);
     expect(a2.annoy).toBeLessThan(a3.annoy);
     expect(a1.hit).toBeLessThan(a2.hit);
@@ -302,6 +332,7 @@ describe("The Ambassador's Table (the dinner and the balance)", () => {
       for (const seed of SEEDS(1500, 2)) {
         const s = A.ambassadorPlay(A.ambassadorSetup(seed, d), A.EXPERT);
         expect(s.over).toBe('won');
+        expect(s.deal!).toBeLessThanOrEqual(A.ambassadorSetup(seed, d).limit);
         expect(A.ambassadorScore(s)).toBeGreaterThan(0);
       }
     }
@@ -318,6 +349,7 @@ describe("The Ambassador's Table (the dinner and the balance)", () => {
           // he never walks out on the careful player, and on the last course the careful player takes his price
           expect(s.over).not.toBe('walked');
           expect(s.over).not.toBe('dessert');
+          expect(s.over).not.toBe('vetoed');
           if (!s.over) expect(s.patience).toBeGreaterThan(0);
         }
       }
@@ -367,18 +399,31 @@ describe("The Ambassador's Table (the dinner and the balance)", () => {
       expect(table.greedy[a].walked).toBeGreaterThan(0.7);
       expect(win('greedy')[a]).toBeLessThan(win('reader')[a] - 0.25);
     }
-    // a timid player who caves wins, but with a low score
+    // caving loses: his opening price is over Brask's limit, always
     for (let a = 0; a < 3; a++) {
-      expect(win('timid')[a]).toBeGreaterThanOrEqual(0.97);
-      within(table.timid[a].score, 20, 60);
+      expect(win('caves')[a]).toBe(0);
+      expect(table.caves[a].walked).toBe(0);
+    }
+    // a timid player (a mild offer, then his price) mostly loses to Brask, and wins with a low score
+    expect(win('timid')[0]).toBeLessThanOrEqual(0.2);
+    expect(win('timid')[1]).toBeLessThanOrEqual(0.4);
+    expect(win('timid')[2]).toBeLessThanOrEqual(0.4);
+    for (let a = 0; a < 3; a++) {
       expect(table.timid[a].score).toBeLessThan(table.reader[a].score - 30);
-      expect(table.caves[a].score).toBe(0);
       expect(table.expert[a].score).toBeGreaterThan(table.timid[a].score);
+    }
+    // a player who offers just under the limit always has a deal, but never a good one
+    for (let a = 0; a < 3; a++) {
+      expect(win('hugger')[a]).toBe(1);
+      within(table.hugger[a].score, 50, 85);
+      expect(table.hugger[a].score).toBeLessThan(table.careful[a].score - 15);
     }
     // the careful player's average score is high
     expect(table.expert[0].score).toBeGreaterThan(90);
     expect(table.expert[1].score).toBeGreaterThan(80);
     expect(table.expert[2].score).toBeGreaterThan(65);
+    // (the limit-hugger is the baseline: the careful player does better than that)
+    for (let a = 0; a < 3; a++) expect(table.expert[a].score).toBeGreaterThanOrEqual(table.hugger[a].score);
     // a dinner lasts a few courses, not one
     expect(table.reader[0].rounds).toBeGreaterThan(2.5);
   });

@@ -27,9 +27,13 @@ import { makeRng } from '../rng';
  *     `annoy` for being refused, plus `hit` for every $10 you were under
  *     his floor. The line then adds or takes patience, by his temper;
  *   - at 0 patience he WALKS OUT (lost); no deal after the dessert is lost.
- * His current price is always an offer he accepts, so a careful player can
- * always reach a deal. The score is how far down you took him: 100 for his
- * floor, 0 for his opening ask.
+ * BRASK'S LIMIT. Kel Brask, the Finance Minister, will not sign above his
+ * LIMIT (shown on his note by your plate from the start). Ostrene opens above
+ * it, and his floor is always at least $20 under it. A deal over the limit
+ * is a loss (he signs, Brask refuses), so caving to his opening price loses.
+ * A price just under the limit is always accepted, so a deal always exists.
+ * The score is how far down you took him: 100 for his floor, 0 for his
+ * opening ask.
  *
  * THE TELLS. His patience is shown three ways, always the same:
  *   level 2 (60–100) relaxed:      smiling · sipping wine · writing numbers
@@ -51,6 +55,8 @@ export const OFFER_COUNT = 5;
 export const OFFER_STEP = 20;
 /** prices are in steps of this many dollars */
 export const PRICE_STEP = 5;
+/** Brask's limit is at least this far above his floor, so a price just under it is always accepted. */
+export const ROOM_MIN = 20;
 export const COURSES = ['Soup', 'Fish', 'Roast', 'Cheese', 'Dessert'] as const;
 
 export const LINES = ['flatter', 'history', 'firm', 'threaten'] as const;
@@ -95,6 +101,8 @@ export interface AmbassadorDifficulty {
   giveBy: number;
   /** the gap between his opening ask and his floor, in dollars [min, max] */
   slack: [number, number];
+  /** Brask's limit sits this share of the gap above his floor (at least ROOM_MIN) */
+  room: number;
   noise: TellNoise;
 }
 
@@ -104,9 +112,9 @@ export function ambassadorDifficulty(act: number): AmbassadorDifficulty {
   // noisier tells (act 2: one tell is frozen; act 3: one tell bluffs, mostly
   // the face). Calibrated with simulated players (ambassador.test.ts prints
   // the win rates by act).
-  if (act <= 1) return { act: 1, startPatience: 100, annoy: 6, hit: 10, lineScale: 1, faceBias: 2, giveBy: 4, slack: [40, 80], noise: 'none' };
-  if (act === 2) return { act: 2, startPatience: 100, annoy: 8, hit: 12, lineScale: 1.25, faceBias: 2, giveBy: 4, slack: [30, 65], noise: 'frozen' };
-  return { act: 3, startPatience: 90, annoy: 9, hit: 16, lineScale: 1.5, faceBias: 5, giveBy: 4, slack: [25, 60], noise: 'bluff' };
+  if (act <= 1) return { act: 1, startPatience: 100, annoy: 6, hit: 10, lineScale: 1, faceBias: 2, giveBy: 4, slack: [40, 80], room: 0.4, noise: 'none' };
+  if (act === 2) return { act: 2, startPatience: 100, annoy: 8, hit: 12, lineScale: 1.25, faceBias: 2, giveBy: 4, slack: [35, 70], room: 0.35, noise: 'frozen' };
+  return { act: 3, startPatience: 90, annoy: 10, hit: 18, lineScale: 1.5, faceBias: 5, giveBy: 4, slack: [35, 70], room: 0.3, noise: 'bluff' };
 }
 
 export interface AmbassadorSetup {
@@ -116,6 +124,8 @@ export interface AmbassadorSetup {
   ask: number;
   /** the lowest price he will sign (hidden) */
   floor: number;
+  /** the most Brask will sign (shown from the start) */
+  limit: number;
   temper: Temper;
   /** the tell that never changes (act 2), or null */
   frozen: TellId | null;
@@ -129,7 +139,7 @@ export interface RoundLog {
   round: number;
   offer: number;
   line: LineId;
-  verdict: 'deal' | 'counter' | 'walkout' | 'dessert';
+  verdict: 'deal' | 'vetoed' | 'counter' | 'walkout' | 'dessert';
   /** his new price (a counter) */
   counter?: number;
   reaction: Reaction;
@@ -143,8 +153,8 @@ export interface AmbassadorState {
   price: number;
   patience: number;
   log: RoundLog[];
-  over?: 'won' | 'walked' | 'dessert';
-  /** the signed price */
+  over?: 'won' | 'vetoed' | 'walked' | 'dessert';
+  /** the signed price (over the limit: 'vetoed') */
   deal?: number;
 }
 
@@ -161,8 +171,11 @@ export function layoutDinner(seed: number, d: AmbassadorDifficulty, attempt = 0)
   const temper = rng.pick(TEMPERS);
   // a trained diplomat's face is the one most likely to be controlled
   const tell = rng.weighted(TELLS, (k) => (k === 'face' ? d.faceBias : 1))!;
+  const floor = ask - slack;
+  // Brask's limit: above his floor, under his opening ask
+  const room = Math.min(slack - 2 * PRICE_STEP, Math.max(ROOM_MIN, PRICE_STEP * Math.round((slack * d.room) / PRICE_STEP)));
   return {
-    seed, d, ask, floor: ask - slack, temper,
+    seed, d, ask, floor, limit: floor + room, temper,
     frozen: d.noise === 'frozen' ? tell : null,
     bluff: d.noise === 'bluff' ? tell : null,
     soft: Array.from({ length: ROUNDS }, () => (rng.chance(0.5) ? PRICE_STEP : 0)),
@@ -242,9 +255,10 @@ export function ambassadorOffer(prev: AmbassadorState, index: number, line: Line
   const effect = Math.round(base * d.lineScale);
   const reaction = reactionOf(base);
   if (offer >= setup.floor) {
-    s.over = 'won';
+    // he signs; Brask will not sign above his limit
+    s.over = offer > setup.limit ? 'vetoed' : 'won';
     s.deal = offer;
-    s.log.push({ round: s.round, offer, line, verdict: 'deal', reaction });
+    s.log.push({ round: s.round, offer, line, verdict: offer > setup.limit ? 'vetoed' : 'deal', reaction });
     return s;
   }
   // refused: he gives 1/giveBy of the way to your offer (and now and then
@@ -274,6 +288,8 @@ export function ambassadorOffer(prev: AmbassadorState, index: number, line: Line
 /** Everything a player can read off the screen — never the floor, patience or temper. */
 export interface AmbassadorView {
   round: number;
+  /** Brask's limit */
+  limit: number;
   /** his price now */
   price: number;
   /** the five offers, lowest first */
@@ -284,7 +300,7 @@ export interface AmbassadorView {
 }
 
 export function ambassadorView(s: AmbassadorState): AmbassadorView {
-  return { round: s.round, price: s.price, offers: offerPrices(s), tells: readTells(s), history: s.log };
+  return { round: s.round, limit: s.setup.limit, price: s.price, offers: offerPrices(s), tells: readTells(s), history: s.log };
 }
 
 export interface Move { offer: number; line: LineId }
@@ -355,10 +371,19 @@ function safeOffer(level: Level, d: AmbassadorDifficulty, history: RoundLog[], l
  * A careful player: reads all three tells and believes the two that agree,
  * learns which line he likes from how it lands, bids as boldly as is safe
  * for the patience he is showing, and takes his price on the last course.
- * Every dinner is laid out so this player closes it.
+ * Never offers over Brask's limit. Every dinner is laid out so this player
+ * closes it.
  */
 export const EXPERT: AmbassadorPolicy = (v, d) => {
   const line = chooseLine(v.history, v.round <= 2);
-  if (v.round >= ROUNDS) return { offer: OFFER_COUNT - 1, line };
-  return { offer: safeOffer(consensusLevel(v.tells), d, v.history, line), line };
+  const cap = highestUnder(v);
+  if (v.round >= ROUNDS) return { offer: cap, line };
+  return { offer: Math.min(cap, safeOffer(consensusLevel(v.tells), d, v.history, line)), line };
 };
+
+/** The highest of the five offers that is not over Brask's limit (his price, when it is under). */
+export function highestUnder(v: AmbassadorView): number {
+  let best = 0;
+  v.offers.forEach((p, i) => { if (p <= v.limit) best = i; });
+  return best;
+}

@@ -56,7 +56,7 @@ const money = (n: number) => `$${n}`;
 
 /** What he says. Same dinner, same words (picked by round and offer, never by chance). */
 function hisWords(e: RoundLog, round: number, index: number): string {
-  if (e.verdict === 'deal') return ['Done. We have a price.', `Agreed. ${money(e.offer)} it is.`, 'Done. Now we can eat.'][(round + index) % 3];
+  if (e.verdict === 'deal' || e.verdict === 'vetoed') return ['Done. We have a price.', `Agreed. ${money(e.offer)} it is.`, 'Done. Now we can eat.'][(round + index) % 3];
   if (e.verdict === 'walkout') return 'I think I have heard enough. Good evening.';
   if (e.verdict === 'dessert') return 'We have run out of courses. We will talk again, perhaps.';
   const pre = { delighted: 'Ha! ', pleased: 'Hm. ', cool: '', offended: 'Please. ' }[e.reaction];
@@ -197,8 +197,9 @@ export function AmbassadorGame({ setup, reduced, paused, onEnd }: {
   const last = st.log[st.log.length - 1];
   const stage = beat?.stage;
   const shownEntry = stage === 'reply' ? beat!.entry : null;
+  const limit = setup.limit;
   const summary = last
-    ? `${COURSES[Math.max(0, Math.min(ROUNDS - 1, last.round - 1))]}: you offered ${money(last.offer)} and said "${LINE_WORDS[last.line].label}". ${REACTION_WORDS[last.reaction].note}${last.verdict === 'counter' ? ` He asks ${money(last.counter!)}.` : last.verdict === 'deal' ? ' He signed.' : last.verdict === 'walkout' ? ' He left.' : ' No deal.'}`
+    ? `${COURSES[Math.max(0, Math.min(ROUNDS - 1, last.round - 1))]}: you offered ${money(last.offer)} and said "${LINE_WORDS[last.line].label}". ${REACTION_WORDS[last.reaction].note}${last.verdict === 'counter' ? ` He asks ${money(last.counter!)}.` : last.verdict === 'deal' ? ' He signed.' : last.verdict === 'vetoed' ? ` He signed, but ${money(last.offer)} is over Brask's limit.` : last.verdict === 'walkout' ? ' He left.' : ' No deal.'}`
     : 'Pick a price to offer and a line to say.';
 
   const goLabel = pick === null ? 'Pick a price' : line === null ? 'Pick a line' : 'Make the offer →';
@@ -227,6 +228,7 @@ export function AmbassadorGame({ setup, reduced, paused, onEnd }: {
           <span className="am-board-k">{over === 'won' ? 'Signed at' : 'He asks'}</span>
           <b key={over === 'won' ? `d${dealPrice}` : st.price} className="am-board-v">{money(over === 'won' && dealPrice !== undefined ? dealPrice : st.price)}</b>
           <span className="am-board-u">per 1,000 m³ of gas</span>
+          <span className="am-board-limit">Brask&apos;s limit <b>{money(limit)}</b></span>
           {st.log.length > 0 && over !== 'won' && <span className="am-board-was">opened at {money(setup.ask)}</span>}
         </div>
       </div>
@@ -241,10 +243,14 @@ export function AmbassadorGame({ setup, reduced, paused, onEnd }: {
           beat={beat}
           shown={shownEntry}
           over={over}
+          limit={limit}
           reduced={reduced}
         />
         {beat && beat.stage !== 'offer' && (
           <div key={`m${beat.key}`} className="am-say me" aria-hidden="true">{LINE_WORDS[beat.line].say}</div>
+        )}
+        {shownEntry && shownEntry.verdict === 'vetoed' && (
+          <div key={`b${beat!.key}`} className="am-say brask">Brask: &quot;Over my limit. I will not sign.&quot;</div>
         )}
         {shownEntry && (
           <div key={`h${beat!.key}`} className={`am-say him r-${shownEntry.reaction} v-${shownEntry.verdict}`} data-reaction={shownEntry.reaction}>
@@ -275,16 +281,17 @@ export function AmbassadorGame({ setup, reduced, paused, onEnd }: {
               <button
                 key={i}
                 type="button"
-                className={`am-offer${pick === i ? ' on' : ''}${i === OFFER_COUNT - 1 ? ' his' : ''}`}
+                className={`am-offer${pick === i ? ' on' : ''}${i === OFFER_COUNT - 1 ? ' his' : ''}${p > limit ? ' over' : ''}`}
                 data-idx={i}
                 data-price={p}
+                data-over={p > limit ? 1 : 0}
                 aria-pressed={pick === i}
                 disabled={phase !== 'choose' || paused}
                 onClick={(e) => { blurMouse(e); setPick(i); }}
               >
                 {showKeys && usedKeys && <kbd>{i + 1}</kbd>}
                 <b>{money(p)}</b>
-                <em>{i === OFFER_COUNT - 1 ? 'his price' : `−$${(OFFER_COUNT - 1 - i) * OFFER_STEP}`}</em>
+                <em>{p > limit ? 'over limit' : i === OFFER_COUNT - 1 ? 'his price' : `−$${(OFFER_COUNT - 1 - i) * OFFER_STEP}`}</em>
               </button>
             ))}
           </div>
@@ -349,6 +356,14 @@ function describeEnd(st: AmbassadorState): MinigameEnd {
       score,
       headline: score >= 85 ? `He signed at ${money(st.deal)}. Better than hoped.` : `A deal at ${money(st.deal)}.`,
       detail: `He opened at ${money(ask)} per 1,000 m³ and signed ${money(ask - st.deal)} lower. He would have gone as low as ${money(floor)}.`,
+    };
+  }
+  if (st.over === 'vetoed' && st.deal !== undefined) {
+    return {
+      won: false,
+      score: 0,
+      headline: `Brask would not sign ${money(st.deal)}.`,
+      detail: `He agreed to ${money(st.deal)}, but Brask's limit was ${money(st.setup.limit)}. A price at or under the limit was there: he would have gone as low as ${money(floor)}.`,
     };
   }
   if (st.over === 'walked') {
@@ -479,9 +494,9 @@ function Dish({ course }: { course: number }) {
   );
 }
 
-function Scene({ tells, course, leaving, round, price, beat, shown, over, reduced }: {
+function Scene({ tells, course, leaving, round, price, beat, shown, over, limit, reduced }: {
   tells: Tells; course: number; leaving: number | null; round: number; price: number; beat: Beat | null;
-  shown: RoundLog | null; over: AmbassadorState['over']; reduced: boolean;
+  shown: RoundLog | null; over: AmbassadorState['over']; limit: number; reduced: boolean;
 }) {
   // when the deal is signed he is content, whatever his tells were
   const won = over === 'won';
@@ -495,7 +510,7 @@ function Scene({ tells, course, leaving, round, price, beat, shown, over, reduce
   const answered = shown !== null;
 
   return (
-    <svg className={`am-svg${over ? ` end-${over}` : ''}`} viewBox="0 -18 400 316" role="img" aria-label="Ostrene's ambassador at the dinner table" preserveAspectRatio="xMidYMid slice">
+    <svg className={`am-svg${over ? ` end-${over === 'vetoed' ? 'dessert' : over}` : ''}`} viewBox="0 -18 400 316" role="img" aria-label="Ostrene's ambassador at the dinner table" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="amz-wall" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#8a2c3b" /><stop offset=".6" stopColor="#64202d" /><stop offset="1" stopColor="#41121c" />
@@ -688,7 +703,7 @@ function Scene({ tells, course, leaving, round, price, beat, shown, over, reduce
 
       {/* the offer card, signed on a deal */}
       {cardOn && (
-        <g key={`card${beat!.key}`} className={`am-card${over === 'won' ? ' signed' : ''}${answered && beat!.entry.verdict === 'counter' ? ' back' : ''}`}>
+        <g key={`card${beat!.key}`} className={`am-card${over === 'won' || over === 'vetoed' ? ' signed' : ''}${over === 'vetoed' ? ' vetoed' : ''}${answered && beat!.entry.verdict === 'counter' ? ' back' : ''}`}>
           <g transform="translate(236 228)">
             <rect x="-30" y="-17" width="60" height="34" rx="3" fill="#fffaf0" stroke="#d9a441" strokeWidth="1.6" />
             <rect x="-26.5" y="-13.5" width="53" height="27" rx="1.6" fill="none" stroke="#e9d5a2" strokeWidth=".8" />
@@ -696,6 +711,7 @@ function Scene({ tells, course, leaving, round, price, beat, shown, over, reduce
             <text x="0" y="9" textAnchor="middle" fontFamily="'Libre Franklin', sans-serif" fontSize="5" letterSpacing=".4" fill="#6b4a3a">PER 1,000 M³</text>
             <path className="am-sign" d="M-22,13 q4,-8 8,-1 t8,-1 q4,-6 8,0 t8,-1" stroke="#1d2a6b" strokeWidth="1.5" fill="none" strokeLinecap="round" />
             <circle className="am-seal" cx="22" cy="10" r="5.4" fill="#a3262e" stroke="#7a1820" strokeWidth=".8" />
+            <g className="am-nosign"><rect x="-27" y="-8" width="54" height="16" rx="2" fill="none" stroke="#c4202c" strokeWidth="2" transform="rotate(-9)" /><text x="0" y="3.4" textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize="9.5" fill="#c4202c" transform="rotate(-9)">OVER LIMIT</text></g>
           </g>
         </g>
       )}
@@ -706,6 +722,15 @@ function Scene({ tells, course, leaving, round, price, beat, shown, over, reduce
           ))}
         </g>
       )}
+      {/* Brask's note, by your place: the most he will sign */}
+      <g className="am-note" transform="translate(84 244) rotate(-6)">
+        <rect x="-36" y="-21" width="72" height="42" rx="2" fill="#fffdf2" stroke="#d9c9a3" strokeWidth="1" />
+        <rect x="-36" y="-21" width="72" height="8" rx="2" fill="#2f7a55" />
+        <text x="0" y="-15" textAnchor="middle" fontFamily="'Archivo Black', sans-serif" fontSize="5" letterSpacing=".4" fill="#fff">KEL BRASK · FINANCE</text>
+        <text x="0" y="-5" textAnchor="middle" fontFamily="'Libre Franklin', sans-serif" fontSize="6.2" fontWeight="700" fill="#4a3a2a">Do not sign above</text>
+        <text x="0" y="12" textAnchor="middle" fontFamily="'Anton', Impact, sans-serif" fontSize="17" fill="#a3262e">{`$${limit}`}</text>
+        <path d="M-26,17 L26,17" stroke="#a3262e" strokeWidth=".8" opacity=".5" />
+      </g>
       {/* a foreground edge, a place setting and the candle light over everything */}
       <path d="M0,274 Q200,286 400,274 L400,300 L0,300Z" fill="#c9b78e" opacity=".35" />
       <path d="M62,244 L66,270 M70,246 l0,10 M74,246 l0,10 M78,246 l0,10" stroke="#aeb2bd" strokeWidth="2" strokeLinecap="round" opacity=".8" />
